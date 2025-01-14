@@ -8,7 +8,7 @@ Kasim O'Meally\
 Divna Mijić\
 Joseph Henry\
 Gabriella Alvarez-McLeod\
-Alexandria Eddings\
+Alexandria Eddings
 
 
 ## How to Run
