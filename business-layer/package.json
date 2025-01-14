@@ -1,0 +1,18 @@
+{
+  "name": "business-layer",
+  "version": "1.0.0",
+  "description": "This layer hosts the front end through our API, handles calls, as well as holding our business logic, and data access object",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./service-layer/server.js",
+    "dev": "nodemon ./service-layer/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "The 7 Musketeers",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.7"
+  }
+}
