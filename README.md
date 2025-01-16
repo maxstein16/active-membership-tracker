@@ -12,6 +12,7 @@ Alexandria Eddings\
 
 
 ## How to Run
+Node version: v20.17.0
 ```
 cd ./business-layer/service-layer
 node server.js
