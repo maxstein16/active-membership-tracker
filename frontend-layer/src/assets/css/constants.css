@@ -1,0 +1,47 @@
+:root {
+    /*
+        RIT COLORS ONLY!
+        Do not put WiC or Comms colors here, those will be stored,
+        as variables referenced from the server/db 
+        (We are not hardcoding specifics about organizations)
+    */
+    --orange: #F76902;
+    --white: #FFFFFF;
+    --black: #000000;
+
+    --light-grey: #D0D3D4;
+    --medium-grey: #A2AAAD;
+    --dark-grey: #7C878E;
+    --light-warm-grey: #D7D2CB;
+    --dark-warm-grey: #ACA39A;
+
+    --green: #84BD00;
+    --highlighter-green: #C4D600;
+    --blue: #009CBD;
+    --purple: #7D55C7;
+    --red: #DA291C;
+    --yellow: #F6BE00;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    background-color: var(--white);
+    font-family: "Ubuntu", sans-serif;
+    color: var(--white);
+  }
+  
+  * {
+    box-sizing: border-box;
+    transition: 0.1s;
+  }
+  
+  *,
+  *:after,
+  *:before {
+      box-sizing: border-box;
+  }
