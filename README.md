@@ -13,6 +13,16 @@ Alexandria Eddings
 
 ## How to Run
 Node version: v20.17.0
+
+If this is your **first time running** or you made **changes to the front end**:
+```
+cd ./frontend-layer
+npm run build
+cd ../business-layer/service-layer
+node server.js
+```
+
+Otherwise:
 ```
 cd ./business-layer/service-layer
 node server.js
