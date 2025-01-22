@@ -1,16 +1,15 @@
-const { getTestRoute } = require("../service-layer/routes/testRoute");
+const request = require("supertest");
+const express = require("express");
+const testRoute = require("../service-layer/routes/testRoute");
 
 describe("GET /test", () => {
-  it("should return a 200 status and a JSON message", () => {
-    const req = {};
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+  it("should return a 200 status and a JSON message", async () => {
+    const app = express();
+    app.use("/", testRoute);
 
-    getTestRoute(req, res);
+    const response = await request(app).get("/");
 
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ message: "Hello Tester" });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ message: "Hello Tester" });
   });
 });
