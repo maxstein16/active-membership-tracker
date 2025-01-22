@@ -37,9 +37,20 @@ app.use(express.static(path.join(__dirname, '../../frontend-layer/build')));
 
 // import routes
 let testRouter = require("./routes/testRoute.js");
+let memberRouter = require("./routes/memberRoute.js");
+let organizationRouter = require("./routes/organizationRouter.js");
+let organizationMemberRouter = require("./routes/organizationMemberRoute.js");
+let organizationReportsRouter = require("./routes/organizationReportsRouter.js");
+
 
 // use the routes
-app.use("/test", testRouter);
+app.use("/v1/test", testRouter);
+app.use("/v1/member", memberRouter)
+app.use("/v1/organization/:orgId", organizationRouter);
+app.use("/v1/organization/:orgId/member", organizationMemberRouter);
+app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
+
+
 
 // Start the server
 const PORT = process.env.PORT || 8080;

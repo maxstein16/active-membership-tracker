@@ -14,6 +14,8 @@ Alexandria Eddings
 ## How to Run
 Node version: v20.17.0
 
+**Before try to run the app, run `npm i` to install any dependencies from other people's changes**
+
 If this is your **first time running** or you made **changes to the front end**:
 ```
 cd ./frontend-layer
@@ -27,5 +29,7 @@ Otherwise:
 cd ./business-layer/service-layer
 node server.js
 ```
+
+LINK: http://localhost:8080/ 
 
 Our server gives our React based front end
