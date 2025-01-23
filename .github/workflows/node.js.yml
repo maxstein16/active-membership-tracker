@@ -23,6 +23,15 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: cd business-layer && npm ci
-    - run: cd business-layer && npm run build --if-present
-    - run: cd business-layer && npm test
+    - name: Install dependencies
+      run: |
+        cd business-layer
+        npm ci
+    - name: Build the project (if applicable)
+      run: |
+        cd business-layer
+        npm run build --if-present
+    - name: Run tests
+      run: |
+        cd business-layer
+        npm test
