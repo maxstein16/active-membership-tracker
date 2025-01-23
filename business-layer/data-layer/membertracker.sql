@@ -11,6 +11,8 @@ CREATE TABLE Organization (
   organization_name VARCHAR(255),
   organization_description VARCHAR(255),
   organization_color VARCHAR(255),
+  org_abbreviation VARCHAR(10),
+  active_membership_threshold INT,
   PRIMARY KEY (organization_id)
 );
 
@@ -26,6 +28,11 @@ CREATE TABLE Member (
   member_major VARCHAR(255),
   member_gender INT,
   member_race VARCHAR(255),
+  meetings_attended INT,
+  volunteer_events INT,
+  social_events INT,
+  your_points INT,
+  active_member BOOLEAN,
   PRIMARY KEY (member_id)
 );
 
@@ -34,7 +41,7 @@ CREATE TABLE Membership (
   membership_id INT,
   member_id INT,
   organization_id INT,
-  role INT,
+  org_role INT,
   PRIMARY KEY (membership_id),
   FOREIGN KEY (member_id) REFERENCES Member (member_id),
   FOREIGN KEY (organization_id) REFERENCES Organization (organization_id)
@@ -47,7 +54,18 @@ CREATE TABLE Attendance (
   event_id INT,
   attendance_status INT,
   PRIMARY KEY (attendance_id),
-  FOREIGN KEY (member_id) REFERENCES Member (member_id)
+  FOREIGN KEY (member_id) REFERENCES Member (member_id),
+  FOREIGN KEY (event_id) RFERENCES Event (event_id)
+);
+
+-- Create the event table 
+CREATE TABLE Event (
+  event_id INT,
+  event_name VARCHAR(255),
+  event_date DATE,
+  event_location VARCHAR(255),
+  event_description VARCHAR(255),
+  PRIMARY KEY (event_id)
 );
 
 -- Create the Recognition table
