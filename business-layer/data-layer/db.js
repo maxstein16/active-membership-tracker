@@ -1,4 +1,4 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, DataTypes } = require("sequelize");
 
 const sequelize = new Sequelize(
   "membertracker",
@@ -55,6 +55,18 @@ const Attendance = sequelize.define("Attendance", {
   attendance_status: DataTypes.INTEGER,
 });
 
+const Event = sequelize.define("Event", {
+  event_id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+  },
+  event_name: DataTypes.STRING,
+  event_date: DataTypes.DATE,
+  event_location: DataTypes.STRING,
+  event_description: DataTypes.STRING,
+  event_type: DataTypes.STRING,
+});
+
 const Recognition = sequelize.define("Recognition", {
   recognition_id: {
     type: DataTypes.INTEGER,
@@ -93,4 +105,5 @@ module.exports = {
   Member,
   Attendance,
   Recognition,
+  Event,
 };

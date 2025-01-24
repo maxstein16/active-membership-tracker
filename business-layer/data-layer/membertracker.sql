@@ -26,13 +26,8 @@ CREATE TABLE Member (
   member_graduation_date DATE,
   member_tshirt_size VARCHAR(255),
   member_major VARCHAR(255),
-  member_gender INT,
+  member_gender VARCHAR(255),
   member_race VARCHAR(255),
-  meetings_attended INT,
-  volunteer_events INT,
-  social_events INT,
-  your_points INT,
-  active_member BOOLEAN,
   PRIMARY KEY (member_id)
 );
 
@@ -42,6 +37,8 @@ CREATE TABLE Membership (
   member_id INT,
   organization_id INT,
   org_role INT,
+  member_points INT,
+  active_member BOOLEAN,
   PRIMARY KEY (membership_id),
   FOREIGN KEY (member_id) REFERENCES Member (member_id),
   FOREIGN KEY (organization_id) REFERENCES Organization (organization_id)
@@ -55,7 +52,7 @@ CREATE TABLE Attendance (
   attendance_status INT,
   PRIMARY KEY (attendance_id),
   FOREIGN KEY (member_id) REFERENCES Member (member_id),
-  FOREIGN KEY (event_id) RFERENCES Event (event_id)
+  FOREIGN KEY (event_id) REFERENCES Event (event_id)
 );
 
 -- Create the event table 
@@ -65,6 +62,7 @@ CREATE TABLE Event (
   event_date DATE,
   event_location VARCHAR(255),
   event_description VARCHAR(255),
+  event_type VARCHAR(255),
   PRIMARY KEY (event_id)
 );
 
