@@ -12,8 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
+    "mariadb": "^3.4.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "sequelize": "^6.37.5"
   },
   "devDependencies": {
     "supertest": "^7.0.0"
