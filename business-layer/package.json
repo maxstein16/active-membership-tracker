@@ -11,9 +11,13 @@
   "author": "The 7 Musketeers",
   "license": "ISC",
   "dependencies": {
+    "@sequelize/mariadb": "^7.0.0-alpha.43",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "mariadb": "^3.4.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "sequelize": "^6.37.5"
   },
   "devDependencies": {
     "supertest": "^7.0.0"
