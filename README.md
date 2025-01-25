@@ -20,13 +20,13 @@ If this is your **first time running** or you made **changes to the front end**:
 ```
 cd ./frontend-layer
 npm run build
-cd ../business-layer/service-layer
+cd ../business-layer
 node server.js
 ```
 
 Otherwise:
 ```
-cd ./business-layer/service-layer
+cd ./business-layer
 node server.js
 ```
 

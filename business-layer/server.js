@@ -16,37 +16,30 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-// app.use(express.static(path.join(__dirname, '../frontend-layer/build')));
-
-// This code makes sure that any request that does not matches a static file
-// in the build folder, will just serve index.html. Client side routing is
-// going to make sure that the correct content will be loaded.
-// https://leejjon.medium.com/create-a-react-app-served-by-express-js-node-js-and-add-typescript-33705be3ceda
-app.use((req, res, next) => {
-  if (/(.ico|.js|.css|.jpg|.png|.map)$/i.test(req.path)) {
-    next();
-  } else {
-    res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
-    res.header("Expires", "-1");
-    res.header("Pragma", "no-cache");
-    res.sendFile(path.join(__dirname, "../frontend-layer/build", "index.html"));
-  }
-});
 app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
 
-// hello route
-// app.use((req, res) => {
-//     res.status(200).json({ message: "Hello Tester" });
-// });
-
 // import routes
+let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
+
 let testRouter = require("./service-layer/routes/testRoute.js");
+let memberRouter = require("./service-layer/routes/memberRoute.js");
+let organizationRouter = require("./service-layer/routes/organizationRouter.js");
+let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
+let organizationReportsRouter = require("./service-layer/routes/organizationReportsRouter.js");
+let organizationReportsSettings = require("./service-layer/routes/organizationSettingsRoute.js");
 
 // use the routes
-app.use("/test", testRouter);
+app.use("/", serveFrontendRouter);
+
+app.use("/v1/test", testRouter);
+app.use("/v1/member", memberRouter);
+app.use("/v1/organization/:orgId", organizationRouter);
+app.use("/v1/organization/:orgId/member", organizationMemberRouter);
+app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
+app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
 
 const ensureDatabaseExists = async () => {
-  const dbName = 'membertracker';
+  const dbName = "membertracker";
 
   // Use the default Sequelize connection without specifying a database
   const connection = new (require("sequelize"))(
