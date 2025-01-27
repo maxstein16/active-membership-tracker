@@ -1,5 +1,11 @@
 import { Recognition, Member } from "../db";
 
+/**
+ * Create a recognition record
+ * @param {number} memberId - The ID of the member
+ * @param {number} recognitionYear - The year the recognition was received
+ * @param {number} recognitionType - The type of recognition
+ */
 async function createRecognition(memberId, recognitionYear, recognitionType) {
   try {
     const member = await Member.findByPk(memberId);
@@ -20,6 +26,11 @@ async function createRecognition(memberId, recognitionYear, recognitionType) {
   }
 }
 
+/**
+ * 
+ * @param {number} memberId - The ID of the member
+ * @returns {Promise<Array>} List of recognition records
+ */
 async function getRecognitions(memberId) {
   try {
     const member = await Member.findByPk(memberId, {
