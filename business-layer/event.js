@@ -34,7 +34,7 @@ const updateEvent = async (eventId, updateData) => {
       console.log(`Event with ID ${eventId} updated successfully.`);
       return true;
     } else {
-      console.log(`⚠️ No event found with ID ${eventId}.`);
+      console.log(`No event found with ID ${eventId}.`);
       return false;
     }
   } catch (error) {
@@ -52,7 +52,7 @@ const getAllEvents = async () => {
   try {
     const events = await Event.findAll();
     if (events.length === 0) {
-      console.log("⚠️ No events found in the database.");
+      console.log("No events found in the database.");
       return [];
     }
     console.log(
@@ -77,7 +77,7 @@ const getEventById = async (eventId) => {
     const event = await Event.findByPk(eventId);
 
     if (!event) {
-      console.log(`⚠️ No event found with ID ${eventId}.`);
+      console.log(`No event found with ID ${eventId}.`);
       return null;
     }
 
@@ -100,7 +100,7 @@ const getEventsByAttributes = async (filters) => {
     const events = await Event.findAll({ where: filters });
 
     if (events.length === 0) {
-      console.log("⚠️ No events found matching the given criteria.");
+      console.log("No events found matching the given criteria.");
       return [];
     }
 
