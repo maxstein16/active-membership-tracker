@@ -9,10 +9,10 @@ import { Event } from "../db"; // Import the Event model from the database
 const createEvent = async (eventData) => {
   try {
     const newEvent = await Event.create(eventData);
-    console.log("✅ Event created:", newEvent.toJSON());
+    console.log("Event created:", newEvent.toJSON());
     return newEvent;
   } catch (error) {
-    console.error("❌ Error creating event:", error);
+    console.error("Error creating event:", error);
     throw error;
   }
 };
@@ -31,14 +31,14 @@ const updateEvent = async (eventId, updateData) => {
     });
 
     if (updatedRows > 0) {
-      console.log(`✅ Event with ID ${eventId} updated successfully.`);
+      console.log(`Event with ID ${eventId} updated successfully.`);
       return true;
     } else {
       console.log(`⚠️ No event found with ID ${eventId}.`);
       return false;
     }
   } catch (error) {
-    console.error("❌ Error updating event:", error);
+    console.error("Error updating event:", error);
     throw error;
   }
 };
@@ -56,12 +56,12 @@ const getAllEvents = async () => {
       return [];
     }
     console.log(
-      "✅ Events found:",
+      "Events found:",
       events.map((e) => e.toJSON())
     );
     return events;
   } catch (error) {
-    console.error("❌ Error fetching events:", error);
+    console.error("Error fetching events:", error);
     throw error;
   }
 };
@@ -81,10 +81,10 @@ const getEventById = async (eventId) => {
       return null;
     }
 
-    console.log("✅ Event found:", event.toJSON());
+    console.log("Event found:", event.toJSON());
     return event;
   } catch (error) {
-    console.error("❌ Error fetching event by ID:", error);
+    console.error("Error fetching event by ID:", error);
     throw error;
   }
 };
@@ -105,12 +105,12 @@ const getEventsByAttributes = async (filters) => {
     }
 
     console.log(
-      "✅ Events found:",
+      "Events found:",
       events.map((e) => e.toJSON())
     );
     return events;
   } catch (error) {
-    console.error("❌ Error fetching events by attributes:", error);
+    console.error("Error fetching events by attributes:", error);
     throw error;
   }
 };
