@@ -1,9 +1,13 @@
 "use strict";
+// imports
+const { MIN_30 } = require("../constants.js");
 
+// Requires
 require("dotenv").config(); // Load .env variables
-const express = require("express");
-const logger = require("morgan");
-const path = require("path");
+const express = require("express"); // REST API 
+const session = require("express-session"); // sessions to log the user out
+const logger = require("morgan"); // logging out the routes
+const path = require("path"); // finding the react pages
 
 // create app
 const app = express();
@@ -17,6 +21,18 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
 app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
+
+// Session Middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    rolling: true,
+    cookie: { secure: true, maxAge: MIN_30, sameSite: "none" },
+  })
+);
+
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
