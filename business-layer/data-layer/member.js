@@ -9,10 +9,10 @@ import { Member } from "../db"; // Import the Member model from the database
 const createMember = async (memberData) => {
   try {
     const newMember = await Member.create(memberData);
-    console.log("✅ Member created:", newMember.toJSON());
+    console.log("Member created:", newMember.toJSON());
     return newMember;
   } catch (error) {
-    console.error("❌ Error creating member:", error);
+    console.error("Error creating member:", error);
     throw error;
   }
 };
@@ -31,14 +31,14 @@ const updateMember = async (memberId, updateData) => {
     });
 
     if (updatedRows > 0) {
-      console.log(`✅ Member with ID ${memberId} updated successfully.`);
+      console.log(`Member with ID ${memberId} updated successfully.`);
       return true;
     } else {
-      console.log(`⚠️ No member found with ID ${memberId}.`);
+      console.log(`No member found with ID ${memberId}.`);
       return false;
     }
   } catch (error) {
-    console.error("❌ Error updating member:", error);
+    console.error("Error updating member:", error);
     throw error;
   }
 };
@@ -52,16 +52,16 @@ const getAllMembers = async () => {
   try {
     const members = await Member.findAll();
     if (members.length === 0) {
-      console.log("⚠️ No members found in the database.");
+      console.log("No members found in the database.");
       return [];
     }
     console.log(
-      "✅ Members found:",
+      "Members found:",
       members.map((m) => m.toJSON())
     );
     return members;
   } catch (error) {
-    console.error("❌ Error fetching members:", error);
+    console.error("Error fetching members:", error);
     throw error;
   }
 };
@@ -77,14 +77,14 @@ const getMemberById = async (memberId) => {
     const member = await Member.findByPk(memberId);
 
     if (!member) {
-      console.log(`⚠️ No member found with ID ${memberId}.`);
+      console.log(`No member found with ID ${memberId}.`);
       return null;
     }
 
-    console.log("✅ Member found:", member.toJSON());
+    console.log("Member found:", member.toJSON());
     return member;
   } catch (error) {
-    console.error("❌ Error fetching member by ID:", error);
+    console.error("Error fetching member by ID:", error);
     throw error;
   }
 };
@@ -100,17 +100,17 @@ const getMembersByAttributes = async (filters) => {
     const members = await Member.findAll({ where: filters });
 
     if (members.length === 0) {
-      console.log("⚠️ No members found matching the given criteria.");
+      console.log("No members found matching the given criteria.");
       return [];
     }
 
     console.log(
-      "✅ Members found:",
+      "Members found:",
       members.map((m) => m.toJSON())
     );
     return members;
   } catch (error) {
-    console.error("❌ Error fetching members by attributes:", error);
+    console.error("Error fetching members by attributes:", error);
     throw error;
   }
 };
