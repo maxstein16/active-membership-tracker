@@ -1,6 +1,6 @@
 "use strict";
 // imports
-const { MIN_30 } = require("../constants.js");
+const { MIN_30 } = require("./constants.js");
 
 // Requires
 require("dotenv").config(); // Load .env variables
@@ -20,6 +20,7 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
 
 // Session Middleware
@@ -38,6 +39,7 @@ app.use(
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
 
 let testRouter = require("./service-layer/routes/testRoute.js");
+let sessionRouter = require("./service-layer/routes/sessionRoute.js");
 let memberRouter = require("./service-layer/routes/memberRoute.js");
 let organizationRouter = require("./service-layer/routes/organizationRouter.js");
 let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
@@ -48,6 +50,7 @@ let organizationReportsSettings = require("./service-layer/routes/organizationSe
 app.use("/", serveFrontendRouter);
 
 app.use("/v1/test", testRouter);
+app.use("/v1/session", sessionRouter);
 app.use("/v1/member", memberRouter);
 app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);

@@ -20,12 +20,13 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
 
 // Session Middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: "shouldnotbehardcoded",
     resave: false,
     saveUninitialized: true,
     rolling: true,
@@ -37,6 +38,7 @@ app.use(
 let serveFrontendRouter = require("./routes/serveFrontendRoute.js");
 
 let testRouter = require("./routes/testRoute.js");
+let sessionRouter = require("./routes/sessionRoute.js");
 let memberRouter = require("./routes/memberRoute.js");
 let organizationRouter = require("./routes/organizationRouter.js");
 let organizationMemberRouter = require("./routes/organizationMemberRoute.js");
@@ -47,6 +49,7 @@ let organizationReportsSettings = require("./routes/organizationSettingsRoute.js
 app.use("/", serveFrontendRouter);
 
 app.use("/v1/test", testRouter);
+app.use("/v1/session", sessionRouter);
 app.use("/v1/member", memberRouter);
 app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
