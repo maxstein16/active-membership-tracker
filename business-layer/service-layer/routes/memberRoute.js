@@ -12,33 +12,37 @@ const sanitizer = new Sanitizer();
 
 /**
  * GET /v1/member/{memberId}
+ * Retrieves member data by their unique ID.
  */
 router.get("/:memberId", async function (req, res) {
-  //sanitize
+  // Sanitize the input
   let memberId = sanitizer.sanitize(req.params.memberId);
 
-  // check if params are valid!
+  // Validate that memberId is a number
   if (isNaN(memberId)) {
     return res.status(400).json({ error: error.memberIdMustBeInteger });
   }
-  // send off to backend
+
+  // Fetch member data from backend
   const memberData = await business.getMemberData(memberId);
 
-  // check for errors that backend returned
+  // Handle potential errors from backend
   if (memberData?.error && memberData.error !== error.noError) {
     return res.status(404).json({ error: memberData.error, memberId });
   }
-  // return with appropriate status error and message
+
+  // Return successful response
   res.status(200).json({ status: "success", data: memberData.data });
 });
 
 /**
- * POST /v1/member/ (Create Member)
+ * POST /v1/member/
+ * Creates a new member with the provided details.
  */
 router.post("/", async function (req, res) {
   let body = req.body;
 
-  // check if has all the params needed
+  // Define required fields for member creation
   const requiredFields = [
     "member_name",
     "member_email",
@@ -52,28 +56,27 @@ router.post("/", async function (req, res) {
     "role",
   ];
 
+  // Check for missing fields
   const missingFields = requiredFields.filter(
     (field) => !body.hasOwnProperty(field)
   );
 
   if (missingFields.length > 0) {
-    res
+    return res
       .status(400)
       .json({ error: `Missing fields: ${missingFields.join(", ")}` });
-    return;
   }
 
   try {
-    // send off to backend
+    // Send data to backend for member creation
     const result = await business.addMember(body);
 
-    // check for errors that backend returned
+    // Handle backend errors
     if (result.error && result.error !== error.noError) {
-      res.status(404).json({ error: result.error });
-      return;
+      return res.status(404).json({ error: result.error });
     }
 
-    // return with appropriate status error and message
+    // Return success response
     res.status(201).json({ status: "success", data: result.data });
   } catch (err) {
     res
@@ -83,29 +86,34 @@ router.post("/", async function (req, res) {
 });
 
 /**
- * PUT /v1/member/{memberId} (Update Member)
+ * PUT /v1/member/{memberId}
+ * Updates an existing member's details.
  */
 router.put("/:memberId", async function (req, res) {
   let memberId = sanitizer.sanitize(req.params.memberId);
   let body = req.body;
 
+  // Validate that memberId is a number
   if (isNaN(memberId)) {
     return res.status(400).json({ error: error.memberIdMustBeInteger });
   }
 
-  // Ensure at least one field is provided for an update
+  // Ensure at least one field is provided for update
   if (Object.keys(body).length === 0) {
     return res
       .status(400)
       .json({ error: error.mustHaveAtLeastOneFieldsAddMember });
   }
 
+  // Send update request to backend
   const result = await business.editMember(memberId, body);
 
+  // Handle potential errors
   if (result?.error && result.error !== error.noError) {
     return res.status(500).json({ error: result.error, memberId });
   }
 
+  // Return success response
   res.status(200).json({ status: "success", data: result.data });
 });
 
