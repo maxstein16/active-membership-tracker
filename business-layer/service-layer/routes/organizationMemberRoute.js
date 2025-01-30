@@ -30,7 +30,7 @@ router.get("/:memberId", async function (req, res) {
   let orgId = req.params.orgId;
   let memberId = req.params.memberId;
 
-  // sanatize params
+  // sanitize params
   orgId = sanitizer.sanitize(orgId);
   memberId = sanitizer.sanitize(memberId);
 
@@ -62,7 +62,7 @@ router.post("/", async function (req, res) {
   let orgId = req.params.orgId;
   let body = req.body;
 
-  // sanatize params
+  // sanitize params
   orgId = sanitizer.sanitize(orgId);
 
   // check if params are valid!
@@ -158,7 +158,7 @@ router.delete("/:memberId", async function (req, res) {
   let orgId = req.params.orgId;
   let memberId = req.params.memberId;
 
-  // sanatize params
+  // sanitize params
   orgId = sanitizer.sanitize(orgId);
   memberId = sanitizer.sanitize(memberId);
 
@@ -174,6 +174,75 @@ router.delete("/:memberId", async function (req, res) {
 
   // send off to backend
   const result = business.deleteMemberInOrg(orgId, memberId)
+
+  // check for errors that backend returned
+  if (result.error && result.error !== error.noError) {
+    res.status(404).json({ error: result.error, orgId: orgId, memberId: memberId });
+    return;
+  }
+
+  // return with appropriate status error and message
+  res.status(200).json({ status: "success", data: result.data });
+});
+
+// GET /v1/organization/{orgId}/members
+router.get("/", async function (req, res) {
+  let orgId = req.params.orgId;
+
+  // sanitize params
+  orgId = sanitizer.sanitize(orgId);
+
+  // check if params are valid!
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+
+  // Send off to backend
+  const result = await business.getMembersInOrg(orgId);
+
+  // check for errors that backend returned
+  if (result.error && result.error !== error.noError) {
+    res.status(404).json({ error: result.error, orgId: orgId });
+    return;
+  }
+
+  // return with appropriate status and message
+  res.status(200).json({ status: "success", data: result.data, count: result.data.length });
+});
+
+// PUT /v1/organization/{orgId}/member/{memberId}/attendance
+router.put("/:memberId/attendance", async function (req, res) {
+  let orgId = req.params.orgId;
+  let memberId = req.params.memberId;
+  let body = req.body;
+
+  // sanitize params
+  orgId = sanitizer.sanitize(orgId);
+  memberId = sanitizer.sanitize(memberId);
+
+  // check if params are valid!
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+  if (isNaN(memberId)) {
+    res.status(400).json({ error: error.memberIdMustBeInteger });
+    return;
+  }
+
+  // check if at least one valid field is provided
+  if (
+    !body.hasOwnProperty("meetings_attended") &&
+    !body.hasOwnProperty("volunteer_events") &&
+    !body.hasOwnProperty("social_events")
+  ) {
+    res.status(400).json({ error: error.memberMustEditValidField });
+    return;
+  }
+
+  // send off to backend
+  const result = await business.updateMemberAttendanceInOrg(orgId, memberId, body);
 
   // check for errors that backend returned
   if (result.error && result.error !== error.noError) {
