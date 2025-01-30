@@ -8,6 +8,7 @@ const BusinessLogic = require("../../business-logic-layer/public/exports.js");
 const business = new BusinessLogic();
 
 const Sanatizer = require("../../business-logic-layer/public/sanitize.js");
+const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
 const sanitizer = new Sanatizer();
 
 /*
@@ -17,7 +18,7 @@ https://api.rit.edu/v1/organization/{orgId}/member
 */
 
 // GET /v1/organization/{orgId}/member
-router.get("/", function (req, res) {
+router.get("/", isAuthorizedHasSessionForAPI, function (req, res) {
   res.status(400).json({
     error:
       "Must Include a member id as part of the url, for example: member/123",
@@ -26,7 +27,7 @@ router.get("/", function (req, res) {
 });
 
 // GET /v1/organization/{orgId}/member/{memberId}
-router.get("/:memberId", async function (req, res) {
+router.get("/:memberId", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
   let memberId = req.params.memberId;
 
@@ -58,7 +59,7 @@ router.get("/:memberId", async function (req, res) {
 });
 
 // POST /v1/organization/{orgId}/member
-router.post("/", async function (req, res) {
+router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
   let body = req.body;
 
@@ -103,7 +104,7 @@ router.post("/", async function (req, res) {
 
 
 // PUT /v1/organization/{orgId}/member/{memberId}
-router.put("/:memberId", async function (req, res) {
+router.put("/:memberId", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
   let memberId = req.params.memberId;
   let body = req.body;
@@ -154,7 +155,7 @@ router.put("/:memberId", async function (req, res) {
 
 
 // DELETE /v1/organization/{orgId}/member/{memberId}
-router.delete("/:memberId", async function (req, res) {
+router.delete("/:memberId", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
   let memberId = req.params.memberId;
 

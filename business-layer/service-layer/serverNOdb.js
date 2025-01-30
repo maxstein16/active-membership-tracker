@@ -7,6 +7,8 @@ require("dotenv").config(); // Load .env variables
 const express = require("express"); // REST API 
 const session = require("express-session"); // sessions to log the user out
 const logger = require("morgan"); // logging out the routes
+const cors = require("cors"); // defines our cors policy (protects our api)
+const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
 const path = require("path"); // finding the react pages
 
 // create app
@@ -16,21 +18,30 @@ const app = express();
 // const { sequelize } = require("./../data-layer/db.js");
 
 // Middleware
-app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
+app.enable("trust proxy");
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build"), { index : false }));
 
 // Session Middleware
 app.use(
   session({
     secret: "shouldnotbehardcoded",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     rolling: true,
-    cookie: { secure: true, maxAge: MIN_30, sameSite: "none" },
+    cookie: { maxAge: MIN_30, httpOnly: true, secure: false }, // secure: true -> for production
+  })
+);
+
+// CORS policy middleware
+app.use(
+  cors({
+    origin: 'true',
+    credentials: true,
   })
 );
 
@@ -55,6 +66,12 @@ app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
+
+// Handle routes that do not exist
+app.get("*", (req, res) => {
+  res.redirect('/login')
+});
+
 
 // // Database
 // const ensureDatabaseExists = async () => {
