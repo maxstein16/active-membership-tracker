@@ -1,4 +1,4 @@
-const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
+const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization, updateMemberAttendanceInOrganization, getMembersInOrganization } = require("../organizationMemberProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -18,6 +18,14 @@ module.exports = function () {
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
     return await editMemberInOrganization(orgId, memberId);
+  }
+
+  this.getMembersInOrg = async (orgId) => {
+    return await getMembersInOrganization(orgId);
+  }
+
+  this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {
+    return await updateMemberAttendanceInOrganization(orgId, memberId, attendanceData);
   }
 
   // Member Calls (not org specific)
