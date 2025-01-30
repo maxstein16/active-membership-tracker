@@ -57,33 +57,31 @@ router.get('/annual-report', function(req, res){
   */
   
   let orgId = req.params.orgId;
-  let meetingId = req.params.meetingId;
+  const BusinessLogic = require("../../business-logic-layer/public/exports.js");
+  const business = new BusinessLogic();
+
+  const Sanatizer = require("../../business-logic-layer/public/sanitize.js");
+  const sanitizer = new Sanatizer();
 
   // sanitize
   orgId = sanitizer.sanitize(orgId);
-  meetingId = sanitizer.sanitize(meetingId);
 
   // checking 
-  if (isNaN(orgId)){
-    res.status(400).json({ error: "organization with id of " + orgId + " not found." });
-    return;
-  }
-
-  if (isNaN(meetingId)){
-    res.status(400).json({ error: "meeting with id of " + meetingId + " not found." });
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
     return;
   }
 
   // send to backend
-  const orgData = await business.getSpecificMemberOrgData(orgId, meetingId);
+  const orgData = business.getAnnualOrgReport(orgId);
 
   // check for errors that backend returned 
   if (orgData.error && orgData.error !== error.noError){
-    res.status(404).json({error: orgData.error, orgId: orgId, meetingId: meetingId});
+    res.status(404).json({error: orgData.error, orgId: orgId});
     return;
   }
 
-  res.status(200).json({message: 'Annual Report for ' + meetingId, org: req.params.orgId});
+  res.status(200).json({message: 'Annual Report ' + orgId, org: req.params.orgId, orgData});
 });
 
 
@@ -123,25 +121,31 @@ router.get('/meeting-report?id={meetingId}', function(req, res){
   */
 
   let orgId = req.params.orgId;
-  let meetingId = req.params.meetingId;
+  let meetingId = req.query.meetingId;
+
+  const BusinessLogic = require("../../business-logic-layer/public/exports.js");
+  const business = new BusinessLogic();
+
+  const Sanatizer = require("../../business-logic-layer/public/sanitize.js");
+  const sanitizer = new Sanatizer();
 
   // sanitize
   orgId = sanitizer.sanitize(orgId);
   meetingId = sanitizer.sanitize(meetingId);
 
   // checking 
-  if (isNaN(orgId)){
-    res.status(400).json({ error: "organization with id of " + orgId + " not found." });
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
     return;
   }
 
-  if (isNaN(meetingId)){
-    res.status(400).json({ error: "meeting with id of " + meetingId + " not found." });
+  if (isNaN(meetingId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
     return;
   }
 
   // send to backend
-  const orgData = await business.getSpecificMemberOrgData(orgId, meetingId);
+  const orgData = business.getMeetingOrgReport(orgId, meetingId);
 
   // check for errors that backend returned 
   if (orgData.error && orgData.error !== error.noError){
@@ -149,7 +153,7 @@ router.get('/meeting-report?id={meetingId}', function(req, res){
     return;
   }
 
-  res.status(200).json({message: 'Meeting Report for ' + meetingId, org: req.params.orgId});
+  res.status(200).json({message: 'Meeting Report for ' + meetingId, org: req.params.orgId, orgData});
 });
 
 
