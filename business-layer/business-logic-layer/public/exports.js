@@ -27,4 +27,11 @@ module.exports = function () {
   // Organization Settings Calls
   
   // Organization Reports Calls
+  this.getAnnualOrgReport = async (orgId, meetingId) => {
+    return await getSpecificMemberOrgData(orgId, meetingId);
+  }
+
+  this.getMeetingOrgReport = async (orgId, meetingId) => {
+    return await getSpecificMemberOrgData(orgId, meetingId);
+  }
 };

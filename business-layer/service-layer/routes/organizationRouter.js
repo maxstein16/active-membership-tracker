@@ -15,9 +15,7 @@ router.get("/", function (req, res) {
 
 
 // GET /v1/organization/{orgId}/annual-report
-router.get('/annual-report', function(req, res){
-  res.status(200).json({message: 'Annual Report for ' + meetingId, org: req.params.orgId});
-  
+router.get('/annual-report', function(req, res){  
   // code from the jira -- the data this is meant to play with 
   /*
   "status": "success",
@@ -57,26 +55,43 @@ router.get('/annual-report', function(req, res){
     }
   }
   */
+  
+  let orgId = req.params.orgId;
+  let meetingId = req.params.meetingId;
 
+  // sanitize
+  orgId = sanitizer.sanitize(orgId);
+  meetingId = sanitizer.sanitize(meetingId);
+
+  // checking 
+  if (isNaN(orgId)){
+    res.status(400).json({ error: "organization with id of " + orgId + " not found." });
+    return;
+  }
+
+  if (isNaN(meetingId)){
+    res.status(400).json({ error: "meeting with id of " + meetingId + " not found." });
+    return;
+  }
+
+  // send to backend
+  const orgData = await business.getSpecificMemberOrgData(orgId, meetingId);
+
+  // check for errors that backend returned 
+  if (orgData.error && orgData.error !== error.noError){
+    res.status(404).json({error: orgData.error, orgId: orgId, meetingId: meetingId});
+    return;
+  }
+
+  res.status(200).json({message: 'Annual Report for ' + meetingId, org: req.params.orgId});
 });
 
-// 404 error
-router.get('/annual-report', function(req, res){
-  res.status(404).json({ error: "organization with id of {orgId} not found" });
-});
-
-// 500 error
-router.get('/annual-report', function(req, res){
-  res.status(500).json({ error: "Error Creating Report" });
-});
 
 
 
 // GET /v1/organization/{orgId}/meeting-report?id={meetingId}
 router.get('/meeting-report?id={meetingId}', function(req, res){
-  res.status(200).json({message: 'Meeting Report for ' + meetingId, org: req.params.orgId});
-
-  // code from the jira -- the data this is meant to play with 
+    // code from the jira -- the data this is meant to play with 
   /*
   {
   "status": "success",
@@ -107,21 +122,35 @@ router.get('/meeting-report?id={meetingId}', function(req, res){
     }
   */
 
+  let orgId = req.params.orgId;
+  let meetingId = req.params.meetingId;
+
+  // sanitize
+  orgId = sanitizer.sanitize(orgId);
+  meetingId = sanitizer.sanitize(meetingId);
+
+  // checking 
+  if (isNaN(orgId)){
+    res.status(400).json({ error: "organization with id of " + orgId + " not found." });
+    return;
+  }
+
+  if (isNaN(meetingId)){
+    res.status(400).json({ error: "meeting with id of " + meetingId + " not found." });
+    return;
+  }
+
+  // send to backend
+  const orgData = await business.getSpecificMemberOrgData(orgId, meetingId);
+
+  // check for errors that backend returned 
+  if (orgData.error && orgData.error !== error.noError){
+    res.status(404).json({error: orgData.error, orgId: orgId, meetingId: meetingId});
+    return;
+  }
+
+  res.status(200).json({message: 'Meeting Report for ' + meetingId, org: req.params.orgId});
 });
 
-// 404 error
-router.get('/', function(req, res){
-  res.status(404).json({ error: "Organization with id of " + {orgId} + "not found" });
-});
-
-// 404 error
-router.get('/meeting-report?id={meetingId}', function(req, res){
-  res.status(404).json({ error: "Meeting with id of " + {meetingId} + "not found" });
-});
-
-// 500 error
-router.get('/meeting-report?id={meetingId}', function(req, res){
-  res.status(500).json({ error: "Error Creating Report" });
-});
 
 module.exports = router;
