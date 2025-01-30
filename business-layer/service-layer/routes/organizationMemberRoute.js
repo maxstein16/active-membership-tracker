@@ -237,7 +237,7 @@ router.put("/:memberId/attendance", async function (req, res) {
     !body.hasOwnProperty("volunteer_events") &&
     !body.hasOwnProperty("social_events")
   ) {
-    res.status(400).json({ error: error.memberMustEditValidField });
+    res.status(400).json({ error: error.memberMustEditAttendanceField });
     return;
   }
 
