@@ -20,7 +20,12 @@ module.exports = function () {
   // Organization Calls
 
   // Organization Settings Calls
-  
+  this.settingIdMustBeInteger = "Setting ID must be an integer";
+  this.mustHaveAtLeastOneFieldToUpdate = "Must include at least one valid field to update: meeting_type, frequency, amount_type, amount";
+  this.organizationNotFound = "Organization with the given ID not found";
+  this.settingNotFound = "Organization setting with the given ID not found";
+  this.mustIncludeIdQueryParam = "Must include an ID as a query param";
+  this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
   // Organization Reports Calls
 
 };
