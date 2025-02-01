@@ -5,8 +5,10 @@ module.exports = function () {
   this.somethingWentWrong = "Something went wrong, please try again";
   this.organizationIdMustBeInteger = "OrganizationId must be an integer";
   this.memberIdMustBeInteger = "MemberId must be an integer";
+  this.roleMustBeInteger = "MemberId must be an integer";
   this.orgNotFound = "Organization Not Found"
   this.memberNotFound = "Member Not Found"
+  this.membershipNotFound = "Membership Not Found"
   
   // Member In Org Management
 
@@ -15,6 +17,8 @@ module.exports = function () {
   this.memberCanNotBeAddedToOrg = "Can not add member to organization";
   this.memberNotFoundInOrg = "Member not found in organization";
   this.memberMustEditAttendanceField = "Must edit at least one valid field: meetings_attended, volunteer_events, social_events";
+  this.mustHaveAllFieldsEditMemberRoleInOrg = "Missing required fields: member_id, organization_id, role";
+
 
   // Member Calls (not org specific)
 

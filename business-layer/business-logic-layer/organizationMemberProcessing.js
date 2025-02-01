@@ -121,6 +121,47 @@ async function deleteMemberInOrganization( orgId, memberId ) {
   return {error: error.noError, data: "data-here"}
 }
 
+async function getMembershipRoleInfoInOrganization(orgId, memberId) {
+  // TODO: call db
+
+  /*
+
+  Data should be displayed as:
+
+    {
+      "membership_id": 101,
+      "member_id": 1,
+      "organization_id": 1,
+      "role": 2
+    }
+
+  */
+  return {error: error.noError, data: "data-here"}
+}
+
+async function updateMembershipRoleInfoInOrganization(memberId) {
+  // TODO: call db
+
+  /*
+
+  Data should be displayed as:
+
+    {
+      "memberships": [
+        {
+          "membership_id": 102,
+          "organization_id": 1,
+          "member_id": 2,
+          "role": 0
+        }
+      ]
+    }
+
+  */
+  return {error: error.noError, data: "data-here"}
+}
+ 
+
 async function getMembersInOrganization(orgId) {
   // TODO: call db and fetch members
 
@@ -181,6 +222,8 @@ async function updateMemberAttendanceInOrganization(orgId, memberId, attendanceD
     addMemberToAnOrganization,
     editMemberInOrganization,
     deleteMemberInOrganization,
+    getMembershipRoleInfoInOrganization,
+    updateMembershipRoleInfoInOrganization,
     getMembersInOrganization,
     updateMemberAttendanceInOrganization
   };

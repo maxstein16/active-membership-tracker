@@ -185,6 +185,77 @@ router.delete("/:memberId", async function (req, res) {
   res.status(200).json({ status: "success", data: result.data });
 });
 
+// GET /v1/organization/{orgId}/membership/{role}
+router.get("/membership/:role", async function (req, res) {
+  let orgId = req.params.orgId;
+  let role = req.params.role;
+
+  // sanitize params
+  orgId = sanitizer.sanitize(orgId);
+  role = sanitizer.sanitize(role);
+
+  // check if params are valid
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+  if (isNaN(role)) {
+    res.status(400).json({ error: error.roleMustBeInteger });
+    return;
+  }
+
+  // send off to backend
+  const result = await business.getMembershipRoleInOrg(orgId, role);
+
+  // check for errors that backend returned
+  if (result.error && result.error !== error.noError) {
+    res.status(404).json({ error:  error.membershipNotFound });
+    return;
+  }
+
+  // return with appropriate status and message
+  res.status(200).json({ status: "success", data: result.data });
+});
+
+// PUT /v1/organization/{orgId}/members/{memberId}
+router.put("/members/:memberId", async function (req, res) {
+  let orgId = req.params.orgId;
+  let memberId = req.params.memberId;
+  let body = req.body;
+
+  // sanitize params
+  orgId = sanitizer.sanitize(orgId);
+  memberId = sanitizer.sanitize(memberId);
+
+  // check if params are valid
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+  if (isNaN(memberId)) {
+    res.status(400).json({ error: error.memberIdMustBeInteger });
+    return;
+  }
+
+  // check if body has necessary fields
+  if (!body.hasOwnProperty("member_id") || !body.hasOwnProperty("organization_id") || !body.hasOwnProperty("role")) {
+    res.status(400).json({ error: error.mustHaveAllFieldsEditMemberRoleInOrg });
+    return;
+  }
+
+  // send off to backend
+  const result = await business.editMembershipRoleInOrg(orgId, memberId, body);
+
+  // check for errors that backend returned
+  if (result.error && result.error !== error.noError) {
+    res.status(404).json({ error: `membership to ${orgId} cannot be given to ${memberId}` });
+    return;
+  }
+
+  // return with appropriate status and message
+  res.status(200).json({ status: "success", data: result.data });
+});
+
 // GET /v1/organization/{orgId}/members
 router.get("/", async function (req, res) {
   let orgId = req.params.orgId;
