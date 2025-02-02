@@ -1,13 +1,6 @@
-const {
-  getSpecificMemberWithOrgData,
-  addMemberToAnOrganization,
-  editMemberInOrganization,
-} = require("../organizationMemberProcessing");
+const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
 
-const {
-  getSpecificMemberData,
-  getSpecificMemberOrgStats,
-} = require("../memberProcessing"); // processing for members (no org specific)
+const { getSpecificMemberOrgStats } = require("../memberProcessing"); // processing for members (no org specific)
 
 // export to api calls
 module.exports = function () {
@@ -30,10 +23,6 @@ module.exports = function () {
   };
 
   // Member Calls (not org specific)
-  this.getSpecificMemberData = async (memberId) => {
-    return await getSpecificMemberData(memberId);
-  };
-
   this.getSpecificMemberOrgStats = async (memberId, orgId) => {
     return await getSpecificMemberOrgStats(memberId, orgId);
   };

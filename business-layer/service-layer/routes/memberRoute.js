@@ -11,31 +11,6 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 /**
- * GET /v1/member/{memberId}
- * Retrieves member data by their unique ID.
- */
-router.get("/:memberId", async function (req, res) {
-  // Sanitize the input
-  let memberId = sanitizer.sanitize(req.params.memberId);
-
-  // Validate that memberId is a number
-  if (isNaN(memberId)) {
-    return res.status(400).json({ error: error.memberIdMustBeInteger });
-  }
-
-  // Fetch member data from backend
-  const memberData = await business.getMemberData(memberId);
-
-  // Handle potential errors from backend
-  if (memberData?.error && memberData.error !== error.noError) {
-    return res.status(404).json({ error: memberData.error, memberId });
-  }
-
-  // Return successful response
-  res.status(200).json({ status: "success", data: memberData.data });
-});
-
-/**
  * GET /v1/member/{memberId}/stats?orgId={orgId}
  * Retrieves member statistics for a specific organization.
  */
@@ -72,4 +47,5 @@ router.get("/:memberId/stats", async function (req, res) {
   // Return successful response
   res.status(200).json({ status: "success", data: memberStats });
 });
+
 module.exports = router;
