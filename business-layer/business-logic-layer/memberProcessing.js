@@ -38,10 +38,36 @@ async function getSpecificMemberData(memberId) {
   return { error: error.noError, data: "data-here" };
 }
 
+/**
+ * Retrieves specific member statistics within an organization.
+ *
+ * @param {number} memberId - The ID of the member.
+ * @param {number} orgId - The ID of the organization.
+ * @returns {Object} - A response containing either an error or the member's org-specific stats.
+ *
+ * Example response format:
+ * {
+ *   "status": "success",
+ *   "data": {
+ *     "member_id": 1,
+ *     "organization_id": 1,
+ *     "membership_id": 101,
+ *     "organization_name": "Women In Computing",
+ *     "organization_abbreviation": "WiC",
+ *     "meetings_attended": 5,
+ *     "volunteer_events": 1,
+ *     "social_events": 1,
+ *     "your_points": 36,
+ *     "active_membership_threshold": 48,
+ *     "isActiveMember": false
+ *   }
+ * }
+ */
 async function getSpecificMemberOrgStats(memberId, orgId) {
   // TODO: Implement database call to fetch member data.
   return { error: error.noError, data: "data-here" };
 }
+
 module.exports = {
   getSpecificMemberData,
   getSpecificMemberOrgStats,
