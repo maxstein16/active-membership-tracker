@@ -37,6 +37,12 @@ async function getSpecificMemberData(memberId) {
   // TODO: Implement database call to fetch member data.
   return { error: error.noError, data: "data-here" };
 }
+
+async function getSpecificMemberOrgStats(memberId, orgId) {
+  // TODO: Implement database call to fetch member data.
+  return { error: error.noError, data: "data-here" };
+}
 module.exports = {
   getSpecificMemberData,
+  getSpecificMemberOrgStats,
 };
