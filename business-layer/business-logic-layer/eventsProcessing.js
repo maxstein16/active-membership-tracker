@@ -2,10 +2,10 @@ const Error = require("./public/errors.js");
 const error = new Error();
 
 /**
- * Retrieve all events for a specific organization.
+ * Retrieve all events for a specific organization with attendance records.
  */
 async function getAllEventsByOrganization(orgId) {
-  // TODO: Replace with database call to fetch events for the given organization.
+  // TODO: Replace with a database call to fetch events and attendance for the given organization.
 
   /*
   Expected Output:
@@ -19,7 +19,19 @@ async function getAllEventsByOrganization(orgId) {
       "event_end": "2024-05-10T20:00:00Z",
       "event_location": "Main Hall",
       "event_description": "Monthly general meeting",
-      "event_type": "Meeting"
+      "event_type": "Meeting",
+      "attendance": [
+        {
+          "attendance_id": 101,
+          "member_id": 5,
+          "check_in": "2024-05-10T18:05:00Z"
+        },
+        {
+          "attendance_id": 102,
+          "member_id": 7,
+          "check_in": "2024-05-10T18:10:00Z"
+        }
+      ]
     },
     {
       "event_id": 2,
@@ -29,7 +41,8 @@ async function getAllEventsByOrganization(orgId) {
       "event_end": "2024-05-15T17:00:00Z",
       "event_location": "Community Center",
       "event_description": "Helping with food drive",
-      "event_type": "Volunteering"
+      "event_type": "Volunteering",
+      "attendance": []
     }
   ]
   */
@@ -38,10 +51,10 @@ async function getAllEventsByOrganization(orgId) {
 }
 
 /**
- * Retrieve a specific event by ID.
+ * Retrieve a specific event by ID with its attendance records.
  */
 async function getEventById(orgId, eventId) {
-  // TODO: Replace with database call to fetch a specific event by eventId.
+  // TODO: Replace with a database call to fetch a specific event by eventId along with attendance.
 
   /*
   Expected Output:
@@ -54,7 +67,19 @@ async function getEventById(orgId, eventId) {
     "event_end": "2024-05-10T20:00:00Z",
     "event_location": "Main Hall",
     "event_description": "Monthly general meeting",
-    "event_type": "Meeting"
+    "event_type": "Meeting",
+    "attendance": [
+      {
+        "attendance_id": 101,
+        "member_id": 5,
+        "check_in": "2024-05-10T18:05:00Z"
+      },
+      {
+        "attendance_id": 102,
+        "member_id": 7,
+        "check_in": "2024-05-10T18:10:00Z"
+      }
+    ]
   }
   */
 
@@ -65,7 +90,7 @@ async function getEventById(orgId, eventId) {
  * Create a new event.
  */
 async function createEvent(orgId, eventData) {
-  // TODO: Replace with database call to insert a new event record.
+  // TODO: Replace with a database call to insert a new event record.
 
   /*
   Expected Output:
@@ -89,20 +114,20 @@ async function createEvent(orgId, eventData) {
  * Update an existing event.
  */
 async function updateEvent(orgId, eventId, updateData) {
-  // TODO: Replace with database call to update an existing event by eventId.
+  // TODO: Replace with a database call to update an event record.
 
   /*
   Expected Output:
 
   {
-    "event_id": 1,
+    "event_id": 3,
     "organization_id": 1,
-    "event_name": "Updated General Meeting",
-    "event_start": "2024-05-10T18:30:00Z",
-    "event_end": "2024-05-10T20:30:00Z",
-    "event_location": "Main Hall",
-    "event_description": "Updated monthly general meeting",
-    "event_type": "Meeting"
+    "event_name": "Hackathon 2024",
+    "event_start": "2024-06-01T09:00:00Z",
+    "event_end": "2024-06-01T18:00:00Z",
+    "event_location": "Tech Lab",
+    "event_description": "Annual coding competition - extended hours",
+    "event_type": "Competition"
   }
   */
 
