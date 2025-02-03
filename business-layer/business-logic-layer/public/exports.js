@@ -3,7 +3,8 @@ const {
   addMemberToAnOrganization,
   editMemberInOrganization,
 } = require("../organizationMemberProcessing");
-const bcrypt = require("bcryptjs"); // or 'bcrypt' if you prefer
+
+const hashPassword = require("./hash");
 
 // export to api calls
 module.exports = function () {
@@ -14,11 +15,7 @@ module.exports = function () {
   };
 
   this.addMemberToOrg = async (orgId, memberData) => {
-    // Hashing the password before storing it
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(memberData.password, saltRounds);
-    memberData.password = hashedPassword; // Replacing the plain password with the newly hashed one
-    // Passing the memberData with the hashed password to the Data Access Layer
+    memberData.password = await hashPassword(memberData.password);
     return await addMemberToAnOrganization(orgId, memberData);
   };
 
