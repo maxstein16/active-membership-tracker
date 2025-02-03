@@ -31,7 +31,7 @@ router.get("/:orgId", async function (req, res) {
   }
 
   //return data
-  res.status(200).json({ 
+  return res.status(200).json({ 
     "status": "success",
     "data": {
       "organization_id": req.params.orgId,
@@ -67,7 +67,7 @@ router.post("/", async function (req, res) {
     return res.status(400).json({ error: "Must include all valid fields: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
   }
 
-  res.status(200).json({ 
+  return res.status(200).json({ 
     "status": "success",
     "data": {
       "organization_id": req.params.orgId,
@@ -84,13 +84,47 @@ router.post("/", async function (req, res) {
 
 //PUT /v1/organization/{orgId}
 router.put("/:orgId", async function (req, res) {
-
  //sanitize
  let orgId = sanitizer.sanitize(req.params.orgId);  
 
     //checking if params are valid
   if(!orgId || isNaN(orgId)){
     return res.status(404).json({ error: "organization with id of ${orgId} not found"});
+  }
+
+  if ( !req.params.organization_name && !req.params.organization_abbreviation 
+    && !req.params.organization_desc && !req.params.organization_color 
+    && !req.params.active_membership_threshold ) {
+      return res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+
+  }
+  var organization = await business.getSpecificOrganizationData(orgId);
+
+  var organization_name = organization.organization_name;
+  var organization_abbreviation = organization.organization_abbreviation;
+  var organization_desc = organization.organization_desc;
+  var organization_color = organization.organization_color;
+  var active_membership_threshold = organization.active_membership_threshold; 
+
+
+  if (req.params.organization_name) {
+    organization_name = sanitizer.sanitize(req.params.organization_name); 
+  } 
+
+  if (req.params.organization_abbreviation) {
+    organization_abbreviation = sanitizer.sanitize(req.params.organization_abbreviation); 
+  }
+
+  if (req.params.organization_desc) {
+    organization_desc = sanitizer.sanitize(req.params.organization_desc); 
+  }
+
+  if (req.params.organization_color ) {
+    organization_color = sanitizer.sanitize(req.params.organization_color ); 
+  }
+
+  if (req.params.active_membership_threshold) {
+    active_membership_threshold = sanitizer.sanitize(req.params.active_membership_threshold); 
   }
 
   let updatedOrgData = await business.editOrganization(orgId, req.params);
@@ -100,11 +134,11 @@ router.put("/:orgId", async function (req, res) {
    }
   
 
-  res.status(200).json({
+   return res.status(200).json({
       "status": "success",
       "data": {
-        "organization_id": updatedOrgData,
-        "organization_name": "Women In Computing",
+        "organization_id": orgId,
+        "organization_name": organization_name,
         "organization_abbreviation": "WiC",
         "organization_desc": "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",
         "organization_color": 0x123456,
