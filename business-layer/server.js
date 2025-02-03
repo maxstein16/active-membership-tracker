@@ -1,9 +1,15 @@
 "use strict";
+// imports
+const { MIN_30 } = require("./constants.js");
 
+// Requires
 require("dotenv").config(); // Load .env variables
-const express = require("express");
-const logger = require("morgan");
-const path = require("path");
+const express = require("express"); // REST API 
+const session = require("express-session"); // sessions to log the user out
+const logger = require("morgan"); // logging out the routes
+const cors = require("cors"); // defines our cors policy (protects our api)
+const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
+const path = require("path"); // finding the react pages
 
 // create app
 const app = express();
@@ -12,16 +18,39 @@ const app = express();
 const { sequelize } = require("./db.js");
 
 // Middleware
-app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
+app.use(express.json());
+app.enable("trust proxy");
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build"), { index : false }));
+
+// Session Middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: { maxAge: MIN_30, httpOnly: true, secure: false }, // secure: true -> for production
+  })
+);
+
+// CORS policy middleware
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
 
 let testRouter = require("./service-layer/routes/testRoute.js");
+let sessionRouter = require("./service-layer/routes/sessionRoute.js");
 let memberRouter = require("./service-layer/routes/memberRoute.js");
 let organizationRouter = require("./service-layer/routes/organizationRouter.js");
 let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
@@ -32,11 +61,17 @@ let organizationReportsSettings = require("./service-layer/routes/organizationSe
 app.use("/", serveFrontendRouter);
 
 app.use("/v1/test", testRouter);
+app.use("/v1/session", sessionRouter);
 app.use("/v1/member", memberRouter);
 app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
+
+// Handle routes that do not exist
+app.get("*", (res, req) => {
+  res.redirect('/login')
+});
 
 const ensureDatabaseExists = async () => {
   const dbName = "membertracker";
