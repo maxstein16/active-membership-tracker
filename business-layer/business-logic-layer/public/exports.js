@@ -33,7 +33,7 @@ module.exports = function () {
   };
 
   addOrganization = async (organizationData) => {
-
+    
   };
 
   editOrganization = async (orgId, orgDataToUpdate) => {

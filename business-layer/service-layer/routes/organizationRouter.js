@@ -12,142 +12,120 @@ const sanitizer = new Sanitizer();
 
 /* https://api.rit.edu/v1/organization/{orgId} */
 
+
+// GET /v1/organization/
+router.get("/", function (req, res) {
+  res.status(400).json({
+    error:
+    "Must include an organization id in your call",
+    org: req.params.orgId,
+  });
+});
+
 // GET /v1/organization/{orgId}
 router.get("/:orgId", async function (req, res) {
   //sanitize
-  let orgId = sanitizer.sanitize(req.params.orgId);
+  let orgId = req.params.orgId;
+
+  orgId = sanitizer.sanitize(req.params.orgId);
 
   //checking if params are valid
-  if(!orgId || isNaN(orgId)){
-    return res.status(400).json({ error: "organization with id of ${orgId} not found"});
+  if(isNaN(orgId)){
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
   }
 
   //send off to backend
   var orgInfo = await business.getSpecificOrganizationData(orgId);
  
   // Handle errors from data returned from backend
-  if(!orgInfo) {
-    return res.status(404).json({ error: "Must include an organization id in your call" });
+  if(orgInfo.error  && orgInfo.error !== error.noError) {
+    res.status(404).json({ error: orgId.error, orgId: orgId });
+    return;
   }
 
   //return data
-  return res.status(200).json({ 
-    "status": "success",
-    "data": {
-      "organization_id": req.params.orgId,
-      "organization_name": orgInfo.organization_name,
-      "organization_abbreviation": orgInfo.organization_abbreviation,
-      "organization_desc": orgInfo.organization_desc,
-      "organization_color": orgInfo.organization_color,
-      "active_membership_threshold": orgInfo.active_membership_threshold
-      }
-    }); 
+  return res.status(200).json({ status: "success", data: orgInfo.data}); 
 });
 
 // POST /v1/organization/
 router.post("/", async function (req, res) {
 
- //sanitize
-  let orgName = sanitizer.sanitize(req.params.organization_name);
-  let orgShortened = sanitizer.sanitize(req.params.organization_abbreviation);
-  let orgDesc = sanitizer.sanitize(req.params.organization_desc);
-  let orgColor = sanitizer.sanitize(req.params.organization_color);
-  let memberThreshold = sanitizer.sanitize(req.params.active_membership_threshold);
+  let orgId = req.params.orgId;
+  let body = req.body;
 
-  //checking if params are valid
-  if(!memberThreshold || isNaN(memberThreshold) || !orgName || !orgShortened || !orgDesc || !orgColor){
-    return res.status(404).json({ error: "Cannot add new organization. Organization incorrectly formatted."});
+  orgId = sanitizer.sanitize(req.params.orgId);
+  
+  // check if params are valid!
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+
+  // check if has all the params needed
+  if (
+    !body.hasOwnProperty("organization_name") ||
+    !body.hasOwnProperty('organization_abbreviation') ||
+    !body.hasOwnProperty('organization_desc') ||
+    !body.hasOwnProperty('organization_color') ||
+    !body.hasOwnProperty('active_membership_threshold')
+  ) {
+    res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
+    return;
   }
 
   //send off to backend
-  var orgInfo = await business.addOrganization(req.params);
+  var result = await business.addOrganization(orgId, body);
 
-  // Handle errors from data returned from backend
-  if(!orgInfo) {
-    return res.status(400).json({ error: "Must include all valid fields: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+   // check for errors that backend returned
+   if (result.error && result.error !== error.noError) {
+    res.status(404).json({ error: result.error, orgId: orgId });
+    return;
   }
 
-  return res.status(200).json({ 
-    "status": "success",
-    "data": {
-      "organization_id": req.params.orgId,
-      "organization_name": orgName,
-      "organization_abbreviation": orgShortened,
-      "organization_desc": orgDesc,
-      "organization_color": orgColor,
-      "active_membership_threshold": memberThreshold }
-    });
+  // return with appropriate status error and message
+  res.status(200).json({ status: "success", data: result.data });
 
-  //  res.status(500).json({ error: "Something went wrong" });
 });
 
 
 //PUT /v1/organization/{orgId}
 router.put("/:orgId", async function (req, res) {
  //sanitize
- let orgId = sanitizer.sanitize(req.params.orgId);  
+ let orgId = req.params.orgId;
+ let body = req.body;
 
-    //checking if params are valid
-  if(!orgId || isNaN(orgId)){
-    return res.status(404).json({ error: "organization with id of ${orgId} not found"});
+ orgId = sanitizer.sanitize(req.params.orgId);
+ 
+ // check if params are valid!
+ if (isNaN(orgId)) {
+   res.status(400).json({ error: error.organizationIdMustBeInteger });
+   return;
+ }
+
+  // check if has all the params needed
+  if (
+    !body.hasOwnProperty("organization_name") ||
+    !body.hasOwnProperty('organization_abbreviation') ||
+    !body.hasOwnProperty('organization_desc') ||
+    !body.hasOwnProperty('organization_color') ||
+    !body.hasOwnProperty('active_membership_threshold')
+  ) {
+    res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
+    return;
   }
 
-  if ( !req.params.organization_name && !req.params.organization_abbreviation 
-    && !req.params.organization_desc && !req.params.organization_color 
-    && !req.params.active_membership_threshold ) {
-      return res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+  //send off to backend
+  var result = await business.editOrganization(orgId, body);
 
-  }
-  var organization = await business.getSpecificOrganizationData(orgId);
-
-  var organization_name = organization.organization_name;
-  var organization_abbreviation = organization.organization_abbreviation;
-  var organization_desc = organization.organization_desc;
-  var organization_color = organization.organization_color;
-  var active_membership_threshold = organization.active_membership_threshold; 
-
-
-  if (req.params.organization_name) {
-    organization_name = sanitizer.sanitize(req.params.organization_name); 
-  } 
-
-  if (req.params.organization_abbreviation) {
-    organization_abbreviation = sanitizer.sanitize(req.params.organization_abbreviation); 
+   // check for errors that backend returned
+   if (result.error && result.error !== error.noError) {
+    res.status(404).json({ error: result.error, orgId: orgId });
+    return;
   }
 
-  if (req.params.organization_desc) {
-    organization_desc = sanitizer.sanitize(req.params.organization_desc); 
-  }
-
-  if (req.params.organization_color ) {
-    organization_color = sanitizer.sanitize(req.params.organization_color ); 
-  }
-
-  if (req.params.active_membership_threshold) {
-    active_membership_threshold = sanitizer.sanitize(req.params.active_membership_threshold); 
-  }
-
-  let updatedOrgData = await business.editOrganization(orgId, req.params);
-    
-  if(!updatedOrgData) {
-    return res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
-   }
-  
-
-   return res.status(200).json({
-      "status": "success",
-      "data": {
-        "organization_id": orgId,
-        "organization_name": organization_name,
-        "organization_abbreviation": "WiC",
-        "organization_desc": "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",
-        "organization_color": 0x123456,
-        "active_membership_threshold": 48 
-        }
-    });
-
-
-  //res.status(500).json({  error: "Something went wrong" });
+  // return with appropriate status error and message
+  res.status(200).json({ status: "success", data: result.data });
 
 });
 
