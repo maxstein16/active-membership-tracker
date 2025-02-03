@@ -3,7 +3,7 @@ const {
   addMemberToAnOrganization,
   editMemberInOrganization,
 } = require("../organizationMemberProcessing");
-
+const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 
 // export to api calls
