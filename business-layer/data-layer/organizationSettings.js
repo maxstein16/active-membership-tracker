@@ -1,4 +1,4 @@
-import { Organization, MembershipRequirement, EmailSettings } from "../db";
+import { Organization, MembershipRequirement, EmailSetting } from "../db";
 
 /**
  * Get membership requirements for an organization
@@ -149,7 +149,7 @@ const updateEmailSettings = async (orgId, updates, res) => {
             });
         }
 
-        const settings = await EmailSettings.findOne({
+        const settings = await EmailSetting.findOne({
             where: { organization_id: orgId },
         });
 
