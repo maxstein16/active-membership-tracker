@@ -16,7 +16,8 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
+// go up 2 layers to move into proper directory
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
 
 // import routes
 let serveFrontendRouter = require("./routes/serveFrontendRoute.js");
