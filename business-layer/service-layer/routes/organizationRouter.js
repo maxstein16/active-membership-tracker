@@ -19,7 +19,7 @@ router.get("/:orgId", async function (req, res) {
 
   //checking if params are valid
   if(!orgId || isNaN(orgId)){
-    res.status(400).json({ error: "organization with id of ${orgId} not found"});
+    return res.status(400).json({ error: "organization with id of ${orgId} not found"});
   }
 
   //send off to backend
@@ -27,7 +27,7 @@ router.get("/:orgId", async function (req, res) {
  
   // Handle errors from data returned from backend
   if(!orgInfo) {
-    res.status(404).json({ error: "Must include an organization id in your call" });
+    return res.status(404).json({ error: "Must include an organization id in your call" });
   }
 
   //return data
@@ -40,12 +40,11 @@ router.get("/:orgId", async function (req, res) {
       "organization_desc": orgInfo.organization_desc,
       "organization_color": orgInfo.organization_color,
       "active_membership_threshold": orgInfo.active_membership_threshold
-      }, 
-      org: req.params.orgId
+      }
     }); 
 });
 
-
+// POST /v1/organization/
 router.post("/", async function (req, res) {
 
  //sanitize
@@ -56,8 +55,8 @@ router.post("/", async function (req, res) {
   let memberThreshold = sanitizer.sanitize(req.params.active_membership_threshold);
 
   //checking if params are valid
-  if(!orgId || isNaN(orgId)){
-    res.status(404).json({ error: "organization with id of ${orgId} not found"});
+  if(!memberThreshold || isNaN(memberThreshold) || !orgName || !orgShortened || !orgDesc || !orgColor){
+    return res.status(404).json({ error: "Cannot add new organization. Organization incorrectly formatted."});
   }
 
   //send off to backend
@@ -65,7 +64,7 @@ router.post("/", async function (req, res) {
 
   // Handle errors from data returned from backend
   if(!orgInfo) {
-    res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+    return res.status(400).json({ error: "Must include all valid fields: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
   }
 
   res.status(200).json({ 
@@ -79,29 +78,32 @@ router.post("/", async function (req, res) {
       "active_membership_threshold": memberThreshold }
     });
 
-    res.status(500).json({ error: "Something went wrong" });
+  //  res.status(500).json({ error: "Something went wrong" });
 });
 
 
 //PUT /v1/organization/{orgId}
 router.put("/:orgId", async function (req, res) {
 
+ //sanitize
+ let orgId = sanitizer.sanitize(req.params.orgId);  
+
     //checking if params are valid
   if(!orgId || isNaN(orgId)){
-    res.status(404).json({ error: "organization with id of ${orgId} not found"});
+    return res.status(404).json({ error: "organization with id of ${orgId} not found"});
   }
 
   let updatedOrgData = await business.editOrganization(orgId, req.params);
     
   if(!updatedOrgData) {
-    res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+    return res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
    }
   
 
   res.status(200).json({
       "status": "success",
       "data": {
-        "organization_id": 1,
+        "organization_id": updatedOrgData,
         "organization_name": "Women In Computing",
         "organization_abbreviation": "WiC",
         "organization_desc": "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",
@@ -111,7 +113,7 @@ router.put("/:orgId", async function (req, res) {
     });
 
 
-  res.status(500).json({  error: "Something went wrong" });
+  //res.status(500).json({  error: "Something went wrong" });
 
 });
 
