@@ -11,8 +11,8 @@ CREATE TABLE Organization (
   organization_name VARCHAR(255),
   organization_description VARCHAR(255),
   organization_color VARCHAR(255),
-  org_abbreviation VARCHAR(10),
-  active_membership_threshold INT,
+  organization_abbreviation VARCHAR(10),
+  organization_threshold INT,
   PRIMARY KEY (organization_id)
 );
 
@@ -36,9 +36,10 @@ CREATE TABLE Membership (
   membership_id INT,
   member_id INT,
   organization_id INT,
-  org_role INT,
-  member_points INT,
+  membership_role INT,
+  membership_points INT,
   active_member BOOLEAN,
+  active_semesters INT,
   PRIMARY KEY (membership_id),
   FOREIGN KEY (member_id) REFERENCES Member (member_id),
   FOREIGN KEY (organization_id) REFERENCES Organization (organization_id)
@@ -49,7 +50,7 @@ CREATE TABLE Attendance (
   attendance_id INT,
   member_id INT,
   event_id INT,
-  attendance_status INT,
+  check_in DATE,
   PRIMARY KEY (attendance_id),
   FOREIGN KEY (member_id) REFERENCES Member (member_id),
   FOREIGN KEY (event_id) REFERENCES Event (event_id)
@@ -59,26 +60,17 @@ CREATE TABLE Attendance (
 CREATE TABLE Event (
   event_id INT,
   event_name VARCHAR(255),
-  event_date DATE,
+  event_start DATE,
+  event_end DATE,
   event_location VARCHAR(255),
   event_description VARCHAR(255),
   event_type VARCHAR(255),
   PRIMARY KEY (event_id)
 );
 
--- Create the Recognition table
-CREATE TABLE Recognition (
-  recognition_id INT,
-  member_id INT,
-  recognition_year INT,
-  recognition_type INT,
-  PRIMARY KEY (recognition_id),
-  FOREIGN KEY (member_id) REFERENCES Member (member_id)
-);
-
 -- Create the MembershipRequirement table
 CREATE TABLE MembershipRequirement (
-  setting_id INT PRIMARY KEY AUTO_INCREMENT,
+  requirement_id INT PRIMARY KEY AUTO_INCREMENT,
   organization_id INT,
   meeting_type VARCHAR(255),
   frequency VARCHAR(255),
@@ -87,9 +79,9 @@ CREATE TABLE MembershipRequirement (
   FOREIGN KEY (organization_id) REFERENCES Organization (organization_id)
 );
 
--- Create the EmailSettings table
-CREATE TABLE EmailSettings (
-  email_setting INT PRIMARY KEY AUTO_INCREMENT,
+-- Create the EmailSetting table
+CREATE TABLE EmailSetting (
+  setting_id INT PRIMARY KEY AUTO_INCREMENT,
   organization_id INT,
   current_status BOOLEAN,
   annual_report BOOLEAN,
