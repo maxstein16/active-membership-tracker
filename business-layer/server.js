@@ -21,30 +21,8 @@ const { sequelize } = require("./db.js");
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-app.use(express.json());
-app.enable("trust proxy");
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../../frontend-layer/build"), { index : false }));
-
-// Session Middleware
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    rolling: true,
-    cookie: { maxAge: MIN_30, httpOnly: true, secure: false }, // secure: true -> for production
-  })
-);
-
-// CORS policy middleware
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
-
+// go up 2 layers to move into proper directory
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
