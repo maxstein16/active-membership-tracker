@@ -2,7 +2,7 @@ const Error = require("./public/errors.js");
 const error = new Error();
 
 
-async function getSpecificMemberOrgData( orgId, memberId ) {
+async function getSpecificReportOrgData( orgId, memberId ) {
     
     // TODO: call db
   
@@ -38,5 +38,5 @@ async function getSpecificMemberOrgData( orgId, memberId ) {
 
 
 module.exports = {
-    getSpecificMemberOrgData,
+  getSpecificReportOrgData,
 };
