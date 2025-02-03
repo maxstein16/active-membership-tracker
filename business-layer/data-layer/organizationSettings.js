@@ -1,4 +1,4 @@
-import { Organization, MembershipRequirement, EmailSetting } from "../db";
+import { Organization, MembershipRequirement, EmailSettings } from "../db";
 
 /**
  * Get membership requirements for an organization
@@ -113,7 +113,7 @@ const updateEmailSettings = async (orgId, updates, res) => {
             console.error("Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved");
         }
 
-        const settings = await EmailSetting.findOne({
+        const settings = await EmailSettings.findOne({
             where: { organization_id: orgId },
         });
 
