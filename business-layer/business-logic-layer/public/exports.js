@@ -1,4 +1,15 @@
-const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization, updateMemberAttendanceInOrganization, getMembersInOrganization, getMembershipRoleInfoInOrganization, updateMembershipRoleInfoInOrganization } = require("../organizationMemberProcessing");
+const {
+  getSpecificMemberWithOrgData,
+  addMemberToAnOrganization,
+  editMemberInOrganization,
+  updateMemberAttendanceInOrganization, 
+  getMembersInOrganization, 
+  getMembershipRoleInfoInOrganization, 
+  updateMembershipRoleInfoInOrganization
+} = require("../organizationMemberProcessing");
+
+const hashPassword = require("./hash");
+
 
 // export to api calls
 module.exports = function () {
@@ -9,16 +20,17 @@ module.exports = function () {
   };
 
   this.addMemberToOrg = async (orgId, memberData) => {
+    memberData.password = await hashPassword(memberData.password);
     return await addMemberToAnOrganization(orgId, memberData);
-  }
+  };
 
   this.editMemberInOrg = async (orgId, memberId, memberDataToUpdate) => {
     return await editMemberInOrganization(orgId, memberId, memberDataToUpdate);
-  }
+  };
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
     return await editMemberInOrganization(orgId, memberId);
-  }
+  };
 
   this.getMembershipRoleInOrg = async (roleId) => {
     return await getMembershipRoleInfoInOrganization(roleId);
@@ -41,6 +53,6 @@ module.exports = function () {
   // Organization Calls
 
   // Organization Settings Calls
-  
+
   // Organization Reports Calls
 };
