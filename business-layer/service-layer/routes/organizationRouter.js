@@ -9,15 +9,11 @@ const business = new BusinessLogic();
 
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
-/*
 
-https://api.rit.edu/v1/organization/{orgId}
-
-*/
+/* https://api.rit.edu/v1/organization/{orgId} */
 
 // GET /v1/organization/{orgId}
 router.get("/:orgId", async function (req, res) {
-
   //sanitize
   let orgId = sanitizer.sanitize(req.params.orgId);
 
@@ -26,47 +22,82 @@ router.get("/:orgId", async function (req, res) {
     res.status(400).json({ error: "organization with id of ${orgId} not found"});
   }
 
-  var orgInfo = await business.getOrganization
+  //send off to backend
+  var orgInfo = await business.getSpecificOrganizationData(orgId);
+ 
+  // Handle errors from data returned from backend
+  if(!orgInfo) {
+    res.status(404).json({ error: "Must include an organization id in your call" });
+  }
 
   //return data
   res.status(200).json({ 
     "status": "success",
     "data": {
-      "organization_id": 1,
-      "organization_name": "Women In Computing",
-      "organization_abbreviation": "WiC",
-      "organization_desc": "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",
-      "organization_color": 0x123456,
-      "active_membership_threshold": 48
+      "organization_id": req.params.orgId,
+      "organization_name": orgInfo.organization_name,
+      "organization_abbreviation": orgInfo.organization_abbreviation,
+      "organization_desc": orgInfo.organization_desc,
+      "organization_color": orgInfo.organization_color,
+      "active_membership_threshold": orgInfo.active_membership_threshold
       }, 
       org: req.params.orgId
     }); 
- 
-  res.status(404).json({ error: "Must include an organization id in your call" });
 });
 
 
-router.post("/", function (req, res) {
+router.post("/", async function (req, res) {
+
+ //sanitize
+  let orgName = sanitizer.sanitize(req.params.organization_name);
+  let orgShortened = sanitizer.sanitize(req.params.organization_abbreviation);
+  let orgDesc = sanitizer.sanitize(req.params.organization_desc);
+  let orgColor = sanitizer.sanitize(req.params.organization_color);
+  let memberThreshold = sanitizer.sanitize(req.params.active_membership_threshold);
+
+  //checking if params are valid
+  if(!orgId || isNaN(orgId)){
+    res.status(404).json({ error: "organization with id of ${orgId} not found"});
+  }
+
+  //send off to backend
+  var orgInfo = await business.addOrganization(req.params);
+
+  // Handle errors from data returned from backend
+  if(!orgInfo) {
+    res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+  }
+
   res.status(200).json({ 
     "status": "success",
     "data": {
-      "organization_id": 1,
-      "organization_name": "Women In Computing",
-      "organization_abbreviation": "WiC",
-      "organization_desc": "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",
-      "organization_color": 0x123456,
-      "active_membership_threshold": 48 }
+      "organization_id": req.params.orgId,
+      "organization_name": orgName,
+      "organization_abbreviation": orgShortened,
+      "organization_desc": orgDesc,
+      "organization_color": orgColor,
+      "active_membership_threshold": memberThreshold }
     });
-
-    res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
-
-    res.status(404).json({ error: "organization with id of {orgId} not found" });
 
     res.status(500).json({ error: "Something went wrong" });
 });
 
+
 //PUT /v1/organization/{orgId}
-router.put("/", function (req, res) {
+router.put("/:orgId", async function (req, res) {
+
+    //checking if params are valid
+  if(!orgId || isNaN(orgId)){
+    res.status(404).json({ error: "organization with id of ${orgId} not found"});
+  }
+
+  let updatedOrgData = await business.editOrganization(orgId, req.params);
+    
+  if(!updatedOrgData) {
+    res.status(400).json({ error: "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold" });
+   }
+  
+
   res.status(200).json({
       "status": "success",
       "data": {
@@ -79,9 +110,6 @@ router.put("/", function (req, res) {
         }
     });
 
-  res.status(400).json({ error: "Must include at least one valid feild to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold"});
-
-  res.status(404).json({ error: "organization with id of {orgId} not found" });
 
   res.status(500).json({  error: "Something went wrong" });
 

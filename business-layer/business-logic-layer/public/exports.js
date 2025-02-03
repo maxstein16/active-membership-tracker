@@ -24,6 +24,26 @@ module.exports = function () {
 
   // Organization Calls
 
+  getSpecificOrganizationData = async (orgId) => {
+
+  };
+
+  getAllOrganizationData = async => {
+
+  };
+
+  addOrganization = async (organizationData) => {
+
+  };
+
+  editOrganization = async (orgId, orgDataToUpdate) => {
+
+  };
+
+  deleteOrganization = async (orgId) => {
+
+  };
+
   // Organization Settings Calls
   
   // Organization Reports Calls
