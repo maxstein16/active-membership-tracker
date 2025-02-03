@@ -1,3 +1,4 @@
+const { getMemberById, updateMemberInDB, createMemberInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
 
 const { getSpecificMemberOrgStats } = require("../memberProcessing"); // processing for members (no org specific)
@@ -23,6 +24,17 @@ module.exports = function () {
   };
 
   // Member Calls (not org specific)
+  this.getMember = async (memberId) => {
+    return await getMemberById(memberId);
+  }
+
+  this.updateMember = async (memberId, memberData) => {
+    return await updateMemberInDB(memberId, memberData);
+  }
+
+  this.createMember = async (memberData) => {
+    return await createMemberInDB(memberData);
+  }
   this.getSpecificMemberOrgStats = async (memberId, orgId) => {
     return await getSpecificMemberOrgStats(memberId, orgId);
   };
