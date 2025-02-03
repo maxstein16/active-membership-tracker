@@ -1,6 +1,14 @@
 let express = require("express");
 const router = express.Router();
 
+const Error = require("../../business-logic-layer/public/errors.js");
+const error = new Error();
+
+const BusinessLogic = require("../../business-logic-layer/public/exports.js");
+const business = new BusinessLogic();
+
+const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
+const sanitizer = new Sanitizer();
 /*
 
 https://api.rit.edu/v1/organization/{orgId}
@@ -8,7 +16,19 @@ https://api.rit.edu/v1/organization/{orgId}
 */
 
 // GET /v1/organization/{orgId}
-router.get("/", function (req, res) {
+router.get("/:orgId", async function (req, res) {
+
+  //sanitize
+  let orgId = sanitizer.sanitize(req.params.orgId);
+
+  //checking if params are valid
+  if(!orgId || isNaN(orgId)){
+    res.status(400).json({ error: "organization with id of ${orgId} not found"});
+  }
+
+  var orgInfo = await business.getOrganization
+
+  //return data
   res.status(200).json({ 
     "status": "success",
     "data": {
@@ -21,9 +41,10 @@ router.get("/", function (req, res) {
       }, 
       org: req.params.orgId
     }); 
-  res.status(400).json({ error: "organization with id of {orgId} not found"});
-  res.status(400).json({ error: "Must include an organization id in your call" });
+ 
+  res.status(404).json({ error: "Must include an organization id in your call" });
 });
+
 
 router.post("/", function (req, res) {
   res.status(200).json({ 
