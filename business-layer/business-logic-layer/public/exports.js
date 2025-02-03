@@ -1,4 +1,5 @@
 const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
+const { getSpecificOrganizationData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -24,23 +25,27 @@ module.exports = function () {
 
   // Organization Calls
 
-  getSpecificOrganizationData = async (orgId) => {
+  this.getSpecificOrgData = async (orgId) => {
+    return await getSpecificOrgData(orgId);
+  };
+
+  this.getAllOrganizationData = async () => {
+    return await getAllOrganizationData(orgId);
 
   };
 
-  getAllOrganizationData = async => {
+  this.addOrganization = async (organizationData) => {
+    return await addOrganization(organizationData);
 
   };
 
-  addOrganization = async (organizationData) => {
-    
-  };
-
-  editOrganization = async (orgId, orgDataToUpdate) => {
+  this.editOrganization = async (orgId, orgDataToUpdate) => {
+    return await editOrganization(orgId, orgDataToUpdate);
 
   };
 
-  deleteOrganization = async (orgId) => {
+  this.deleteOrganization = async (orgId) => {
+    return await deleteOrganization(orgId);
 
   };
 

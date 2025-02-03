@@ -36,7 +36,7 @@ router.get("/:orgId", async function (req, res) {
   }
 
   //send off to backend
-  var orgInfo = await business.getSpecificOrganizationData(orgId);
+  var orgInfo = await business.getSpecificOrgData(orgId);
  
   // Handle errors from data returned from backend
   if(orgInfo.error  && orgInfo.error !== error.noError) {
