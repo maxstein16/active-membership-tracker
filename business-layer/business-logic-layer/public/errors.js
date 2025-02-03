@@ -28,5 +28,11 @@ module.exports = function () {
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
   // Organization Reports Calls
 
+  // Event Management
+  this.eventIdMustBeInteger = "EventId must be an integer";
+  this.eventNotFound = "Event not found";
+  this.mustHaveAllFieldsCreateEvent = "Must include all required event fields: event_name, event_start, event_end, event_location, event_description, event_type";
+  this.mustHaveAtLeastOneFieldToUpdateEvent = "Must include at least one valid field to update an event";
+
 };
 
