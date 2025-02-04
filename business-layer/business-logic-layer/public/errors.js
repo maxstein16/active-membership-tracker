@@ -37,6 +37,7 @@ module.exports = function () {
   this.settingNotFound = "Organization setting with the given ID not found";
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
+  
   // Organization Reports Calls
 
   // Event Management
@@ -44,6 +45,10 @@ module.exports = function () {
   this.eventNotFound = "Event not found";
   this.mustHaveAllFieldsCreateEvent = "Must include all required event fields: event_name, event_start, event_end, event_location, event_description, event_type";
   this.mustHaveAtLeastOneFieldToUpdateEvent = "Must include at least one valid field to update an event";
+
+  // Organization Recognition Calls
+  this.mustHaveMembershipYearsField = "Must include field 'membership_years' in the request body to edit."
+
 
 };
 

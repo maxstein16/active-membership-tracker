@@ -22,8 +22,6 @@ RESOURCES:
 
 // GET index.html
 router.get("/", isAuthorizedHasSessionForWebsite, function (req, res) {
-    console.log("here is where i'm displaying the link")
-    console.log(__dirname)
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );

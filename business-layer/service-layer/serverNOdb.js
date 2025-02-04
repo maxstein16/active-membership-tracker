@@ -54,7 +54,9 @@ let memberRouter = require("./routes/memberRoute.js");
 let organizationRouter = require("./routes/organizationRouter.js");
 let organizationMemberRouter = require("./routes/organizationMemberRoute.js");
 let organizationReportsRouter = require("./routes/organizationReportsRouter.js");
-let organizationReportsSettings = require("./routes/organizationSettingsRoute.js");
+let organizationSettingsRouter = require("./routes/organizationSettingsRoute.js");
+let organizationRecognitionsRouter = require("./routes/organizationRecognitionRouter.js")
+
 
 // use the routes
 app.use("/", serveFrontendRouter);
@@ -65,7 +67,8 @@ app.use("/v1/member", memberRouter);
 app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
-app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
+app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
+app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {

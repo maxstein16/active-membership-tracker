@@ -26,7 +26,7 @@ router.get("/", isAuthorizedHasSessionForAPI, function (req, res) {
 });
 
 // GET /v1/organization/{orgId}/reports/annual
-router.get("/annual", isAuthorizedHasSessionForAPI, function (req, res) {
+router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
 
   // sanitize
@@ -39,7 +39,7 @@ router.get("/annual", isAuthorizedHasSessionForAPI, function (req, res) {
   }
 
   // send to backend
-  const orgData = business.getAnnualOrgReport(orgId);
+  const orgData = await business.getAnnualOrgReport(orgId);
 
   // check for errors that backend returned
   if (orgData.error && orgData.error !== error.noError) {
@@ -58,7 +58,7 @@ router.get("/annual", isAuthorizedHasSessionForAPI, function (req, res) {
 router.get(
   "/meeting?id={meetingId}",
   isAuthorizedHasSessionForAPI,
-  function (req, res) {
+  async function (req, res) {
     let orgId = req.params.orgId;
     let meetingId = req.query.meetingId;
 
@@ -78,7 +78,7 @@ router.get(
     }
 
     // send to backend
-    const orgData = business.getMeetingOrgReport(orgId, meetingId);
+    const orgData = await business.getMeetingOrgReport(orgId, meetingId);
 
     // check for errors that backend returned
     if (orgData.error && orgData.error !== error.noError) {

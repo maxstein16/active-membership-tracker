@@ -18,6 +18,7 @@ const {
 const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
+const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -39,6 +40,24 @@ module.exports = function () {
   this.deleteMemberInOrg = async (orgId, memberId) => {
     return await editMemberInOrganization(orgId, memberId);
   };
+
+  this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {
+    return await updateMemberAttendanceInOrganization(orgId, memberId, attendanceData);
+  }
+
+  this.getMembersInOrg = async (orgId) => {
+    return await getMembersInOrganization(orgId);
+  }
+
+  this.getMembershipRoleInOrg = async (orgId, memberId) => {
+    return await getMembershipRoleInfoInOrganization(orgId, memberId);
+  }
+
+  this.updateMembershipRoleInOrg = async (orgId, memberId) => {
+    return await updateMembershipRoleInfoInOrganization(orgId, memberId);
+  }
+
+  
 
   // Member Calls (not org specific)
   this.getMember = async (memberId) => {
@@ -128,5 +147,17 @@ module.exports = function () {
     return await updateEvent(orgId, eventId, updateData);
   };
 
-};
 
+  // Organization Recognition Calls
+  this.getAllOrgRecognitions = async (orgId) => {
+    return await getAllOrgRecognitionsFromDB(orgId);
+  }
+
+  this.getSpecificRecognition = async (orgId, memberId) => {
+    return await getSpecificRecognitionFromDB(orgId, memberId);
+  }
+
+  this.updateSpecificRecognition = async (orgId, memberId, membershipYears) => {
+    return await updateSpecificRecognitionInDB(orgId, memberId, membershipYears);
+  }
+};
