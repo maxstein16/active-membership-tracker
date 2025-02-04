@@ -107,7 +107,7 @@ router.post(
         .status(400)
         .json({ error: error.mustHaveAllFieldsCreateEvent });
     }
-     asdfk;jsdhflaskdfhskjdfhkjsdhfkjdshfjksdhfkljsdhfkdfj
+     asdfk;jsdhflaskdfhskjdfhk
 
     // Send to business layer
     const result = await business.createEvent(orgId, body);
