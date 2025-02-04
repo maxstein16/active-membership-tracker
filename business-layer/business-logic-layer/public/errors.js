@@ -40,8 +40,15 @@ module.exports = function () {
   
   // Organization Reports Calls
 
+  // Event Management
+  this.eventIdMustBeInteger = "EventId must be an integer";
+  this.eventNotFound = "Event not found";
+  this.mustHaveAllFieldsCreateEvent = "Must include all required event fields: event_name, event_start, event_end, event_location, event_description, event_type";
+  this.mustHaveAtLeastOneFieldToUpdateEvent = "Must include at least one valid field to update an event";
+
   // Organization Recognition Calls
   this.mustHaveMembershipYearsField = "Must include field 'membership_years' in the request body to edit."
+
 
 };
 

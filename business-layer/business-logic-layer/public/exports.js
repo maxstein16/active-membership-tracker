@@ -1,3 +1,11 @@
+
+const {
+  getAllEventsByOrganization,
+  getEventById,
+  createEvent,
+  updateEvent,
+} = require ("../eventsProcessing")
+
 const {
   getSpecificMemberWithOrgData, 
   addMemberToAnOrganization, 
@@ -31,7 +39,7 @@ module.exports = function () {
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
     return await editMemberInOrganization(orgId, memberId);
-  }
+  };
 
   this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {
     return await updateMemberAttendanceInOrganization(orgId, memberId, attendanceData);
@@ -94,6 +102,7 @@ module.exports = function () {
   };
 
   // Organization Settings Calls
+
   this.getOrganizationSettings = async (orgId) => {
     return await getOrganizationSettings(orgId);
   };
@@ -118,6 +127,26 @@ module.exports = function () {
   this.getMeetingOrgReport = async (orgId, meetingId) => {
     return await getSpecificReportOrgData(orgId, meetingId);
   }
+  
+  // Organization Reports Calls
+
+  // Event Management
+  this.getAllEventsByOrganization = async (orgId) => {
+    return await getAllEventsByOrganization(orgId);
+  };
+
+  this.getEventById = async (orgId, eventId) => {
+    return await getEventById(orgId, eventId);
+  };
+
+  this.createEvent = async (orgId, eventData) => {
+    return await createEvent(orgId, eventData);
+  };
+
+  this.updateEvent = async (orgId, eventId, updateData) => {
+    return await updateEvent(orgId, eventId, updateData);
+  };
+
 
   // Organization Recognition Calls
   this.getAllOrgRecognitions = async (orgId) => {
