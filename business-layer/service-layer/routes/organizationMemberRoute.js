@@ -96,7 +96,7 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // send off to backend
-  const result = business.addMemberToOrg(orgId, body);
+  const result = await business.addMemberToOrg(orgId, body);
 
   // check for errors that backend returned
   if (result.error && result.error !== error.noError) {
@@ -151,7 +151,7 @@ router.put(
     }
 
     // send off to backend
-    const result = business.editMemberInOrg(orgId, memberId, body);
+    const result = await business.editMemberInOrg(orgId, memberId, body);
 
     // check for errors that backend returned
     if (result.error && result.error !== error.noError) {
@@ -189,7 +189,7 @@ router.delete(
     }
 
     // send off to backend
-    const result = business.deleteMemberInOrg(orgId, memberId);
+    const result = await business.deleteMemberInOrg(orgId, memberId);
 
     // check for errors that backend returned
     if (result.error && result.error !== error.noError) {

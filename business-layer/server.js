@@ -54,7 +54,8 @@ let memberRouter = require("./service-layer/routes/memberRoute.js");
 let organizationRouter = require("./service-layer/routes/organizationRouter.js");
 let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
 let organizationReportsRouter = require("./service-layer/routes/organizationReportsRouter.js");
-let organizationReportsSettings = require("./service-layer/routes/organizationSettingsRoute.js");
+let organizationSettingsRouter = require("./service-layer/routes/organizationSettingsRoute.js");
+let organizationRecognitionsRouter = require("./service-layer/routes/organizationRecognitionRouter.js")
 
 // use the routes
 app.use("/", serveFrontendRouter);
@@ -65,11 +66,15 @@ app.use("/v1/member", memberRouter);
 app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
-app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
+app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
+app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {
-  res.redirect('/login')
+
+  console.log("redirecting from where? ", req.originalUrl)
+  console.log("Redirecting...")
+  res.redirect('/')
 });
 
 
