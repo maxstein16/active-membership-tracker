@@ -10,7 +10,6 @@ const {
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 
-
 // export to api calls
 module.exports = function () {
   // Member In Org Management
@@ -79,4 +78,11 @@ module.exports = function () {
   // Organization Settings Calls
 
   // Organization Reports Calls
+  this.getAnnualOrgReport = async (orgId, meetingId) => {
+    return await getSpecificReportOrgData(orgId, meetingId);
+  }
+
+  this.getMeetingOrgReport = async (orgId, meetingId) => {
+    return await getSpecificReportOrgData(orgId, meetingId);
+  }
 };
