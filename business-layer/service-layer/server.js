@@ -9,14 +9,15 @@ const path = require("path");
 const app = express();
 
 // Import the database and models
-// const { sequelize } = require("./../data-layer/db.js");
+const { sequelize } = require("./../data-layer/db.js");
 
 // Middleware
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
+// go up 2 layers to move into proper directory
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
 
 // import routes
 let serveFrontendRouter = require("./routes/serveFrontendRoute.js");
@@ -38,52 +39,48 @@ app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
 
-// // Database
-// const ensureDatabaseExists = async () => {
-//   const dbName = "membertracker";
+const ensureDatabaseExists = async () => {
+  const dbName = "membertracker";
 
-//   // Use the default Sequelize connection without specifying a database
-//   const connection = new (require("sequelize"))(
-//     "",
-//     process.env.DB_USERNAME,
-//     process.env.DB_PASSWORD,
-//     {
-//       host: process.env.DB_HOST || "localhost",
-//       dialect: "mariadb",
-//       logging: false,
-//     }
-//   );
+  // Use the default Sequelize connection without specifying a database
+  const connection = new (require("sequelize"))(
+    "",
+    process.env.DB_USERNAME,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST || "localhost",
+      dialect: "mariadb",
+      logging: false,
+    }
+  );
 
-//   try {
-//     // Check if the database exists
-//     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
-//     console.log(`Database '${dbName}' is ready.`);
-//   } catch (err) {
-//     console.error("Error ensuring database exists:", err.message);
-//     throw err;
-//   } finally {
-//     await connection.close(); // Close the temporary connection
-//   }
-// };
+  try {
+    // Check if the database exists
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
+    console.log(`Database '${dbName}' is ready.`);
+  } catch (err) {
+    console.error("Error ensuring database exists:", err.message);
+    throw err;
+  } finally {
+    await connection.close(); // Close the temporary connection
+  }
+};
 
 // Start the server
 const PORT = process.env.PORT || 8080;
-// ensureDatabaseExists()
-//   .then(() => {
-//     return sequelize.authenticate();
-//   })
-//   .then(() => {
-//     console.log("Database connected successfully.");
-//     return sequelize.sync(); // Sync models with the database
-//   })
-//   .then(() => {
-//     app.listen(PORT, () => {
-//       console.log(`App listening on port ${PORT}`);
-//     });
-//   })
-//   .catch((err) => {
-//     console.error("Unable to start the application:", err);
-//   });
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+ensureDatabaseExists()
+  .then(() => {
+    return sequelize.authenticate();
+  })
+  .then(() => {
+    console.log("Database connected successfully.");
+    return sequelize.sync(); // Sync models with the database
+  })
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`App listening on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Unable to start the application:", err);
+  });

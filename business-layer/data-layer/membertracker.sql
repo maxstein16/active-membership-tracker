@@ -75,3 +75,25 @@ CREATE TABLE Recognition (
   PRIMARY KEY (recognition_id),
   FOREIGN KEY (member_id) REFERENCES Member (member_id)
 );
+
+-- Create the MembershipRequirement table
+CREATE TABLE MembershipRequirement (
+  setting_id INT PRIMARY KEY AUTO_INCREMENT,
+  organization_id INT,
+  meeting_type VARCHAR(255),
+  frequency VARCHAR(255),
+  amount_type VARCHAR(255),
+  amount Float,
+  FOREIGN KEY (organization_id) REFERENCES Organization (organization_id)
+);
+
+-- Create the EmailSettings table
+CREATE TABLE EmailSettings (
+  email_setting INT PRIMARY KEY AUTO_INCREMENT,
+  organization_id INT,
+  current_status BOOLEAN,
+  annual_report BOOLEAN,
+  semester_report BOOLEAN,
+  membership_achieved BOOLEAN,
+  FOREIGN KEY (organization_id) REFERENCES Organization (organization_id)
+);

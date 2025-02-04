@@ -12,14 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "@sequelize/mariadb": "^7.0.0-alpha.43",
-    "dompurify": "^3.2.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "jsdom": "^26.0.0",
-    "jsdon": "^0.2.3",
     "mariadb": "^3.4.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.7",
     "sequelize": "^6.37.5"
   },
   "devDependencies": {

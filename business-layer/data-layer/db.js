@@ -116,75 +116,7 @@ const Recognition = sequelize.define("Recognition", {
   recognition_type: DataTypes.INTEGER,
 });
 
-
-const MembershipRequirement = sequelize.define("MembershipRequirement", {
-  setting_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  meeting_type: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  frequency: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  amount_type: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  amount: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-});
-
-const EmailSettings = sequelize.define("EmailSettings", {
-  email_setting: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  current_status: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  annual_report: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-  },
-  semester_report: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-  },
-  membership_achieved: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-  },
-});
-
 // Define associations
-
-EmailSettings.belongsTo(Organization, {
-  foreignKey: "organization_id",
-  as: "organization",
-});
-
-MembershipRequirement.belongsTo(Organization, {
-  foreignKey: "organization_id",
-  as: "organization",
-});
-
 Member.hasMany(Membership, {
   foreignKey: "member_id",
   as: "memberships",
@@ -243,6 +175,4 @@ module.exports = {
   Attendance,
   Recognition,
   Event,
-  MembershipRequirement,
-  EmailSettings,
 };

@@ -1,7 +1,4 @@
-const { getMemberById, updateMemberInDB, createMemberInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
-
-const { getSpecificMemberOrgStats } = require("../memberProcessing"); // processing for members (no org specific)
 
 // export to api calls
 module.exports = function () {
@@ -12,6 +9,7 @@ module.exports = function () {
   };
 
   this.addMemberToOrg = async (orgId, memberData) => {
+    memberData.password = await hashPassword(memberData.password);
     return await addMemberToAnOrganization(orgId, memberData);
   };
 
@@ -21,7 +19,7 @@ module.exports = function () {
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
     return await editMemberInOrganization(orgId, memberId);
-  };
+  }
 
   // Member Calls (not org specific)
   this.getMember = async (memberId) => {
@@ -40,6 +38,30 @@ module.exports = function () {
   };
 
   // Organization Calls
+
+  this.getSpecificOrgData = async (orgId) => {
+    return await getSpecificOrgData(orgId);
+  };
+
+  this.getAllOrganizationData = async () => {
+    return await getAllOrganizationData(orgId);
+
+  };
+
+  this.addOrganization = async (organizationData) => {
+    return await addOrganization(organizationData);
+
+  };
+
+  this.editOrganization = async (orgId, orgDataToUpdate) => {
+    return await editOrganization(orgId, orgDataToUpdate);
+
+  };
+
+  this.deleteOrganization = async (orgId) => {
+    return await deleteOrganization(orgId);
+
+  };
 
   // Organization Settings Calls
 
