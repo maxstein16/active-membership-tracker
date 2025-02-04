@@ -10,74 +10,84 @@ const business = new BusinessLogic();
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
+const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+
 // GET /v1/member/:memberId
-router.get("/:memberId", async function (req, res) {
-  let memberId = req.params.memberId;
+router.get(
+  "/:memberId",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    let memberId = req.params.memberId;
 
-  // sanitize and validate memberId
-  memberId = sanitizer.sanitize(memberId);
-  if (isNaN(memberId)) {
-    res.status(400).json({ error: "Must include a valid member ID" });
-    return;
+    // sanitize and validate memberId
+    memberId = sanitizer.sanitize(memberId);
+    if (isNaN(memberId)) {
+      res.status(400).json({ error: "Must include a valid member ID" });
+      return;
+    }
+
+    // fetch member data from backend
+    const memberData = await business.getMember(memberId);
+
+    if (memberData.error && memberData.error !== error.noError) {
+      res.status(404).json({ error: error.memberCannotBeFoundInDB });
+      return;
+    }
+
+    res.status(200).json({ status: "success", data: memberData.data });
   }
-
-  // fetch member data from backend
-  const memberData = await business.getMember(memberId);
-
-  if (memberData.error && memberData.error !== error.noError) {
-    res.status(404).json({ error: error.memberCannotBeFoundInDB });
-    return;
-  }
-
-  res.status(200).json({ status: "success", data: memberData.data });
-});
+);
 
 // PUT /v1/member/:memberId
-router.put("/:memberId", async function (req, res) {
-  let memberId = req.params.memberId;
-  let body = req.body;
+router.put(
+  "/:memberId",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    let memberId = req.params.memberId;
+    let body = req.body;
 
-  // sanitize and validate memberId
-  memberId = sanitizer.sanitize(memberId);
-  if (isNaN(memberId)) {
-    res.status(400).json({ error: "Must include a valid member ID" });
-    return;
+    // sanitize and validate memberId
+    memberId = sanitizer.sanitize(memberId);
+    if (isNaN(memberId)) {
+      res.status(400).json({ error: "Must include a valid member ID" });
+      return;
+    }
+
+    // check if at least one valid field is provided for update
+    const allowedFields = [
+      "personal_email",
+      "phone_number",
+      "gender",
+      "race",
+      "tshirt_size",
+      "major",
+      "graduation_date",
+    ];
+    const hasValidFields = Object.keys(body).some((key) =>
+      allowedFields.includes(key)
+    );
+
+    if (!hasValidFields) {
+      res.status(400).json({
+        error: error.mustIncludeValidFieldAddMember,
+      });
+      return;
+    }
+
+    // send data to backend for update
+    const updateResult = await business.updateMember(memberId, body);
+
+    if (updateResult.error && updateResult.error !== error.noError) {
+      res.status(404).json({ error: error.memberCannotBeFoundInDB });
+      return;
+    }
+
+    res.status(200).json({ status: "success", data: updateResult.data });
   }
-
-  // check if at least one valid field is provided for update
-  const allowedFields = [
-    "personal_email",
-    "phone_number",
-    "gender",
-    "race",
-    "tshirt_size",
-    "major",
-    "graduation_date",
-  ];
-  const hasValidFields = Object.keys(body).some((key) =>
-    allowedFields.includes(key)
-  );
-
-  if (!hasValidFields) {
-    res.status(400).json({
-      error: error.mustIncludeValidFieldAddMember
-    });
-    return;
-  }
-
-  // send data to backend for update
-  const updateResult = await business.updateMember(memberId, body);
-
-  if (updateResult.error && updateResult.error !== error.noError) {
-    res.status(404).json({ error: error.memberCannotBeFoundInDB });
-    return;
-  }
-
-  res.status(200).json({ status: "success", data: updateResult.data });
-});
+);
 
 // POST /v1/member
-router.post("/", async function (req, res) {
+router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   let body = req.body;
 
   // validate required fields
@@ -99,7 +109,7 @@ router.post("/", async function (req, res) {
 
   if (missingFields.length > 0) {
     res.status(400).json({
-      error: error.mustIncludeValidFieldAddMember
+      error: error.mustIncludeValidFieldAddMember,
     });
     return;
   }
@@ -119,38 +129,44 @@ router.post("/", async function (req, res) {
  * GET /v1/member/{memberId}/stats?orgId={orgId}
  * Retrieves member statistics for a specific organization.
  */
-router.get("/:memberId/stats", async function (req, res) {
-  // Sanitize input
-  let memberId = sanitizer.sanitize(req.params.memberId);
-  let orgId = sanitizer.sanitize(req.query.orgId);
+router.get(
+  "/:memberId/stats",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    // Sanitize input
+    let memberId = sanitizer.sanitize(req.params.memberId);
+    let orgId = sanitizer.sanitize(req.query.orgId);
 
-  // Validate inputs
-  if (!memberId || isNaN(memberId)) {
-    return res
-      .status(400)
-      .json({ error: "Must include a valid member ID in your call" });
-  }
-  if (!orgId || isNaN(orgId)) {
-    return res
-      .status(400)
-      .json({ error: "Must include a valid org ID in your call" });
-  }
+    // Validate inputs
+    if (!memberId || isNaN(memberId)) {
+      return res
+        .status(400)
+        .json({ error: "Must include a valid member ID in your call" });
+    }
+    if (!orgId || isNaN(orgId)) {
+      return res
+        .status(400)
+        .json({ error: "Must include a valid org ID in your call" });
+    }
 
-  // Fetch member stats for the organization
-  const memberStats = await business.getMemberStats(memberId, orgId);
+    // Fetch member stats for the organization
+    const memberStats = await business.getMemberStats(memberId, orgId);
 
-  // Handle errors from backend
-  if (!memberStats) {
-    return res
-      .status(404)
-      .json({ error: `member with id of ${memberId} not found` });
-  }
-  if (memberStats.error === "org_not_found") {
-    return res.status(404).json({ error: `org with id of ${orgId} not found` });
-  }
+    // Handle errors from backend
+    if (!memberStats) {
+      return res
+        .status(404)
+        .json({ error: `member with id of ${memberId} not found` });
+    }
+    if (memberStats.error === "org_not_found") {
+      return res
+        .status(404)
+        .json({ error: `org with id of ${orgId} not found` });
+    }
 
-  // Return successful response
-  res.status(200).json({ status: "success", data: memberStats });
-});
+    // Return successful response
+    res.status(200).json({ status: "success", data: memberStats });
+  }
+);
 
 module.exports = router;
