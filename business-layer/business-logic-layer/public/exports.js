@@ -1,12 +1,13 @@
 const {
-  getSpecificMemberWithOrgData,
-  addMemberToAnOrganization,
-  editMemberInOrganization,
+  getSpecificMemberWithOrgData, 
+  addMemberToAnOrganization, 
+  editMemberInOrganization, 
   updateMemberAttendanceInOrganization, 
   getMembersInOrganization, 
   getMembershipRoleInfoInOrganization, 
-  updateMembershipRoleInfoInOrganization
+  updateMembershipRoleInfoInOrganization 
 } = require("../organizationMemberProcessing");
+const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 
@@ -29,25 +30,23 @@ module.exports = function () {
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
     return await editMemberInOrganization(orgId, memberId);
-  };
-
-  this.getMembershipRoleInOrg = async (roleId) => {
-    return await getMembershipRoleInfoInOrganization(roleId);
-  }
-
-  this.editMembershipRoleInOrg = async (memberId) => {
-    return await updateMembershipRoleInfoInOrganization(memberId);
-  }
-
-  this.getMembersInOrg = async (orgId) => {
-    return await getMembersInOrganization(orgId);
-  }
-
-  this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {
-    return await updateMemberAttendanceInOrganization(orgId, memberId, attendanceData);
   }
 
   // Member Calls (not org specific)
+  this.getMember = async (memberId) => {
+    return await getMemberById(memberId);
+  }
+
+  this.updateMember = async (memberId, memberData) => {
+    return await updateMemberInDB(memberId, memberData);
+  }
+
+  this.createMember = async (memberData) => {
+    return await createMemberInDB(memberData);
+  }
+  this.getSpecificMemberOrgStats = async (memberId, orgId) => {
+    return await getSpecificMemberOrgStats(memberId, orgId);
+  };
 
   // Organization Calls
 
@@ -76,6 +75,21 @@ module.exports = function () {
   };
 
   // Organization Settings Calls
+  this.getOrganizationSettings = async (orgId) => {
+    return await getOrganizationSettings(orgId);
+  };
+
+  this.editOrganizationMembershipRequirements = async (orgId, settingDataToUpdate) => {
+    return await editOrganizationMembershipRequirements(orgId, settingDataToUpdate);
+  }
+
+  this.editOrganizationEmailSettings = async (orgId, emailDataToUpdate) => {
+    return await editOrganizationEmailSettings(orgId, emailDataToUpdate);
+  }
+
+  this.deleteOrganizationMembershipRequirement = async (orgId, membershipId) => {
+    return await deleteOrganizationMembershipRequirement(orgId, membershipId);
+  }
 
   // Organization Reports Calls
   this.getAnnualOrgReport = async (orgId, meetingId) => {
