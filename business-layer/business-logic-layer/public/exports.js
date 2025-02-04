@@ -1,4 +1,5 @@
 const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
+const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -64,6 +65,21 @@ module.exports = function () {
   };
 
   // Organization Settings Calls
+  this.getOrganizationSettings = async (orgId) => {
+    return await getOrganizationSettings(orgId);
+  };
+
+  this.editOrganizationMembershipRequirements = async (orgId, settingDataToUpdate) => {
+    return await editOrganizationMembershipRequirements(orgId, settingDataToUpdate);
+  }
+
+  this.editOrganizationEmailSettings = async (orgId, emailDataToUpdate) => {
+    return await editOrganizationEmailSettings(orgId, emailDataToUpdate);
+  }
+
+  this.deleteOrganizationMembershipRequirement = async (orgId, membershipId) => {
+    return await deleteOrganizationMembershipRequirement(orgId, membershipId);
+  }
 
   // Organization Reports Calls
 };
