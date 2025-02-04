@@ -1,4 +1,4 @@
-import { Organization, MembershipRequirement, EmailSetting } from "../db";
+import { Organization, MembershipRequirement, EmailSettings } from "../db";
 
 /**
  * Get membership requirements for an organization
@@ -13,19 +13,9 @@ const getMembershipRequirements = async (orgId, res) => {
 
         if (requirements.length === 0) {
             console.error(`Organization with ID ${orgId} not found`);
-            return res.status(404).json({ error: `Organization with ID ${orgId} not found` });
         }
-
-        return res.status(200).json({
-            status: "success",
-            data: {
-                organization_id: orgId,
-                active_membership_requirements: requirements,
-            },
-        });
     } catch (err) {
         console.error("Error fetching membership requirements:", err);
-        return res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -41,10 +31,6 @@ const updateMembershipRequirements = async (orgId, updates, res) => {
 
         if (!setting_id || (!meeting_type && !frequency && !amount_type && !amount)) {
             console.error("Must include at least a setting_id and one valid field to update: meeting_type, frequency, amount_type, amount");
-            return res.status(400).json({
-                error: "Invalid input",
-                message: "Must include at least a setting_id and one valid field to update: meeting_type, frequency, amount_type, amount"
-            });
         }
 
         const requirement = await MembershipRequirement.findOne({
@@ -53,7 +39,6 @@ const updateMembershipRequirements = async (orgId, updates, res) => {
 
         if (!requirement) {
             console.error(`Organization setting with ID ${setting_id} not found`);
-            return res.status(404).json({ error: `Organization setting with ID ${setting_id} not found` });
         }
 
         const updatedRequirement = await requirement.update({
@@ -63,13 +48,8 @@ const updateMembershipRequirements = async (orgId, updates, res) => {
             amount: amount || requirement.amount,
         });
 
-        return res.status(200).json({
-            status: "success",
-            data: updatedRequirement,
-        });
     } catch (err) {
         console.error("Error updating membership requirement:", err);
-        return res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -83,7 +63,6 @@ const deleteMembershipRequirement = async (orgId, id, res) => {
     try {
         if (!id) {
             console.error("Must include an id as a query param");
-            return res.status(400).json({ error: "Invalid input", message: "Must include an id as a query param" });
         }
 
         const organization = await Organization.findOne({
@@ -98,7 +77,6 @@ const deleteMembershipRequirement = async (orgId, id, res) => {
 
         if (!organization) {
             console.error(`Organization with ID ${orgId} not found`);
-            return res.status(404).json({ error: `Organization with ID ${orgId} not found` });
         }
 
         const requirement = await MembershipRequirement.findOne({
@@ -107,7 +85,6 @@ const deleteMembershipRequirement = async (orgId, id, res) => {
 
         if (!requirement) {
             console.error(`Membership requirement with ID ${id} not found`);
-            return res.status(404).json({ error: `Membership requirement with ID ${id} not found` });
         }
 
         await requirement.destroy();
@@ -117,19 +94,10 @@ const deleteMembershipRequirement = async (orgId, id, res) => {
             where: { organization_id: orgId },
         });
 
-        return res.status(200).json({
-            status: "success",
-            data: {
-                organization_id: organization.organization_id,
-                organization_name: organization.organization_name,
-                active_membership_requirements: updatedRequirements,
-            },
-        });
+        
     } catch (err) {
         console.error("Error deleting membership requirement:", err);
-        return res.status(500).json({ error: "Internal server error" });
-    }
-};
+}};
 
 /**
  * Update email settings for an organization
@@ -143,19 +111,15 @@ const updateEmailSettings = async (orgId, updates, res) => {
 
         if (!current_status && !annual_report && !semester_report && !membership_achieved) {
             console.error("Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved");
-            return res.status(400).json({
-                error: "Invalid input",
-                message: "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved"
-            });
         }
 
-        const settings = await EmailSetting.findOne({
+        const settings = await EmailSettings.findOne({
             where: { organization_id: orgId },
         });
 
         if (!settings) {
             console.error(`Organization with ID ${orgId} not found`);
-            return res.status(404).json({ error: `Organization with ID ${orgId} not found` });
+            
         }
 
         const updatedSettings = await settings.update({
@@ -164,14 +128,8 @@ const updateEmailSettings = async (orgId, updates, res) => {
             semester_report: semester_report || settings.semester_report,
             membership_achieved: membership_achieved || settings.membership_achieved,
         });
-
-        return res.status(200).json({
-            status: "success",
-            data: updatedSettings,
-        });
     } catch (err) {
         console.error("Error updating email settings:", err);
-        return res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -180,4 +138,34 @@ const updateEmailSettings = async (orgId, updates, res) => {
  * @param {number} orgId - The ID of the organization
  * @returns {Promise<Object>} The settings of the organization
  */
-const getOrganizationSettings = async
+const getOrganizationSettings = async (orgId, res) => {
+    try {
+        const organization = await Organization.findOne({
+            where: { organization_id: orgId },
+            include: [
+                {
+                    model: MembershipRequirement,
+                    as: "membership_requirements",
+                },
+                {
+                    model: EmailSettings,
+                    as: "email_settings",
+                },
+            ],
+        });
+         if (!organization) {
+            console.error(`Organization with ID ${orgId} not found`);
+        }
+    } catch (err) {
+        console.error("Error fetching organization settings:", err);
+    }
+};
+
+// Export all functions
+module.exports = {
+    getMembershipRequirements,
+    updateMembershipRequirements,
+    deleteMembershipRequirement,
+    updateEmailSettings,
+    getOrganizationSettings,
+};

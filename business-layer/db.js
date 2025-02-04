@@ -28,10 +28,10 @@ const Organization = sequelize.define("Organization", {
   },
   organization_description: DataTypes.STRING,
   organization_color: DataTypes.STRING,
-  organization_abbreviation: {
+  org_abbreviation: {
     type: DataTypes.STRING(10),
   },
-  organization_threshold: {
+  active_membership_threshold: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
@@ -67,34 +67,14 @@ const Membership = sequelize.define("Membership", {
     primaryKey: true,
     autoIncrement: true,
   },
-  member_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Member",
-      key: "member_id",
-    },
-  },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Organization",
-      key: "organization_id",
-    },
-  },
-  membership_role: DataTypes.INTEGER, // FIXED naming
-  membership_points: {
+  org_role: DataTypes.INTEGER,
+  member_points: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
   active_member: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  },
-  active_semesters: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
   },
 });
 
@@ -104,26 +84,7 @@ const Attendance = sequelize.define("Attendance", {
     primaryKey: true,
     autoIncrement: true,
   },
-  member_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Member",
-      key: "member_id",
-    },
-  },
-  event_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Event",
-      key: "event_id",
-    },
-  },
-  check_in: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW, // Replaced attendance_status
-  },
+  attendance_status: DataTypes.INTEGER,
 });
 
 const Event = sequelize.define("Event", {
@@ -136,11 +97,7 @@ const Event = sequelize.define("Event", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  event_start: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  event_end: {
+  event_date: {
     type: DataTypes.DATE,
     allowNull: false,
   },
@@ -149,8 +106,19 @@ const Event = sequelize.define("Event", {
   event_type: DataTypes.STRING,
 });
 
+const Recognition = sequelize.define("Recognition", {
+  recognition_id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  recognition_year: DataTypes.INTEGER,
+  recognition_type: DataTypes.INTEGER,
+});
+
+
 const MembershipRequirement = sequelize.define("MembershipRequirement", {
-  requirement_id: {
+  setting_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -158,10 +126,6 @@ const MembershipRequirement = sequelize.define("MembershipRequirement", {
   organization_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Organization",
-      key: "organization_id",
-    },
   },
   meeting_type: {
     type: DataTypes.STRING,
@@ -172,7 +136,7 @@ const MembershipRequirement = sequelize.define("MembershipRequirement", {
     allowNull: false,
   },
   amount_type: {
-    type: DataTypes.STRING, // "points" or "percentage"
+    type: DataTypes.STRING,
     allowNull: false,
   },
   amount: {
@@ -181,8 +145,8 @@ const MembershipRequirement = sequelize.define("MembershipRequirement", {
   },
 });
 
-const EmailSetting = sequelize.define("EmailSetting", {
-  setting_id: {
+const EmailSettings = sequelize.define("EmailSettings", {
+  email_setting: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -190,13 +154,9 @@ const EmailSetting = sequelize.define("EmailSetting", {
   organization_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Organization",
-      key: "organization_id",
-    },
   },
   current_status: {
-    type: DataTypes.BOOLEAN,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   annual_report: {
@@ -214,40 +174,65 @@ const EmailSetting = sequelize.define("EmailSetting", {
 });
 
 // Define associations
-Organization.hasMany(Membership, {
-  foreignKey: "organization_id",
-  as: "memberships",
-});
-Membership.belongsTo(Organization, {
+
+EmailSettings.belongsTo(Organization, {
   foreignKey: "organization_id",
   as: "organization",
 });
 
-Member.hasMany(Membership, { foreignKey: "member_id", as: "memberships" });
-Membership.belongsTo(Member, { foreignKey: "member_id", as: "member" });
-
-Member.hasMany(Attendance, { foreignKey: "member_id", as: "attendances" });
-Attendance.belongsTo(Member, { foreignKey: "member_id", as: "member" });
-
-Event.hasMany(Attendance, { foreignKey: "event_id", as: "attendances" });
-Attendance.belongsTo(Event, { foreignKey: "event_id", as: "event" });
-
-Organization.hasMany(MembershipRequirement, {
-  foreignKey: "organization_id",
-  as: "membership_requirements",
-});
 MembershipRequirement.belongsTo(Organization, {
   foreignKey: "organization_id",
   as: "organization",
 });
 
-Organization.hasMany(EmailSetting, {
-  foreignKey: "organization_id",
-  as: "email_settings",
+Member.hasMany(Membership, {
+  foreignKey: "member_id",
+  as: "memberships",
 });
-EmailSetting.belongsTo(Organization, {
+
+Membership.belongsTo(Member, {
+  foreignKey: "member_id",
+  as: "member",
+});
+
+Organization.hasMany(Membership, {
+  foreignKey: "organization_id",
+  as: "memberships",
+});
+
+Membership.belongsTo(Organization, {
   foreignKey: "organization_id",
   as: "organization",
+});
+
+Member.hasMany(Attendance, {
+  foreignKey: "member_id",
+  as: "attendances",
+});
+
+Attendance.belongsTo(Member, {
+  foreignKey: "member_id",
+  as: "member",
+});
+
+Event.hasMany(Attendance, {
+  foreignKey: "event_id",
+  as: "attendances",
+});
+
+Attendance.belongsTo(Event, {
+  foreignKey: "event_id",
+  as: "event",
+});
+
+Member.hasMany(Recognition, {
+  foreignKey: "member_id",
+  as: "recognitions",
+});
+
+Recognition.belongsTo(Member, {
+  foreignKey: "member_id",
+  as: "member",
 });
 
 module.exports = {
@@ -256,7 +241,8 @@ module.exports = {
   Member,
   Membership,
   Attendance,
+  Recognition,
   Event,
   MembershipRequirement,
-  EmailSetting,
+  EmailSettings,
 };
