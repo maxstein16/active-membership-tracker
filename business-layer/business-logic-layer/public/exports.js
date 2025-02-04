@@ -7,7 +7,7 @@ const {
   getMembershipRoleInfoInOrganization, 
   updateMembershipRoleInfoInOrganization
 } = require("../organizationMemberProcessing");
-
+const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 
 
@@ -51,6 +51,30 @@ module.exports = function () {
   // Member Calls (not org specific)
 
   // Organization Calls
+
+  this.getSpecificOrgData = async (orgId) => {
+    return await getSpecificOrgData(orgId);
+  };
+
+  this.getAllOrganizationData = async () => {
+    return await getAllOrganizationData(orgId);
+
+  };
+
+  this.addOrganization = async (organizationData) => {
+    return await addOrganization(organizationData);
+
+  };
+
+  this.editOrganization = async (orgId, orgDataToUpdate) => {
+    return await editOrganization(orgId, orgDataToUpdate);
+
+  };
+
+  this.deleteOrganization = async (orgId) => {
+    return await deleteOrganization(orgId);
+
+  };
 
   // Organization Settings Calls
 

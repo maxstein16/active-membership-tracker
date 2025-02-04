@@ -1,15 +1,5 @@
 let express = require("express");
-const router = express.Router({ mergeParams: true });
-
-const Error = require("../../business-logic-layer/public/errors.js");
-const error = new Error();
-
-const BusinessLogic = require("../../business-logic-layer/public/exports.js");
-const business = new BusinessLogic();
-
-const Sanatizer = require("../../business-logic-layer/public/sanitize.js");
-const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
-const sanitizer = new Sanatizer();
+const router = express.Router();
 
 /*
 

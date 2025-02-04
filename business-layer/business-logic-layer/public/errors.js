@@ -23,6 +23,9 @@ module.exports = function () {
   // Member Calls (not org specific)
 
   // Organization Calls
+  this.mustHaveAllFieldsAddOrg = "Must include feilds: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold";
+  this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid feild to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold";
+  
 
   // Organization Settings Calls
   this.settingIdMustBeInteger = "Setting ID must be an integer";

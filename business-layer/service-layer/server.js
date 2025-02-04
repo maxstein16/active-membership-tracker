@@ -9,24 +9,25 @@ const path = require("path");
 const app = express();
 
 // Import the database and models
-const { sequelize } = require("./db.js");
+const { sequelize } = require("./../data-layer/db.js");
 
 // Middleware
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-app.use(express.static(path.join(__dirname, "../frontend-layer/build")));
+// go up 2 layers to move into proper directory
+app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
 
 // import routes
-let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
+let serveFrontendRouter = require("./routes/serveFrontendRoute.js");
 
-let testRouter = require("./service-layer/routes/testRoute.js");
-let memberRouter = require("./service-layer/routes/memberRoute.js");
-let organizationRouter = require("./service-layer/routes/organizationRouter.js");
-let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
-let organizationReportsRouter = require("./service-layer/routes/organizationReportsRouter.js");
-let organizationReportsSettings = require("./service-layer/routes/organizationSettingsRoute.js");
+let testRouter = require("./routes/testRoute.js");
+let memberRouter = require("./routes/memberRoute.js");
+let organizationRouter = require("./routes/organizationRouter.js");
+let organizationMemberRouter = require("./routes/organizationMemberRoute.js");
+let organizationReportsRouter = require("./routes/organizationReportsRouter.js");
+let organizationReportsSettings = require("./routes/organizationSettingsRoute.js");
 
 // use the routes
 app.use("/", serveFrontendRouter);
