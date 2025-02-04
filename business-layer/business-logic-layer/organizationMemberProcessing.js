@@ -139,7 +139,7 @@ async function getMembershipRoleInfoInOrganization(orgId, memberId) {
   return {error: error.noError, data: "data-here"}
 }
 
-async function updateMembershipRoleInfoInOrganization(memberId) {
+async function updateMembershipRoleInfoInOrganization(orgId, memberId) {
   // TODO: call db
 
   /*

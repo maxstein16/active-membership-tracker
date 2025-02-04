@@ -14,16 +14,10 @@ const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
 /* https://api.rit.edu/v1/organization/{orgId} */
 
-// GET /v1/organization/
-router.get("/", isAuthorizedHasSessionForAPI, function (req, res) {
-  res.status(400).json({
-    error: "Must include an organization id in your call",
-    org: req.params.orgId,
-  });
-});
 
 // GET /v1/organization/{orgId}
-router.get("/:orgId", isAuthorizedHasSessionForAPI, async function (req, res) {
+router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
+
   //sanitize
   let orgId = req.params.orgId;
 
@@ -87,7 +81,7 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
 });
 
 //PUT /v1/organization/{orgId}
-router.put("/:orgId", isAuthorizedHasSessionForAPI, async function (req, res) {
+router.put("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   //sanitize
   let orgId = req.params.orgId;
   let body = req.body;
