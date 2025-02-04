@@ -21,8 +21,29 @@ const { sequelize } = require("./db.js");
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(logger("dev"));
-// go up 2 layers to move into proper directory
-app.use(express.static(path.join(__dirname, "../../frontend-layer/build")));
+app.use(express.json());
+app.enable("trust proxy");
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index : false }));
+
+// Session Middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: { maxAge: MIN_30, httpOnly: true, secure: false }, // secure: true -> for production
+  })
+);
+
+// CORS policy middleware
+app.use(
+  cors({
+    origin: 'true',
+    credentials: true,
+  })
+);
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
@@ -47,10 +68,12 @@ app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationReportsSettings);
 
 // Handle routes that do not exist
-app.get("*", (res, req) => {
+app.get("*", (req, res) => {
   res.redirect('/login')
 });
 
+
+// Database
 const ensureDatabaseExists = async () => {
   const dbName = "membertracker";
 
@@ -96,3 +119,4 @@ ensureDatabaseExists()
   .catch((err) => {
     console.error("Unable to start the application:", err);
   });
+

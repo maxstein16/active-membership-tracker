@@ -32,9 +32,4 @@ node server.js
 
 LINK: http://localhost:8080/ 
 
-**Are you getting a 'no session' error?** \
-For now...this will change when the frontend works. (then you'll need to login)
-Go to: http://localhost:8080/v1/session/login 
-
-
 Our server gives our React based front end

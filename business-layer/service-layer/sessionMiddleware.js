@@ -7,7 +7,6 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
 }
 
 function isAuthorizedHasSessionForWebsite(req, res, next) {
-    console.log("here2", req.session.user)
     if (req.session.user) {
         next()
     } else {
