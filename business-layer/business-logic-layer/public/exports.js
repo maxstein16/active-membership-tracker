@@ -1,5 +1,16 @@
 const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
 const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
+const {
+  getSpecificMemberWithOrgData,
+  addMemberToAnOrganization,
+  editMemberInOrganization,
+  updateMemberAttendanceInOrganization, 
+  getMembersInOrganization, 
+  getMembershipRoleInfoInOrganization, 
+  updateMembershipRoleInfoInOrganization
+} = require("../organizationMemberProcessing");
+const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
+const hashPassword = require("./hash");
 
 // export to api calls
 module.exports = function () {
@@ -82,4 +93,11 @@ module.exports = function () {
   }
 
   // Organization Reports Calls
+  this.getAnnualOrgReport = async (orgId, meetingId) => {
+    return await getSpecificReportOrgData(orgId, meetingId);
+  }
+
+  this.getMeetingOrgReport = async (orgId, meetingId) => {
+    return await getSpecificReportOrgData(orgId, meetingId);
+  }
 };
