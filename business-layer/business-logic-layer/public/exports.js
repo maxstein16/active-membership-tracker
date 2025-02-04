@@ -1,14 +1,13 @@
-const { getSpecificMemberWithOrgData, addMemberToAnOrganization, editMemberInOrganization } = require("../organizationMemberProcessing");
-const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const {
-  getSpecificMemberWithOrgData,
-  addMemberToAnOrganization,
-  editMemberInOrganization,
+  getSpecificMemberWithOrgData, 
+  addMemberToAnOrganization, 
+  editMemberInOrganization, 
   updateMemberAttendanceInOrganization, 
   getMembersInOrganization, 
   getMembershipRoleInfoInOrganization, 
-  updateMembershipRoleInfoInOrganization
+  updateMembershipRoleInfoInOrganization 
 } = require("../organizationMemberProcessing");
+const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 

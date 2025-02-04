@@ -22,12 +22,6 @@ router.get("/", function (req, res) {
   });
 });
 
-const BusinessLogic = require("../../business-logic-layer/public/exports.js");
-const business = new BusinessLogic();
-
-const Sanatizer = require("../../business-logic-layer/public/sanitize.js");
-const sanitizer = new Sanatizer();
-
 // GET /v1/organization/{orgId}
 router.get("/:orgId", async function (req, res) {
   //sanitize
