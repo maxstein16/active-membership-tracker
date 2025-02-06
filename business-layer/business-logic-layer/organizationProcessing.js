@@ -1,39 +1,53 @@
 const Error = require("./public/errors.js");
 const error = new Error();
 
-async function getSpecificOrgData( orgId ) {
-    
-    // TODO: call db
-  
-    /*
-
-    Data should be displayed as:
-
-      {
-        "member_id": 1,
-        "member_name": "Jane Doe",
-        "member_email": "jd1234@rit.edu",
-        "member_personal_email": "jane.doe@gmail.com",
-        "member_phone_number": "555-0123",
-        "member_graduation_date": "2025-05-15",
-        "member_tshirt_size": "M",
-        "member_major": "Computer Science",
-        "member_gender": "F",
-        "member_race": "Asian",
-        "membership": {
-          "membership_id": 101,
-          "organization_id": 1,
-          "role": 2
-        }
-      }
-
-    */
-    return {error: error.noError, data: "data-here"}
+async function getSpecificOrgData(orgId) {
+  // check that the params are valid
+  // example: organization id must be an integer)
+  // Validate that orgId is an integer
+  if (!Number.isInteger(orgId)) {
+    return { error: error.invalidParameter, data: null };
   }
 
+  // get the data from the data layer method
+  const orgData = await getOrganizationById(orgId);
+  // check the return to make sure it exists
 
-async function addOrganization( orgId, orgData ) {
-    
+  // if it does not:
+  // return an appropriate error from errors.js
+  // if an appropriate error doesn't exist in errors.js, add a new one
+  if (!orgData) {
+    return { error: error.notFound, data: null };
+  }
+
+  // if it does
+  // return error.noError from errors.js as well as the data listed in the api call documentation
+
+  return { error: error.noError, data: orgData };
+}
+/*
+  Data should be displayed as:
+
+    {
+      "member_id": 1,
+      "member_name": "Jane Doe",
+      "member_email": "jd1234@rit.edu",
+      "member_personal_email": "jane.doe@gmail.com",
+      "member_phone_number": "555-0123",
+      "member_graduation_date": "2025-05-15",
+      "member_tshirt_size": "M",
+      "member_major": "Computer Science",
+      "member_gender": "F",
+      "member_race": "Asian",
+      "membership": {
+        "membership_id": 101,
+        "organization_id": 1,
+        "role": 2
+      }
+    }
+  */
+
+async function addOrganization(orgId, orgData) {
   // TODO: call db
 
   /*
@@ -62,12 +76,10 @@ async function addOrganization( orgId, orgData ) {
     }
 
   */
-  return {error: error.noError, data: "data-here"}
+  return { error: error.noError, data: "data-here" };
 }
 
-
-async function editOrganization( orgId, orgDataToUpdate ) {
-    
+async function editOrganization(orgId, orgDataToUpdate) {
   // TODO: call db
 
   /*
@@ -96,12 +108,10 @@ async function editOrganization( orgId, orgDataToUpdate ) {
     }
 
   */
-  return {error: error.noError, data: "data-here"}
+  return { error: error.noError, data: "data-here" };
 }
 
-
-async function deleteOrganization( orgId ) {
-    
+async function deleteOrganization(orgId) {
   // TODO: call db
 
   /*
@@ -118,12 +128,10 @@ async function deleteOrganization( orgId ) {
     }
 
   */
-  return {error: error.noError, data: "data-here"}
+  return { error: error.noError, data: "data-here" };
 }
-  
-  
-async function getAllOrganizationData( ) {
-    
+
+async function getAllOrganizationData() {
   // TODO: call db
 
   /*
@@ -140,15 +148,13 @@ async function getAllOrganizationData( ) {
     }
 
   */
-  return {error: error.noError, data: "data-here"}
+  return { error: error.noError, data: "data-here" };
 }
 
-
-  module.exports = {
-    getSpecificOrgData,
-    addOrganization,
-    editOrganization,
-    deleteOrganization,
-    getAllOrganizationData
-  };
-  
+module.exports = {
+  getSpecificOrgData,
+  addOrganization,
+  editOrganization,
+  deleteOrganization,
+  getAllOrganizationData,
+};
