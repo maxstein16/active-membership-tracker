@@ -29,7 +29,7 @@ router.get("/annual-report", function (req, res) {
     res.status(400).json({ error: error.organizationIdMustBeInteger });
     return;
   }
-  
+  orgId = sanitizer.sanitize(orgId);
 
   res.status(200).json({ message: "Hello Organization Reports Route", org: req.params.orgId });
 });
@@ -45,9 +45,11 @@ router.get("/meeting-report", function (req, res) {
     return;
   }
   if (isNaN(meetingId)) {
-    res.status(400).json({ error: error.meetingIdMustBeInteger });
+    res.status(500).json({ error: error.meetingIdMustBeInteger });
     return;
   }
+  orgId = sanitizer.sanitize(orgId);
+  meetingId = sanitizer.sanitize(meetingId);
 
   res.status(200).json({ message: "Hello Organization Reports Route", org: req.params.orgId });
 });
