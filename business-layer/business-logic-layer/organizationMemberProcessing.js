@@ -1,230 +1,251 @@
+const { Member, Membership, Organization } = require("../db.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
-async function getSpecificMemberWithOrgData( orgId, memberId ) {
-    
-    // TODO: call db
-  
-    /*
+async function getSpecificMemberWithOrgData(orgId, memberId) {
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
+    if (isNaN(memberId)) {
+      return { error: error.memberIdMustBeInteger, data: null };
+    }
 
-    Data should be displayed as:
+    // get the data from data-layer
+    const member = await Member.findOne({ where: { member_id: memberId } });
 
-      {
-        "member_id": 1,
-        "member_name": "Jane Doe",
-        "member_email": "jd1234@rit.edu",
-        "member_personal_email": "jane.doe@gmail.com",
-        "member_phone_number": "555-0123",
-        "member_graduation_date": "2025-05-15",
-        "member_tshirt_size": "M",
-        "member_major": "Computer Science",
-        "member_gender": "F",
-        "member_race": "Asian",
-        "membership": {
-          "membership_id": 101,
-          "organization_id": 1,
-          "role": 2
-        }
-      }
+    // if the result is empty return error
+    if (!member) {
+      return { error: error.memberNotFound, data: null };
+    }
 
-    */
-    return {error: error.noError, data: "data-here"}
+    // get membership from database
+    const membership = await Membership.findOne({
+      where: { organization_id: orgId, member_id: memberId },
+    });
+
+    // if it doesn't exist return error
+    if (!membership) {
+      return { error: error.memberNotFoundInOrg, data: null };
+    }
+
+    return {
+      error: error.noError,
+      data: { ...member, membership: membership },
+    };
+  } catch (err) {
+    console.error("Error fetching specific member + membership:", err);
+    return { error: error.somethingWentWrong, data: null };
   }
+}
 
+async function addMemberToAnOrganization(orgId, memberData) {
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
+    if (isNaN(memberData.member_id)) {
+      return { error: error.memberIdMustBeInteger, data: null };
+    }
+    if (isNaN(memberData.role)) {
+      return { error: error.roleMustBeAnInteger, data: null };
+    }
 
-async function addMemberToAnOrganization( orgId, memberData ) {
-    
-  // TODO: call db
+    // does org exist?
+    const organization = await Organization.findOne({
+      where: { organization_id: orgId },
+    });
+    if (!organization) {
+      return { error: error.orgNotFound, data: null };
+    }
 
-  /*
+    // get the data from data-layer
+    const membership = await Membership.create({
+      ...memberData,
+      organization_id: orgId,
+    });
 
-  Data should be displayed as:
+    // if the result is empty return error
+    if (!membership) {
+      return { error: error.couldNotCreateMembership, data: null };
+    }
 
-    {
-      "member": {
-        "member_id": 2,
-        "member_name": "John Smith",
-        "member_email": "js5678@rit.edu",
-        "member_personal_email": "john.smith@gmail.com",
-        "member_phone_number": "555-0124",
-        "member_graduation_date": "2024-12-15",
-        "member_tshirt_size": "L",
-        "member_major": "Software Engineering",
-        "member_gender": "M",
-        "member_race": "Caucasian"
+    return {
+      error: error.noError,
+      data: membership,
+    };
+  } catch (err) {
+    console.error("Error adding specific member to organization:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
+}
+
+async function editMemberInOrganization(orgId, memberId, memberDataToUpdate) {
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
+    if (isNaN(memberId)) {
+      return { error: error.memberIdMustBeInteger, data: null };
+    }
+    if (isNaN(memberDataToUpdate.role)) {
+      return { error: error.roleMustBeAnInteger, data: null };
+    }
+
+    // get the data from data-layer
+    const [updatedRows] = await Membership.update(memberDataToUpdate, {
+      where: {
+        organization_id: orgId,
+        member_id: memberId,
       },
-      "membership": {
-        "membership_id": 102,
-        "organization_id": 1,
-        "member_id": 2,
-        "role": 0
-      }
+    });
+
+    // if the result is empty return error
+    if (updatedRows == 0) {
+      return { error: error.membershipNotFound, data: null };
     }
 
-  */
-  return {error: error.noError, data: "data-here"}
+    return {
+      error: error.noError,
+      data: { update: "success" },
+    };
+  } catch (err) {
+    console.error("Error editing membership:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
+async function deleteMemberInOrganization(orgId, memberId) {
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
+    if (isNaN(memberId)) {
+      return { error: error.memberIdMustBeInteger, data: null };
+    }
 
-async function editMemberInOrganization( orgId, memberId, memberDataToUpdate ) {
-    
-  // TODO: call db
-
-  /*
-
-  Data should be displayed as:
-
-    {
-      "member": {
-        "member_id": 2,
-        "member_name": "John Smith",
-        "member_email": "js5678@rit.edu",
-        "member_personal_email": "john.smith@gmail.com",
-        "member_phone_number": "555-0124",
-        "member_graduation_date": "2024-12-15",
-        "member_tshirt_size": "L",
-        "member_major": "Software Engineering",
-        "member_gender": "M",
-        "member_race": "Caucasian"
+    // get the data from data-layer
+    await Membership.destroy({
+      where: {
+        organization_id: orgId,
+        member_id: memberId,
       },
-      "membership": {
-        "membership_id": 102,
-        "organization_id": 1,
-        "member_id": 2,
-        "role": 0
-      }
-    }
+    });
 
-  */
-  return {error: error.noError, data: "data-here"}
+    return {
+      error: error.noError,
+      data: { message: "Membership Successfully Deleted" },
+    };
+  } catch (err) {
+    console.error("Error deleting membership:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
-
-async function deleteMemberInOrganization( orgId, memberId ) {
-    
-  // TODO: call db
-
-  /*
-
-  Data should be displayed as:
-
-    {
-      "message": "Membership successfully removed",
-      "membership_id": 102,
-      "member_id": 2,
-      "organization_id": 1,
-      "removed_at": "2024-04-03T14:40:00Z",
-      "removed_by": "admin@rit.edu"
+async function getMembershipRoleInfoInOrganization(orgId, role) {
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
+    if (isNaN(role)) {
+      return { error: error.roleMustBeAnInteger, data: null };
     }
 
-  */
-  return {error: error.noError, data: "data-here"}
-}
+    // get the data from data-layer
+    const memberships = await Membership.findAll();
 
-async function getMembershipRoleInfoInOrganization(orgId, memberId) {
-  // TODO: call db
-
-  /*
-
-  Data should be displayed as:
-
-    {
-      "membership_id": 101,
-      "member_id": 1,
-      "organization_id": 1,
-      "role": 2
+    // if the result is empty return error
+    if (!memberships || memberships.length < 1) {
+      return { error: error.membershipNotFound, data: null };
     }
 
-  */
-  return {error: error.noError, data: "data-here"}
-}
+    // filter by org and role
+    const filteredMemberships = memberships.filter(
+      (membership) =>
+        membership.organization_id == orgId && membership.role == role
+    );
 
-async function updateMembershipRoleInfoInOrganization(orgId, memberId) {
-  // TODO: call db
-
-  /*
-
-  Data should be displayed as:
-
-    {
-      "memberships": [
-        {
-          "membership_id": 102,
-          "organization_id": 1,
-          "member_id": 2,
-          "role": 0
-        }
-      ]
+    // check if there are results
+    if (filteredMemberships.length < 1) {
+      return { error: error.membershipNotFound, data: null };
     }
 
-  */
-  return {error: error.noError, data: "data-here"}
+    let displayResults = filteredMemberships.map(
+      (membership_id, member_id) => ({ membership_id, member_ids })
+    );
+
+    return {
+      error: error.noError,
+      data: {
+        organization_id: orgId,
+        role: role,
+        memberships: displayResults,
+      },
+    };
+  } catch (err) {
+    console.error("Error getting memberships by role:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
- 
 
 async function getMembersInOrganization(orgId) {
-  // TODO: call db and fetch members
-
-  /*
-  Expected Response:
-  {
-    "status": "success",
-    "data": [
-      {
-        "member_id": 1,
-        "member_name": "Jane Doe",
-        "member_email": "jd1234@rit.edu",
-        "member_major": "Computer Science",
-        "member_graduation_date": "2025-05-15",
-        "role": 2,
-        "joined_date": "2023-09-01T00:00:00Z"
-      },
-      {
-        "member_id": 2,
-        "member_name": "John Smith",
-        "member_email": "js5678@rit.edu",
-        "member_major": "Software Engineering",
-        "member_graduation_date": "2024-12-15",
-        "role": 0,
-        "joined_date": "2023-09-01T00:00:00Z"
-      }
-    ],
-    "count": 2
-  }
-  */
-  return { error: error.noError, data: "data-here" };
-}
-
-async function updateMemberAttendanceInOrganization(orgId, memberId, attendanceData) {
-  // TODO: call db and update attendance
-
-  /*
-  Expected Response:
-  {
-    "status": "success",
-    "data": {
-      "member_id": 1041,
-      "organization_abr": "WiC",
-      "meetings_attended": 5,
-      "volunteer_events": 1,
-      "social_events": 1,
-      "points": 36,
-      "isActiveMember": false
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
     }
+
+    // get the data from data-layer
+    const members = await Member.findAll();
+    const memberships = await Membership.findAll();
+
+    // if the result is empty return error
+    if (!members || !memberships) {
+      return { error: error.membershipNotFound, data: null };
+    }
+
+    // filter for memberships only in this org
+    const membershipsInOrg = memberships.filter(
+      (membership) => membership.organization_id == orgId
+    );
+
+    // put some of the member data into an array with the membership information
+    const resultData = membershipsInOrg.map((membership) => {
+      let memberData = members.find(
+        (member) => member.member_id == membership.member_id
+      );
+      if (!memberData) {
+        return;
+      }
+      return {
+        ...membership,
+        member_name: memberData.member_name,
+        member_email: memberData.member_email,
+        member_major: memberData.member_major,
+        member_graduation_date: memberData.member_graduation_date,
+      };
+    });
+
+    return {
+      error: error.noError,
+      data: resultData,
+    };
+  } catch (err) {
+    console.error("Error fetching all members of org", err);
+    return { error: error.somethingWentWrong, data: null };
   }
-  */
-  return { error: error.noError, data: "data-here" };
 }
 
-  
-  module.exports = {
-    getSpecificMemberWithOrgData,
-    addMemberToAnOrganization,
-    editMemberInOrganization,
-    deleteMemberInOrganization,
-    getMembershipRoleInfoInOrganization,
-    updateMembershipRoleInfoInOrganization,
-    getMembersInOrganization,
-    updateMemberAttendanceInOrganization
-  };
-  
+module.exports = {
+  getSpecificMemberWithOrgData,
+  addMemberToAnOrganization,
+  editMemberInOrganization,
+  deleteMemberInOrganization,
+  getMembershipRoleInfoInOrganization,
+  getMembersInOrganization,
+};

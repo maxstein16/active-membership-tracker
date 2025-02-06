@@ -9,15 +9,17 @@ module.exports = function () {
   this.orgNotFound = "Organization Not Found"
   this.memberNotFound = "Member Not Found"
   this.membershipNotFound = "Membership Not Found"
+  this.roleMustBeAnInteger = "Organization Role must be an integer"
   
   // Member In Org Management
 
-  this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_name, member_email, member_personal_email, member_phone_number, member_graduation_date, member_tshirt_size, member_major, member_gender, member_race, role";
-  this.mustHaveAtLeastOneFieldsAddMemberInOrg = "Must include at least one valid field to update: member_name, member_email, member_personal_email, member_phone_number, member_graduation_date, member_tshirt_size, member_major, member_gender, member_race, role";
+  this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_id and role";
+  this.mustHaveAtLeastOneFieldsAddMemberInOrg = "Must include at least one valid field to update: meetings_attended, volunteer_events, social_events, role";
   this.memberCanNotBeAddedToOrg = "Can not add member to organization";
   this.memberNotFoundInOrg = "Member not found in organization";
   this.memberMustEditAttendanceField = "Must edit at least one valid field: meetings_attended, volunteer_events, social_events";
   this.mustHaveAllFieldsEditMemberRoleInOrg = "Missing required fields: member_id, organization_id, role";
+  this.couldNotCreateMembership = "Could not create membership";
 
 
   // Member Calls (not org specific)
