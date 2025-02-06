@@ -44,6 +44,9 @@ module.exports = function () {
   this.noError = "No error.";
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid feild to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold";
 
+  // Edit Organization Errors
+  this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: org_name, org_description, org_category, org_contact_email, org_phone_number.";
+  this.orgNotFound = "Organization not found or update failed.";
 
   // Organization Settings Calls
   this.settingIdMustBeInteger = "Setting ID must be an integer";
