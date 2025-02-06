@@ -47,6 +47,11 @@ const Member = sequelize.define("Member", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  member_rit_username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
   member_email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -233,6 +238,11 @@ Member.hasMany(Recognition, {
 Recognition.belongsTo(Member, {
   foreignKey: "member_id",
   as: "member",
+});
+
+Recognition.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
 });
 
 module.exports = {

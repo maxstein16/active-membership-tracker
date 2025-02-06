@@ -11,6 +11,8 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
 const sanitizer = new Sanitizer();
 
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
+
 /**
  * GET v1/organizations/{orgId}/events
  * Get all events for an organization.
@@ -93,7 +95,7 @@ router.post(
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-
+    
     // Validate required fields
     if (
       !body.event_name ||
@@ -106,6 +108,12 @@ router.post(
       return res
         .status(400)
         .json({ error: error.mustHaveAllFieldsCreateEvent });
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     // Send to business layer
@@ -154,6 +162,12 @@ router.put(
       return res
         .status(400)
         .json({ error: error.mustHaveAtLeastOneFieldToUpdateEvent });
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     // Send to business layer

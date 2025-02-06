@@ -11,6 +11,7 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 //GET /v1/organization/:orgId/settings
 router.get(
@@ -23,6 +24,15 @@ router.get(
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(
+      req.session.user.username,
+      orgId
+    );
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     const response = await business.getOrganizationSettings(parseInt(orgId));
@@ -56,6 +66,15 @@ router.put(
       return res
         .status(400)
         .json({ error: error.mustHaveAtLeastOneFieldToUpdate });
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(
+      req.session.user.username,
+      orgId
+    );
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     const response = await business.editOrganizationMembershipRequirements(
@@ -106,6 +125,15 @@ router.put(
         .json({ error: error.mustIncludeAtLeastOneValidFieldToEdit });
     }
 
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(
+      req.session.user.username,
+      orgId
+    );
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
+    }
+
     const response = await business.editOrganizationEmailSettings(
       parseInt(orgId),
       req.body
@@ -136,6 +164,13 @@ router.delete(
     if (!id || isNaN(id)) {
       return res.status(400).json({ error: error.mustIncludeIdQueryParam });
     }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
+    }
+
 
     const response = await business.deleteOrganizationMembershipRequirement(
       parseInt(orgId),

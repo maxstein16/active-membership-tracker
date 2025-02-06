@@ -11,6 +11,7 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 /*
 
 https://api.rit.edu/v1/organization/{orgId}/member
@@ -95,6 +96,13 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     return;
   }
 
+  // does the user have privileges?
+  const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+  if (!hasPrivileges) {
+    res.status(401).json({ error: error.youDoNotHavePermission });
+  }
+
+
   // send off to backend
   const result = await business.addMemberToOrg(orgId, body);
 
@@ -150,6 +158,12 @@ router.put(
       return;
     }
 
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
+    }
+
     // send off to backend
     const result = await business.editMemberInOrg(orgId, memberId, body);
 
@@ -187,6 +201,13 @@ router.delete(
       res.status(400).json({ error: error.memberIdMustBeInteger });
       return;
     }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
+    }
+
 
     // send off to backend
     const result = await business.deleteMemberInOrg(orgId, memberId);
