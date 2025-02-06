@@ -57,8 +57,6 @@ module.exports = function () {
     return await updateMembershipRoleInfoInOrganization(orgId, memberId);
   }
 
-  
-
   // Member Calls (not org specific)
   this.getMember = async (memberId) => {
     return await getMemberById(memberId);
@@ -128,8 +126,6 @@ module.exports = function () {
     return await getSpecificReportOrgData(orgId, meetingId);
   }
   
-  // Organization Reports Calls
-
   // Event Management
   this.getAllEventsByOrganization = async (orgId) => {
     return await getAllEventsByOrganization(orgId);
