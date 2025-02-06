@@ -19,7 +19,7 @@ async function getAllOrgRecognitionsFromDB(orgId) {
 
     // if the list is empty return error
     if (!recognitions || recognitions.length < 1) {
-        return { error: error.noRecognitionsFound, data: null };
+      return { error: error.noRecognitionsFound, data: null };
     }
 
     // filter out recognitions for only this organization
@@ -29,7 +29,7 @@ async function getAllOrgRecognitionsFromDB(orgId) {
 
     // return error if there are no recognitions
     if (!recognitionsFromOrgId || recognitionsFromOrgId.length < 1) {
-        return { error: error.thisOrgHasNoRecognitions, data: null };
+      return { error: error.thisOrgHasNoRecognitions, data: null };
     }
 
     // find organization data
@@ -49,71 +49,75 @@ async function getAllOrgRecognitionsFromDB(orgId) {
         organization_name: organization.organization_name,
         organization_abbreviation: organization.organization_abbreviation,
         active_membership_threshold: organization.active_membership_threshold,
-        member_list: recognitions
+        member_list: recognitions,
       },
     };
   } catch (err) {
     console.error("Error fetching organization recognitions:", err);
     return { error: error.somethingWentWrong, data: null };
   }
-
 }
 
 async function getSpecificRecognitionFromDB(orgId, memberId) {
-    try {
-        // is orgId an int?
-        if (isNaN(orgId)) {
-          return { error: error.organizationIdMustBeInteger, data: null };
-        }
-    
-        // get the data from data-layer 
-        // TODO: causing ERROR: Unknown column 'organization_id' in SELECT.... don't know how to fix this ( i added the foreign key to the db )
-        const recognition = await Recognition.findOne({
-            where: { organization: orgId, member: memberId },
-        })
-    
-        // if the result is empty return error
-        if (!recognition || recognition.length < 1) {
-            return { error: error.noRecognitionsFound, data: null };
-        }
-    
-        return {
-          error: error.noError,
-          data: recognition
-        };
-      } catch (err) {
-        console.error("Error fetching specific organization recognition:", err);
-        return { error: error.somethingWentWrong, data: null };
-      }
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
+
+    // get the data from data-layer
+    // TODO: causing ERROR: Unknown column 'organization_id' in SELECT.... don't know how to fix this ( i added the foreign key to the db )
+    const recognition = await Recognition.findOne({
+      where: { organization: orgId, member: memberId },
+    });
+
+    // if the result is empty return error
+    if (!recognition || recognition.length < 1) {
+      return { error: error.noRecognitionsFound, data: null };
+    }
+
+    return {
+      error: error.noError,
+      data: recognition,
+    };
+  } catch (err) {
+    console.error("Error fetching specific organization recognition:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
 async function updateSpecificRecognitionInDB(orgId, memberId, membershipYears) {
-  // TODO: call db
+  try {
+    // is orgId an int?
+    if (isNaN(orgId)) {
+      return { error: error.organizationIdMustBeInteger, data: null };
+    }
 
-  /*
+    // get the data from data-layer
+    const [updatedRows] = await Recognition.update(
+      { recognition_year: membershipYears },
+      {
+        where: {
+          organization_id: orgId,
+          membership_id: memberId,
+        },
+      }
+    );
 
-  Data should be displayed as:
+    // if the result is empty return error
+    if (updatedRows === 0) {
+      return { error: error.noRecognitionsFound, data: null };
+    }
 
-    "data": {
-	    "member_id": 2,
-	    "member_name": "John Smith Jr",
-	    "member_email": "js5678@rit.edu",
-	    "member_personal_email": "john.smith.new@gmail.com",
-	    "member_phone_number": "555-0125",
-	    "member_graduation_date": "2025-05-15",
-	    "member_tshirt_size": "XL",
-	    "member_major": "Software Engineering",
-	    "member_gender": "M",
-	    "member_race": "Caucasian",
-	    "membership": {
-	      "membership_id": 102,
-	      "membership_years": 4,
-	      "role": 0
-	    }
-	  },
+    return {
+      error: error.noError,
+      data: { membershipYears: membershipYears },
+    };
+  } catch (err) {
+    console.error("Error fetching specific organization recognition:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 
-  */
-  return { error: error.noError, data: "data-here" };
 }
 
 module.exports = {
