@@ -22,6 +22,6 @@ module.exports = function () {
   // Organization Settings Calls
   
   // Organization Reports Calls
-
+  this.cannotCreateReport = "Error Creating Report";
 };
 
