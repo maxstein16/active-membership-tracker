@@ -49,7 +49,7 @@ async function getSpecificOrgData(orgId) {
   // example: organization id must be an integer)
   // Validate that orgId is an integer
   if (!Number.isInteger(orgId)) {
-    return { error: error.invalidParameter, data: null };
+    return { error: error.organizationIdMustBeInteger, data: null };
   }
 
   // get the data from the data layer method
@@ -68,35 +68,19 @@ async function getSpecificOrgData(orgId) {
 
   return { error: error.noError, data: orgData };
 }
-/*
-  Data should be displayed as:
 
-    {
-      "member_id": 1,
-      "member_name": "Jane Doe",
-      "member_email": "jd1234@rit.edu",
-      "member_personal_email": "jane.doe@gmail.com",
-      "member_phone_number": "555-0123",
-      "member_graduation_date": "2025-05-15",
-      "member_tshirt_size": "M",
-      "member_major": "Computer Science",
-      "member_gender": "F",
-      "member_race": "Asian",
-      "membership": {
-        "membership_id": 101,
-        "organization_id": 1,
-        "role": 2
-      }
-    }
-  */
+
 
 async function addOrganization(orgId, orgData) {
   // Validate organization attributes
   const validationError = validateOrgFields(orgData);
   if (validationError) {
-    return { error: validationError, data: null };
+    return { error: error.validationError, data: null };
   }
 
+  if (!Number.isInteger(orgId)) {
+    return { error: error.organizationIdMustBeInteger, data: null };
+  }
   // Call data layer method to create the organization
   try {
     const newOrganization = await createOrganization(orgId, orgData);
@@ -111,7 +95,6 @@ async function addOrganization(orgId, orgData) {
 }
 
 
-
 async function editOrganization(orgId, orgDataToUpdate) {
   try {
     // Validate orgId
@@ -119,28 +102,32 @@ async function editOrganization(orgId, orgDataToUpdate) {
       return { error: error.invalidOrganizationId, data: null };
     }
 
-    // Validate provided fields (at least one field should be present)
+    // Validate that at least one field is being updated
     const validFields = Object.keys(orgDataToUpdate);
     if (validFields.length === 0) {
-      return { error: error.mustHaveAtLeastOneFieldsEditOrg, data: null };
+      return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
     }
 
-    // Run field validation
+    // Run field validation for all provided fields
     const validationError = validateOrgFields(orgDataToUpdate);
     if (validationError) {
       return { error: validationError, data: null };
     }
 
-    // Call data layer method
+    // Call data layer method to update the organization
     const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
-    return updateSuccess
-      ? { error: error.noError, data: "Organization updated successfully." }
-      : { error: error.orgNotFound, data: null };
+    if (updateSuccess) {
+      return { error: error.noError, data: { message: "Organization updated successfully." } };
+    } else {
+      return { error: error.orgNotFound, data: null };
+    }
   } catch (err) {
     console.error("Error updating organization:", err);
     return { error: error.databaseError, data: null };
   }
 }
+
+
 
 
 async function deleteOrganization(orgId) {

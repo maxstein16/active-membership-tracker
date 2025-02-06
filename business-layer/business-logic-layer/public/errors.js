@@ -29,7 +29,7 @@ module.exports = function () {
 
   //Adding Org
   // Organization Calls
-
+  this.validationError = "Validation error: One or more fields are invalid";
   // Adding Org
   this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
   this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
@@ -47,6 +47,8 @@ module.exports = function () {
   // Edit Organization Errors
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: org_name, org_description, org_category, org_contact_email, org_phone_number.";
   this.orgNotFound = "Organization not found or update failed.";
+
+
 
   // Organization Settings Calls
   this.settingIdMustBeInteger = "Setting ID must be an integer";
