@@ -11,13 +11,12 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 /* https://api.rit.edu/v1/organization/{orgId} */
 
-
 // GET /v1/organization/{orgId}
 router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
-
   //sanitize
   let orgId = req.params.orgId;
 
@@ -67,6 +66,15 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     return;
   }
 
+  // does the user have privileges?
+  const hasPrivileges = hasCredentials.isAdmin(
+    req.session.user.username,
+    orgId
+  );
+  if (!hasPrivileges) {
+    res.status(401).json({ error: error.youDoNotHavePermission });
+  }
+
   //send off to backend
   var result = await business.addOrganization(orgId, body);
 
@@ -104,6 +112,15 @@ router.put("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   ) {
     res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
     return;
+  }
+
+  // does the user have privileges?
+  const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    req.session.user.username,
+    orgId
+  );
+  if (!hasPrivileges) {
+    res.status(401).json({ error: error.youDoNotHavePermission });
   }
 
   //send off to backend

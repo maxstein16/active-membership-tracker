@@ -9,6 +9,7 @@ module.exports = function () {
   this.orgNotFound = "Organization Not Found"
   this.memberNotFound = "Member Not Found"
   this.membershipNotFound = "Membership Not Found"
+  this.youDoNotHavePermission = "You do not have permissions for this action"
   this.roleMustBeAnInteger = "Organization Role must be an integer"
  
   // Member In Org Management
@@ -60,8 +61,7 @@ module.exports = function () {
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
 
-  // Organization Reports Calls
-
+  
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";
   this.eventNotFound = "Event not found";
@@ -70,6 +70,8 @@ module.exports = function () {
 
   // Organization Recognition Calls
   this.mustHaveMembershipYearsField = "Must include field 'membership_years' in the request body to edit."
+  this.noRecognitionsFound = "There are no recognitions found"
+  this.thisOrgHasNoRecognitions = "This organization has no active member recognitions"
 
 
 };

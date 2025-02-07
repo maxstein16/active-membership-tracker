@@ -11,6 +11,7 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 /*
 
 https://api.rit.edu/v1/organization/{orgId}/reports
@@ -36,6 +37,15 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   if (isNaN(orgId)) {
     res.status(400).json({ error: error.organizationIdMustBeInteger });
     return;
+  }
+
+  // does the user have privileges?
+  const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    req.session.user.username,
+    orgId
+  );
+  if (!hasPrivileges) {
+    res.status(401).json({ error: error.youDoNotHavePermission });
   }
 
   // send to backend
@@ -75,6 +85,15 @@ router.get(
     if (isNaN(meetingId)) {
       res.status(400).json({ error: error.organizationIdMustBeInteger });
       return;
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(
+      req.session.user.username,
+      orgId
+    );
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     // send to backend
