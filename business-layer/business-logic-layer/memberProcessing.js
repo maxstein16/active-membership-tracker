@@ -1,5 +1,6 @@
 const { Member, Membership, Organization } = require("../db"); // Import database models
 const { sendEmail } = require("../service-layer/emailService");
+const { activeMembershipEmail } = require("./public/emailTemplates");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -49,29 +50,22 @@ async function updateMemberInDB(memberId, memberData) {
     }
 
     try {
-        // fetch member's existing status before updating
-        const prevMemberStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
-        const wasActiveBefore = prevMemberStats.data?.isActiveMember || false;
+        const prevStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
+        const wasActiveBefore = prevStats.data?.isActiveMember || false;
 
-        // update the member's data
         const [updated] = await Member.update(memberData, { where: { member_id: memberId } });
 
         if (!updated) {
             return { error: error.memberNotFound, data: null };
         }
 
-        // fetch updated member status
         const updatedMember = await Member.findByPk(memberId);
-        const newMemberStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
-        const isActiveNow = newMemberStats.data?.isActiveMember || false;
+        const newStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
+        const isActiveNow = newStats.data?.isActiveMember || false;
 
-        // if the member just became active, send an email
         if (!wasActiveBefore && isActiveNow) {
-            await sendEmail(
-                updatedMember.email,
-                "Congratulations! You're Now an Active Member",
-                `<p>Dear ${updatedMember.name},</p><p>You are now an active member of ${newMemberStats.data.organization_name}! Keep up the great work!</p>`
-            );
+            const emailData = activeMembershipEmail(updatedMember.name, newStats.data.organization_name, newStats.data.organization_abbreviation);
+            await sendEmail(updatedMember.email, emailData.subject, emailData.body);
         }
 
         return { error: error.noError, data: updatedMember.toJSON() };
