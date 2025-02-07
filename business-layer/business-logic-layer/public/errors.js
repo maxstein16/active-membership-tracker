@@ -10,7 +10,7 @@ module.exports = function () {
   this.memberNotFound = "Member Not Found"
   this.membershipNotFound = "Membership Not Found"
   this.youDoNotHavePermission = "You do not have permissions for this action"
-  
+
   // Member In Org Management
 
   this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_name, member_email, member_personal_email, member_phone_number, member_graduation_date, member_tshirt_size, member_major, member_gender, member_race, role";
@@ -27,9 +27,29 @@ module.exports = function () {
   this.mustIncludeValidFieldAddMember = "Must include at least one valid field to update: personal_email, phone_number, gender, race, tshirt_size, major, or graduation_date";
 
   // Organization Calls
-  this.mustHaveAllFieldsAddOrg = "Must include feilds: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold";
+
+  //Adding Org
+  // Organization Calls
+  this.validationError = "Validation error: One or more fields are invalid";
+  // Adding Org
+  this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
+  this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
+  this.invalidOrgDescription = "Organization description is invalid. It must be a non-empty string.";
+  this.invalidOrgCategory = "Organization category is invalid. It must be a non-empty string.";
+  this.invalidOrgEmail = "Invalid contact email format.";
+  this.invalidOrgPhoneNumber = "Invalid phone number format. Example: 555-123-4567.";
+  this.addOrgFailed = "Organization creation failed. Please try again.";
+  this.databaseError = "Database error. Unable to process the request.";
+  this.permissionDenied = "You do not have permission to add an organization.";
+  this.invalidOrganizationId = "Organization ID must be a positive integer.";
+  this.noError = "No error.";
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid feild to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold";
-  
+
+  // Edit Organization Errors
+  this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: org_name, org_description, org_category, org_contact_email, org_phone_number.";
+  this.orgNotFound = "Organization not found or update failed.";
+
+
 
   // Organization Settings Calls
   this.settingIdMustBeInteger = "Setting ID must be an integer";
@@ -39,6 +59,7 @@ module.exports = function () {
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
 
+  
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";
   this.eventNotFound = "Event not found";
