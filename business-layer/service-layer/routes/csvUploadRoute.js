@@ -3,10 +3,10 @@ const router = express.Router({ mergeParams: true });
 const multer = require("multer");
 const path = require("path");
 
-const Error = require("../../business-logic-layer/public/errors.js");
-const error = new Error();
+const ErrorMessages = require("../../business-logic-layer/public/errors.js");
+const error = new ErrorMessages();
 
-const BusinessLogic = require("../../business-logic-layer/public/exports.js");
+const BusinessLogic = require("../../business-logic-layer/public/csvUploadProcessing.js");
 const business = new BusinessLogic();
 
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
@@ -15,7 +15,8 @@ const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
 
 // Configure Multer for file uploads
 const upload = multer({
-    dest: "uploads/", // Temporary storage location
+    dest: "uploads/",
+    limits: { fileSize: 10 * 1024 * 1024 },  // Limit file size to 10MB
     fileFilter: (req, file, cb) => {
         if (path.extname(file.originalname) !== ".csv") {
             return cb(new Error("Only CSV files are allowed"));
@@ -24,12 +25,8 @@ const upload = multer({
     },
 });
 
-/**
- * POST v1/organizations/{orgId}/upload-csv
- * Upload and process a CSV file.
- */
 router.post(
-    "v1/organizations/:orgId/upload-csv",
+    "/v1/organizations/:orgId/upload-csv",
     isAuthorizedHasSessionForAPI,
     upload.single("file"),
     async (req, res) => {
@@ -47,11 +44,12 @@ router.post(
         }
 
         try {
-            // Process the uploaded file in business logic
-            const result = await business.processCSVUpload(orgId, req.file.path);
+            // Process the uploaded file using business logic
+            const result = await business.processCSV(req.file.path);
 
-            if (result.error && result.error !== error.noError) {
-                return res.status(500).json({ error: result.error, orgId });
+            if (result.error) {
+                // Handle the specific error from business logic
+                return res.status(500).json({ error: result.error || error.csvProcessingFailed });
             }
 
             return res.status(200).json({
@@ -60,7 +58,8 @@ router.post(
                 data: result.data,
             });
         } catch (err) {
-            return res.status(500).json({ error: "Failed to process CSV file" });
+            console.error(err);
+            return res.status(500).json({ error: error.genericProcessingError });
         }
     }
 );
