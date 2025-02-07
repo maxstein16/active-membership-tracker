@@ -36,6 +36,19 @@ async function getSpecificReportOrgData( orgId, memberId ) {
   }
 
 
+  async function getAnnualOrgReportOrgData(orgId) {
+   
+  }
+
+  async function getSemesterOrgReportOrgData(orgId) {
+   
+  }
+
+  async function getMeetingOrgReport (orgId, meetingId) {
+    
+  }
+  
+
 
 module.exports = {
   getSpecificReportOrgData,

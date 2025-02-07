@@ -125,6 +125,10 @@ module.exports = function () {
   this.getMeetingOrgReport = async (orgId, meetingId) => {
     return await getSpecificReportOrgData(orgId, meetingId);
   }
+
+  this.getSemesterOrgReport = async (orgId) => {
+    return await getSemesterReportOrgData(orgId);
+  }
   
   // Event Management
   this.getAllEventsByOrganization = async (orgId) => {
