@@ -107,30 +107,47 @@ async function createMemberInDB(memberData) {
  * @returns {Promise<object>} Member's organizational stats or an error.
  */
 async function getSpecificMemberOrgStats(memberId, orgId) {
-  // TODO: Implement database call to fetch member data.
+    if (!Number.isInteger(memberId)) {
+        return { error: error.memberIdMustBeInteger, data: null };
+    }
+    if (!Number.isInteger(orgId)) {
+        return { error: error.organizationIdMustBeInteger, data: null };
+    }
 
-  /*
-    Data should be displayed as:
-      {
-        "member_id": 1,
-        "organization_id": 1,
-        "membership_id": 101,
-        "organization_name": "Women In Computing",
-        "organization_abbreviation": "WiC",
-        "meetings_attended": 5,
-        "volunteer_events": 1,
-        "social_events": 1,
-        "your_points": 36,
-        "active_membership_threshold": 48,
-        "isActiveMember": false
-      }
-    */
-  return { error: error.noError, data: "data-here" };
+    try {
+        const membership = await Membership.findOne({
+            where: { member_id: memberId, organization_id: orgId },
+            include: [{ model: Organization }],
+        });
+
+        if (!membership) {
+            return { error: error.membershipNotFound, data: null };
+        }
+
+        const stats = {
+            member_id: membership.member_id,
+            organization_id: membership.organization_id,
+            membership_id: membership.membership_id,
+            organization_name: membership.Organization.organization_name,
+            organization_abbreviation: membership.Organization.organization_abbreviation,
+            meetings_attended: membership.meetings_attended || 0,
+            volunteer_events: membership.volunteer_events || 0,
+            social_events: membership.social_events || 0,
+            your_points: membership.points || 0,
+            active_membership_threshold: Organization.active_membership_threshold,
+            isActiveMember: (membership.points || 0) >= 48,
+        };
+
+        return { error: error.noError, data: stats };
+    } catch (err) {
+        console.error("Error fetching member organization stats:", err);
+        return { error: error.somethingWentWrong, data: null };
+    }
 }
 
 module.exports = {
-  getMemberById,
-  updateMemberInDB,
-  createMemberInDB,
-  getSpecificMemberOrgStats
+    getMemberById,
+    updateMemberInDB,
+    createMemberInDB,
+    getSpecificMemberOrgStats
 };
