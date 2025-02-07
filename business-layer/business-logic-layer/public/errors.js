@@ -70,5 +70,11 @@ module.exports = function () {
   this.mustHaveMembershipYearsField = "Must include field 'membership_years' in the request body to edit."
 
 
+  //CSV file upload errors
+  this.organizationIdMustBeInteger = "Organization ID must be an integer.";
+  this.csvProcessingFailed = "Failed to process the CSV file.";
+  this.fileCleanupFailed = "Failed to delete the uploaded CSV file.";
+  this.genericProcessingError = "An unexpected error occurred during processing.";
+
 };
 
