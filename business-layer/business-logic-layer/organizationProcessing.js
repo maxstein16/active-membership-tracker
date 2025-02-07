@@ -16,31 +16,38 @@ const error = new Error();
 
 // Helper function to validate fields
 function validateOrgFields(fields) {
+  if (!fields || typeof fields !== 'object') {
+    return error.invalidData;  // Return a new error if fields is not an object
+  }
+
   const { org_name, org_description, org_category, org_contact_email, org_phone_number } = fields;
 
+  // Validate organization name
   if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
     return error.invalidOrgName;
   }
 
+  // Validate organization description
   if (org_description && (typeof org_description !== 'string' || org_description.trim() === '')) {
     return error.invalidOrgDescription;
   }
 
+  // Validate organization category
   if (org_category && (typeof org_category !== 'string' || org_category.trim() === '')) {
     return error.invalidOrgCategory;
   }
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (org_contact_email && (typeof org_contact_email !== 'string' || !emailRegex.test(org_contact_email))) {
+  // Validate contact email
+  if (org_contact_email && (typeof org_contact_email !== 'string' || !/^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/.test(org_contact_email))) {
     return error.invalidOrgEmail;
   }
 
-  const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
-  if (org_phone_number && (typeof org_phone_number !== 'string' || !phoneRegex.test(org_phone_number))) {
+  // Validate phone number
+  if (org_phone_number && (typeof org_phone_number !== 'string' || !/^\d{3}-\d{3}-\d{4}$/.test(org_phone_number))) {
     return error.invalidOrgPhoneNumber;
   }
 
-  return null;
+  return null;  // No validation errors found
 }
 
 
