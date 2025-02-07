@@ -164,26 +164,47 @@ async function deleteOrganization(orgId) {
   }
 }
 
-
 async function getAllOrganizationData() {
-  // TODO: call db
+  try {
+    const organizations = await getOrganizations(Organization);
 
-  /*
+    // Use .map() to format and validate each organization's fields
+    const formattedOrganizations = organizations.map(org => {
+      // Validate fields before mapping
+      const error = validateOrgFields({
+        org_name: org.organization_name,
+        org_description: org.organization_description,
+        org_category: org.organization_category,
+        org_contact_email: org.contact_email,
+        org_phone_number: org.phone_number
+      });
 
-  Data should be displayed as:
+      // If any error exists in validation, skip or handle accordingly
+      if (error) {
+        return { error: error, data: null }; // or handle error differently, like logging
+      }
 
-    {
-      "message": "Membership successfully removed",
-      "membership_id": 102,
-      "member_id": 2,
-      "organization_id": 1,
-      "removed_at": "2024-04-03T14:40:00Z",
-      "removed_by": "admin@rit.edu"
-    }
+      // If validation passes, format and return the organization data
+      return {
+        org_id: org.id, // Assuming 'id' is the primary key
+        org_name: org.organization_name,
+        org_description: org.organization_description,
+        org_category: org.organization_category,
+        org_contact_email: org.contact_email,
+        org_phone_number: org.phone_number,
+        message: "Organization fetched successfully",
+      };
+    });
 
-  */
-  return { error: error.noError, data: "data-here" };
+    return { error: error.noError, data: formattedOrganizations };
+  } catch (err) {
+    console.error("Error getting organizations:", err);
+    return { error: error.databaseError, data: null };
+  }
 }
+
+
+
 
 module.exports = {
   getSpecificOrgData,
