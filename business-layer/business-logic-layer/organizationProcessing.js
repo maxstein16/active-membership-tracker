@@ -1,23 +1,14 @@
 const Error = require("./public/errors.js");
 const error = new Error();
 
-
-/**Also checking priviledges used to be a thing so I'll just put it here
- *   // // check that the user is an admin or eboard - removed
-  // const userId = req.session.user.userId;
-  // const roleInfo = await getMembershipRoleInfoInOrganization(orgId, userId);
-
-  // if (!roleInfo || (roleInfo.role !== 2 && roleInfo.role !== 1)) {
-  //   return { error: error.permissionDenied, data: null }; // User does not have permission
-  // }
-
- * 
+/**
+ * Validates the fields of an organization.
+ * @param {Object} fields - The organization data to validate.
+ * @returns {Object|null} - Error object if invalid, null if valid.
  */
-
-// Helper function to validate fields
 function validateOrgFields(fields) {
   if (!fields || typeof fields !== 'object') {
-    return error.invalidData;  // Return a new error if fields is not an object
+    return error.invalidData;
   }
 
   const { org_name, org_description, org_category, org_contact_email, org_phone_number } = fields;
@@ -47,39 +38,35 @@ function validateOrgFields(fields) {
     return error.invalidOrgPhoneNumber;
   }
 
-  return null;  // No validation errors found
+  return null;
 }
 
-
+/**
+ * Fetches organization data by ID.
+ * @param {number} orgId - Organization ID.
+ * @returns {Object} - Returns error and organization data.
+ */
 async function getSpecificOrgData(orgId) {
-  // check that the params are valid
-  // example: organization id must be an integer)
-  // Validate that orgId is an integer
   if (!Number.isInteger(orgId)) {
     return { error: error.organizationIdMustBeInteger, data: null };
   }
 
-  // get the data from the data layer method
   const orgData = await getOrganizationById(orgId);
-  // check the return to make sure it exists
 
-  // if it does not:
-  // return an appropriate error from errors.js
-  // if an appropriate error doesn't exist in errors.js, add a new one
   if (!orgData) {
     return { error: error.notFound, data: null };
   }
 
-  // if it does
-  // return error.noError from errors.js as well as the data listed in the api call documentation
-
   return { error: error.noError, data: orgData };
 }
 
-
-
+/**
+ * Adds a new organization.
+ * @param {number} orgId - New organization's ID.
+ * @param {Object} orgData - Organization data.
+ * @returns {Object} - Returns error and new organization data.
+ */
 async function addOrganization(orgId, orgData) {
-  // Validate organization attributes
   const validationError = validateOrgFields(orgData);
   if (validationError) {
     return { error: error.validationError, data: null };
@@ -88,10 +75,9 @@ async function addOrganization(orgId, orgData) {
   if (!Number.isInteger(orgId)) {
     return { error: error.organizationIdMustBeInteger, data: null };
   }
-  // Call data layer method to create the organization
+
   try {
     const newOrganization = await createOrganization(orgId, orgData);
-
     if (!newOrganization) {
       return { error: error.addOrgFailed, data: null };
     }
@@ -101,83 +87,73 @@ async function addOrganization(orgId, orgData) {
   }
 }
 
-
+/**
+ * Edits an existing organization's details.
+ * @param {number} orgId - Organization ID to update.
+ * @param {Object} orgDataToUpdate - Fields to update.
+ * @returns {Object} - Returns error and success message.
+ */
 async function editOrganization(orgId, orgDataToUpdate) {
-  try {
-    // Validate orgId
-    if (!Number.isInteger(orgId) || orgId <= 0) {
-      return { error: error.invalidOrganizationId, data: null };
-    }
+  if (!Number.isInteger(orgId) || orgId <= 0) {
+    return { error: error.invalidOrganizationId, data: null };
+  }
 
-    // Validate that at least one field is being updated
-    const validFields = Object.keys(orgDataToUpdate);
-    if (validFields.length === 0) {
-      return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
-    }
+  const validFields = Object.keys(orgDataToUpdate);
+  if (validFields.length === 0) {
+    return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
+  }
 
-    // Run field validation for all provided fields
-    const validationError = validateOrgFields(orgDataToUpdate);
-    if (validationError) {
-      return { error: validationError, data: null };
-    }
+  const validationError = validateOrgFields(orgDataToUpdate);
+  if (validationError) {
+    return { error: validationError, data: null };
+  }
 
-    // Call data layer method to update the organization
-    const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
-    if (updateSuccess) {
-      return { error: error.noError, data: { message: "Organization updated successfully." } };
-    } else {
-      return { error: error.orgNotFound, data: null };
-    }
-  } catch (err) {
-    console.error("Error updating organization:", err);
-    return { error: error.databaseError, data: null };
+  const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
+  if (updateSuccess) {
+    return { error: error.noError, data: { message: "Organization updated successfully." } };
+  } else {
+    return { error: error.orgNotFound, data: null };
   }
 }
 
-
-
-
+/**
+ * Deletes an organization by ID.
+ * @param {number} orgId - Organization ID to delete.
+ * @returns {Object} - Returns error and deletion data.
+ */
 async function deleteOrganization(orgId) {
-
-  // Check that the params are valid
   if (!Number.isInteger(orgId) || orgId <= 0) {
-    return { error: error.invalidOrganizationId, data: null }; // Invalid orgId
+    return { error: error.invalidOrganizationId, data: null };
   }
 
   try {
-    // Attempt to find the organization by its ID
     const org = await Organization.getOrganizationById(orgId);
-
-    // If the organization doesn't exist, return an error
     if (!org) {
-      return { error: error.orgNotFound, data: null }; // Organization not found
+      return { error: error.orgNotFound, data: null };
     }
 
-    // Delete the organization
     await org.destroy();
-
-    // Assuming there is some logic to track who deleted the organization
     const deletionData = {
       message: 'Organization successfully deleted',
       org_id: orgId,
-      removed_by: "admin@rit.edu",  // Example, adjust with real user data
+      removed_by: "admin@rit.edu",  // Adjust with real user data
       removed_at: new Date().toISOString(),
     };
 
     return { error: error.noError, data: deletionData };
   } catch (err) {
-    console.error("Error deleting organization:", err);
-    return { error: error.databaseError, data: null }; // Database error
+    return { error: error.databaseError, data: null };
   }
 }
 
+/**
+ * Retrieves all organizations.
+ * @returns {Object} - Returns error and formatted organization data.
+ */
 async function getAllOrganizationData() {
   try {
     const organizations = await getOrganizations(Organization);
-
-    // Use .map() to format and validate each organization's fields
     const formattedOrganizations = organizations.map(org => {
-      // Validate fields before mapping
       const error = validateOrgFields({
         org_name: org.organization_name,
         org_description: org.organization_description,
@@ -186,14 +162,12 @@ async function getAllOrganizationData() {
         org_phone_number: org.phone_number
       });
 
-      // If any error exists in validation, skip or handle accordingly
       if (error) {
-        return { error: error, data: null }; // or handle error differently, like logging
+        return { error: error, data: null };
       }
 
-      // If validation passes, format and return the organization data
       return {
-        org_id: org.id, // Assuming 'id' is the primary key
+        org_id: org.id,
         org_name: org.organization_name,
         org_description: org.organization_description,
         org_category: org.organization_category,
@@ -205,13 +179,9 @@ async function getAllOrganizationData() {
 
     return { error: error.noError, data: formattedOrganizations };
   } catch (err) {
-    console.error("Error getting organizations:", err);
     return { error: error.databaseError, data: null };
   }
 }
-
-
-
 
 module.exports = {
   getSpecificOrgData,
