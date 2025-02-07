@@ -1,6 +1,6 @@
 const fs = require("fs");
 const csv = require("fast-csv");
-const ErrorMessages = require("../../business-logic-layer/public/errors.js");  // Assuming the error messages are defined here
+const ErrorMessages = require("../../business-logic-layer/public/errors.js");
 const error = new ErrorMessages();
 
 class BusinessLogic {
@@ -39,7 +39,7 @@ class BusinessLogic {
                 })
                 .on("error", (err) => {
                     // Return a structured error with the error message from `errors.js`
-                    reject({ error: error.fileProcessingFailed, details: err });
+                    reject({ error: error.csvProcessingFailed, details: err });
                 });
         });
     }
