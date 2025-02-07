@@ -81,6 +81,18 @@ const Membership = sequelize.define("Membership", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  meetings_attended: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  volunteer_events: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  social_events: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
 });
 
 const Attendance = sequelize.define("Attendance", {
