@@ -54,6 +54,36 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   });
 });
 
+// GET /v1/organization/{orgId}/reports/semesterly
+router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res) {
+  let orgId = req.params.orgId;
+
+  // sanitize
+  orgId = sanitizer.sanitize(orgId);
+
+  // checking
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+
+  // send to backend
+  const orgData = await business.getSemesterOrgReport(orgId);
+
+  // check for errors that backend returned
+  if (orgData.error && orgData.error !== error.noError) {
+    res.status(404).json({ error: orgData.error, orgId: orgId });
+    return;
+  }
+
+  res.status(200).json({
+    message: "Semester Report " + orgId,
+    org: req.params.orgId,
+    orgData,
+  });
+});
+
+
 // GET /v1/organization/{orgId}/reports/meeting?id={meetingId}
 router.get(
   "/meeting?id={meetingId}",
