@@ -47,6 +47,11 @@ const Member = sequelize.define("Member", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  member_rit_username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
   member_email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -75,6 +80,18 @@ const Membership = sequelize.define("Membership", {
   active_member: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  meetings_attended: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  volunteer_events: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  social_events: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
   },
 });
 
@@ -233,6 +250,11 @@ Member.hasMany(Recognition, {
 Recognition.belongsTo(Member, {
   foreignKey: "member_id",
   as: "member",
+});
+
+Recognition.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
 });
 
 module.exports = {

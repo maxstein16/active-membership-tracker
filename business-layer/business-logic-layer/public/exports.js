@@ -29,7 +29,6 @@ module.exports = function () {
   };
 
   this.addMemberToOrg = async (orgId, memberData) => {
-    memberData.password = await hashPassword(memberData.password);
     return await addMemberToAnOrganization(orgId, memberData);
   };
 
@@ -49,15 +48,13 @@ module.exports = function () {
     return await getMembersInOrganization(orgId);
   }
 
-  this.getMembershipRoleInOrg = async (orgId, memberId) => {
-    return await getMembershipRoleInfoInOrganization(orgId, memberId);
+  this.getMembershipRoleInOrg = async (orgId, role) => {
+    return await getMembershipRoleInfoInOrganization(orgId, role);
   }
 
-  this.updateMembershipRoleInOrg = async (orgId, memberId) => {
-    return await updateMembershipRoleInfoInOrganization(orgId, memberId);
+  this.editMembershipRoleInOrg = async (orgId, memberId, body) => {
+    return await updateMembershipRoleInfoInOrganization(orgId, memberId, body);
   }
-
-  
 
   // Member Calls (not org specific)
   this.getMember = async (memberId) => {
@@ -69,6 +66,7 @@ module.exports = function () {
   }
 
   this.createMember = async (memberData) => {
+    memberData.password = await hashPassword(memberData.password);
     return await createMemberInDB(memberData);
   }
   this.getSpecificMemberOrgStats = async (memberId, orgId) => {
@@ -128,8 +126,6 @@ module.exports = function () {
     return await getSpecificReportOrgData(orgId, meetingId);
   }
   
-  // Organization Reports Calls
-
   // Event Management
   this.getAllEventsByOrganization = async (orgId) => {
     return await getAllEventsByOrganization(orgId);
