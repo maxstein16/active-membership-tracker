@@ -37,15 +37,13 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
 
   async function getAnnualOrgReport(orgId) {
- //for each entry in the Organization table, get the organization info
- //for each entry in the Organization table, get every Member
-
-    var members = [];
-    var memberData = {};
-    var memberDataLastYear = {};
-    var meetingsDataThisYear = {};
-
-    
+    //connect to db
+    //in order to get the data for this report, do something like this....
+    //for each entry in the Organization table, get the organization info
+    //for each entry in the Organization table, get every Member
+    //for every member, get their info
+    //Count each entry in the Events table
+     //Count each entry in the Attendance table
 
     /** 
      * {
