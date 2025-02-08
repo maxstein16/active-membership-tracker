@@ -39,6 +39,8 @@ module.exports = function () {
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
   
   // Organization Reports Calls
+  this.cannotCreateReport = "Error Creating Report";
+
 
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";
