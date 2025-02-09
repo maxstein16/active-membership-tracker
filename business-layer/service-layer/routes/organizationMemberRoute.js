@@ -11,20 +11,12 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 /*
 
 https://api.rit.edu/v1/organization/{orgId}/member
 
 */
-
-// GET /v1/organization/{orgId}/member
-router.get("/", isAuthorizedHasSessionForAPI, function (req, res) {
-  res.status(400).json({
-    error:
-      "Must Include a member id as part of the url, for example: member/123",
-    org: req.params.orgId,
-  });
-});
 
 // GET /v1/organization/{orgId}/member/{memberId}
 router.get(
@@ -79,21 +71,17 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // check if has all the params needed
-  if (
-    !body.hasOwnProperty("member_name") ||
-    !body.hasOwnProperty("member_email") ||
-    !body.hasOwnProperty("member_personal_email") ||
-    !body.hasOwnProperty("member_phone_number") ||
-    !body.hasOwnProperty("member_graduation_date") ||
-    !body.hasOwnProperty("member_tshirt_size") ||
-    !body.hasOwnProperty("member_major") ||
-    !body.hasOwnProperty("member_gender") ||
-    !body.hasOwnProperty("member_race") ||
-    !body.hasOwnProperty("role")
-  ) {
+  if (!body.hasOwnProperty("member_id") || !body.hasOwnProperty("role")) {
     res.status(400).json({ error: error.mustHaveAllFieldsAddMemberInOrg });
     return;
   }
+
+  // does the user have privileges?
+  const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+  if (!hasPrivileges) {
+    res.status(401).json({ error: error.youDoNotHavePermission });
+  }
+
 
   // send off to backend
   const result = await business.addMemberToOrg(orgId, body);
@@ -133,21 +121,21 @@ router.put(
 
     // check if has all the params needed
     if (
-      !body.hasOwnProperty("member_name") &&
-      !body.hasOwnProperty("member_email") &&
-      !body.hasOwnProperty("member_personal_email") &&
-      !body.hasOwnProperty("member_phone_number") &&
-      !body.hasOwnProperty("member_graduation_date") &&
-      !body.hasOwnProperty("member_tshirt_size") &&
-      !body.hasOwnProperty("member_major") &&
-      !body.hasOwnProperty("member_gender") &&
-      !body.hasOwnProperty("member_race") &&
-      !body.hasOwnProperty("role")
+      !body.hasOwnProperty("role") &&
+      !body.hasOwnProperty("meetings_attended") &&
+      !body.hasOwnProperty("volunteer_events") &&
+      !body.hasOwnProperty("social_events")
     ) {
       res
         .status(400)
         .json({ error: error.mustHaveAtLeastOneFieldsAddMemberInOrg });
       return;
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     // send off to backend
@@ -187,6 +175,13 @@ router.delete(
       res.status(400).json({ error: error.memberIdMustBeInteger });
       return;
     }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
+    }
+
 
     // send off to backend
     const result = await business.deleteMemberInOrg(orgId, memberId);
@@ -240,64 +235,7 @@ router.get(
   }
 );
 
-// PUT /v1/organization/{orgId}/members/{memberId}
-router.put(
-  "/members/:memberId",
-  isAuthorizedHasSessionForAPI,
-  async function (req, res) {
-    let orgId = req.params.orgId;
-    let memberId = req.params.memberId;
-    let body = req.body;
-
-    // sanitize params
-    orgId = sanitizer.sanitize(orgId);
-    memberId = sanitizer.sanitize(memberId);
-
-    // check if params are valid
-    if (isNaN(orgId)) {
-      res.status(400).json({ error: error.organizationIdMustBeInteger });
-      return;
-    }
-    if (isNaN(memberId)) {
-      res.status(400).json({ error: error.memberIdMustBeInteger });
-      return;
-    }
-
-    // check if body has necessary fields
-    if (
-      !body.hasOwnProperty("member_id") ||
-      !body.hasOwnProperty("organization_id") ||
-      !body.hasOwnProperty("role")
-    ) {
-      res
-        .status(400)
-        .json({ error: error.mustHaveAllFieldsEditMemberRoleInOrg });
-      return;
-    }
-
-    // send off to backend
-    const result = await business.editMembershipRoleInOrg(
-      orgId,
-      memberId,
-      body
-    );
-
-    // check for errors that backend returned
-    if (result.error && result.error !== error.noError) {
-      res
-        .status(404)
-        .json({
-          error: `membership to ${orgId} cannot be given to ${memberId}`,
-        });
-      return;
-    }
-
-    // return with appropriate status and message
-    res.status(200).json({ status: "success", data: result.data });
-  }
-);
-
-// GET /v1/organization/{orgId}/members
+// GET /v1/organization/{orgId}/member
 router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
 
@@ -324,58 +262,5 @@ router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     .status(200)
     .json({ status: "success", data: result.data, count: result.data.length });
 });
-
-// PUT /v1/organization/{orgId}/member/{memberId}/attendance
-router.put(
-  "/:memberId/attendance",
-  isAuthorizedHasSessionForAPI,
-  async function (req, res) {
-    let orgId = req.params.orgId;
-    let memberId = req.params.memberId;
-    let body = req.body;
-
-    // sanitize params
-    orgId = sanitizer.sanitize(orgId);
-    memberId = sanitizer.sanitize(memberId);
-
-    // check if params are valid!
-    if (isNaN(orgId)) {
-      res.status(400).json({ error: error.organizationIdMustBeInteger });
-      return;
-    }
-    if (isNaN(memberId)) {
-      res.status(400).json({ error: error.memberIdMustBeInteger });
-      return;
-    }
-
-    // check if at least one valid field is provided
-    if (
-      !body.hasOwnProperty("meetings_attended") &&
-      !body.hasOwnProperty("volunteer_events") &&
-      !body.hasOwnProperty("social_events")
-    ) {
-      res.status(400).json({ error: error.memberMustEditAttendanceField });
-      return;
-    }
-
-    // send off to backend
-    const result = await business.updateMemberAttendanceInOrg(
-      orgId,
-      memberId,
-      body
-    );
-
-    // check for errors that backend returned
-    if (result.error && result.error !== error.noError) {
-      res
-        .status(404)
-        .json({ error: result.error, orgId: orgId, memberId: memberId });
-      return;
-    }
-
-    // return with appropriate status error and message
-    res.status(200).json({ status: "success", data: result.data });
-  }
-);
 
 module.exports = router;
