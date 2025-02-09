@@ -60,7 +60,9 @@ module.exports = function () {
   this.settingNotFound = "Organization setting with the given ID not found";
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
-
+  
+  // Organization Reports Calls
+  this.cannotCreateReport = "Error Creating Report";
   
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";
