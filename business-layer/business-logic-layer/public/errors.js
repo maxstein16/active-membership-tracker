@@ -76,5 +76,12 @@ module.exports = function () {
   this.thisOrgHasNoRecognitions = "This organization has no active member recognitions"
 
 
+  //CSV file upload errors
+  this.organizationIdMustBeInteger = "Organization ID must be an integer.";
+  this.csvProcessingFailed = "Failed to process the CSV file.";
+  this.fileCleanupFailed = "Failed to delete the uploaded CSV file.";
+  this.genericProcessingError = "An unexpected error occurred during processing.";
+  this.fileProcessingFailed = "Failed to process the CSV file.";
+
 };
 
