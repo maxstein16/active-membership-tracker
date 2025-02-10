@@ -1,4 +1,6 @@
 const { Member, Membership, Organization } = require("../db"); // Import database models
+const { sendEmail } = require("../service-layer/emailService");
+const { activeMembershipEmail } = require("./public/emailTemplates");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -48,6 +50,9 @@ async function updateMemberInDB(memberId, memberData) {
     }
 
     try {
+        const prevStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
+        const wasActiveBefore = prevStats.data?.isActiveMember || false;
+
         const [updated] = await Member.update(memberData, { where: { member_id: memberId } });
 
         if (!updated) {
@@ -55,6 +60,14 @@ async function updateMemberInDB(memberId, memberData) {
         }
 
         const updatedMember = await Member.findByPk(memberId);
+        const newStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
+        const isActiveNow = newStats.data?.isActiveMember || false;
+
+        if (!wasActiveBefore && isActiveNow) {
+            const emailData = activeMembershipEmail(updatedMember.name, newStats.data.organization_name, newStats.data.organization_abbreviation);
+            await sendEmail(updatedMember.email, emailData.subject, emailData.body);
+        }
+
         return { error: error.noError, data: updatedMember.toJSON() };
     } catch (err) {
         console.error("Error updating member:", err);
