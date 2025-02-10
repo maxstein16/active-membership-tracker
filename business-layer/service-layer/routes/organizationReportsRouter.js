@@ -11,6 +11,7 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 /*
 
 https://api.rit.edu/v1/organization/{orgId}/reports
@@ -38,6 +39,15 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
     return;
   }
 
+  // does the user have privileges?
+  const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    req.session.user.username,
+    orgId
+  );
+  if (!hasPrivileges) {
+    res.status(401).json({ error: error.youDoNotHavePermission });
+  }
+
   // send to backend
   const orgData = await business.getAnnualOrgReport(orgId);
 
@@ -53,6 +63,36 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
     orgData,
   });
 });
+
+// GET /v1/organization/{orgId}/reports/semesterly
+router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res) {
+  let orgId = req.params.orgId;
+
+  // sanitize
+  orgId = sanitizer.sanitize(orgId);
+
+  // checking
+  if (isNaN(orgId)) {
+    res.status(400).json({ error: error.organizationIdMustBeInteger });
+    return;
+  }
+
+  // send to backend
+  const orgData = await business.getSemesterOrgReport(orgId);
+
+  // check for errors that backend returned
+  if (orgData.error && orgData.error !== error.noError) {
+    res.status(404).json({ error: orgData.error, orgId: orgId });
+    return;
+  }
+
+  res.status(200).json({
+    message: "Semester Report " + orgId,
+    org: req.params.orgId,
+    orgData,
+  });
+});
+
 
 // GET /v1/organization/{orgId}/reports/meeting?id={meetingId}
 router.get(
@@ -75,6 +115,15 @@ router.get(
     if (isNaN(meetingId)) {
       res.status(400).json({ error: error.organizationIdMustBeInteger });
       return;
+    }
+
+    // does the user have privileges?
+    const hasPrivileges = hasCredentials.isEboardOrAdmin(
+      req.session.user.username,
+      orgId
+    );
+    if (!hasPrivileges) {
+      res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
     // send to backend

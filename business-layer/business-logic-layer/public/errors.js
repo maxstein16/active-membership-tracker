@@ -9,15 +9,18 @@ module.exports = function () {
   this.orgNotFound = "Organization Not Found"
   this.memberNotFound = "Member Not Found"
   this.membershipNotFound = "Membership Not Found"
-
+  this.youDoNotHavePermission = "You do not have permissions for this action"
+  this.roleMustBeAnInteger = "Organization Role must be an integer"
+ 
   // Member In Org Management
 
-  this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_name, member_email, member_personal_email, member_phone_number, member_graduation_date, member_tshirt_size, member_major, member_gender, member_race, role";
-  this.mustHaveAtLeastOneFieldsAddMemberInOrg = "Must include at least one valid field to update: member_name, member_email, member_personal_email, member_phone_number, member_graduation_date, member_tshirt_size, member_major, member_gender, member_race, role";
+  this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_id and role";
+  this.mustHaveAtLeastOneFieldsAddMemberInOrg = "Must include at least one valid field to update: meetings_attended, volunteer_events, social_events, role";
   this.memberCanNotBeAddedToOrg = "Can not add member to organization";
   this.memberNotFoundInOrg = "Member not found in organization";
   this.memberMustEditAttendanceField = "Must edit at least one valid field: meetings_attended, volunteer_events, social_events";
   this.mustHaveAllFieldsEditMemberRoleInOrg = "Missing required fields: member_id, organization_id, role";
+  this.couldNotCreateMembership = "Could not create membership";
 
 
   // Member Calls (not org specific)
@@ -57,9 +60,10 @@ module.exports = function () {
   this.settingNotFound = "Organization setting with the given ID not found";
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
-
+  
   // Organization Reports Calls
-
+  this.cannotCreateReport = "Error Creating Report";
+  
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";
   this.eventNotFound = "Event not found";
@@ -68,6 +72,8 @@ module.exports = function () {
 
   // Organization Recognition Calls
   this.mustHaveMembershipYearsField = "Must include field 'membership_years' in the request body to edit."
+  this.noRecognitionsFound = "There are no recognitions found"
+  this.thisOrgHasNoRecognitions = "This organization has no active member recognitions"
 
 
   //CSV file upload errors
