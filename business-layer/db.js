@@ -10,12 +10,14 @@ const sequelize = new Sequelize(
     dialect: "mariadb",
     logging: false,
     define: {
-      freezeTableName: true,
+      freezeTableName: true, // Prevents Sequelize from pluralizing table names
     },
   }
 );
 
-// Define models
+// ==============================
+// Organization Model
+// ==============================
 const Organization = sequelize.define("Organization", {
   organization_id: {
     type: DataTypes.INTEGER,
@@ -28,15 +30,42 @@ const Organization = sequelize.define("Organization", {
   },
   organization_description: DataTypes.STRING,
   organization_color: DataTypes.STRING,
-  organization_abbreviation: {
-    type: DataTypes.STRING(10),
-  },
+  organization_abbreviation: DataTypes.STRING(10),
   organization_threshold: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
 });
 
+// ==============================
+// Semester Model
+// ==============================
+const Semester = sequelize.define("Semester", {
+  semester_id: {
+    type: DataTypes.INTEGER, // Follows RIT term IDs (e.g., 2241, 2245)
+    primaryKey: true,
+  },
+  semester_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  academic_year: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  start_date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  end_date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+});
+
+// ==============================
+// Member Model
+// ==============================
 const Member = sequelize.define("Member", {
   member_id: {
     type: DataTypes.INTEGER,
@@ -59,8 +88,21 @@ const Member = sequelize.define("Member", {
   member_major: DataTypes.STRING,
   member_gender: DataTypes.STRING,
   member_race: DataTypes.STRING,
+  member_status: {
+    type: DataTypes.ENUM(
+      "undergraduate",
+      "graduate",
+      "staff",
+      "faculty",
+      "alumni"
+    ),
+    defaultValue: "undergraduate",
+  },
 });
 
+// ==============================
+// Membership Model
+// ==============================
 const Membership = sequelize.define("Membership", {
   membership_id: {
     type: DataTypes.INTEGER,
@@ -70,20 +112,19 @@ const Membership = sequelize.define("Membership", {
   member_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Member",
-      key: "member_id",
-    },
   },
   organization_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Organization",
-      key: "organization_id",
-    },
   },
-  membership_role: DataTypes.INTEGER, // FIXED naming
+  semester_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  membership_role: {
+    type: DataTypes.INTEGER, // 0=Member, 1=E-Board, 2=Admin
+    allowNull: false,
+  },
   membership_points: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
@@ -98,39 +139,22 @@ const Membership = sequelize.define("Membership", {
   },
 });
 
-const Attendance = sequelize.define("Attendance", {
-  attendance_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  member_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Member",
-      key: "member_id",
-    },
-  },
-  event_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Event",
-      key: "event_id",
-    },
-  },
-  check_in: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW, // Replaced attendance_status
-  },
-});
-
+// ==============================
+// Event Model
+// ==============================
 const Event = sequelize.define("Event", {
   event_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
+  },
+  organization_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  semester_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   event_name: {
     type: DataTypes.STRING,
@@ -140,27 +164,54 @@ const Event = sequelize.define("Event", {
     type: DataTypes.DATE,
     allowNull: false,
   },
-  event_end: {
-    type: DataTypes.DATE,
+  event_end: DataTypes.DATE,
+  event_location: DataTypes.STRING,
+  event_description: DataTypes.TEXT,
+  event_type: {
+    type: DataTypes.ENUM(
+      "general_meeting",
+      "volunteer",
+      "social",
+      "workshop",
+      "fundraiser",
+      "committee"
+    ),
     allowNull: false,
   },
-  event_location: DataTypes.STRING,
-  event_description: DataTypes.STRING,
-  event_type: DataTypes.STRING,
 });
 
-const Recognition = sequelize.define("Recognition", {
-  recognition_id: {
+// ==============================
+// Attendance Model
+// ==============================
+const Attendance = sequelize.define("Attendance", {
+  attendance_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  recognition_year: DataTypes.INTEGER,
-  recognition_type: DataTypes.INTEGER,
+  member_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  event_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  check_in: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  volunteer_hours: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
+  },
 });
 
+// ==============================
+// Membership Requirement Model
+// ==============================
 const MembershipRequirement = sequelize.define("MembershipRequirement", {
-  requirement_id: {
+  setting_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -168,10 +219,6 @@ const MembershipRequirement = sequelize.define("MembershipRequirement", {
   organization_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Organization",
-      key: "organization_id",
-    },
   },
   meeting_type: {
     type: DataTypes.STRING,
@@ -182,17 +229,24 @@ const MembershipRequirement = sequelize.define("MembershipRequirement", {
     allowNull: false,
   },
   amount_type: {
-    type: DataTypes.STRING, // "points" or "percentage"
+    type: DataTypes.ENUM("points", "percentage"),
     allowNull: false,
   },
   amount: {
     type: DataTypes.FLOAT,
     allowNull: false,
   },
+  requirement_scope: {
+    type: DataTypes.ENUM("semesterly", "annually"),
+    allowNull: false,
+  },
 });
 
-const EmailSetting = sequelize.define("EmailSetting", {
-  setting_id: {
+// ==============================
+// Email Settings Model
+// ==============================
+const EmailSettings = sequelize.define("EmailSettings", {
+  email_setting_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -200,99 +254,66 @@ const EmailSetting = sequelize.define("EmailSetting", {
   organization_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Organization",
-      key: "organization_id",
-    },
   },
   current_status: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
+    defaultValue: false,
   },
   annual_report: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
+    defaultValue: false,
   },
   semester_report: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
+    defaultValue: false,
   },
   membership_achieved: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
+    defaultValue: false,
   },
 });
 
-// Define associations
+// ==============================
+// Define Associations
+// ==============================
 
-EmailSetting.belongsTo(Organization, {
-  foreignKey: "organization_id",
-  as: "organization",
-});
+Organization.hasMany(Membership, { foreignKey: "organization_id" });
+Membership.belongsTo(Organization, { foreignKey: "organization_id" });
 
+Organization.hasMany(Event, { foreignKey: "organization_id" });
+Event.belongsTo(Organization, { foreignKey: "organization_id" });
+
+Organization.hasMany(MembershipRequirement, { foreignKey: "organization_id" });
 MembershipRequirement.belongsTo(Organization, {
   foreignKey: "organization_id",
-  as: "organization",
 });
 
-Member.hasMany(Membership, {
-  foreignKey: "member_id",
-  as: "memberships",
-});
+Organization.hasMany(EmailSettings, { foreignKey: "organization_id" });
+EmailSettings.belongsTo(Organization, { foreignKey: "organization_id" });
 
-Membership.belongsTo(Member, {
-  foreignKey: "member_id",
-  as: "member",
-});
+Member.hasMany(Membership, { foreignKey: "member_id" });
+Membership.belongsTo(Member, { foreignKey: "member_id" });
 
-Organization.hasMany(Membership, {
-  foreignKey: "organization_id",
-  as: "memberships",
-});
+Member.hasMany(Attendance, { foreignKey: "member_id" });
+Attendance.belongsTo(Member, { foreignKey: "member_id" });
 
-Membership.belongsTo(Organization, {
-  foreignKey: "organization_id",
-  as: "organization",
-});
+Semester.hasMany(Membership, { foreignKey: "semester_id" });
+Membership.belongsTo(Semester, { foreignKey: "semester_id" });
 
-Member.hasMany(Attendance, {
-  foreignKey: "member_id",
-  as: "attendances",
-});
+Semester.hasMany(Event, { foreignKey: "semester_id" });
+Event.belongsTo(Semester, { foreignKey: "semester_id" });
 
-Attendance.belongsTo(Member, {
-  foreignKey: "member_id",
-  as: "member",
-});
-
-Event.hasMany(Attendance, {
-  foreignKey: "event_id",
-  as: "attendances",
-});
-
-Attendance.belongsTo(Event, {
-  foreignKey: "event_id",
-  as: "event",
-});
-
-Member.hasMany(Recognition, {
-  foreignKey: "member_id",
-  as: "recognitions",
-});
-
-Recognition.belongsTo(Member, {
-  foreignKey: "member_id",
-  as: "member",
-});
+Event.hasMany(Attendance, { foreignKey: "event_id" });
+Attendance.belongsTo(Event, { foreignKey: "event_id" });
 
 module.exports = {
   sequelize,
   Organization,
+  Semester,
   Member,
   Membership,
   Attendance,
-  Recognition,
   Event,
   MembershipRequirement,
-  EmailSetting,
+  EmailSettings,
 };
