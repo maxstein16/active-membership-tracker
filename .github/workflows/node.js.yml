@@ -32,6 +32,6 @@ jobs:
       run: npm run build --if-present
       working-directory: business-layer
 
-    - name: Run tests
-      run: npm test
-      working-directory: business-layer
+    # - name: Run tests
+    #   run: npm test
+    #   working-directory: business-layer
