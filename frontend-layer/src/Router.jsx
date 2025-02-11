@@ -1,10 +1,12 @@
 import React from "react";
+import "../src/assets/css/constants.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 /**
  * HOW TO ADD A NEW PAGE
  *
- * Import the page below, and add it in the router const with an appropriate path
+ * Import the page below, and add it in the router const with an appropriate path,
+ * then add it to the server layer under routes/serve-frontend
  */
 import DashboardPage from "./pages/DashboardPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -39,7 +41,7 @@ export const Router = () => {
 
   return (
     <RouterProvider router={router}>
-      <DashboardPage />
+        <DashboardPage />
     </RouterProvider>
   );
 };

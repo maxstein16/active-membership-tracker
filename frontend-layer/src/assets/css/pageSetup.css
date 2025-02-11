@@ -1,0 +1,21 @@
+.navigation-bar {
+    background-color: var(--black);
+    color: var(--white);
+
+    display: flex;
+    padding: 10px;
+    height: 50px;
+    align-items: center;
+}
+
+.navigation-bar img {
+    height: 100%;
+}
+
+.navigation-bar div {
+    width: 100%;
+    display: flex;
+
+    justify-content: end;
+    align-items: center;
+}

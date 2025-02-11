@@ -31,8 +31,8 @@ html, body {
     scroll-behavior: smooth;
     overflow-x: hidden;
     background-color: var(--white);
-    font-family: "Ubuntu", sans-serif;
-    color: var(--white);
+    font-family: "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
+    color: var(--black);
   }
   
   * {
