@@ -31,10 +31,10 @@ export default function DashboardPage() {
           role: 0,
         },
         {
-          id: 3,
+          id: 1,
           abbreviation: "Comms",
           color: "#20BDE4",
-          role: 1,
+          role: 2,
         },
       ],
     });
