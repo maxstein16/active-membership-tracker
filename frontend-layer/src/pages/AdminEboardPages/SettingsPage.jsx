@@ -72,13 +72,11 @@ export default function SettingsPage() {
       ) : (
         <>
           <h1>Settings</h1>
+          <p>Data is automatically saved after you enter it</p>
+          <br/>
 
           <OrgSettingsBasicInfo orgData={orgData} setOrgData={setOrgData} />
-          <DisplayEmailSettings
-            emailSettings={orgData.emailSettings}
-            orgData={orgData}
-            setOrgData={setOrgData}
-          />
+          <DisplayEmailSettings orgData={orgData} setOrgData={setOrgData} />
         </>
       )}
     </PageSetup>

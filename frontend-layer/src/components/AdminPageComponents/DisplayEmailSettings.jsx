@@ -4,25 +4,80 @@ import "../../assets/css/pageSetup.css";
 import "../../assets/css/general.css";
 import "../../assets/css/adminPages.css";
 
-export default function DisplayEmailSettings({ emailSettings, orgData, setOrgData }) {
+import CustomColorToggle from "../CustomColorToggle";
+
+export default function DisplayEmailSettings({ orgData, setOrgData }) {
   // define my variables
-  const [name, setName] = React.useState("");
+  const [isMonthlyOn, setIsMonthlyOn] = React.useState(
+    orgData.emailSettings.monthlyStatus
+  );
+  const [isYearlyOn, setIsYearlyOn] = React.useState(
+    orgData.emailSettings.annual
+  );
+  const [isSemesterlyOn, setIsSemesterlyOn] = React.useState(
+    orgData.emailSettings.semester
+  );
+  const [isActiveAchievedOn, setIsActiveAchievedOn] = React.useState(
+    orgData.emailSettings.membershipAchieved
+  );
 
   // create my functions
   const saveSetting = (newValue, valueName) => {
     // use the newValue variable to update the db (using getAPIdata method)
-
     // update the org data variable
     let newData = { ...orgData };
-    newData[valueName] = newValue;
+    newData.emailSettings[valueName] = newValue;
     setOrgData(newData);
     console.log(newData);
   };
 
   return (
     <div className="org-email-settings">
-        <h2>Email Settings</h2>
-      <p>h</p>
+      <h2>Email Settings</h2>
+
+      {/* Monthly Status Update */}
+      <CustomColorToggle
+        label={"Monthly Status Update"}
+        isChecked={isMonthlyOn}
+        color={orgData.color}
+        onChange={() => {
+          setIsMonthlyOn(!isMonthlyOn);
+          saveSetting(!isMonthlyOn, "monthlyStatus");
+        }}
+      />
+
+      {/* Annual Org Update */}
+      <CustomColorToggle
+        label={"Annual Organization Update"}
+        isChecked={isYearlyOn}
+        color={orgData.color}
+        onChange={() => {
+          setIsYearlyOn(!isYearlyOn);
+          saveSetting(!isYearlyOn, "annual");
+        }}
+      />
+
+      {/* Semesterly Org Update */}
+      <CustomColorToggle
+        label={"Semester Organization Update"}
+        isChecked={isSemesterlyOn}
+        color={orgData.color}
+        onChange={() => {
+          setIsSemesterlyOn(!isSemesterlyOn);
+          saveSetting(!isSemesterlyOn, "semester");
+        }}
+      />
+
+      {/* Active Membership Achieved Update */}
+      <CustomColorToggle
+        label={"Active Membership Achieved Update"}
+        isChecked={isActiveAchievedOn}
+        color={orgData.color}
+        onChange={() => {
+          setIsActiveAchievedOn(!isActiveAchievedOn);
+          saveSetting(!isActiveAchievedOn, "monthlyStatus");
+        }}
+      />
     </div>
   );
 }
