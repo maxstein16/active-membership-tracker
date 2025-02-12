@@ -2,10 +2,12 @@ const Error = require("./public/errors.js");
 const error = new Error();
 
 
+
 async function getSpecificReportOrgData( orgId, memberId ) {
     
     // TODO: call db
-  
+
+
     /*
     Data should be displayed as:
 
