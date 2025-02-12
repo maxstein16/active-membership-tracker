@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
-const BusinessLogic = require("../../business-logic-layer/exports.js");
+const BusinessLogic = require("../../business-logic-layer/public/exports.js");
 const business = new BusinessLogic();
 
 const Error = require("../../business-logic-layer/public/errors.js");
