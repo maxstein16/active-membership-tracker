@@ -18,7 +18,7 @@ async function getMembershipRoleInfoInOrganization(organizationId, role) {
     }
 
     const memberships = await Membership.findAll({
-      where: { organization_id: organizationId, role: role },
+      where: { organization_id: organizationId, org_role: role },
     });
 
     if (!memberships || memberships.length < 1) {

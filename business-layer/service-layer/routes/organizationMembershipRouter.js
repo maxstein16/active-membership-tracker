@@ -14,7 +14,7 @@ const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
 // GET /v1/organization/{orgId}/membership/{role}
 router.get(
-  "/:orgId/membership/:role",
+  "/:role",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
