@@ -47,10 +47,6 @@ module.exports = function () {
     return await getMembersInOrganization(orgId);
   }
 
-  this.getMembershipRoleInOrg = async (orgId, role) => {
-    return await getMembershipRoleInfoInOrganization(orgId, role);
-  }
-
   this.editMembershipRoleInOrg = async (orgId, memberId, body) => {
     return await updateMembershipRoleInfoInOrganization(orgId, memberId, body);
   }
