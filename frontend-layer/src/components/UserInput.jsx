@@ -10,6 +10,7 @@ export default function UserInput({ label, color, value, setValue, isMultiline, 
   // Define my variables
 
   return (
+    <div className="user-input">
     <TextField
       multiline={isMultiline}
       fullWidth
@@ -35,7 +36,10 @@ export default function UserInput({ label, color, value, setValue, isMultiline, 
           },
         }
       }}
-      onBlur={onLeaveField}
+      onBlur={(event) => {
+        onLeaveField(event.target.value);
+      }}
     />
+    </div>
   );
 }

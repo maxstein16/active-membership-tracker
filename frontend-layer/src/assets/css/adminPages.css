@@ -1,4 +1,18 @@
 /* Organization settings basic info */
-.org-settings-basic-info {
-    
+.org-color-selector {
+    display: flex;
+    align-items: center;
+}
+
+.org-color-selector .user-input {
+    display: flex;
+    margin: 0;
+}
+
+.org-color-preview {
+    display: block;
+    width: 2em;
+    height: 2em;
+
+    margin-right: 1em;
 }

@@ -4,20 +4,20 @@ import "../../assets/css/pageSetup.css";
 import "../../assets/css/general.css";
 import "../../assets/css/memberPages.css";
 
-import { useParams } from "react-router-dom";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettingsBasicInfo";
+import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
 
 export default function SettingsPage() {
   // Define my variables
-  const { orgId } = useParams();
+  // const { orgId } = useParams();
   const [orgData, setOrgData] = React.useState(undefined);
 
   // Get user data
   React.useEffect(() => {
     // TODO
-    // get API data with org Id
+    // get API data with org Id above, uncomment
     // set org data
 
     // temp data
@@ -39,7 +39,7 @@ export default function SettingsPage() {
         {
           id: 0,
           meetingType: "Meeting",
-          frequency: "2x a Month",
+          frequency: "yearly",
           amountType: "points",
           amount: 1,
           requirementScope: "umm",
@@ -47,7 +47,7 @@ export default function SettingsPage() {
         {
           id: 4,
           meetingType: "Volunteer",
-          frequency: "2x a Month",
+          frequency: "semesterly",
           amountType: "points",
           amount: 4,
           requirementScope: "umm",
@@ -55,9 +55,9 @@ export default function SettingsPage() {
         {
           id: 10,
           meetingType: "Event",
-          frequency: "2x a Month",
-          amountType: "points",
-          amount: 1,
+          frequency: "semesterly",
+          amountType: "percent",
+          amount: 50,
           requirementScope: "umm",
         },
       ],
@@ -71,12 +71,14 @@ export default function SettingsPage() {
         <p>Error Fetching your Data</p>
       ) : (
         <>
-          <h1>Settings Page</h1>
-          <p>Org Id: {orgId}</p>
-          <br />
+          <h1>Settings</h1>
 
-          
-          <OrgSettingsBasicInfo orgData={orgData} setOrgData={setOrgData}/>
+          <OrgSettingsBasicInfo orgData={orgData} setOrgData={setOrgData} />
+          <DisplayEmailSettings
+            emailSettings={orgData.emailSettings}
+            orgData={orgData}
+            setOrgData={setOrgData}
+          />
         </>
       )}
     </PageSetup>

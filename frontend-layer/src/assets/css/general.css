@@ -59,3 +59,9 @@ button.secondary:hover {
 .bottom-corner-button:hover {
     background-color: var(--black);
 }
+
+/* User input */
+.user-input {
+    display: block;
+    margin: 2em 0;
+}
