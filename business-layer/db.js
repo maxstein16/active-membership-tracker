@@ -37,63 +37,120 @@ const Organization = sequelize.define("Organization", {
   },
 });
 
-const Member = sequelize.define("Member", {
-  member_id: {
-    type: DataTypes.INTEGER,
+// ==============================
+// Semester Model
+// ==============================
+const Semester = sequelize.define("Semester", {
+  semester_id: {
+    type: DataTypes.INTEGER, // Follows RIT term IDs (e.g., 2241, 2245)
     primaryKey: true,
-    autoIncrement: true,
   },
-  member_name: {
+  semester_name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  member_rit_username: {
+  academic_year: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true
   },
-  member_email: {
-    type: DataTypes.STRING,
+  start_date: {
+    type: DataTypes.DATE,
     allowNull: false,
-    unique: true,
   },
-  member_personal_email: DataTypes.STRING,
-  member_phone_number: DataTypes.STRING,
-  member_graduation_date: DataTypes.DATE,
-  member_tshirt_size: DataTypes.STRING,
-  member_major: DataTypes.STRING,
-  member_gender: DataTypes.STRING,
-  member_race: DataTypes.STRING,
+  end_date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 
-const Membership = sequelize.define("Membership", {
-  membership_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+// ==============================
+// Member Model
+// ==============================
+const Member = sequelize.define(
+  "Member",
+  {
+    member_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    member_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    member_email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    member_personal_email: DataTypes.STRING,
+    member_phone_number: DataTypes.STRING,
+    member_graduation_date: DataTypes.DATE,
+    member_tshirt_size: DataTypes.STRING,
+    member_major: DataTypes.STRING,
+    member_gender: DataTypes.STRING,
+    member_race: DataTypes.STRING,
+    member_status: {
+      type: DataTypes.ENUM(
+        "undergraduate",
+        "graduate",
+        "staff",
+        "faculty",
+        "alumni"
+      ),
+      defaultValue: "undergraduate",
+    },
   },
-  org_role: DataTypes.INTEGER,
-  member_points: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
+  {
+    timestamps: false,
+  }
+);
+
+// ==============================
+// Membership Model
+// ==============================
+const Membership = sequelize.define(
+  "Membership",
+  {
+    membership_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    member_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    organization_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    semester_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    membership_role: {
+      type: DataTypes.INTEGER, // 0=Member, 1=E-Board, 2=Admin
+      allowNull: false,
+    },
+    membership_points: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    active_member: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    active_semesters: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
-  active_member: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  meetings_attended: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
-  volunteer_events: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
-  social_events: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
+
 
 const Attendance = sequelize.define("Attendance", {
   attendance_id: {
