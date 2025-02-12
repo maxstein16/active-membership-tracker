@@ -25,7 +25,6 @@ export default function UserProfilePage() {
     // temp data
     setUserData({
       name: "Name Here",
-      img: "idk how to get this",
       email: "email@rit.edu",
       personalEmail: "email@gmail.com",
       phone: "(111) 111 - 1111",
