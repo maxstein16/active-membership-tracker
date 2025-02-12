@@ -8,6 +8,8 @@ import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettingsBasicInfo";
 import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
+import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
+import MemberTable from "../../components/AdminPageComponents/MemberTable";
 
 export default function SettingsPage() {
   // Define my variables
@@ -21,6 +23,8 @@ export default function SettingsPage() {
     // set org data
 
     // temp data
+    // don't change the labels of this data, it is used in MANY files
+    // instead, format the api result to look like this
     setOrgData({
       name: "Computing Organization for Multicultural Students",
       abbreviation: "COMMs",
@@ -73,10 +77,17 @@ export default function SettingsPage() {
         <>
           <h1>Settings</h1>
           <p>Data is automatically saved after you enter it</p>
-          <br/>
+          <br />
 
           <OrgSettingsBasicInfo orgData={orgData} setOrgData={setOrgData} />
           <DisplayEmailSettings orgData={orgData} setOrgData={setOrgData} />
+          <DisplayMembershipRequirements
+            color={orgData.color}
+            orgData={orgData}
+            setOrgData={setOrgData}
+          />
+
+          <MemberTable />
         </>
       )}
     </PageSetup>

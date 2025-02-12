@@ -51,17 +51,17 @@ export default function DashboardPage() {
         <>
           <h1>Welcome, {userData.name}</h1>{" "}
           <div className="org-boxes">
-            {userData.organizations.map((organization) => {
+            {userData.organizations.map((organization, key) => {
               if (organization.role !== ROLE_MEMBER) {
                 return (
-                  <div className="org-box-with-admin-links">
+                  <div key={KeyboardEvent} className="org-box-with-admin-links">
                     <OrgBox org={organization} />
                     <Link to={`/${organization.id}/settings`}>Settings</Link>
                     <Link to={`/${organization.id}/reports`}>Reports</Link>
                   </div>
                 );
               }
-              return <OrgBox org={organization} />;
+              return <OrgBox key={key} org={organization} />;
             })}
           </div>
           <div className="how-to-add-org-block">
