@@ -9,7 +9,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 // Creates the theme for MUI
 const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     primary: { main: "#F76902" },
     secondary: { main: "#ACA39A" },
     text: {

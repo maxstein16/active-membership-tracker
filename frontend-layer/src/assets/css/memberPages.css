@@ -1,0 +1,38 @@
+/* Columns */
+.two-columns-big-screen {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Member Profile Content */
+
+.member-profile-wrapper h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.2em;
+}
+
+.member-profile-wrapper hr {
+    margin: 3em 0;
+    border-color: var(--light-grey);
+    filter: brightness(1.7);
+}
+
+.member-profile-wrapper a, .member-profile-wrapper .phone-num {
+    display: block;
+    font-weight: bold;
+    margin: 0.5em 0;
+    color: var(--orange);
+}
+
+.icon-data {
+    display: flex;
+    margin-top: 3em;
+   
+}
+
+/* Icon and Caption */
+.icon-and-caption {
+    text-align: center;
+    margin: auto 1em;
+}

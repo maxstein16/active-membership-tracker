@@ -9,10 +9,7 @@
 .page-content {
     height: 100%;
     flex: 1;
-}
-
-a {
-    color: var(--orange);
+    padding: 4em 3em;
 }
 
 /* Navigation Bar */
@@ -47,19 +44,30 @@ a {
     filter: brightness(0.8);
 }
 
+.navigation-bar button:hover {
+    border: none;
+}
+
 /* Navigation Dropdown */
 
 .navigation-dropdown {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-around;
     align-items: top;
 
     background-color: var(--light-grey);
 
     width: 100vw;
-    padding: 20px 10px;
+    padding: 20px 30px;
     transition: 0.25s;
+
+    z-index: 2;
+}
+
+.columns {
+    flex-direction: row ;
+    padding: 20px 10px;
 }
 
 .navigation-dropdown div {
@@ -107,4 +115,15 @@ a {
 
 .footer a {
     filter: brightness(0.8);
+}
+
+/* Back button */
+.back-button {
+    position: absolute;
+    top: 60px;
+    left: 10px;
+}
+
+.back-button button:hover {
+    border: none;
 }

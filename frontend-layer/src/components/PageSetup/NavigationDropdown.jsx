@@ -1,11 +1,17 @@
 import * as React from "react";
 import "../../assets/css/constants.css";
 import "../../assets/css/pageSetup.css";
+import "../../assets/css/general.css";
 import { Link } from "react-router";
+import useWindowWidth from "../../utils/useWindowWidth";
 
-export default function NavigationDropdown({ opacity }) {
+
+export default function NavigationDropdown() {
+
+  const windowWidth = useWindowWidth();
+
   return (
-      <div className="navigation-dropdown" style={{opacity: opacity}}>
+      <div className={ windowWidth > 499 ? "navigation-dropdown columns" : "navigation-dropdown"}>
         <div>
           {/* TODO: get their organizations */}
           <Link to="/1/status">Wic</Link>
@@ -27,6 +33,7 @@ export default function NavigationDropdown({ opacity }) {
         <div>
           <Link to="/">Dashboard</Link>
           <Link to="/profile">Profile</Link>
+          <Link to="/login">Logout</Link>
         </div>
 
         {/* TODO: If they are a admin */}

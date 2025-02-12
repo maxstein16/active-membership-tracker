@@ -1,6 +1,7 @@
 import * as React from "react";
 import "../../assets/css/constants.css";
 import "../../assets/css/pageSetup.css";
+import "../../assets/css/general.css";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton } from "@mui/material";
@@ -21,10 +22,10 @@ export default function NavigationBar({ toggleDropdown }) {
       />
       <div>
         <IconButton onClick={() => navigate("/profile")} className="nav-bar-button">
-          <AccountCircleIcon sx={{ fontSize: 28 }} />
+          <AccountCircleIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
         </IconButton>
         <IconButton onClick={() => toggleDropdown()}>
-          <MenuIcon sx={{ fontSize: 28 }} />
+          <MenuIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
         </IconButton>
       </div>
     </div>

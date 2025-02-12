@@ -1,6 +1,7 @@
 import * as React from "react";
 import "../../assets/css/constants.css";
 import "../../assets/css/pageSetup.css";
+import "../../assets/css/general.css";
 
 export default function Footer() {
   return (
@@ -16,7 +17,7 @@ export default function Footer() {
       </div>
       <div>
         <h4>Learn more about us</h4>
-        <a href="https://www.rit.edu/diversity/">RIT DIO</a>
+        <a href="https://www.rit.edu/diversity/" target="_blank" rel="noreferrer">RIT DIO</a>
       </div>
     </div>
   );
