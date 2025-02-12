@@ -130,30 +130,30 @@ const Membership = sequelize.define(
     member_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "Member",
+        key: "member_id",
+      },
     },
     organization_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "Organization",
+        key: "organization_id",
+      },
     },
-    semester_id: {
-      type: DataTypes.INTEGER,
+    org_role: {
+      type: DataTypes.INTEGER, // 0 = Member, 1 = E-Board, 2 = Admin
       allowNull: false,
     },
-    membership_role: {
-      type: DataTypes.INTEGER, // 0=Member, 1=E-Board, 2=Admin
-      allowNull: false,
-    },
-    membership_points: {
+    member_points: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
     active_member: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    active_semesters: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
     },
   },
   {

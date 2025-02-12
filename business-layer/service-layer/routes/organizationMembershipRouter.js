@@ -42,7 +42,7 @@ router.get(
 
 // GET /v1/organization/{orgId}/membership/
 router.get(
-  "/:orgId/membership/",
+  "/",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
