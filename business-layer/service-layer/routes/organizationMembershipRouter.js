@@ -12,7 +12,7 @@ const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
-// GET /v1/organizations/{orgId}/membership/{role}
+// GET /v1/organization/{orgId}/membership/{role}
 router.get(
   "/:orgId/membership/:role",
   isAuthorizedHasSessionForAPI,
@@ -40,7 +40,7 @@ router.get(
   }
 );
 
-// GET /v1/organizations/{orgId}/membership/
+// GET /v1/organization/{orgId}/membership/
 router.get(
   "/:orgId/membership/",
   isAuthorizedHasSessionForAPI,
