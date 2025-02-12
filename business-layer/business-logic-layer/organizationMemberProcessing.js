@@ -146,53 +146,6 @@ async function deleteMemberInOrganization(orgId, memberId) {
   }
 }
 
-async function getMembershipRoleInfoInOrganization(orgId, role) {
-  try {
-    // is orgId an int?
-    if (isNaN(orgId)) {
-      return { error: error.organizationIdMustBeInteger, data: null };
-    }
-    if (isNaN(role)) {
-      return { error: error.roleMustBeAnInteger, data: null };
-    }
-
-    // get the data from data-layer
-    const memberships = await Membership.findAll();
-
-    // if the result is empty return error
-    if (!memberships || memberships.length < 1) {
-      return { error: error.membershipNotFound, data: null };
-    }
-
-    // filter by org and role
-    const filteredMemberships = memberships.filter(
-      (membership) =>
-        membership.organization_id == orgId && membership.role == role
-    );
-
-    // check if there are results
-    if (filteredMemberships.length < 1) {
-      return { error: error.membershipNotFound, data: null };
-    }
-
-    let displayResults = filteredMemberships.map(
-      (membership_id, member_id) => ({ membership_id, member_ids })
-    );
-
-    return {
-      error: error.noError,
-      data: {
-        organization_id: orgId,
-        role: role,
-        memberships: displayResults,
-      },
-    };
-  } catch (err) {
-    console.error("Error getting memberships by role:", err);
-    return { error: error.somethingWentWrong, data: null };
-  }
-}
-
 async function getMembersInOrganization(orgId) {
   try {
     // is orgId an int?
@@ -246,6 +199,5 @@ module.exports = {
   addMemberToAnOrganization,
   editMemberInOrganization,
   deleteMemberInOrganization,
-  getMembershipRoleInfoInOrganization,
   getMembersInOrganization,
 };

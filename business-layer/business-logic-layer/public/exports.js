@@ -10,16 +10,14 @@ const {
   getSpecificMemberWithOrgData, 
   addMemberToAnOrganization, 
   editMemberInOrganization, 
-  updateMemberAttendanceInOrganization, 
-  getMembersInOrganization, 
-  getMembershipRoleInfoInOrganization, 
-  updateMembershipRoleInfoInOrganization 
+  getMembersInOrganization,
 } = require("../organizationMemberProcessing");
 const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 const { getSpecificReportOrgData, getAnnualOrgReport, getSemesterOrgReport, getMeetingOrgReport } = require("../organizationReportProcessing");
+const { getAllMembershipsInOrganization, getMembershipRoleInfoInOrganization } = require("../organizationMembershipProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -129,6 +127,15 @@ module.exports = function () {
 
   this.getSemesterOrgReport = async (orgId) => {
     return await getSemesterOrgReport(orgId);
+  }
+
+  // Organization Membership Calls
+  this.getMembershipRoleInOrg = async (orgId, role) => {
+    return await getMembershipRoleInfoInOrganization(orgId, role);
+  }
+
+  this.getAllMembershipsInfoInOrg = async (orgId) => {
+    return await getAllMembershipsInOrganization(orgId);
   }
   
   // Event Management
