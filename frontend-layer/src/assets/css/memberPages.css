@@ -84,7 +84,7 @@
     margin: 0;
 }
 
-.org-box-with-admin-links a {
+.org-box-with-admin-links a, .org-box-with-admin-links p {
     display: block;
     color: var(--black);
     text-align: center;
@@ -94,7 +94,7 @@
     margin: 0.2em 0;
 }
 
-.org-box-with-admin-links a:hover {
+.org-box-with-admin-links a:hover, .org-box-with-admin-links p:hover {
     color: var(--medium-grey);
 }
 

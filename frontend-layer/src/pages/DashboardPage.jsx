@@ -5,9 +5,8 @@ import "../assets/css/general.css";
 import "../assets/css/memberPages.css";
 
 import PageSetup from "../components/PageSetup/PageSetup";
-import OrgBox from "../components/MemberPageComponents/OrgBox";
-import { ROLE_MEMBER } from "../utils/constants";
 import { Link } from "react-router";
+import OrgBoxWithAdminLinks from "../components/AdminPageComponents/OrgBoxWithAdminLinks";
 
 export default function DashboardPage() {
   // Define my variables
@@ -52,16 +51,7 @@ export default function DashboardPage() {
           <h1>Welcome, {userData.name}</h1>{" "}
           <div className="org-boxes">
             {userData.organizations.map((organization, key) => {
-              if (organization.role !== ROLE_MEMBER) {
-                return (
-                  <div key={KeyboardEvent} className="org-box-with-admin-links">
-                    <OrgBox org={organization} />
-                    <Link to={`/${organization.id}/settings`}>Settings</Link>
-                    <Link to={`/${organization.id}/reports`}>Reports</Link>
-                  </div>
-                );
-              }
-              return <OrgBox key={key} org={organization} />;
+              return <OrgBoxWithAdminLinks organization={organization} key={key}/>
             })}
           </div>
           <div className="how-to-add-org-block">

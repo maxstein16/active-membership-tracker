@@ -73,3 +73,8 @@ button.secondary:hover {
     display: block;
     margin: 2em 0;
 }
+
+/* Dialog */
+.dialog {
+    padding: 1em;
+}
