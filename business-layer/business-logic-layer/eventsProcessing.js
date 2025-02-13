@@ -1,3 +1,4 @@
+const { Event, Attendance } = require("../db"); // Import models
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -5,133 +6,100 @@ const error = new Error();
  * Retrieve all events for a specific organization with attendance records.
  */
 async function getAllEventsByOrganization(orgId) {
-  // TODO: Replace with a database call to fetch events and attendance for the given organization.
-
-  /*
-  Expected Output:
-
-  [
-    {
-      "event_id": 1,
-      "organization_id": 1,
-      "event_name": "General Meeting",
-      "event_start": "2024-05-10T18:00:00Z",
-      "event_end": "2024-05-10T20:00:00Z",
-      "event_location": "Main Hall",
-      "event_description": "Monthly general meeting",
-      "event_type": "Meeting",
-      "attendance": [
+  try {
+    const events = await Event.findAll({
+      where: { organization_id: orgId },
+      include: [
         {
-          "attendance_id": 101,
-          "member_id": 5,
-          "check_in": "2024-05-10T18:05:00Z"
+          model: Attendance,
+          as: "attendances",
+          attributes: ["attendance_id", "member_id", "check_in"],
         },
-        {
-          "attendance_id": 102,
-          "member_id": 7,
-          "check_in": "2024-05-10T18:10:00Z"
-        }
-      ]
-    },
-    {
-      "event_id": 2,
-      "organization_id": 1,
-      "event_name": "Volunteer Event",
-      "event_start": "2024-05-15T14:00:00Z",
-      "event_end": "2024-05-15T17:00:00Z",
-      "event_location": "Community Center",
-      "event_description": "Helping with food drive",
-      "event_type": "Volunteering",
-      "attendance": []
-    }
-  ]
-  */
+      ],
+    });
 
-  return { error: error.noError, data: "data-here" };
+    if (!events.length) {
+      return { error: error.noError, data: [] };
+    }
+
+    return { error: error.noError, data: events };
+  } catch (err) {
+    console.error("Error fetching events by organization:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
 /**
  * Retrieve a specific event by ID with its attendance records.
  */
 async function getEventById(orgId, eventId) {
-  // TODO: Replace with a database call to fetch a specific event by eventId along with attendance.
+  try {
+    const event = await Event.findOne({
+      where: { event_id: eventId, organization_id: orgId },
+      include: [
+        {
+          model: Attendance,
+          as: "attendances",
+          attributes: ["attendance_id", "member_id", "check_in"],
+        },
+      ],
+    });
 
-  /*
-  Expected Output:
+    if (!event) {
+      return { error: error.eventNotFound, data: null };
+    }
 
-  {
-    "event_id": 1,
-    "organization_id": 1,
-    "event_name": "General Meeting",
-    "event_start": "2024-05-10T18:00:00Z",
-    "event_end": "2024-05-10T20:00:00Z",
-    "event_location": "Main Hall",
-    "event_description": "Monthly general meeting",
-    "event_type": "Meeting",
-    "attendance": [
-      {
-        "attendance_id": 101,
-        "member_id": 5,
-        "check_in": "2024-05-10T18:05:00Z"
-      },
-      {
-        "attendance_id": 102,
-        "member_id": 7,
-        "check_in": "2024-05-10T18:10:00Z"
-      }
-    ]
+    return { error: error.noError, data: event };
+  } catch (err) {
+    console.error("Error fetching event by ID:", err);
+    return { error: error.somethingWentWrong, data: null };
   }
-  */
-
-  return { error: error.noError, data: "data-here" };
 }
 
 /**
  * Create a new event.
  */
 async function createEvent(orgId, eventData) {
-  // TODO: Replace with a database call to insert a new event record.
+  try {
+    const newEvent = await Event.create({
+      organization_id: orgId,
+      event_name: eventData.event_name,
+      event_start: eventData.event_start,
+      event_end: eventData.event_end,
+      event_location: eventData.event_location,
+      event_description: eventData.event_description,
+      event_type: eventData.event_type,
+    });
 
-  /*
-  Expected Output:
-
-  {
-    "event_id": 3,
-    "organization_id": 1,
-    "event_name": "Hackathon",
-    "event_start": "2024-06-01T09:00:00Z",
-    "event_end": "2024-06-01T17:00:00Z",
-    "event_location": "Tech Lab",
-    "event_description": "Annual coding competition",
-    "event_type": "Competition"
+    return { error: error.noError, data: newEvent };
+  } catch (err) {
+    console.error("Error creating event:", err);
+    return { error: error.somethingWentWrong, data: null };
   }
-  */
-
-  return { error: error.noError, data: "data-here" };
 }
 
 /**
  * Update an existing event.
  */
 async function updateEvent(orgId, eventId, updateData) {
-  // TODO: Replace with a database call to update an event record.
+  try {
+    const [updatedRows] = await Event.update(updateData, {
+      where: { event_id: eventId, organization_id: orgId },
+    });
 
-  /*
-  Expected Output:
+    if (updatedRows === 0) {
+      return { error: error.eventNotFound, data: null };
+    }
 
-  {
-    "event_id": 3,
-    "organization_id": 1,
-    "event_name": "Hackathon 2024",
-    "event_start": "2024-06-01T09:00:00Z",
-    "event_end": "2024-06-01T18:00:00Z",
-    "event_location": "Tech Lab",
-    "event_description": "Annual coding competition - extended hours",
-    "event_type": "Competition"
+    const updatedEvent = await Event.findOne({
+      where: { event_id: eventId, organization_id: orgId },
+    });
+
+    return { error: error.noError, data: updatedEvent };
+  } catch (err) {
+    console.error("Error updating event:", err);
+    return { error: error.somethingWentWrong, data: null };
   }
-  */
-
-  return { error: error.noError, data: "data-here" };
 }
 
 module.exports = {
