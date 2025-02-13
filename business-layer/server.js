@@ -2,6 +2,7 @@
 // imports
 const { MIN_30 } = require("./constants.js");
 
+
 // Requires
 require("dotenv").config(); // Load .env variables
 const express = require("express"); // REST API 
@@ -10,6 +11,8 @@ const logger = require("morgan"); // logging out the routes
 const cors = require("cors"); // defines our cors policy (protects our api)
 const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
 const path = require("path"); // finding the react pages
+const passport = require("passport"); // authentication for SSO/SHIBBOLETH
+const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 
 // create app
 const app = express();
@@ -37,6 +40,33 @@ app.use(
   })
 );
 
+// Passport SAML configuration
+passport.use(
+  new SamlStrategy(
+    {
+      path: "/login/callback",
+      entryPoint: process.env.SAML_ENTRY_POINT,
+      issuer: process.env.SAML_ISSUER,
+      cert: process.env.SAML_CERT,
+    },
+    function (profile, done) {
+      return done(null, profile);
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // CORS policy middleware
 app.use(
   cors({
@@ -57,6 +87,14 @@ let organizationReportsRouter = require("./service-layer/routes/organizationRepo
 let organizationSettingsRouter = require("./service-layer/routes/organizationSettingsRoute.js");
 let organizationRecognitionsRouter = require("./service-layer/routes/organizationRecognitionRouter.js")
 
+// Middleware to ensure the user is authenticated
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+}
+
 // use the routes
 app.use("/", serveFrontendRouter);
 
@@ -68,6 +106,31 @@ app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);
+
+// Define routes for SSO
+app.get(
+  "/login",
+  passport.authenticate("saml", {
+    successRedirect: "/",
+    failureRedirect: "/login",
+  })
+);
+
+app.post(
+  "/login/callback",
+  passport.authenticate("saml", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  function (req, res) {
+    res.redirect("/");
+  }
+);
+
+app.get("/logout", (req, res) => {
+  req.logout();
+  res.redirect("/");
+});
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {
