@@ -35,18 +35,41 @@
 
 /* Membership Requirement */
 .requirement-wrapper {
+    margin: 2em 0 3em 0;
+}
+.requirement-wrapper hr {
+    opacity: 0.3;
+}
+.percent-or-amount, .selects-and-delete {
     display: flex;
     flex-direction: row;
-    align-items: center;
-
-    margin: 1em 0;
+    align-items: end;
 }
-
-.requirement-wrapper div {
-    display: inline-block;
-    margin: 0 0.4em 0 0.2em;
+.selects-and-delete {
+    align-items: center;
+}
+.percent-or-amount p.percent {
+    margin-left: 2em;
+}
+.percent-or-amount .user-input {
+    width: 100%;
+    margin-bottom: 0em;
+}
+.selects-and-delete .select {
+    width: 100%;
+    margin-right: 1em;
 }
 
 .delete-requirement:hover {
     border: none;
 }
+/* .delete-requirement {
+    display: flex;
+    align-items: center;
+}
+.delete-requirement p {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    margin-left: 1em;
+} */

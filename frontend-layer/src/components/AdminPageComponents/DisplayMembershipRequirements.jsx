@@ -27,7 +27,9 @@ export default function DisplayMembershipRequirements({
 
     // remove the requirement from the orgData
     let newData = { ...orgData };
-    newData.membershipRequirements.splice(id, 1);
+    newData.membershipRequirements = newData.membershipRequirements.filter(
+      (requirement) => requirement.id !== id
+    );
     setOrgData(newData);
     // console.log(newData);
   };
@@ -36,18 +38,30 @@ export default function DisplayMembershipRequirements({
     <div className="org-email-settings">
       <h2>Membership Requirements</h2>
 
-      {orgData.membershipRequirements.map((requirement, key) => {
-        return (
-          <MembershipRequirementLine
-            requirement={requirement}
-            color={color}
-            updateValueAsTyping={updateValueAsTyping}
-            updateValueWhenDone={updateValueWhenDone}
-            deleteRequirement={deleteRequirement}
-            key={key}
-          />
-        );
-      })}
+      {orgData.membershipRequirements.length < 1 ? (
+        <p>No Requirements</p>
+      ) : (
+        <>
+          {orgData.membershipRequirements.map((requirement, key) => {
+            return (
+              <MembershipRequirementLine
+                requirement={requirement}
+                color={color}
+                updateValueAsTyping={updateValueAsTyping}
+                updateValueWhenDone={updateValueWhenDone}
+                deleteRequirement={deleteRequirement}
+                key={key}
+              />
+            );
+          })}
+        </>
+      )}
+      <button
+        className="custom-color-button"
+        style={{ backgroundColor: color, borderColor: color }}
+      >
+        Add New Requirement
+      </button>
     </div>
   );
 }

@@ -42,6 +42,10 @@ button.secondary:hover {
 
 }
 
+.custom-color-button:hover {
+    filter: brightness(0.8);
+}
+
 /* Bottom Corner Button */
 .bottom-corner-button {
     position: absolute;
@@ -62,6 +66,10 @@ button.secondary:hover {
 
 /* User input */
 .user-input {
+    display: block;
+    margin: 2em 0;
+}
+.select {
     display: block;
     margin: 2em 0;
 }

@@ -6,8 +6,8 @@ import "../../assets/css/adminPages.css";
 
 import UserInput from "../UserInput";
 import CustomSelect from "../CustomSelect";
-import { IconButton } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { IconButton } from "@mui/material";
 
 export default function MembershipRequirementLine({
   requirement,
@@ -18,8 +18,8 @@ export default function MembershipRequirementLine({
 }) {
   return (
     <div className="requirement-wrapper">
-      <p>A member must participate in</p>
-      <div>
+      <div className="percent-or-amount">
+        <p>A member must participate in</p>
         {/* Amount */}
         <UserInput
           label={requirement.amountType}
@@ -33,29 +33,39 @@ export default function MembershipRequirementLine({
             updateValueWhenDone(newValue, requirement.id, "amount");
           }}
         />
+        {requirement.amountType === "percent" ? (
+          <p className="percent">% of</p>
+        ) : (
+          <></>
+        )}
       </div>
-      {requirement.amountType === "percent" ? <p>% of</p> : <></>}
 
-      {/* Meeting Type Select */}
-      <CustomSelect
-        label="Meeting Type"
-        color={color}
-        options={["Meeting", "Event", "Volunteering"]}
-      />
+      <div className="selects-and-delete">
+        {/* Meeting Type Select */}
+        <CustomSelect
+          label="Meeting Type"
+          color={color}
+          options={["Meeting", "Event", "Volunteering"]}
+        />
 
-      {/* Frequency Type Select */}
-      <CustomSelect
-        label="Frequency"
-        color={color}
-        options={["Monthly", "Semesterly", "Yearly"]}
-      />
+        {/* Frequency Type Select */}
+        <CustomSelect
+          label="Frequency"
+          color={color}
+          options={["Monthly", "Semesterly", "Yearly"]}
+        />
 
-      <IconButton
-        className="delete-requirement"
-        onClick={() => deleteRequirement(requirement.id)}
-      >
-        <DeleteForeverIcon />
-      </IconButton>
+        {/* Delete Requirement Button */}
+        <IconButton
+          className="delete-requirement"
+          onClick={() => deleteRequirement(requirement.id)}
+        >
+          <DeleteForeverIcon />
+        </IconButton>
+
+      </div>
+
+      <hr/>
     </div>
   );
 }
