@@ -86,6 +86,10 @@ router.put(
   }
 );
 
+router.put("/", (req, res) => {
+  res.status(400).json({ error: error.mustIncludeMemberId });
+});
+
 // POST /v1/member
 router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   let body = req.body;

@@ -19,7 +19,7 @@ const hashPassword = require("./hash");
 const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 const { getSpecificReportOrgData, getAnnualOrgReport, getSemesterOrgReport, getMeetingOrgReport } = require("../organizationReportProcessing");
 const { getAllMembershipsInOrganization, getMembershipRoleInfoInOrganization } = require("../organizationMembershipProcessing");
-const { updateMemberInDB } = require("../memberProcessing");
+const { updateMemberInDB, getMemberById, createMemberInDB } = require("../memberProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -63,7 +63,6 @@ module.exports = function () {
   }
 
   this.createMember = async (memberData) => {
-    memberData.password = await hashPassword(memberData.password);
     return await createMemberInDB(memberData);
   }
   this.getSpecificMemberOrgStats = async (memberId, orgId) => {
