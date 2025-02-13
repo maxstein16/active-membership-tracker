@@ -107,30 +107,6 @@ app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);
 
-// Define routes for SSO
-app.get(
-  "/login",
-  passport.authenticate("saml", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  })
-);
-
-app.post(
-  "/login/callback",
-  passport.authenticate("saml", {
-    failureRedirect: "/login",
-    failureFlash: true,
-  }),
-  function (req, res) {
-    res.redirect("/");
-  }
-);
-
-app.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
-});
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {
