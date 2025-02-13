@@ -27,10 +27,17 @@ router.get("/", isAuthorizedHasSessionForWebsite, function (req, res) {
   );
 });
 
-// GET login
+// GET login  -- change for shibboleth
 router.get("/login", function (req, res) {
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
+  );
+});
+
+//Get metadata for SSO -- this is where metadata lives
+router.get("/Shibboleth/Metadata", function (req, res) {
+  res.sendFile(
+     "../../../Metadata.xml"
   );
 });
 
