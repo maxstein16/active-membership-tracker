@@ -29,7 +29,7 @@ router.get("/", isAuthorizedHasSessionForWebsite, function (req, res) {
 
 // GET login  -- change for shibboleth
 router.get("/login", function (req, res) {
-  res.sendFile(
+  res.sendFile( // should change to shibboleth login
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );
 });
