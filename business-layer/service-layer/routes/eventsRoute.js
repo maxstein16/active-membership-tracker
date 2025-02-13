@@ -18,7 +18,7 @@ const hasCredentials = require("../../business-logic-layer/public/hasCredentials
  * Get all events for an organization.
  */
 router.get(
-  "v1/organizations/:orgId/events",
+  "/",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let orgId = req.params.orgId;
@@ -48,7 +48,7 @@ router.get(
  * Get a specific event's details.
  */
 router.get(
-  "v1/organizations/:orgId/events/:eventId",
+  "/:eventId",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let { orgId, eventId } = req.params;
@@ -82,7 +82,7 @@ router.get(
  * Create a new event for an organization.
  */
 router.post(
-  "v1/organizations/:orgId/events",
+  "/",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let orgId = req.params.orgId;
@@ -133,7 +133,7 @@ router.post(
  * Update a specific event's details.
  */
 router.put(
-  "v1/organizations/:orgId/events/:eventId",
+  "/:eventId",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let { orgId, eventId } = req.params;

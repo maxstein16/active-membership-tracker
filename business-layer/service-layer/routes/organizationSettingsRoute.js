@@ -15,7 +15,7 @@ const hasCredentials = require("../../business-logic-layer/public/hasCredentials
 
 //GET /v1/organization/:orgId/settings
 router.get(
-  "/v1/organization/:orgId/settings",
+  "/",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -47,7 +47,7 @@ router.get(
 
 //PUT /v1/organization/:orgId/membership-requirements
 router.put(
-  "/v1/organization/:orgId/membership-requirements",
+  "/membership-requirements",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -98,7 +98,7 @@ router.put(
 
 //PUT /v1/organization/:orgId/email-settings
 router.put(
-  "/v1/organization/:orgId/email-settings",
+  "/email-settings",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -149,7 +149,7 @@ router.put(
 
 //DELETE /v1/organization/:orgId/membership-requirements
 router.delete(
-  "/v1/organization/:orgId/membership-requirements",
+  "/membership-requirements",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;

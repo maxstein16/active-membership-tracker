@@ -96,7 +96,7 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
 
 // GET /v1/organization/{orgId}/reports/meeting?id={meetingId}
 router.get(
-  "/meeting?id={meetingId}",
+  "/meeting/:meetingId",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
