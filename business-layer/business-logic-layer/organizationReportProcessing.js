@@ -1,12 +1,13 @@
 const Error = require("./public/errors.js");
 const error = new Error();
-
-
+const { Member, Membership, Organization, Event, Attendance } = require("../db"); // Import database models
+const { getMemberById } = require("../business-logic-layer/memberProcessing");
+const { getAllEventsByOrganization } = require("../business-logic-layer/eventsProcessing");
 
 async function getSpecificReportOrgData( orgId, memberId ) {
     
     // TODO: call db
-
+    var memberguy = getMemberById(1);
 
     /*
     Data should be displayed as:
@@ -34,11 +35,15 @@ async function getSpecificReportOrgData( orgId, memberId ) {
           ]
         }
     */
-    return {error: error.noError, data: "data-here"}
+    //return {error: error.noError, data: "data-here"}
+    return {error: error.noError, data: memberguy};
   }
 
 
   async function getAnnualOrgReport(orgId) {
+    var orgThing = getAllEventsByOrganization(1);
+
+
     //connect to db
     //in order to get the data for this report, do something like this....
     //for each entry in the Organization table, get the organization info
@@ -96,7 +101,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
      */
 
 
-    return {error: error.noError, data: "data-here"}
+    return {error: error.noError, data: orgThing}
   }
 
   async function getSemesterOrgReport(orgId) {

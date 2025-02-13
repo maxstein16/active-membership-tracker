@@ -12,7 +12,7 @@ async function getAllEventsByOrganization(orgId) {
       include: [
         {
           model: Attendance,
-          as: "attendances",
+          as: "Attendances",
           attributes: ["attendance_id", "member_id", "check_in"],
         },
       ],
