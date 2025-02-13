@@ -4,6 +4,9 @@ const { Member, Membership, Organization, Event, Attendance } = require("../db")
 const { getMemberById } = require("../business-logic-layer/memberProcessing");
 const { getAllEventsByOrganization } = require("../business-logic-layer/eventsProcessing");
 
+//note: route for getAllEventsByOrganization method doesn't work currently. will be calling DB manually to get data for now
+//may revise this with method calls after routes/paths are fixed
+
 async function getSpecificReportOrgData( orgId, memberId ) {
     
     // TODO: call db
@@ -41,8 +44,32 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
 
   async function getAnnualOrgReport(orgId) {
-    var orgThing = getAllEventsByOrganization(1);
+   // var orgThing = getAllEventsByOrganization(orgId);
+    var report ;
 
+      try {
+        const events = await Event.findAll({
+          where: { organization_id: 1 },
+          include: [
+            {
+              model: Attendance,
+              as: "Attendances",
+              attributes: ["attendance_id", "member_id", "check_in"],
+            },
+          ],
+        });
+    
+        if (!events.length) {
+          return { error: error.noError, data: [] };
+        }
+    
+       report = events;
+        
+       
+      } catch (err) {
+        console.error("Error fetching events by organization:", err);
+        return { error: error.somethingWentWrong, data: null };
+      }
 
     //connect to db
     //in order to get the data for this report, do something like this....
@@ -101,14 +128,38 @@ async function getSpecificReportOrgData( orgId, memberId ) {
      */
 
 
-    return {error: error.noError, data: orgThing}
+    return {error: error.noError, data: report}
   }
 
   async function getSemesterOrgReport(orgId) {
-   
 
+   //var orgThing = getAllEventsByOrganization(1);
+   var report = "";
+
+
+    // try {
+    //     const events = await Event.findAll({
+    //       where: { organization_id: 1 },
+    //       include: [
+    //         {
+    //           model: Attendance,
+    //           as: "Attendances",
+    //           attributes: ["attendance_id", "member_id", "check_in"],
+    //         },
+    //       ],
+    //     });
     
-    return {error: error.noError, data: "data-here"}
+    //     if (!events.length) {
+    //       return { error: error.noError, data: [] };
+    //     }
+    
+    //     return { error: error.noError, data: events.length };
+    //   } catch (err) {
+    //     console.error("Error fetching events by organization:", err);
+    //     return { error: error.somethingWentWrong, data: null };
+    //   }
+    
+    return {error: error.noError, data: report}
   }
 
   async function getMeetingOrgReport (orgId, meetingId) {
