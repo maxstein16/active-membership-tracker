@@ -15,263 +15,272 @@ const sequelize = new Sequelize(
   }
 );
 
-// ==============================
-// Organization Model
-// ==============================
-const Organization = sequelize.define("Organization", {
-  organization_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+// Define models
+const Organization = sequelize.define(
+  "Organization", {
+    organization_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    organization_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    organization_description: DataTypes.STRING,
+    organization_color: DataTypes.STRING,
+    org_abbreviation: {
+      type: DataTypes.STRING(10),
+    },
+    active_membership_threshold: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
-  organization_name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  organization_description: DataTypes.STRING,
-  organization_color: DataTypes.STRING,
-  organization_abbreviation: DataTypes.STRING(10),
-  organization_threshold: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 // ==============================
 // Semester Model
 // ==============================
-const Semester = sequelize.define("Semester", {
-  semester_id: {
-    type: DataTypes.INTEGER, // Follows RIT term IDs (e.g., 2241, 2245)
-    primaryKey: true,
+const Semester = sequelize.define("Semester", 
+  {
+    semester_id: {
+      type: DataTypes.INTEGER, // Follows RIT term IDs (e.g., 2241, 2245)
+      primaryKey: true,
+    },
+    semester_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    academic_year: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    start_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    end_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   },
-  semester_name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  academic_year: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  start_date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  end_date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 // ==============================
 // Member Model
 // ==============================
-const Member = sequelize.define("Member", {
-  member_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Member = sequelize.define(
+  "Member",
+  {
+    member_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    member_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    member_email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    member_personal_email: DataTypes.STRING,
+    member_phone_number: DataTypes.STRING,
+    member_graduation_date: DataTypes.DATE,
+    member_tshirt_size: DataTypes.STRING,
+    member_major: DataTypes.STRING,
+    member_gender: DataTypes.STRING,
+    member_race: DataTypes.STRING,
+    member_status: {
+      type: DataTypes.ENUM(
+        "undergraduate",
+        "graduate",
+        "staff",
+        "faculty",
+        "alumni"
+      ),
+      defaultValue: "undergraduate",
+    },
   },
-  member_name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  member_email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  member_personal_email: DataTypes.STRING,
-  member_phone_number: DataTypes.STRING,
-  member_graduation_date: DataTypes.DATE,
-  member_tshirt_size: DataTypes.STRING,
-  member_major: DataTypes.STRING,
-  member_gender: DataTypes.STRING,
-  member_race: DataTypes.STRING,
-  member_status: {
-    type: DataTypes.ENUM(
-      "undergraduate",
-      "graduate",
-      "staff",
-      "faculty",
-      "alumni"
-    ),
-    defaultValue: "undergraduate",
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 // ==============================
 // Membership Model
 // ==============================
-const Membership = sequelize.define("Membership", {
-  membership_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Membership = sequelize.define(
+  "Membership",
+  {
+    membership_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    member_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Member",
+        key: "member_id",
+      },
+    },
+    organization_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Organization",
+        key: "organization_id",
+      },
+    },
+    org_role: {
+      type: DataTypes.INTEGER, // 0 = Member, 1 = E-Board, 2 = Admin
+      allowNull: false,
+    },
+    member_points: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    active_member: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
-  member_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  semester_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  membership_role: {
-    type: DataTypes.INTEGER, // 0=Member, 1=E-Board, 2=Admin
-    allowNull: false,
-  },
-  membership_points: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
-  active_member: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  active_semesters: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
-// ==============================
-// Event Model
-// ==============================
-const Event = sequelize.define("Event", {
-  event_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  semester_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  event_name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  event_start: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  event_end: DataTypes.DATE,
-  event_location: DataTypes.STRING,
-  event_description: DataTypes.TEXT,
-  event_type: {
-    type: DataTypes.ENUM(
-      "general_meeting",
-      "volunteer",
-      "social",
-      "workshop",
-      "fundraiser",
-      "committee"
-    ),
-    allowNull: false,
-  },
-});
 
-// ==============================
-// Attendance Model
-// ==============================
-const Attendance = sequelize.define("Attendance", {
-  attendance_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Attendance = sequelize.define(
+  "Attendance", {
+    attendance_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    attendance_status: DataTypes.INTEGER,
   },
-  member_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  event_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  check_in: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  volunteer_hours: {
-    type: DataTypes.FLOAT,
-    defaultValue: 0,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
-// ==============================
-// Membership Requirement Model
-// ==============================
-const MembershipRequirement = sequelize.define("MembershipRequirement", {
-  setting_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Event = sequelize.define(
+  "Event", {
+    event_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    event_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    event_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    event_location: DataTypes.STRING,
+    event_description: DataTypes.STRING,
+    event_type: DataTypes.STRING,
   },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  meeting_type: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  frequency: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  amount_type: {
-    type: DataTypes.ENUM("points", "percentage"),
-    allowNull: false,
-  },
-  amount: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  requirement_scope: {
-    type: DataTypes.ENUM("semesterly", "annually"),
-    allowNull: false,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
-// ==============================
-// Email Settings Model
-// ==============================
-const EmailSettings = sequelize.define("EmailSettings", {
-  email_setting_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Recognition = sequelize.define(
+  "Recognition", {
+    recognition_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    recognition_year: DataTypes.INTEGER,
+    recognition_type: DataTypes.INTEGER,
   },
-  organization_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+  {
+    timestamps: false,
+  }
+);
+
+
+const MembershipRequirement = sequelize.define(
+  "MembershipRequirement", {
+    setting_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    organization_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    meeting_type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    frequency: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    amount_type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    amount: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
   },
-  current_status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
+  {
+    timestamps: false,
+  }
+);
+
+const EmailSettings = sequelize.define(
+  "EmailSettings", {
+    email_setting: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    organization_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    current_status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    annual_report: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    semester_report: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    membership_achieved: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
   },
-  annual_report: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  semester_report: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  membership_achieved: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 // ==============================
 // Define Associations

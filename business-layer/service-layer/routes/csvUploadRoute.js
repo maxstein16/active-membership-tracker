@@ -26,7 +26,7 @@ const upload = multer({
 });
 
 router.post(
-    "/v1/organizations/:orgId/upload-csv",
+    "/upload-csv",
     isAuthorizedHasSessionForAPI,
     upload.single("file"),
     async (req, res) => {
