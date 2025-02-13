@@ -39,7 +39,7 @@ export default function NavigationDropdown() {
         {/* TODO: If they are a admin */}
         <div>
           <Link to="/createOrg">Create an Organization</Link>
-          <Link to="/">Grant Privileges</Link>
+          <Link to="/grantPrivilege">Grant Privileges</Link>
         </div>
       </div>
   );
