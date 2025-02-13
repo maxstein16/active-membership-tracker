@@ -10,6 +10,8 @@ export default function DisplayMembershipRequirements({
   color,
   orgData,
   setOrgData,
+  updateValueInDB, 
+  deleteRequirementInDB
 }) {
   const updateValueAsTyping = (newValue, reqId, valueName) => {
     let newData = { ...orgData };
@@ -18,12 +20,9 @@ export default function DisplayMembershipRequirements({
     // console.log(newData);
   };
 
-  const updateValueWhenDone = (newValue, reqId, valueName) => {
-    // use the newValue variable to update the db (using getAPIdata method)
-  };
-
   const deleteRequirement = (id) => {
     // delete the requirement in the api
+    deleteRequirementInDB(id)
 
     // remove the requirement from the orgData
     let newData = { ...orgData };
@@ -48,7 +47,7 @@ export default function DisplayMembershipRequirements({
                 requirement={requirement}
                 color={color}
                 updateValueAsTyping={updateValueAsTyping}
-                updateValueWhenDone={updateValueWhenDone}
+                updateValueWhenDone={updateValueInDB}
                 deleteRequirement={deleteRequirement}
                 key={key}
               />

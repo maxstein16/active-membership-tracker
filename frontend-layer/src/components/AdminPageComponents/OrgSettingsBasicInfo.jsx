@@ -6,23 +6,12 @@ import "../../assets/css/adminPages.css";
 
 import UserInput from "../UserInput";
 
-export default function OrgSettingsBasicInfo({ orgData, setOrgData }) {
+export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
   // define my variables
   const [name, setName] = React.useState(orgData.name);
   const [abbreviation, setAbbreviation] = React.useState(orgData.abbreviation);
   const [description, setDescription] = React.useState(orgData.description);
   const [color, setColor] = React.useState(orgData.color);
-
-  // create my functions
-  const saveSetting = (newValue, valueName) => {
-    // use the newValue variable to update the db (using getAPIdata method)
-
-    // update the org data variable
-    let newData = { ...orgData };
-    newData[valueName] = newValue;
-    setOrgData(newData);
-    console.log(newData);
-  };
 
   return (
     <div className="org-settings-basic-info">

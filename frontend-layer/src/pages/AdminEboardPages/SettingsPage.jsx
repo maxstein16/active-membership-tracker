@@ -23,7 +23,7 @@ export default function SettingsPage() {
     // set org data
 
     // temp data
-    // don't change the labels of this data, it is used in MANY files
+    // DO NOT CHANGE THE LABELS OR FORMAT OF THIS DATA, it is used in MANY files
     // instead, format the api result to look like this
     setOrgData({
       name: "Computing Organization for Multicultural Students",
@@ -68,6 +68,37 @@ export default function SettingsPage() {
     });
   }, []);
 
+  /* Update Settings*/
+  const saveBasicSetting = (newValue, valueName) => {
+    // use the newValue variable to update the db (using getAPIdata method)
+
+    // this can be done at the same time as the getAPIdata method is running
+    // update the org data variable
+    let newData = { ...orgData };
+    newData[valueName] = newValue;
+    setOrgData(newData);
+    console.log(newData);
+  };
+
+  const saveEmailSetting = (newValue, valueName) => {
+    // use the newValue variable to update the db (using getAPIdata method)
+    
+    // this can be done at the same time as the getAPIdata method is running
+    // update the org data variable
+    let newData = { ...orgData };
+    newData.emailSettings[valueName] = newValue;
+    setOrgData(newData);
+    console.log(newData);
+  };
+
+  const updateValueInDB = (newValue, reqId, valueName) => {
+    // update a value for a membership requirement in the db
+      // example param values: '3' '39' 'amount'
+  };
+  const deleteRequirementInDB = (reqId) => {
+    // delete the requirement by reqId in the databse
+  };
+
   return (
     <PageSetup>
       <BackButton route={"/"} />
@@ -79,12 +110,14 @@ export default function SettingsPage() {
           <p>Data is automatically saved after you enter it</p>
           <br />
 
-          <OrgSettingsBasicInfo orgData={orgData} setOrgData={setOrgData} />
-          <DisplayEmailSettings orgData={orgData} setOrgData={setOrgData} />
+          <OrgSettingsBasicInfo orgData={orgData} saveData={saveBasicSetting} />
+          <DisplayEmailSettings orgData={orgData} saveData={saveEmailSetting} />
           <DisplayMembershipRequirements
             color={orgData.color}
             orgData={orgData}
             setOrgData={setOrgData}
+            updateValueInDB={updateValueInDB}
+            deleteRequirementInDB={deleteRequirementInDB}
           />
 
           <MemberTable />

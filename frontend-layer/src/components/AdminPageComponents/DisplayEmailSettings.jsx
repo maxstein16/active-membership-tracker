@@ -6,7 +6,7 @@ import "../../assets/css/adminPages.css";
 
 import CustomColorToggle from "../CustomColorToggle";
 
-export default function DisplayEmailSettings({ orgData, setOrgData }) {
+export default function DisplayEmailSettings({ orgData, saveSetting }) {
   // define my variables
   const [isMonthlyOn, setIsMonthlyOn] = React.useState(
     orgData.emailSettings.monthlyStatus
@@ -20,16 +20,6 @@ export default function DisplayEmailSettings({ orgData, setOrgData }) {
   const [isActiveAchievedOn, setIsActiveAchievedOn] = React.useState(
     orgData.emailSettings.membershipAchieved
   );
-
-  // create my functions
-  const saveSetting = (newValue, valueName) => {
-    // use the newValue variable to update the db (using getAPIdata method)
-    // update the org data variable
-    let newData = { ...orgData };
-    newData.emailSettings[valueName] = newValue;
-    setOrgData(newData);
-    console.log(newData);
-  };
 
   return (
     <div className="org-email-settings">
