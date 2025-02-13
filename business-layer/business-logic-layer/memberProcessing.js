@@ -1,4 +1,4 @@
-const { Member, Membership, Organization } = require("../db"); // Import database models
+const { Member, Membership, Organization } = require("../db");
 const { sendEmail } = require("../service-layer/emailService");
 const { activeMembershipEmail } = require("./public/emailTemplates");
 const Error = require("./public/errors.js");
@@ -28,7 +28,7 @@ async function getMemberById(memberId) {
             return { error: error.memberNotFound, data: null };
         }
 
-        return { error: error.noError, data: member.toJSON() };
+        return { error: null, data: member.toJSON() };
     } catch (err) {
         console.error("Error fetching member by ID:", err);
         return { error: error.somethingWentWrong, data: null };
@@ -45,21 +45,23 @@ async function updateMemberInDB(memberId, memberData) {
     if (!Number.isInteger(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
-    if (typeof memberData !== "object" || Object.keys(memberData).length === 0) {
+    if (!memberData || typeof memberData !== "object" || Object.keys(memberData).length === 0) {
         return { error: error.mustIncludeValidFieldAddMember, data: null };
     }
 
     try {
-        const prevStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
-        const wasActiveBefore = prevStats.data?.isActiveMember || false;
-
-        const [updated] = await Member.update(memberData, { where: { member_id: memberId } });
-
-        if (!updated) {
+        const existingMember = await Member.findByPk(memberId);
+        if (!existingMember) {
             return { error: error.memberNotFound, data: null };
         }
 
+        const prevStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
+        const wasActiveBefore = prevStats.data?.isActiveMember || false;
+
+        await Member.update(memberData, { where: { member_id: memberId } });
+
         const updatedMember = await Member.findByPk(memberId);
+
         const newStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
         const isActiveNow = newStats.data?.isActiveMember || false;
 
@@ -68,7 +70,7 @@ async function updateMemberInDB(memberId, memberData) {
             await sendEmail(updatedMember.email, emailData.subject, emailData.body);
         }
 
-        return { error: error.noError, data: updatedMember.toJSON() };
+        return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
         console.error("Error updating member:", err);
         return { error: error.somethingWentWrong, data: null };
@@ -81,13 +83,13 @@ async function updateMemberInDB(memberId, memberData) {
  * @returns {Promise<object>} The newly created member object or an error.
  */
 async function createMemberInDB(memberData) {
-    if (typeof memberData !== "object") {
+    if (!memberData || typeof memberData !== "object") {
         return { error: error.mustHaveAllFieldsAddMemberInOrg, data: null };
     }
 
     try {
         const newMember = await Member.create(memberData);
-        return { error: error.noError, data: newMember.toJSON() };
+        return { error: null, data: newMember.toJSON() };
     } catch (err) {
         console.error("Error creating member:", err);
         return { error: error.memberCanNotBeAddedToOrg, data: null };
@@ -118,21 +120,23 @@ async function getSpecificMemberOrgStats(memberId, orgId) {
             return { error: error.membershipNotFound, data: null };
         }
 
+        const organization = membership.Organization;
+
         const stats = {
             member_id: membership.member_id,
             organization_id: membership.organization_id,
             membership_id: membership.membership_id,
-            organization_name: membership.Organization.organization_name,
-            organization_abbreviation: membership.Organization.organization_abbreviation,
+            organization_name: organization.organization_name,
+            organization_abbreviation: organization.organization_abbreviation,
             meetings_attended: membership.meetings_attended || 0,
             volunteer_events: membership.volunteer_events || 0,
             social_events: membership.social_events || 0,
             your_points: membership.points || 0,
-            active_membership_threshold: Organization.active_membership_threshold,
-            isActiveMember: (membership.points || 0) >= 48,
+            active_membership_threshold: organization.active_membership_threshold,
+            isActiveMember: (membership.points || 0) >= organization.active_membership_threshold,
         };
 
-        return { error: error.noError, data: stats };
+        return { error: null, data: stats };
     } catch (err) {
         console.error("Error fetching member organization stats:", err);
         return { error: error.somethingWentWrong, data: null };

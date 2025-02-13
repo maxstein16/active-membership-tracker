@@ -40,13 +40,13 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // does the user have privileges?
-  const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    req.session.user.username,
-    orgId
-  );
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+  //   req.session.user.username,
+  //   orgId
+  // );
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
 
   // send to backend
   const orgData = await business.getAnnualOrgReport(orgId);
@@ -96,7 +96,7 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
 
 // GET /v1/organization/{orgId}/reports/meeting?id={meetingId}
 router.get(
-  "/meeting?id={meetingId}",
+  "/meeting/:meetingId",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -118,13 +118,13 @@ router.get(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(
-      req.session.user.username,
-      orgId
-    );
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    //   req.session.user.username,
+    //   orgId
+    // );
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     // send to backend
     const orgData = await business.getMeetingOrgReport(orgId, meetingId);

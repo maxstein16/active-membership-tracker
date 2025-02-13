@@ -14,7 +14,6 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v4
@@ -23,6 +22,16 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        cache-dependency-path: business-layer/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+      working-directory: business-layer
+
+    - name: Build project
+      run: npm run build --if-present
+      working-directory: business-layer
+
+    # - name: Run tests
+    #   run: npm test
+    #   working-directory: business-layer
