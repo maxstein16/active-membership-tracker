@@ -77,10 +77,10 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // does the user have privileges?
-  const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
 
 
   // send off to backend
@@ -133,10 +133,10 @@ router.put(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     // send off to backend
     const result = await business.editMemberInOrg(orgId, memberId, body);

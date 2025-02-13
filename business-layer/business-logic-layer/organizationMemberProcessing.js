@@ -84,6 +84,12 @@ async function addMemberToAnOrganization(orgId, memberData) {
 
 async function editMemberInOrganization(orgId, memberId, memberDataToUpdate) {
   try {
+    // Map `role` to `org_role`
+    if (memberDataToUpdate.hasOwnProperty("role")) {
+      memberDataToUpdate.org_role = memberDataToUpdate.role;
+      delete memberDataToUpdate.role;
+    }
+
     // is orgId an int?
     if (isNaN(orgId)) {
       return { error: error.organizationIdMustBeInteger, data: null };
@@ -91,7 +97,7 @@ async function editMemberInOrganization(orgId, memberId, memberDataToUpdate) {
     if (isNaN(memberId)) {
       return { error: error.memberIdMustBeInteger, data: null };
     }
-    if (isNaN(memberDataToUpdate.role)) {
+    if (isNaN(memberDataToUpdate.org_role)) {
       return { error: error.roleMustBeAnInteger, data: null };
     }
 

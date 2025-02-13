@@ -11,6 +11,7 @@ const {
   addMemberToAnOrganization, 
   editMemberInOrganization, 
   getMembersInOrganization,
+  deleteMemberInOrganization,
 } = require("../organizationMemberProcessing");
 const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
@@ -18,6 +19,7 @@ const hashPassword = require("./hash");
 const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 const { getSpecificReportOrgData, getAnnualOrgReport, getSemesterOrgReport, getMeetingOrgReport } = require("../organizationReportProcessing");
 const { getAllMembershipsInOrganization, getMembershipRoleInfoInOrganization } = require("../organizationMembershipProcessing");
+const { updateMemberInDB } = require("../memberProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -36,7 +38,7 @@ module.exports = function () {
   };
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
-    return await editMemberInOrganization(orgId, memberId);
+    return await deleteMemberInOrganization(orgId, memberId);
   };
 
   this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {

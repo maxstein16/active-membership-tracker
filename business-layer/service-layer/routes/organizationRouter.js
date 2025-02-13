@@ -67,13 +67,13 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // does the user have privileges?
-  const hasPrivileges = hasCredentials.isAdmin(
-    req.session.user.username,
-    orgId
-  );
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
+  // const hasPrivileges = hasCredentials.isAdmin(
+  //   req.session.user.username,
+  //   orgId
+  // );
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
 
   //send off to backend
   var result = await business.addOrganization(orgId, body);
@@ -115,13 +115,13 @@ router.put("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // does the user have privileges?
-  const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    req.session.user.username,
-    orgId
-  );
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+  //   req.session.user.username,
+  //   orgId
+  // );
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
 
   //send off to backend
   var result = await business.editOrganization(orgId, body);
