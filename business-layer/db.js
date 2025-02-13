@@ -10,7 +10,7 @@ const sequelize = new Sequelize(
     dialect: "mariadb",
     logging: false,
     define: {
-      freezeTableName: true, // Prevents Sequelize from pluralizing table names
+      freezeTableName: true,
     },
   }
 );
@@ -282,46 +282,80 @@ const EmailSettings = sequelize.define(
   }
 );
 
-// ==============================
-// Define Associations
-// ==============================
+// Define associations
 
-Organization.hasMany(Membership, { foreignKey: "organization_id" });
-Membership.belongsTo(Organization, { foreignKey: "organization_id" });
-
-Organization.hasMany(Event, { foreignKey: "organization_id" });
-Event.belongsTo(Organization, { foreignKey: "organization_id" });
-
-Organization.hasMany(MembershipRequirement, { foreignKey: "organization_id" });
-MembershipRequirement.belongsTo(Organization, {
+EmailSettings.belongsTo(Organization, {
   foreignKey: "organization_id",
+  as: "organization",
 });
 
-Organization.hasMany(EmailSettings, { foreignKey: "organization_id" });
-EmailSettings.belongsTo(Organization, { foreignKey: "organization_id" });
+MembershipRequirement.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
+});
 
-Member.hasMany(Membership, { foreignKey: "member_id" });
-Membership.belongsTo(Member, { foreignKey: "member_id" });
+Member.hasMany(Membership, {
+  foreignKey: "member_id",
+  as: "memberships",
+});
 
-Member.hasMany(Attendance, { foreignKey: "member_id" });
-Attendance.belongsTo(Member, { foreignKey: "member_id" });
+Membership.belongsTo(Member, {
+  foreignKey: "member_id",
+  as: "member",
+});
 
-Semester.hasMany(Membership, { foreignKey: "semester_id" });
-Membership.belongsTo(Semester, { foreignKey: "semester_id" });
+Organization.hasMany(Membership, {
+  foreignKey: "organization_id",
+  as: "memberships",
+});
 
-Semester.hasMany(Event, { foreignKey: "semester_id" });
-Event.belongsTo(Semester, { foreignKey: "semester_id" });
+Membership.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
+});
 
-Event.hasMany(Attendance, { foreignKey: "event_id" });
-Attendance.belongsTo(Event, { foreignKey: "event_id" });
+Member.hasMany(Attendance, {
+  foreignKey: "member_id",
+  as: "attendances",
+});
+
+Attendance.belongsTo(Member, {
+  foreignKey: "member_id",
+  as: "member",
+});
+
+Event.hasMany(Attendance, {
+  foreignKey: "event_id",
+  as: "attendances",
+});
+
+Attendance.belongsTo(Event, {
+  foreignKey: "event_id",
+  as: "event",
+});
+
+Member.hasMany(Recognition, {
+  foreignKey: "member_id",
+  as: "recognitions",
+});
+
+Recognition.belongsTo(Member, {
+  foreignKey: "member_id",
+  as: "member",
+});
+
+Recognition.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
+});
 
 module.exports = {
   sequelize,
   Organization,
-  Semester,
   Member,
   Membership,
   Attendance,
+  Recognition,
   Event,
   MembershipRequirement,
   EmailSettings,

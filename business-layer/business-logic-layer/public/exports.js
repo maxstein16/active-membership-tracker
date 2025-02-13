@@ -19,7 +19,7 @@ const hashPassword = require("./hash");
 const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 const { getSpecificReportOrgData, getAnnualOrgReport, getSemesterOrgReport, getMeetingOrgReport } = require("../organizationReportProcessing");
 const { getAllMembershipsInOrganization, getMembershipRoleInfoInOrganization } = require("../organizationMembershipProcessing");
-const { updateMemberInDB } = require("../memberProcessing");
+const { updateMemberInDB, getMemberById } = require("../memberProcessing");
 
 // export to api calls
 module.exports = function () {
