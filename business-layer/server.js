@@ -53,6 +53,7 @@ let sessionRouter = require("./service-layer/routes/sessionRoute.js");
 let memberRouter = require("./service-layer/routes/memberRoute.js");
 let organizationRouter = require("./service-layer/routes/organizationRouter.js");
 let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
+let organizationMembershipRouter = require("./service-layer/routes/organizationMembershipRouter.js");
 let organizationReportsRouter = require("./service-layer/routes/organizationReportsRouter.js");
 let organizationSettingsRouter = require("./service-layer/routes/organizationSettingsRoute.js");
 let organizationRecognitionsRouter = require("./service-layer/routes/organizationRecognitionRouter.js")
@@ -65,6 +66,7 @@ app.use("/v1/session", sessionRouter);
 app.use("/v1/member", memberRouter);
 app.use("/v1/organization/:orgId", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
+app.use("/v1/organization/:orgId/membership", organizationMembershipRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);

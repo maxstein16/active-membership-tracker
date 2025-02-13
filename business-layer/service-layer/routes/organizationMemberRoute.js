@@ -77,10 +77,10 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // does the user have privileges?
-  const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
 
 
   // send off to backend
@@ -133,10 +133,10 @@ router.put(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     // send off to backend
     const result = await business.editMemberInOrg(orgId, memberId, body);
@@ -195,42 +195,6 @@ router.delete(
     }
 
     // return with appropriate status error and message
-    res.status(200).json({ status: "success", data: result.data });
-  }
-);
-
-// GET /v1/organization/{orgId}/membership/{role}
-router.get(
-  "/membership/:role",
-  isAuthorizedHasSessionForAPI,
-  async function (req, res) {
-    let orgId = req.params.orgId;
-    let role = req.params.role;
-
-    // sanitize params
-    orgId = sanitizer.sanitize(orgId);
-    role = sanitizer.sanitize(role);
-
-    // check if params are valid
-    if (isNaN(orgId)) {
-      res.status(400).json({ error: error.organizationIdMustBeInteger });
-      return;
-    }
-    if (isNaN(role)) {
-      res.status(400).json({ error: error.roleMustBeInteger });
-      return;
-    }
-
-    // send off to backend
-    const result = await business.getMembershipRoleInOrg(orgId, role);
-
-    // check for errors that backend returned
-    if (result.error && result.error !== error.noError) {
-      res.status(404).json({ error: error.membershipNotFound });
-      return;
-    }
-
-    // return with appropriate status and message
     res.status(200).json({ status: "success", data: result.data });
   }
 );

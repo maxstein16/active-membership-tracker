@@ -10,16 +10,16 @@ const {
   getSpecificMemberWithOrgData, 
   addMemberToAnOrganization, 
   editMemberInOrganization, 
-  updateMemberAttendanceInOrganization, 
-  getMembersInOrganization, 
-  getMembershipRoleInfoInOrganization, 
-  updateMembershipRoleInfoInOrganization 
+  getMembersInOrganization,
+  deleteMemberInOrganization,
 } = require("../organizationMemberProcessing");
 const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
 const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
 const hashPassword = require("./hash");
 const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 const { getSpecificReportOrgData, getAnnualOrgReport, getSemesterOrgReport, getMeetingOrgReport } = require("../organizationReportProcessing");
+const { getAllMembershipsInOrganization, getMembershipRoleInfoInOrganization } = require("../organizationMembershipProcessing");
+const { updateMemberInDB } = require("../memberProcessing");
 
 // export to api calls
 module.exports = function () {
@@ -38,7 +38,7 @@ module.exports = function () {
   };
 
   this.deleteMemberInOrg = async (orgId, memberId) => {
-    return await editMemberInOrganization(orgId, memberId);
+    return await deleteMemberInOrganization(orgId, memberId);
   };
 
   this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {
@@ -47,10 +47,6 @@ module.exports = function () {
 
   this.getMembersInOrg = async (orgId) => {
     return await getMembersInOrganization(orgId);
-  }
-
-  this.getMembershipRoleInOrg = async (orgId, role) => {
-    return await getMembershipRoleInfoInOrganization(orgId, role);
   }
 
   this.editMembershipRoleInOrg = async (orgId, memberId, body) => {
@@ -129,6 +125,15 @@ module.exports = function () {
 
   this.getSemesterOrgReport = async (orgId) => {
     return await getSemesterOrgReport(orgId);
+  }
+
+  // Organization Membership Calls
+  this.getMembershipRoleInOrg = async (orgId, role) => {
+    return await getMembershipRoleInfoInOrganization(orgId, role);
+  }
+
+  this.getAllMembershipsInfoInOrg = async (orgId) => {
+    return await getAllMembershipsInOrganization(orgId);
   }
   
   // Event Management

@@ -15,7 +15,7 @@ const hasCredentials = require("../../business-logic-layer/public/hasCredentials
 
 //GET /v1/organization/:orgId/settings
 router.get(
-  "/v1/organization/:orgId/settings",
+  "/",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -27,13 +27,13 @@ router.get(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(
-      req.session.user.username,
-      orgId
-    );
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    //   req.session.user.username,
+    //   orgId
+    // );
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     const response = await business.getOrganizationSettings(parseInt(orgId));
 
@@ -47,7 +47,7 @@ router.get(
 
 //PUT /v1/organization/:orgId/membership-requirements
 router.put(
-  "/v1/organization/:orgId/membership-requirements",
+  "/membership-requirements",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -69,13 +69,13 @@ router.put(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(
-      req.session.user.username,
-      orgId
-    );
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    //   req.session.user.username,
+    //   orgId
+    // );
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     const response = await business.editOrganizationMembershipRequirements(
       parseInt(orgId),
@@ -98,7 +98,7 @@ router.put(
 
 //PUT /v1/organization/:orgId/email-settings
 router.put(
-  "/v1/organization/:orgId/email-settings",
+  "/email-settings",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -126,13 +126,13 @@ router.put(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(
-      req.session.user.username,
-      orgId
-    );
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    //   req.session.user.username,
+    //   orgId
+    // );
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     const response = await business.editOrganizationEmailSettings(
       parseInt(orgId),
@@ -149,7 +149,7 @@ router.put(
 
 //DELETE /v1/organization/:orgId/membership-requirements
 router.delete(
-  "/v1/organization/:orgId/membership-requirements",
+  "/membership-requirements",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
@@ -166,10 +166,10 @@ router.delete(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
 
     const response = await business.deleteOrganizationMembershipRequirement(
