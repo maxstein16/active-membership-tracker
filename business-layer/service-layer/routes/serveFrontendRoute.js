@@ -37,7 +37,7 @@ router.get("/login", function (req, res) {
 //Get metadata for SSO -- this is where metadata lives
 router.get("/Shibboleth/Metadata", function (req, res) {
   res.sendFile(
-     "../../../metadata.xml"
+    path.join(__dirname, "../../../metadata.xml")
   );
 });
 
