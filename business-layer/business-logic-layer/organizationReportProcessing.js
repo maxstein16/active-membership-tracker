@@ -50,10 +50,10 @@ async function getSpecificReportOrgData( orgId, memberId ) {
   }
 
 
-  async function getAnnualOrgReport(organizationId) {    
+  async function getAnnualOrgReport(organizationId, year) {    
     const d = new Date();
     const current_year = d.getUTCFullYear() + "-01-01 00:00:00";
-    const past_year = d.getUTCFullYear()-1 + "-01-01 00:00:00";
+    const past_year = d.getUTCFullYear()-1;
 
     var totalMembers, new_members, total_active, new_active = 0;
     var orgName = "";
@@ -84,6 +84,11 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     });
 
     const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
+
+    const events = await sequelize.query(`SELECT event_id, event_start, event_end  FROM Event WHERE organization_id = ? AND event_start >= '2024-01-01 00:00:00' AND event_end < '2025-01-01 00:00:00'`, {
       replacements: [organizationId],
       type: QueryTypes.SELECT,
     });
@@ -120,12 +125,34 @@ async function getSpecificReportOrgData( orgId, memberId ) {
         "rit_username": member.member_email,
         "phone": member.member_phone_number
       }))
-    }
+    },
+    "member-data-last-year": {
+          "total_members": 35,
+          "new_members": 4,
+          "total_active_members": 16,
+          "new_active_members": 6,
+      },
+        
+      "meetings_data_this_year": {
+          "number_of_meetings": 35,
+          "number_of_events": 329,
+          "number_of_volunteering": 23,
+          "total_attendance": 32942
+      },
+        
+      "meetings_data_last_year": {
+          "number_of_meetings": 35,
+          "number_of_events": 329,
+          "number_of_volunteering": 23,
+          "total_attendance": 32942
+      }
+
+
   };
 
 
 
-    return { error: error.noError, data: jsonResponse };
+    return { error: error.noError, data: events };
 
    } catch (err) {
     console.error("Error fetching member by ID:", err);
