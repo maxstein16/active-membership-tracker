@@ -1,8 +1,15 @@
 const Error = require("./public/errors.js");
 const error = new Error();
 const { Member, Membership, Organization, Event, Attendance } = require("../db"); // Import database models
-const { getMemberById } = require("../business-logic-layer/memberProcessing");
-const { getAllEventsByOrganization } = require("../business-logic-layer/eventsProcessing");
+const { QueryTypes } = require('sequelize');
+const { sequelize } = require("../db");
+
+//const { getMemberById } = require("../business-logic-layer/memberProcessing");
+//const { getAllEventsByOrganization } = require("../business-logic-layer/eventsProcessing");
+//const { getEventById } = require("../business-logic-layer/eventsProcessing");
+//const { getSpecificOrgData } = require("../business-logic-layer/organizationProcessing");
+//const { getAllMembershipsInOrganization } = require("../business-logic-layer/organizationMembershipProcessing");
+
 
 //note: route for getAllEventsByOrganization method doesn't work currently. will be calling DB manually to get data for now
 //may revise this with method calls after routes/paths are fixed
@@ -43,34 +50,29 @@ async function getSpecificReportOrgData( orgId, memberId ) {
   }
 
 
-  async function getAnnualOrgReport(orgId) {
+  async function getAnnualOrgReport(organizationId) {
    // var orgThing = getAllEventsByOrganization(orgId);
-    var report ;
-
-      try {
-        const events = await Event.findAll({
-          where: { organization_id: 1 },
-          include: [
-            {
-              model: Attendance,
-              as: "Attendances",
-              attributes: ["attendance_id", "member_id", "check_in"],
-            },
-          ],
-        });
+   try {
+    //organization_id
+    var report = "no data here in annual"
+    const members = await sequelize.query('SELECT * FROM `Membership` WHERE organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
     
-        if (!events.length) {
-          return { error: error.noError, data: [] };
-        }
-    
-       report = events;
-        
-       
-      } catch (err) {
-        console.error("Error fetching events by organization:", err);
-        return { error: error.somethingWentWrong, data: null };
-      }
+  
+    if (!members.length) {
+      return { error: error.noError, data: [] };
+    }
+    report = members;
 
+    return { error: error.noError, data: report };
+
+   } catch (err) {
+    console.error("Error fetching member by ID:", err);
+    return { error: error.somethingWentWrong, data: null };
+   } 
+   
     //connect to db
     //in order to get the data for this report, do something like this....
     //for each entry in the Organization table, get the organization info
@@ -128,13 +130,13 @@ async function getSpecificReportOrgData( orgId, memberId ) {
      */
 
 
-    return {error: error.noError, data: report}
   }
 
   async function getSemesterOrgReport(orgId) {
 
    //var orgThing = getAllEventsByOrganization(1);
    var report = "";
+
 
 
     // try {
@@ -164,7 +166,13 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   async function getMeetingOrgReport (orgId, meetingId) {
 
+    var report;
 
+    var orgInfo = getSpecificOrgData(orgId);
+
+
+
+    return {error: error.noError, data: orgInfo}
 /**
    * {
     "status": "success",
@@ -213,8 +221,6 @@ async function getSpecificReportOrgData( orgId, memberId ) {
  */
 
 
-
-    return {error: error.noError, data: "data-here"}
   }
   
 
