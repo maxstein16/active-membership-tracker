@@ -69,6 +69,17 @@ export default function CreateOrganizationPage() {
         updateValueInDB={() => {/* Don't need to do anything here */}}
         deleteRequirementInDB={() => {/* Don't need to do anything here */}}
       />
+
+      {/* When clicked: cancel needs to have an are you sure popup,  */}
+      <div className="create-org-buttons">
+      <button className="secondary">
+        Cancel
+      </button>
+      <button>
+        Create Organization
+      </button>
+      </div>
+      
     </PageSetup>
   );
 }

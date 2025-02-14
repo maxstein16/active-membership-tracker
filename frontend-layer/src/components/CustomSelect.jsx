@@ -9,11 +9,12 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
-export default function CustomSelect({ label, color, options }) {
-  const [age, setAge] = React.useState("");
+export default function CustomSelect({ label, color, options, startingValue, onSelect }) {
+  const [age, setAge] = React.useState(startingValue);
 
   const handleChange = (event) => {
     setAge(event.target.value);
+    onSelect(event.target.value);
   };
 
   return (

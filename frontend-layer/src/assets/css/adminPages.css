@@ -63,13 +63,23 @@
 .delete-requirement:hover {
     border: none;
 }
-/* .delete-requirement {
+
+/* Create org save and cancel buttons */
+.create-org-buttons {
+    margin-top: 4em;
     display: flex;
-    align-items: center;
+    justify-content: end;
 }
-.delete-requirement p {
-    display: inline-block;
-    padding: 0;
+
+/* Reports Page */
+.report-pick-and-download {
+    display: flex;
+    padding: 0.5em 0;
+}
+.report-pick-and-download .select {
+    width: 100%;
     margin: 0;
-    margin-left: 1em;
-} */
+}
+.reports-wrapper > div {
+    margin: 5em 0;
+}

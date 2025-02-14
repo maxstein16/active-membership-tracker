@@ -7,6 +7,7 @@ import "../assets/css/memberPages.css";
 import PageSetup from "../components/PageSetup/PageSetup";
 import { Link } from "react-router";
 import OrgBoxWithAdminLinks from "../components/AdminPageComponents/OrgBoxWithAdminLinks";
+import { CircularProgress } from "@mui/material";
 
 export default function DashboardPage() {
   // Define my variables
@@ -45,7 +46,7 @@ export default function DashboardPage() {
   return (
     <PageSetup>
       {!userData ? (
-        <p>Error fetching your data</p>
+        <CircularProgress/>
       ) : (
         <>
           <h1>Welcome, {userData.name}</h1>{" "}

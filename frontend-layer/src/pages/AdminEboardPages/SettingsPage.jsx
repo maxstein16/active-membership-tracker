@@ -10,6 +10,7 @@ import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettin
 import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
+import { CircularProgress } from "@mui/material";
 
 export default function SettingsPage() {
   // Define my variables
@@ -43,7 +44,7 @@ export default function SettingsPage() {
         {
           id: 0,
           meetingType: "Meeting",
-          frequency: "yearly",
+          frequency: "Yearly",
           amountType: "points",
           amount: 1,
           requirementScope: "umm",
@@ -51,7 +52,7 @@ export default function SettingsPage() {
         {
           id: 4,
           meetingType: "Volunteer",
-          frequency: "semesterly",
+          frequency: "Semesterly",
           amountType: "points",
           amount: 4,
           requirementScope: "umm",
@@ -59,7 +60,7 @@ export default function SettingsPage() {
         {
           id: 10,
           meetingType: "Event",
-          frequency: "semesterly",
+          frequency: "Monthly",
           amountType: "percent",
           amount: 50,
           requirementScope: "umm",
@@ -103,7 +104,7 @@ export default function SettingsPage() {
     <PageSetup>
       <BackButton route={"/"} />
       {!orgData ? (
-        <p>Error Fetching your Data</p>
+        <CircularProgress/>
       ) : (
         <>
           <h1>Settings</h1>

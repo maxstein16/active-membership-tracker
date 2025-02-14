@@ -10,6 +10,7 @@ import BottomCornerButton from "../../components/BottomCornerButton";
 import EditIcon from "@mui/icons-material/Edit";
 import UserProfileData from "../../components/MemberPageComponents/UserProfileData";
 import { useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 export default function UserProfilePage() {
   // Define my variables
@@ -49,7 +50,7 @@ export default function UserProfilePage() {
       </BottomCornerButton>
 
       {!userData ? (
-        <p>Error fetching your data</p>
+        <CircularProgress/>
       ) : (
         <UserProfileData user={userData} />
       )}
