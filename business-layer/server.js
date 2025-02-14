@@ -67,8 +67,8 @@ passport.use(
   new SamlStrategy(
     {
       path: "/login/callback",
-      entryPoint: process.env.SAML_ENTRY_POINT,
-      issuer: process.env.SAML_ISSUER,
+      entryPoint: process.env.ENTRY_POINT,
+      issuer: process.env.ISSUER,
       cert: fs.readFileSync(path.join(__dirname, "../cert/idp_cert.pem"), "utf8"),
     },
     function (profile, done) {
