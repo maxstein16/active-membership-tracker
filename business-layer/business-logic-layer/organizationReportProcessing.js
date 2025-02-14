@@ -50,23 +50,82 @@ async function getSpecificReportOrgData( orgId, memberId ) {
   }
 
 
-  async function getAnnualOrgReport(organizationId) {
+  async function getAnnualOrgReport(organizationId) {    
+    const d = new Date();
+    const current_year = d.getUTCFullYear() + "-01-01 00:00:00";
+    const past_year = d.getUTCFullYear()-1 + "-01-01 00:00:00";
+
+    var totalMembers, new_members, total_active, new_active = 0;
+    var orgName = "";
+    var shortOrg = "";
+    var report = `
+    organization_id: ${organizationId}, 
+    organization_name: ${orgName}, 
+    organization_abbreviation: ${shortOrg},
+     member-data : { 
+     total_members: ${totalMembers}, 
+     new_members : ${new_members}, 
+     total_active_members: ${total_active}, 
+     new_active_members: ${new_active} }`;
+
    // var orgThing = getAllEventsByOrganization(orgId);
    try {
     //organization_id
-    var report = "no data here in annual"
-    const members = await sequelize.query('SELECT * FROM `Membership` WHERE organization_id = ?', {
+   // var report = "no data here in annual"
+    const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
       replacements: [organizationId],
       type: QueryTypes.SELECT,
     });
-    
-  
-    if (!members.length) {
-      return { error: error.noError, data: [] };
-    }
-    report = members;
 
-    return { error: error.noError, data: report };
+// //SELECT member_id, member_name FROM `Member` INNER JOIN ON Member.member_id = Membership.member_id WHERE Membership.organization_id = ?
+    const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
+
+    const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
+
+    
+
+
+    //sample to test join
+    const test = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id', {
+      logging: console.log,
+      raw: true,
+      type: QueryTypes.SELECT,
+    });
+
+    // if (!members.length && !org.length) {
+    //   return { error: error.noError, data: "data is empty" };
+    // }
+
+   const jsonResponse = {
+    "organization_id": organizationId,
+    "organization_name": organization.organization_name,
+    "organization_abbreviation": organization.organization_abbreviation,
+    "current_year": current_year,
+    "member-data": {
+      "total_members": members.length,
+      //"new_members": stats.new_members,
+      "total_active_members": activeMembers.length,
+      //"new_active_members": stats.new_active_members,
+      "members": members.map(member => ({
+        "member_id": member.member_id,
+        "role_num": member.role_num,
+        "firstName": member.member_name,
+        "lastName": member.member_name,
+        "rit_username": member.member_email,
+        "phone": member.member_phone_number
+      }))
+    }
+  };
+
+
+
+    return { error: error.noError, data: jsonResponse };
 
    } catch (err) {
     console.error("Error fetching member by ID:", err);
