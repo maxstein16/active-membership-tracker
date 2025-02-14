@@ -41,7 +41,7 @@ app.use(
   })
 );
 
-// Passport SAML configuration
+/* Passport SAML configuration
 var samlStrategy = new saml.Strategy({
   // URL that goes from the Identity Provider -> Service Provider
   callbackUrl: process.env.CALLBACK_URL,
@@ -62,7 +62,20 @@ var samlStrategy = new saml.Strategy({
   return done(null, profile); 
 });
 passport.use(samlStrategy);
-
+*/
+passport.use(
+  new SamlStrategy(
+    {
+      path: "/login/callback",
+      entryPoint: process.env.SAML_ENTRY_POINT,
+      issuer: process.env.SAML_ISSUER,
+      cert: fs.readFileSync(path.join(__dirname, "../cert/idp_cert.pem"), "utf8"),
+    },
+    function (profile, done) {
+      return done(null, profile);
+    }
+  )
+);
 passport.serializeUser((user, done) => {
   done(null, user);
 });
