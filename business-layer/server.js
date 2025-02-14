@@ -41,19 +41,26 @@ app.use(
 );
 
 // Passport SAML configuration
-passport.use(
-  new SamlStrategy(
-    {
-      path: "/login/callback",
-      entryPoint: process.env.SAML_ENTRY_POINT,
-      issuer: process.env.SAML_ISSUER,
-      cert: process.env.SAML_CERT,
-    },
-    function (profile, done) {
-      return done(null, profile);
-    }
-  )
-);
+var samlStrategy = new saml.Strategy({
+  // URL that goes from the Identity Provider -> Service Provider
+  callbackUrl: process.env.CALLBACK_URL,
+  // URL that goes from the Service Provider -> Identity Provider
+  entryPoint: process.env.ENTRY_POINT,
+  // Usually specified as `/shibboleth` from site root
+  issuer: process.env.ISSUER,
+  identifierFormat: null,
+  // Service Provider private key
+  decryptionPvk: fs.readFileSync(__dirname + '../cert/key.pem', 'utf8'),
+  // Service Provider Certificate
+  privateCert: fs.readFileSync(__dirname + '../cert/key.pem', 'utf8'),
+  // Identity Provider's public key
+  cert: fs.readFileSync(__dirname + '../cert/idp_cert.pem', 'utf8'),
+  validateInResponseTo: false,
+  disableRequestedAuthnContext: true
+}, function(profile, done) {
+  return done(null, profile); 
+});
+passport.use(samlStrategy);
 
 passport.serializeUser((user, done) => {
   done(null, user);
