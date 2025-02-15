@@ -107,14 +107,24 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       logging: console.log,
     });
 
-    const attendance = await sequelize.query('SELECT attendance_id FROM `Attendance` WHERE check_in BETWEEN ? AND ? ', {
-      replacements: [start_year, end_year],
+    const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
+      replacements: [organizationId, start_year, end_year],
       type: QueryTypes.SELECT,
     });
 
-
     start_year = (year-1) + "-01-01 00:00:00";
      end_year = year  + "-01-01 00:00:00";
+
+
+     const previousMembers = await sequelize.query(`SELECT Member.member_id FROM Member INNER JOIN Membership ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ? AND Membership.createdAt >= ? AND Membership.createdAt < ?`, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+    });
+
+    const previousActiveMembers = await sequelize.query(`SELECT Member.member_id, Member.member_name FROM Member INNER JOIN Membership ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ? AND Membership.createdAt >= ? AND Membership.createdAt < ?`, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+    });
 
      const previousEvents = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? `, {
       replacements: [organizationId, start_year, end_year],
@@ -134,6 +144,14 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       logging: console.log,
     });
 
+    const previousAttendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+    });
+
+    
+    let newMemberCount = members.length - previousMembers.length;
+    let newActiveMemberCount = activeMembers.length - previousActiveMembers.length;
 
     console.log(meetings);
     console.log(volunteering);
@@ -158,22 +176,22 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     // "current_year": current_year,
     "member-data": {
       "total_members": members.length,
-      //"new_members": stats.new_members,
+      "new_members": newMemberCount,
       "total_active_members": activeMembers.length,
-      //"new_active_members": stats.new_active_members,
+      "new_active_members": newActiveMemberCount,
       "members": members.map(member => ({
         "member_id": member.member_id,
         "role_num": member.role_num,
-        "firstName": member.member_name,
-        "lastName": member.member_name,
-        "rit_username": member.member_email,
+        "firstName": member.member_name.split(" ")[0],
+        "lastName": member.member_name.split(" ")[1],
+        "rit_username": member.member_email.split("@")[0],
         "phone": member.member_phone_number
       }))
     },
     "member-data-last-year": {
-          "total_members": 35,
+          "total_members": previousMembers.length,
           "new_members": 4,
-          "total_active_members": 16,
+          "total_active_members": previousActiveMembers.length,
           "new_active_members": 6,
       },
         
@@ -181,14 +199,14 @@ async function getSpecificReportOrgData( orgId, memberId ) {
           "number_of_meetings": meetings.length,
           "number_of_events": events.length,
           "number_of_volunteering": volunteering.length,
-          "total_attendance": 32942
+          "total_attendance": attendance.length
       },
         
       "meetings_data_last_year": {
           "number_of_meetings": previousMeetings.length,
           "number_of_events": previousEvents.length,
           "number_of_volunteering": previousVolunteering.length,
-          "total_attendance": 32942
+          "total_attendance": previousAttendance.length
       }
 
 
