@@ -277,36 +277,148 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   }
 
-  async function getSemesterOrgReport(organizationId) {
+  async function getSemesterOrgReport(organizationId, semesterId) {
 
    //var orgThing = getAllEventsByOrganization(1);
    var report = "";
 
+   const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+    replacements: [organizationId],
+    type: QueryTypes.SELECT,
+  });
+
+  const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+    replacements: [organizationId],
+    type: QueryTypes.SELECT,
+  });
+
+  const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
+    replacements: [organizationId],
+    type: QueryTypes.SELECT,
+  });
+
+  const events = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? `, {
+    replacements: [organizationId, start_year, end_year],
+    type: QueryTypes.SELECT,
+    logging: console.log,
+  });
+
+  const meetings = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'general_meeting'`, {
+    replacements: [organizationId, start_year, end_year],
+    type: QueryTypes.SELECT,
+    logging: console.log,
+  });
+
+  const volunteering = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'volunteer'`, {
+    replacements: [organizationId, start_year, end_year],
+    type: QueryTypes.SELECT,
+    logging: console.log,
+  });
+
+  const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
+    replacements: [organizationId, start_year, end_year],
+    type: QueryTypes.SELECT,
+  });
 
 
-    // try {
-    //     const events = await Event.findAll({
-    //       where: { organization_id: 1 },
-    //       include: [
-    //         {
-    //           model: Attendance,
-    //           as: "Attendances",
-    //           attributes: ["attendance_id", "member_id", "check_in"],
-    //         },
-    //       ],
-    //     });
     
-    //     if (!events.length) {
-    //       return { error: error.noError, data: [] };
-    //     }
-    
-    //     return { error: error.noError, data: events.length };
-    //   } catch (err) {
-    //     console.error("Error fetching events by organization:", err);
-    //     return { error: error.somethingWentWrong, data: null };
-    //   }
-    
-    return {error: error.noError, data: report}
+
+    const jsonResponse = {
+      "organization_id": organizationId,
+      "organization_name": organization.organization_name,
+      "organization_abbreviation": organization.organization_abbreviation,
+      // "current_year": current_year,
+      "current_semester_start": '01-12-2025',
+    "current_semester_end": '05-12-2025',
+      "member-data": {
+        "total_members": members.length,
+        "new_members": newMemberCount,
+        "total_active_members": activeMembers.length,
+        "new_active_members": newActiveMemberCount,
+        "members": members.map(member => ({
+          "member_id": member.member_id,
+          "role_num": member.role_num,
+          "firstName": member.member_name.split(" ")[0],
+          "lastName": member.member_name.split(" ")[1],
+          "rit_username": member.member_email.split("@")[0],
+          "phone": member.member_phone_number
+        }))
+      },
+
+      "member_data_last_sem": {
+            "total_members": previousMembers.length,
+            "new_members": previousYearNewMemberCount,
+            "total_active_members": previousActiveMembers.length,
+            "new_active_members": previousYearNewActiveMemberCount,
+        },
+          
+        "meetings_data_this_sem": {
+            "number_of_meetings": meetings.length,
+            "number_of_events": events.length,
+            "number_of_volunteering": volunteering.length,
+            "total_attendance": attendance.length
+        },
+          
+        "meetings_data_last_sem": {
+            "number_of_meetings": previousMeetings.length,
+            "number_of_events": previousEvents.length,
+            "number_of_volunteering": previousVolunteering.length,
+            "total_attendance": previousAttendance.length
+        }
+    };
+  
+   return {error: error.noError, data: report}
+
+
+   /**
+    * {
+  "status": "success",
+  "data": {
+    "organization_id": 1,
+    "organization_name": "Women In Computing",
+    "organization_abbreviation": "WiC",
+    "current_year": 2025, 
+    "current_semester_start": 01-12-2025,
+    "current_semester_end": 05-12-2025,
+    "member-data-this-sem": {
+	    "total_members": 35,
+	    "new_members": 4,
+	    "total_active_members": 16,
+	    "new_active_members": 6,
+	    "members": [
+		    {
+			    "member_id": 0291,
+			    "role_num": 1,
+			    "firstName": "Phoebe",
+			    "lastName": "Wong",
+			    "rit_username": "pw3919",
+			    "phone": 2319239140
+		    },
+		    ...
+	    ]
+    },
+    "member-data-last-sem": {
+	    "total_members": 35,
+	    "new_members": 4,
+	    "total_active_members": 16,
+	    "new_active_members": 6,
+    }
+    "meetings_data_this_sem": {
+	    "number_of_meetings": 35,
+	    "number_of_events": 329,
+	    "number_of_volunteering": 23,
+	    "total_attendance": 32942
+    },
+    "meetings_data_last_sem": {
+	    "number_of_meetings": 35,
+	    "number_of_events": 329,
+	    "number_of_volunteering": 23,
+	    "total_attendance": 32942
+    }
+  }
+}
+    */
+   
   }
 
   //NOTE The current path for this does NOT work as defined in organizationReportsRouter. This method has NOT been tested.
@@ -332,8 +444,8 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       type: QueryTypes.SELECT,
     });
 
-    const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
-      replacements: [organizationId, start_year, end_year],
+    const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? `, {
+      replacements: [organizationId],
       type: QueryTypes.SELECT,
     });
 
@@ -345,7 +457,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       "meeting_type": meetingData.event_type,
       "meeting_date": meetingData.event_start,
       "attendance": {
-        "total_attendance": 13,
+        "total_attendance": attendance.length,
         "active_member_attendance": 4,
         "inactive_member_attendance": 9,
         "members_who_attended": members.map(member => ({
