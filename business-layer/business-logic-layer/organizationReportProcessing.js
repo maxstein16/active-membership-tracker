@@ -209,11 +209,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
           "number_of_volunteering": previousVolunteering.length,
           "total_attendance": previousAttendance.length
       }
-
-
   };
-
-
 
     return { error: error.noError, data: jsonResponse };
 
@@ -281,7 +277,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   }
 
-  async function getSemesterOrgReport(orgId) {
+  async function getSemesterOrgReport(organizationId) {
 
    //var orgThing = getAllEventsByOrganization(1);
    var report = "";
@@ -313,15 +309,59 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     return {error: error.noError, data: report}
   }
 
-  async function getMeetingOrgReport (orgId, meetingId) {
+  //NOTE The current path for this does NOT work as defined in organizationReportsRouter. This method has NOT been tested.
+  async function getMeetingOrgReport (organizationId, meetingId) {
+    const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
 
-    var report;
+    const meetingData = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_id = ?`, {
+      replacements: [organizationId, meetingId],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
 
-    var orgInfo = getSpecificOrgData(orgId);
+    const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
+
+    const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
+
+    const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+    });
+
+    const jsonResponse = {
+      "organization_id": organizationId,
+      "organization_name": organization.organization_name,
+      "organization_abbreviation": organization.organization_abbreviation,
+      "meeting_id": meetingId,
+      "meeting_type": meetingData.event_type,
+      "meeting_date": meetingData.event_start,
+      "attendance": {
+        "total_attendance": 13,
+        "active_member_attendance": 4,
+        "inactive_member_attendance": 9,
+        "members_who_attended": members.map(member => ({
+          "member_id": member.member_id,
+          "role_num": member.role_num,
+          "firstName": member.member_name.split(" ")[0],
+          "lastName": member.member_name.split(" ")[1],
+          "rit_username": member.member_email.split("@")[0],
+          "phone": member.member_phone_number
+        }))
+      },
+    
+    };
 
 
-
-    return {error: error.noError, data: orgInfo}
+    return {error: error.noError, data: jsonResponse}
 /**
    * {
     "status": "success",
