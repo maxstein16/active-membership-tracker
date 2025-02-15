@@ -4,16 +4,6 @@ const { Member, Membership, Organization, Event, Attendance } = require("../db")
 const { QueryTypes } = require('sequelize');
 const { sequelize } = require("../db");
 
-//const { getMemberById } = require("../business-logic-layer/memberProcessing");
-//const { getAllEventsByOrganization } = require("../business-logic-layer/eventsProcessing");
-//const { getEventById } = require("../business-logic-layer/eventsProcessing");
-//const { getSpecificOrgData } = require("../business-logic-layer/organizationProcessing");
-//const { getAllMembershipsInOrganization } = require("../business-logic-layer/organizationMembershipProcessing");
-
-
-//note: route for getAllEventsByOrganization method doesn't work currently. will be calling DB manually to get data for now
-//may revise this with method calls after routes/paths are fixed
-
 async function getSpecificReportOrgData( orgId, memberId ) {
     
     // TODO: call db
@@ -52,13 +42,12 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   async function getAnnualOrgReport(organizationId, year) {    
     const d = new Date();
+    //you can set the year to whatever you want for testing purposes. 
+    // i set it here because i'm not sure if the getAnnualOrgReport method call is built to include a year parameter yet
     year = 2024;
     let start_year = year + "-01-01 00:00:00";
     let end_year = (year + 1) + "-01-01 00:00:00";
 
-    var totalMembers, new_members, total_active, new_active = 0;
-    var orgName = "";
-    var shortOrg = "";
     
    try {
    
@@ -148,24 +137,22 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     });
 
 
+    //to get the new members for the current year
     let newMemberCount = members.length - previousMembers.length;
     let newActiveMemberCount = activeMembers.length - previousActiveMembers.length;
 
+    //to get the count of new members for last year
     let previousYearNewMemberCount = previousYearNewMember.length - previousMembers.length;
     let previousYearNewActiveMemberCount = previousYearNewActiveMember.length - previousActiveMembers.length;
 
+    //printing stuff to console to make sure that there's data in there
     console.log(meetings);
     console.log(volunteering);
 
     console.log("attendance!!");
     console.log(attendance);
-    //sample to test join
-    // const test = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id', {
-    //   logging: console.log,
-    //   raw: true,
-    //   type: QueryTypes.SELECT,
-    // });
-
+   
+//test to make sure that data is retrieved. will re-add later
     // if (!members.length && !org.length) {
     //   return { error: error.noError, data: "data is empty" };
     // }
@@ -174,7 +161,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     "organization_id": organizationId,
     "organization_name": organization.organization_name,
     "organization_abbreviation": organization.organization_abbreviation,
-    // "current_year": current_year,
+// "current_year": current_year, <- will add later, i guess it should change according to the year parameter rather than the current year
     "member-data": {
       "total_members": members.length,
       "new_members": newMemberCount,
@@ -218,13 +205,6 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     return { error: error.somethingWentWrong, data: null };
    } 
    
-    //connect to db
-    //in order to get the data for this report, do something like this....
-    //for each entry in the Organization table, get the organization info
-    //for each entry in the Organization table, get every Member
-    //for every member, get their info
-    //Count each entry in the Events table
-     //Count each entry in the Attendance table
 
     /** 
      * {
@@ -279,9 +259,6 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   async function getSemesterOrgReport(organizationId, semesterId) {
 
-   //var orgThing = getAllEventsByOrganization(1);
-   var report = "";
-
    const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
     replacements: [organizationId],
     type: QueryTypes.SELECT,
@@ -327,7 +304,6 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       "organization_id": organizationId,
       "organization_name": organization.organization_name,
       "organization_abbreviation": organization.organization_abbreviation,
-      // "current_year": current_year,
       "current_semester_start": '01-12-2025',
     "current_semester_end": '05-12-2025',
       "member-data": {
@@ -367,7 +343,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
         }
     };
   
-   return {error: error.noError, data: report}
+   return {error: error.noError, data: jsonResponse}
 
 
    /**
