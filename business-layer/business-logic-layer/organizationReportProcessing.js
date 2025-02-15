@@ -52,8 +52,9 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   async function getAnnualOrgReport(organizationId, year) {    
     const d = new Date();
-    const current_year = d.getUTCFullYear() + "-01-01 00:00:00";
-    const past_year = d.getUTCFullYear()-1;
+    year = 2024;
+    const start_year = year + "-01-01 00:00:00";
+    const end_year = (year + 1) + "-01-01 00:00:00";
 
     var totalMembers, new_members, total_active, new_active = 0;
     var orgName = "";
@@ -72,36 +73,37 @@ async function getSpecificReportOrgData( orgId, memberId ) {
    try {
     //organization_id
    // var report = "no data here in annual"
-    const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
-      replacements: [organizationId],
-      type: QueryTypes.SELECT,
-    });
+    // const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+    //   replacements: [organizationId],
+    //   type: QueryTypes.SELECT,
+    // });
 
 // //SELECT member_id, member_name FROM `Member` INNER JOIN ON Member.member_id = Membership.member_id WHERE Membership.organization_id = ?
-    const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
-      replacements: [organizationId],
-      type: QueryTypes.SELECT,
-    });
+    // const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+    //   replacements: [organizationId],
+    //   type: QueryTypes.SELECT,
+    // });
 
     const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
       replacements: [organizationId],
       type: QueryTypes.SELECT,
     });
 
-    const events = await sequelize.query(`SELECT event_id, event_start, event_end  FROM Event WHERE organization_id = ? AND event_start >= '2024-01-01 00:00:00' AND event_end < '2025-01-01 00:00:00'`, {
-      replacements: [organizationId],
+    const events = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? `, {
+      replacements: [organizationId, start_year, end_year],
       type: QueryTypes.SELECT,
+      logging: console.log,
     });
 
     
 
 
     //sample to test join
-    const test = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id', {
-      logging: console.log,
-      raw: true,
-      type: QueryTypes.SELECT,
-    });
+    // const test = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id', {
+    //   logging: console.log,
+    //   raw: true,
+    //   type: QueryTypes.SELECT,
+    // });
 
     // if (!members.length && !org.length) {
     //   return { error: error.noError, data: "data is empty" };
@@ -111,41 +113,41 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     "organization_id": organizationId,
     "organization_name": organization.organization_name,
     "organization_abbreviation": organization.organization_abbreviation,
-    "current_year": current_year,
-    "member-data": {
-      "total_members": members.length,
-      //"new_members": stats.new_members,
-      "total_active_members": activeMembers.length,
-      //"new_active_members": stats.new_active_members,
-      "members": members.map(member => ({
-        "member_id": member.member_id,
-        "role_num": member.role_num,
-        "firstName": member.member_name,
-        "lastName": member.member_name,
-        "rit_username": member.member_email,
-        "phone": member.member_phone_number
-      }))
-    },
-    "member-data-last-year": {
-          "total_members": 35,
-          "new_members": 4,
-          "total_active_members": 16,
-          "new_active_members": 6,
-      },
+    // "current_year": current_year,
+    // "member-data": {
+    //   "total_members": members.length,
+    //   //"new_members": stats.new_members,
+    //   "total_active_members": activeMembers.length,
+    //   //"new_active_members": stats.new_active_members,
+    //   "members": members.map(member => ({
+    //     "member_id": member.member_id,
+    //     "role_num": member.role_num,
+    //     "firstName": member.member_name,
+    //     "lastName": member.member_name,
+    //     "rit_username": member.member_email,
+    //     "phone": member.member_phone_number
+    //   }))
+    // },
+    // "member-data-last-year": {
+    //       "total_members": 35,
+    //       "new_members": 4,
+    //       "total_active_members": 16,
+    //       "new_active_members": 6,
+    //   },
         
-      "meetings_data_this_year": {
-          "number_of_meetings": 35,
-          "number_of_events": 329,
-          "number_of_volunteering": 23,
-          "total_attendance": 32942
-      },
+    //   "meetings_data_this_year": {
+    //       "number_of_meetings": 35,
+    //       "number_of_events": 329,
+    //       "number_of_volunteering": 23,
+    //       "total_attendance": 32942
+    //   },
         
-      "meetings_data_last_year": {
-          "number_of_meetings": 35,
-          "number_of_events": 329,
-          "number_of_volunteering": 23,
-          "total_attendance": 32942
-      }
+    //   "meetings_data_last_year": {
+    //       "number_of_meetings": 35,
+    //       "number_of_events": 329,
+    //       "number_of_volunteering": 23,
+    //       "total_attendance": 32942
+    //   }
 
 
   };
