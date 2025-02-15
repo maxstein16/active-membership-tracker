@@ -53,8 +53,8 @@ async function getSpecificReportOrgData( orgId, memberId ) {
   async function getAnnualOrgReport(organizationId, year) {    
     const d = new Date();
     year = 2024;
-    const start_year = year + "-01-01 00:00:00";
-    const end_year = (year + 1) + "-01-01 00:00:00";
+    let start_year = year + "-01-01 00:00:00";
+    let end_year = (year + 1) + "-01-01 00:00:00";
 
     var totalMembers, new_members, total_active, new_active = 0;
     var orgName = "";
@@ -112,6 +112,29 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       type: QueryTypes.SELECT,
     });
 
+
+    start_year = (year-1) + "-01-01 00:00:00";
+     end_year = year  + "-01-01 00:00:00";
+
+     const previousEvents = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? `, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
+
+    const previousMeetings = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'general_meeting'`, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
+
+    const previousVolunteering = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'volunteer'`, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
+
+
     console.log(meetings);
     console.log(volunteering);
 
@@ -162,9 +185,9 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       },
         
       "meetings_data_last_year": {
-          "number_of_meetings": 35,
-          "number_of_events": 329,
-          "number_of_volunteering": 23,
+          "number_of_meetings": previousMeetings.length,
+          "number_of_events": previousEvents.length,
+          "number_of_volunteering": previousVolunteering.length,
           "total_attendance": 32942
       }
 
