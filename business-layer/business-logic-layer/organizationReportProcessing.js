@@ -59,26 +59,14 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     var totalMembers, new_members, total_active, new_active = 0;
     var orgName = "";
     var shortOrg = "";
-    var report = `
-    organization_id: ${organizationId}, 
-    organization_name: ${orgName}, 
-    organization_abbreviation: ${shortOrg},
-     member-data : { 
-     total_members: ${totalMembers}, 
-     new_members : ${new_members}, 
-     total_active_members: ${total_active}, 
-     new_active_members: ${new_active} }`;
-
-   // var orgThing = getAllEventsByOrganization(orgId);
+    
    try {
-    //organization_id
-   // var report = "no data here in annual"
+   
     const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
       replacements: [organizationId],
       type: QueryTypes.SELECT,
     });
 
-// //SELECT member_id, member_name FROM `Member` INNER JOIN ON Member.member_id = Membership.member_id WHERE Membership.organization_id = ?
     const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
       replacements: [organizationId],
       type: QueryTypes.SELECT,
@@ -149,9 +137,22 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       type: QueryTypes.SELECT,
     });
 
-    
+    const previousYearNewMember = await sequelize.query(`SELECT Member.member_id FROM Member INNER JOIN Membership ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ? AND Membership.createdAt >= ? AND Membership.createdAt < ?`, {
+      replacements: [organizationId, start_year-1, end_year-1],
+      type: QueryTypes.SELECT,
+    });
+
+    const previousYearNewActiveMember = await sequelize.query(`SELECT Member.member_id, Member.member_name FROM Member INNER JOIN Membership ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ? AND Membership.createdAt >= ? AND Membership.createdAt < ?`, {
+      replacements: [organizationId, start_year-1, end_year-1],
+      type: QueryTypes.SELECT,
+    });
+
+
     let newMemberCount = members.length - previousMembers.length;
     let newActiveMemberCount = activeMembers.length - previousActiveMembers.length;
+
+    let previousYearNewMemberCount = previousYearNewMember.length - previousMembers.length;
+    let previousYearNewActiveMemberCount = previousYearNewActiveMember.length - previousActiveMembers.length;
 
     console.log(meetings);
     console.log(volunteering);
@@ -190,9 +191,9 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     },
     "member-data-last-year": {
           "total_members": previousMembers.length,
-          "new_members": 4,
+          "new_members": previousYearNewMemberCount,
           "total_active_members": previousActiveMembers.length,
-          "new_active_members": 6,
+          "new_active_members": previousYearNewActiveMemberCount,
       },
         
       "meetings_data_this_year": {
