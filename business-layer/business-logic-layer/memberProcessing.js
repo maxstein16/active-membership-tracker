@@ -10,7 +10,7 @@ const error = new Error();
  * @returns {Promise<object>} The member object if found, otherwise an error.
  */
 async function getMemberById(memberId) {
-    if (!Number.isInteger(memberId)) {
+    if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
 
@@ -19,10 +19,16 @@ async function getMemberById(memberId) {
             include: [
                 {
                     model: Membership,
-                    include: [{ model: Organization }],
+                    as: 'memberships',
+                    include: [
+                        {
+                            model: Organization,
+                            as: 'organization'
+                        }
+                    ],
                 },
             ],
-        });
+        }); 
 
         if (!member) {
             return { error: error.memberNotFound, data: null };
@@ -42,7 +48,7 @@ async function getMemberById(memberId) {
  * @returns {Promise<object>} The updated member object or an error.
  */
 async function updateMemberInDB(memberId, memberData) {
-    if (!Number.isInteger(memberId)) {
+    if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
     if (!memberData || typeof memberData !== "object" || Object.keys(memberData).length === 0) {
@@ -55,20 +61,27 @@ async function updateMemberInDB(memberId, memberData) {
             return { error: error.memberNotFound, data: null };
         }
 
-        const prevStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
-        const wasActiveBefore = prevStats.data?.isActiveMember || false;
+        // 🔑 Map incoming fields to database fields
+        const updateFields = {
+            member_personal_email: memberData.personal_email,
+            member_phone_number: memberData.phone_number,
+            member_gender: memberData.gender,
+            member_race: memberData.race,
+            member_tshirt_size: memberData.tshirt_size,
+            member_major: memberData.major,
+            member_graduation_date: memberData.graduation_date,
+        };
 
-        await Member.update(memberData, { where: { member_id: memberId } });
+        // Remove undefined fields to avoid Sequelize errors
+        Object.keys(updateFields).forEach(
+            (key) => updateFields[key] === undefined && delete updateFields[key]
+        );
 
+        // Perform the update
+        await Member.update(updateFields, { where: { member_id: memberId } });
+
+        // Fetch updated member data
         const updatedMember = await Member.findByPk(memberId);
-
-        const newStats = await getSpecificMemberOrgStats(memberId, memberData.organization_id);
-        const isActiveNow = newStats.data?.isActiveMember || false;
-
-        if (!wasActiveBefore && isActiveNow) {
-            const emailData = activeMembershipEmail(updatedMember.name, newStats.data.organization_name, newStats.data.organization_abbreviation);
-            await sendEmail(updatedMember.email, emailData.subject, emailData.body);
-        }
 
         return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
@@ -88,7 +101,27 @@ async function createMemberInDB(memberData) {
     }
 
     try {
-        const newMember = await Member.create(memberData);
+        // Map request body to Sequelize fields
+        const mappedFields = {
+            member_name: memberData.name,
+            member_email: memberData.email,
+            member_personal_email: memberData.personal_email,
+            member_phone_number: memberData.phone_number,
+            member_graduation_date: memberData.graduation_date,
+            member_tshirt_size: memberData.tshirt_size,
+            member_major: memberData.major,
+            member_gender: memberData.gender,
+            member_race: memberData.race,
+            member_status: memberData.status || "undergraduate", // default status
+        };
+
+        // Remove undefined fields
+        Object.keys(mappedFields).forEach(
+            (key) => mappedFields[key] === undefined && delete mappedFields[key]
+        );
+
+        // Create the member in the database
+        const newMember = await Member.create(mappedFields);
         return { error: null, data: newMember.toJSON() };
     } catch (err) {
         console.error("Error creating member:", err);
@@ -103,10 +136,10 @@ async function createMemberInDB(memberData) {
  * @returns {Promise<object>} Member's organizational stats or an error.
  */
 async function getSpecificMemberOrgStats(memberId, orgId) {
-    if (!Number.isInteger(memberId)) {
+    if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
-    if (!Number.isInteger(orgId)) {
+    if (!isNaN(orgId)) {
         return { error: error.organizationIdMustBeInteger, data: null };
     }
 
