@@ -11,7 +11,7 @@ module.exports = function () {
   this.membershipNotFound = "Membership Not Found"
   this.youDoNotHavePermission = "You do not have permissions for this action"
   this.roleMustBeAnInteger = "Organization Role must be an integer"
- 
+
   // Member In Org Management
 
   this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_id and role";
@@ -60,10 +60,10 @@ module.exports = function () {
   this.settingNotFound = "Organization setting with the given ID not found";
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
-  
+
   // Organization Reports Calls
   this.cannotCreateReport = "Error Creating Report";
-  
+
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";
   this.eventNotFound = "Event not found";
@@ -82,6 +82,7 @@ module.exports = function () {
   this.fileCleanupFailed = "Failed to delete the uploaded CSV file.";
   this.genericProcessingError = "An unexpected error occurred during processing.";
   this.fileProcessingFailed = "Failed to process the CSV file.";
+  this.emailExistenceCheckError = "Error while checking email existence in the DB"
 
 };
 

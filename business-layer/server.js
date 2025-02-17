@@ -44,6 +44,8 @@ app.use(
     credentials: true,
   })
 );
+app.enable("trust proxy");
+app.set("trust proxy", true);
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");

@@ -86,6 +86,10 @@ router.put(
   }
 );
 
+router.put("/", (req, res) => {
+  res.status(400).json({ error: error.mustIncludeMemberId });
+});
+
 // POST /v1/member
 router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   let body = req.body;
@@ -150,7 +154,7 @@ router.get(
     }
 
     // Fetch member stats for the organization
-    const memberStats = await business.getMemberStats(memberId, orgId);
+    const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
     // Handle errors from backend
     if (!memberStats) {

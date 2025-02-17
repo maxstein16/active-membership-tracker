@@ -27,13 +27,15 @@ const Organization = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    organization_description: DataTypes.STRING,
+    organization_description: DataTypes.TEXT,
     organization_color: DataTypes.STRING,
     org_abbreviation: {
       type: DataTypes.STRING(10),
+      field: 'organization_abbreviation'
     },
     active_membership_threshold: {
       type: DataTypes.INTEGER,
+      field: 'organization_threshold',
       defaultValue: 0,
     },
   },
@@ -83,33 +85,48 @@ const Member = sequelize.define(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+      field: "member_id" // Ensure field mapping
     },
     member_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      field: "member_name"
     },
     member_email: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
+      field: "member_email"
     },
-    member_personal_email: DataTypes.STRING,
-    member_phone_number: DataTypes.STRING,
-    member_graduation_date: DataTypes.DATE,
-    member_tshirt_size: DataTypes.STRING,
-    member_major: DataTypes.STRING,
-    member_gender: DataTypes.STRING,
-    member_race: DataTypes.STRING,
+    member_personal_email: {
+      type: DataTypes.STRING,
+      field: "member_personal_email"
+    },
+    member_phone_number: {
+      type: DataTypes.STRING,
+      field: "member_phone_number"
+    },
+    member_graduation_date: {
+      type: DataTypes.DATE,
+      field: "member_graduation_date"
+    },
+    member_tshirt_size: {
+      type: DataTypes.STRING,
+      field: "member_tshirt_size"
+    },
+    member_major: {
+      type: DataTypes.STRING,
+      field: "member_major"
+    },
+    member_gender: {
+      type: DataTypes.STRING,
+      field: "member_gender"
+    },
+    member_race: {
+      type: DataTypes.STRING,
+      field: "member_race"
+    },
     member_status: {
-      type: DataTypes.ENUM(
-        "undergraduate",
-        "graduate",
-        "staff",
-        "faculty",
-        "alumni"
-      ),
-      defaultValue: "undergraduate",
-    },
+      type: DataTypes.STRING,
+      field: "member_status"
+    }
   },
   {
     timestamps: false,
