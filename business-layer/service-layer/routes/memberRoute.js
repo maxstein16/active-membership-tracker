@@ -154,7 +154,7 @@ router.get(
     }
 
     // Fetch member stats for the organization
-    const memberStats = await business.getMemberStats(memberId, orgId);
+    const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
     // Handle errors from backend
     if (!memberStats) {
