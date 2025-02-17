@@ -23,7 +23,7 @@ export default function ReportsPage() {
     // the data MUST BE FORMATTED AND LABELLED LIKE THIS
     setOrgInfo({
       name: "Computing Organization for Multicultural Students",
-      abbreviation: "COMMs",
+      abbreviation: "COMS",
       color: "#20BDE4",
     });
   }, []);

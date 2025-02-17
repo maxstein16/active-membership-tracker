@@ -14,14 +14,14 @@ export default function NavigationDropdown() {
       <div className={ windowWidth > 499 ? "navigation-dropdown columns" : "navigation-dropdown"}>
         <div>
           {/* TODO: get their organizations */}
-          <Link to="/1/status">Wic</Link>
+          <Link to="/1/status">WiC</Link>
           {/* 
         <Link className="sub-link" to="/">Settings</Link>
         <Link className="sub-link" to="/">Reports</Link> 
         */}
 
-          <Link to="/2/status">Comms</Link>
-          {/* TODO: If they are a comms eboard for example */}
+          <Link to="/2/status">COMS</Link>
+          {/* TODO: If they are a COMs eboard for example */}
           <Link className="sub-link" to="/2/settings">
             Settings
           </Link>

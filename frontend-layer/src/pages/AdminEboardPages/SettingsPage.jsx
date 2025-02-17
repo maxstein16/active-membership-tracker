@@ -28,7 +28,7 @@ export default function SettingsPage() {
     // instead, format the api result to look like this
     setOrgData({
       name: "Computing Organization for Multicultural Students",
-      abbreviation: "COMMs",
+      abbreviation: "COMS",
       color: "#20BDE4",
       description:
         "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",

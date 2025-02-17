@@ -32,7 +32,7 @@ export default function DashboardPage() {
         },
         {
           id: 1,
-          abbreviation: "Comms",
+          abbreviation: "COMS",
           color: "#20BDE4",
           role: 2,
         },
