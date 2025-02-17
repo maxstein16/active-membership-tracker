@@ -15,7 +15,9 @@ const sequelize = new Sequelize(
   }
 );
 
-// Define models
+// ==============================
+// Organization Model
+// ==============================
 const Organization = sequelize.define(
   "Organization", {
     organization_id: {
@@ -33,7 +35,7 @@ const Organization = sequelize.define(
       type: DataTypes.STRING(10),
       field: 'organization_abbreviation'
     },
-    active_membership_threshold: {
+    organization_threshold: {
       type: DataTypes.INTEGER,
       field: 'organization_threshold',
       defaultValue: 0,
@@ -160,17 +162,29 @@ const Membership = sequelize.define(
         key: "organization_id",
       },
     },
-    org_role: {
+    semester_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Semester",
+        key: "semester_id",
+      },
+    },
+    membership_role: {
       type: DataTypes.INTEGER, // 0 = Member, 1 = E-Board, 2 = Admin
       allowNull: false,
     },
-    member_points: {
+    membership_points: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
     active_member: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    active_semesters: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
   {
@@ -179,6 +193,9 @@ const Membership = sequelize.define(
 );
 
 
+// ==============================
+// Attendance Model
+// ==============================
 const Attendance = sequelize.define(
   "Attendance", {
     attendance_id: {

@@ -165,8 +165,8 @@ async function getSpecificMemberOrgStats(memberId, orgId) {
             volunteer_events: membership.volunteer_events || 0,
             social_events: membership.social_events || 0,
             your_points: membership.points || 0,
-            active_membership_threshold: organization.active_membership_threshold,
-            isActiveMember: (membership.points || 0) >= organization.active_membership_threshold,
+            organization_threshold: organization.organization_threshold,
+            isActiveMember: (membership.points || 0) >= organization.organization_threshold,
         };
 
         return { error: null, data: stats };
