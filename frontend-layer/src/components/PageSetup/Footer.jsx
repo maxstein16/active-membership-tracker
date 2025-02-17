@@ -17,7 +17,7 @@ export default function Footer() {
       </div>
       <div>
         <h4>Learn more about us</h4>
-        <a href="https://www.rit.edu/computing/diversity-initiatives-and-access" target="_blank" rel="noreferrer">RIT DIO</a>
+        <a href="https://www.rit.edu/computing/diversity-initiatives-and-access" target="_blank" rel="noreferrer">RIT GCCIS DIO</a>
       </div>
     </div>
   );
