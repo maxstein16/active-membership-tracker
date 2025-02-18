@@ -1,4 +1,4 @@
-let express = require("express");
+const express = require("express");
 const router = express.Router({ mergeParams: true });
 
 const Error = require("../../business-logic-layer/public/errors.js");
@@ -11,111 +11,99 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
 const sanitizer = new Sanitizer();
 
-
 /**
- * ATTENDANCE TABLE ATTRIBUTES BASED ON DB
- * attendance_id, member_id, event_id, check_in, volunteer_hours
+ * ATTENDANCE TABLE ATTRIBUTES (Based on DB):
+ * - attendance_id
+ * - member_id
+ * - event_id
+ * - check_in
+ * - volunteer_hours
  */
 
 /**
- * WHAT IS GIVEN TO USE IN DL "attendance.js"
- * 
- * createAttendance, - 
- * getAttendanceById,-
- * getAttendanceByMemberId -
- * getAttendanceByEventId, -
- * getAttendanceByMemberAndEvent -
+ * DATA LAYER FUNCTIONS (from "attendance.js")
+ * - createAttendance
+ * - getAttendanceById
+ * - getAttendanceByMemberId
+ * - getAttendanceByEventId
+ * - getAttendanceByMemberAndEvent
  */
 
-
-// POST /link/to/call/here/with/params
-//createAttendance
-/**
- * 
- */
-router.post("/:param/link", async function (req, res) {
-
-    // sanatize
-
-    // check if params are valid!
-
-    // send off to backend
-
-    // check for errors that backend returned
-
-    // return with appropriate status error and message
+// POST /link/to/call/here/with/params (Create Attendance)
+router.post("/:param/link", async (req, res) => {
+    // TODO: Implement sanitation, validation, business logic, and error handling.
 });
 
-/**
- * getAttendanceById
- * Should not require authorization? A member should be able to see their own attendance for example but not the attendance of others (to be tweaked later) 
- */
-router.get(
-    "/:attendanceId", isAuthorizedHasSessionForAPI,
-    async (req, res) => {
-        let { attendanceId } = req.params;
+// GET /attendance/:attendanceId (Retrieve attendance by ID)
+router.get("/:attendanceId", isAuthorizedHasSessionForAPI, async (req, res) => {
+    let { attendanceId } = req.params;
+    attendanceId = sanitizer.sanitize(attendanceId);
 
-        // Sanitize input
-        attendanceId = sanitizer.sanitize(attendanceId);
-
-        // Validate IDs
-        if (isNaN(attendanceId)) {
-            return res.status(400).json({ error: error.attendanceIdMustBeInteger });//TODO add errir
-        }
-
-        // Fetch data from business layer
-        const event = await business.getAttendanceById(attendanceId); //TODO BL
-
-        // Handle errors
-        if (event.error && event.error !== error.noError) {
-            return res.status(404).json({ error: event.error, attendanceId });
-        }
-
-        return res.status(200).json({ status: "success", data: event.data });
+    if (isNaN(attendanceId)) {
+        return res.status(400).json({ error: error.attendanceIdMustBeInteger });
     }
 
-);//getAttendanceById
-
-/**
- * getAttendanceByMemberId
- */
-router.get(
-    "/attendance/:memberId", isAuthorizedHasSessionForAPI,
-    async (req, res) => {
-        let { memberId } = req.params;
-
-        // Sanitize input
-        memberId = sanitizer.sanitize(memberId);
-
-        // Validate IDs
-        if (isNaN(memberId)) {
-            return res.status(400).json({ error: error.memberIdMustBeInteger });
-        }
-
-        // Fetch data from business layer
-        const event = await business.getAttendanceById(attendanceId); //TODO BL
-
-        // Handle errors
-        if (event.error && event.error !== error.noError) {
-            return res.status(404).json({ error: event.error, attendanceId });
-        }
-
-        return res.status(200).json({ status: "success", data: event.data });
+    const attendance = await business.getAttendanceById(attendanceId);
+    if (attendance.error && attendance.error !== error.noError) {
+        return res.status(404).json({ error: attendance.error, attendanceId });
     }
 
-);//getAttendanceById
+    return res.status(200).json({ status: "success", data: attendance.data });
+});
 
+// GET /attendance/member/:memberId (Retrieve attendance by Member ID)
+router.get("/attendance/member/:memberId", isAuthorizedHasSessionForAPI, async (req, res) => {
+    let { memberId } = req.params;
+    memberId = sanitizer.sanitize(memberId);
 
-/**
- * getAttendanceByEventId
- */
+    if (isNaN(memberId)) {
+        return res.status(400).json({ error: error.memberIdMustBeInteger });
+    }
 
+    const attendance = await business.getAttendanceByMemberId(memberId);
+    if (attendance.error && attendance.error !== error.noError) {
+        return res.status(404).json({ error: attendance.error, memberId });
+    }
 
-/**
- * getAttendanceByMemberAndEvent
- * 
- * 
- */
+    return res.status(200).json({ status: "success", data: attendance.data });
+});
 
+// GET /attendance/event/:eventId (Retrieve attendance by Event ID)
+router.get("/attendance/event/:eventId", isAuthorizedHasSessionForAPI, async (req, res) => {
+    let { eventId } = req.params;
+    eventId = sanitizer.sanitize(eventId);
+
+    if (isNaN(eventId)) {
+        return res.status(400).json({ error: error.eventIdMustBeInteger });
+    }
+
+    const attendance = await business.getAttendanceByEventId(eventId);
+    if (attendance.error && attendance.error !== error.noError) {
+        return res.status(404).json({ error: attendance.error, eventId });
+    }
+
+    return res.status(200).json({ status: "success", data: attendance.data });
+});
+
+// GET /attendance/member/:memberId/event/:eventId (Retrieve attendance by Member & Event ID)
+router.get("/attendance/member/:memberId/event/:eventId", isAuthorizedHasSessionForAPI, async (req, res) => {
+    let { memberId, eventId } = req.params;
+    memberId = sanitizer.sanitize(memberId);
+    eventId = sanitizer.sanitize(eventId);
+
+    if (isNaN(memberId)) {
+        return res.status(400).json({ error: error.memberIdMustBeInteger });
+    }
+    if (isNaN(eventId)) {
+        return res.status(400).json({ error: error.eventIdMustBeInteger });
+    }
+
+    const attendance = await business.getAttendanceByMemberAndEvent(memberId, eventId);
+    if (attendance.error && attendance.error !== error.noError) {
+        return res.status(404).json({ error: attendance.error, memberId, eventId });
+    }
+
+    return res.status(200).json({ status: "success", data: attendance.data });
+});
 
 module.exports = router;
