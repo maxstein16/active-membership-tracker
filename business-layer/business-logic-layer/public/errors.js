@@ -87,5 +87,6 @@ module.exports = function () {
 
   //Attendance data
   this.attendanceIdMustBeInteger = "Attendance has to be an Integer."
+  this.attendanceNotFound = "Attendance has not been found"
 };
 
