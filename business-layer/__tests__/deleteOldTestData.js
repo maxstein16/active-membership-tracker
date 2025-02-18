@@ -1,4 +1,4 @@
-const { Organization, Semester, Member, Membership, EmailSettings, MembershipRequirement } = require("../db");
+const { Organization, Semester, Member, Membership, EmailSettings, MembershipRequirement, Attendance, Event } = require("../db");
 
 // RUN WITH ADD TEST DATA
 async function deleteOldTestData() {
@@ -9,6 +9,10 @@ async function deleteOldTestData() {
   let org1Id = await Organization.findOne({
     where: { organization_name: "WiC TEST ONLY" },
   });
+
+  if (!org1Id) {
+    return;
+  }
   org1Id = org1Id.organization_id;
 
   let org2Id = await Organization.findOne({
@@ -16,6 +20,21 @@ async function deleteOldTestData() {
   });
   org2Id = org2Id.organization_id;
 
+
+  // get member ids 
+  const members = ["mep4741@rit.edu", "mhs8558@rit.edu", "dm9718@rit.edu", "klo7619@rit.edu", "jdh6459@rit.edu", "aze6809@rit.edu", "gma5228@rit.edu"]
+
+  for (let member of members) {
+
+    let memberInfo = await Member.findOne({
+      where: { member_email: member },
+    });
+
+    // delete attendance 
+    result = await Attendance.destroy({
+      where: { member_id: memberInfo.member_id }
+    })
+  }
 
 
   // delete events
@@ -52,34 +71,12 @@ async function deleteOldTestData() {
   })  
 
   // delete members
-  result = await Member.destroy({
-    where: { member_email: "mep4741@rit.edu" },
-  });
-
-  result = await Member.destroy({
-    where: { member_email: "mhs8558@rit.edu" },
-  });
-
-  result = await Member.destroy({
-    where: { member_email: "dm9718@rit.edu" },
-  });
-
-  result = await Member.destroy({
-    where: { member_email: "klo7619@rit.edu" },
-  });
-
-  result = await Member.destroy({
-    where: { member_email: "jdh6459@rit.edu" },
-  });
-
-  result = await Member.destroy({
-    where: { member_email: "aze6809@rit.edu" },
-  });
-
-  result = await Member.destroy({
-    where: { member_email: "gma5228@rit.edu" },
-  });
-
+  for (const member of members) {
+    result = await Member.destroy({
+      where: { member_email: member },
+    });
+  }
+  
   // delete semesters
   result = await Semester.destroy({
     where: { semester_name: "2024 FALL TEST" },

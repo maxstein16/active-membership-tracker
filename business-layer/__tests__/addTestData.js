@@ -9,6 +9,9 @@
  * The members are real people with real RIT usernames.
  * We as the initial developers are using our own data to test.
  * If you run this on the production site, you will delete all our data....
+ *
+ * SEE WHAT DATA I ENTER:
+ * I show the filled tables at the end of the file
  */
 
 const {
@@ -18,6 +21,8 @@ const {
   Membership,
   EmailSettings,
   MembershipRequirement,
+  Attendance,
+  Event,
 } = require("../db");
 const { deleteOldTestData } = require("./deleteOldTestData");
 
@@ -207,7 +212,7 @@ async function addTestData() {
     frequency: "Yearly",
     amount_type: "points",
     amount: 2,
-    requirement_scope: "yearly",
+    requirement_scope: "annually",
   });
 
   await MembershipRequirement.create({
@@ -225,7 +230,7 @@ async function addTestData() {
     frequency: "Yearly",
     amount_type: "points",
     amount: 1,
-    requirement_scope: "yearly",
+    requirement_scope: "annually",
   });
 
   await MembershipRequirement.create({
@@ -248,7 +253,7 @@ async function addTestData() {
 
   // Events
   console.log("7. Adding Events");
-  await Event.create({
+  const event1 = await Event.create({
     organization_id: org1.organization_id,
     event_name: "WiC General Meeting",
     event_start: "2025-02-05 18:00:00",
@@ -257,17 +262,18 @@ async function addTestData() {
     event_description: "An overview of upcoming events and initiatives.",
     event_type: "general_meeting",
   });
-  await Event.create({
+  const event2 = await Event.create({
     organization_id: org1.organization_id,
     event_name: "WiC Volunteer Day",
     event_start: "2025-03-10 10:00:00",
     event_end: "2025-03-10 14:00:00",
     event_location: "Local Community Center",
-    event_description: "Helping out at the community center with tech workshops.",
+    event_description:
+      "Helping out at the community center with tech workshops.",
     event_type: "volunteer",
   });
 
-  await Event.create({
+  const event3 = await Event.create({
     organization_id: org1.organization_id,
     event_name: "WiC Social Night",
     event_start: "2025-04-15 19:00:00",
@@ -275,38 +281,119 @@ async function addTestData() {
     event_location: "Java's Café",
     event_description: "A night of networking, games, and fun!",
     event_type: "social",
-  },)
-  await Event.create( {
+  });
+  const event4 = await Event.create({
     organization_id: org2.organization_id,
     event_name: "COMS Workshop: Resume Building",
     event_start: "2025-02-12 17:30:00",
     event_end: "2025-02-12 19:00:00",
     event_location: "GOL 2250",
-    event_description: "Learn how to craft a compelling resume with industry professionals.",
+    event_description:
+      "Learn how to craft a compelling resume with industry professionals.",
     event_type: "workshop",
-  },)
-  await Event.create({
+  });
+  const event5 = await Event.create({
     organization_id: org2.organization_id,
     event_name: "COMS Charity Fundraiser",
     event_start: "2025-03-20 18:00:00",
     event_end: "2025-03-20 21:00:00",
     event_location: "RIT Ballroom",
-    event_description: "A night of fundraising for a local cause with guest speakers.",
+    event_description:
+      "A night of fundraising for a local cause with guest speakers.",
     event_type: "fundraiser",
-  },)
-  await Event.create({
+  });
+  const event6 = await Event.create({
     organization_id: org2.organization_id,
     event_name: "COMS Committee Brainstorming",
     event_start: "2025-04-10 16:00:00",
     event_end: "2025-04-10 18:00:00",
     event_location: "GOL 3000",
-    event_description: "Collaborate and plan initiatives for the next semester.",
+    event_description:
+      "Collaborate and plan initiatives for the next semester.",
     event_type: "committee",
-  })
-
+  });
 
   // Events
   console.log("8. Adding Attendance");
+
+  // wic events
+  await Attendance.create({
+    member_id: member1.member_id,
+    event_id: event1.event_id,
+    check_in: "2025-02-05 18:01:00",
+  });
+  await Attendance.create({
+    member_id: member2.member_id,
+    event_id: event1.event_id,
+    check_in: "2025-02-05 18:02:00",
+  });
+
+  await Attendance.create({
+    member_id: member3.member_id,
+    event_id: event2.event_id,
+    check_in: "2025-03-10 12:00:00",
+  });
+  await Attendance.create({
+    member_id: member4.member_id,
+    event_id: event2.event_id,
+    check_in: "2025-03-10 10:01:00",
+  });
+
+  await Attendance.create({
+    member_id: member5.member_id,
+    event_id: event3.event_id,
+    check_in: "2025-04-15 19:01:00",
+  });
+  await Attendance.create({
+    member_id: member6.member_id,
+    event_id: event3.event_id,
+    check_in: "2025-04-15 20:00:00",
+  });
+  await Attendance.create({
+    member_id: member7.member_id,
+    event_id: event3.event_id,
+    check_in: "2025-04-15 21:00:00",
+  });
+
+  // coms events
+
+  await Attendance.create({
+    member_id: member1.member_id,
+    event_id: event4.event_id,
+    check_in: "2025-02-12 18:00:00",
+  });
+  await Attendance.create({
+    member_id: member2.member_id,
+    event_id: event4.event_id,
+    check_in: "2025-02-12 18:30:00",
+  });
+
+  await Attendance.create({
+    member_id: member3.member_id,
+    event_id: event5.event_id,
+    check_in: "2025-03-20 18:01:00",
+  });
+  await Attendance.create({
+    member_id: member4.member_id,
+    event_id: event5.event_id,
+    check_in: "2025-03-20 18:02:00",
+  });
+
+  await Attendance.create({
+    member_id: member5.member_id,
+    event_id: event6.event_id,
+    check_in: "2025-04-10 16:01:00",
+  });
+  await Attendance.create({
+    member_id: member6.member_id,
+    event_id: event6.event_id,
+    check_in: "2025-04-10 16:30:00",
+  });
+  await Attendance.create({
+    member_id: member7.member_id,
+    event_id: event6.event_id,
+    check_in: "2025-04-10 17:00:00",
+  });
 
   // Finishing up
   console.log("\nFinishing up...");
@@ -316,3 +403,127 @@ async function addTestData() {
 (async () => {
   addTestData();
 })();
+
+/**
+ *
+ * WHAT DO THE TABLES LOOK LIKE NOW?
+ * IDs will vary -> they are auto-generated 
+ * (other than semester ids, they will stay the same)
+ *
+ * ORGANIZATION
+  +-----------------+-------------------+----------------------------------+--------------------+---------------------------+------------------------+---------------------+---------------------+
+| organization_id | organization_name | organization_description         | organization_color | organization_abbreviation | organization_threshold | createdAt           | updatedAt           |
++-----------------+-------------------+----------------------------------+--------------------+---------------------------+------------------------+---------------------+---------------------+
+|              35 | WiC TEST ONLY     | This is a test for WiC Settings  | #381A58            | NULL                      |                     42 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|              36 | COMS TEST ONLY    | This is a test for COMS Settings | #20BDE4            | NULL                      |                     23 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
++-----------------+-------------------+----------------------------------+--------------------+---------------------------+------------------------+---------------------+---------------------+
+
+
+SEMESTER
++-------------+------------------+---------------+---------------------+---------------------+---------------------+---------------------+
+| semester_id | semester_name    | academic_year | start_date          | end_date            | createdAt           | updatedAt           |
++-------------+------------------+---------------+---------------------+---------------------+---------------------+---------------------+
+|        1123 | 2024 FALL TEST   | 2024-2025     | 2024-08-14 00:00:00 | 2024-12-16 00:00:00 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        1124 | 2025 SPRING TEST | 2024-2025     | 2025-01-14 00:00:00 | 2024-05-02 00:00:00 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
++-------------+------------------+---------------+---------------------+---------------------+---------------------+---------------------+
+2 rows in set (0.001 sec)
+
+
+MEMBER
++-----------+--------------------------+-----------------+------------------------------------+---------------------+------------------------+--------------------+----------------------------+---------------+-------------+---------------+---------------------+---------------------+
+| member_id | member_name              | member_email    | member_personal_email              | member_phone_number | member_graduation_date | member_tshirt_size | member_major               | member_gender | member_race | member_status | createdAt           | updatedAt           |
++-----------+--------------------------+-----------------+------------------------------------+---------------------+------------------------+--------------------+----------------------------+---------------+-------------+---------------+---------------------+---------------------+
+|        88 | Maija Philip             | mep4741@rit.edu | maija.philip@gmail.com             | NULL                | 2025-05-10 00:00:00    | S                  | Web and Mobile Computing   | F             | White       | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        89 | Max Stein                | mhs8558@rit.edu | max.stein@gmail.com                | NULL                | 2025-05-10 00:00:00    | M                  | Web and Mobile Computing   | M             | White       | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        90 | Divna Mijic              | dm9718@rit.edu  | divna.mijic@gmail.com              | NULL                | 2025-05-10 00:00:00    | S                  | Web and Mobile Computing   | F             | White       | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        91 | Kasim O'Meally           | klo7619@rit.edu | kasim.omeally@gmail.com            | NULL                | 2025-05-10 00:00:00    | NULL               | Web and Mobile Computing   | NULL          | NULL        | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        92 | Joseph Henry             | jdh6459@rit.edu | joseph.henry@gmail.com             | NULL                | 2025-05-10 00:00:00    | NULL               | Web and Mobile Computing   | NULL          | NULL        | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        93 | Alexandria Eddings       | aze6809@rit.edu | alexandria.eddings@gmail.com       | NULL                | 2025-05-10 00:00:00    | NULL               | Web and Mobile Computing   | NULL          | NULL        | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
+|        94 | Gabriella Alvarez-Mcleod | gma5228@rit.edu | Gabriella.alvarez-mcleod@gmail.com | NULL                | 2025-05-10 00:00:00    | NULL               | Human Computer Interaction | NULL          | NULL        | undergraduate | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |
++-----------+--------------------------+-----------------+------------------------------------+---------------------+------------------------+--------------------+----------------------------+---------------+-------------+---------------+---------------------+---------------------+
+7 rows in set (0.001 sec)
+
+
+MEMBERSHIPS
++---------------+-----------------+-------------------+---------------+------------------+---------------------+---------------------+-----------+-----------------+-------------+
+| membership_id | membership_role | membership_points | active_member | active_semesters | createdAt           | updatedAt           | member_id | organization_id | semester_id |
++---------------+-----------------+-------------------+---------------+------------------+---------------------+---------------------+-----------+-----------------+-------------+
+|            71 |               2 |                36 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        88 |              35 |        1123 |
+|            72 |               2 |                15 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        88 |              35 |        1123 |
+|            73 |               2 |                 2 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        89 |              35 |        1123 |
+|            74 |               2 |                20 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        89 |              35 |        1123 |
+|            75 |               2 |                37 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        90 |              35 |        1123 |
+|            76 |               2 |                12 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        90 |              35 |        1123 |
+|            77 |               2 |                 1 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        91 |              35 |        1123 |
+|            78 |               2 |                14 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        91 |              35 |        1123 |
+|            79 |               2 |                18 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        92 |              35 |        1123 |
+|            80 |               2 |                36 |             1 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        92 |              35 |        1123 |
+|            81 |               2 |                10 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        93 |              35 |        1123 |
+|            82 |               2 |                31 |             1 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        93 |              35 |        1123 |
+|            83 |               2 |                29 |             0 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        94 |              35 |        1123 |
+|            84 |               2 |                28 |             1 |                1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        94 |              35 |        1123 |
++---------------+-----------------+-------------------+---------------+------------------+---------------------+---------------------+-----------+-----------------+-------------+
+14 rows in set (0.001 sec)
+
+
+
+EMAIL SETTINGS
++------------------+----------------+---------------+-----------------+---------------------+---------------------+---------------------+-----------------+
+| email_setting_id | current_status | annual_report | semester_report | membership_achieved | createdAt           | updatedAt           | organization_id |
++------------------+----------------+---------------+-----------------+---------------------+---------------------+---------------------+-----------------+
+|                7 |              1 |             0 |               1 |                   0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |
+|                8 |              0 |             0 |               1 |                   1 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |
++------------------+----------------+---------------+-----------------+---------------------+---------------------+---------------------+-----------------+
+
+
+MEMBERSHIP REQUIREMENTS
++----------------+--------------+------------+-------------+--------+-------------------+---------------------+---------------------+-----------------+
+| requirement_id | meeting_type | frequency  | amount_type | amount | requirement_scope | createdAt           | updatedAt           | organization_id |
++----------------+--------------+------------+-------------+--------+-------------------+---------------------+---------------------+-----------------+
+|             14 | Meeting      | Semesterly | points      |      4 | semesterly        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |
+|             15 | Event        | Yearly     | points      |      2 | annually          | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |
+|             16 | Volunteer    | Semesterly | percentage  |     50 | semesterly        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |
+|             17 | Meeting      | Yearly     | points      |      1 | annually          | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |
+|             18 | Event        | Semesterly | percentage  |     25 | semesterly        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |
+|             19 | Volunteer    | Semesterly | percentage  |     50 | semesterly        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |
++----------------+--------------+------------+-------------+--------+-------------------+---------------------+---------------------+-----------------+
+6 rows in set (0.001 sec)
+
+
+EVENTS
++----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
+| event_id | event_name                     | event_start         | event_end           | event_location         | event_description                                                   | event_type      | createdAt           | updatedAt           | organization_id | semester_id |
++----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
+|        7 | WiC General Meeting            | 2025-02-05 23:00:00 | 2025-02-06 00:30:00 | GOL 1400               | An overview of upcoming events and initiatives.                     | general_meeting | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
+|        8 | WiC Volunteer Day              | 2025-03-10 14:00:00 | 2025-03-10 18:00:00 | Local Community Center | Helping out at the community center with tech workshops.            | volunteer       | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
+|        9 | WiC Social Night               | 2025-04-15 23:00:00 | 2025-04-16 02:00:00 | Java's Café            | A night of networking, games, and fun!                              | social          | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
+|       10 | COMS Workshop: Resume Building | 2025-02-12 22:30:00 | 2025-02-13 00:00:00 | GOL 2250               | Learn how to craft a compelling resume with industry professionals. | workshop        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |        NULL |
+|       11 | COMS Charity Fundraiser        | 2025-03-20 22:00:00 | 2025-03-21 01:00:00 | RIT Ballroom           | A night of fundraising for a local cause with guest speakers.       | fundraiser      | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |        NULL |
+|       12 | COMS Committee Brainstorming   | 2025-04-10 20:00:00 | 2025-04-10 22:00:00 | GOL 3000               | Collaborate and plan initiatives for the next semester.             | committee       | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |        NULL |
++----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
+6 rows in set (0.001 sec)
+
+
+ATTENDANCE
++---------------+---------------------+-----------------+---------------------+---------------------+-----------+----------+
+| attendance_id | check_in            | volunteer_hours | createdAt           | updatedAt           | member_id | event_id |
++---------------+---------------------+-----------------+---------------------+---------------------+-----------+----------+
+|             3 | 2025-02-05 23:01:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        88 |        7 |
+|             4 | 2025-02-05 23:02:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        89 |        7 |
+|             5 | 2025-03-10 16:00:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        90 |        8 |
+|             6 | 2025-03-10 14:01:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        91 |        8 |
+|             7 | 2025-04-15 23:01:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        92 |        9 |
+|             8 | 2025-04-16 00:00:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        93 |        9 |
+|             9 | 2025-04-16 01:00:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        94 |        9 |
+|            10 | 2025-02-12 23:00:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        88 |       10 |
+|            11 | 2025-02-12 23:30:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        89 |       10 |
+|            12 | 2025-03-20 22:01:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        90 |       11 |
+|            13 | 2025-03-20 22:02:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        91 |       11 |
+|            14 | 2025-04-10 20:01:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        92 |       12 |
+|            15 | 2025-04-10 20:30:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        93 |       12 |
+|            16 | 2025-04-10 21:00:00 |               0 | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |        94 |       12 |
++---------------+---------------------+-----------------+---------------------+---------------------+-----------+----------+
+14 rows in set (0.001 sec)
+
+
+ */
