@@ -1,5 +1,5 @@
 -- Drop the database if it exists (use with caution)
-DROP DATABASE membertracker;
+-- DROP DATABASE membertracker;
 
 -- Create the database
 CREATE DATABASE membertracker;

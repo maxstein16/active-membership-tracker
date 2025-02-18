@@ -38,15 +38,17 @@ async function addTestData() {
   console.log("2. Creating Test Semesters");
 
   await Semester.create({
+    semester_id: 1123,
     semester_name: "2024 FALL TEST",
-    academic_year: "2024 - 2025",
+    academic_year: "2024-2025",
     start_date: "2024-08-14",
     end_date: "2024-12-16",
   });
 
   await Semester.create({
+    semester_id: 1124,
     semester_name: "2025 SPRING TEST",
-    academic_year: "2024 - 2025",
+    academic_year: "2024-2025",
     start_date: "2025-01-14",
     end_date: "2024-05-02",
   });
