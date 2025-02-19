@@ -63,6 +63,7 @@ module.exports = function () {
 
   // Organization Reports Calls
   this.cannotCreateReport = "Error Creating Report";
+  this.mustHaveId = "Must include an id as a query parameter";
 
   // Event Management
   this.eventIdMustBeInteger = "EventId must be an integer";

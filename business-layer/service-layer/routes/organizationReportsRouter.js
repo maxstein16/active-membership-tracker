@@ -18,7 +18,7 @@ https://api.rit.edu/v1/organization/{orgId}/reports
 
 */
 
-// GET /v1/organization/{orgId}/member
+// GET /v1/organization/{orgId}/reports
 router.get("/", isAuthorizedHasSessionForAPI, function (req, res) {
   res.status(200).json({
     message: "Hello Organization Reports Route",
@@ -64,9 +64,16 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   });
 });
 
-// GET /v1/organization/{orgId}/reports/semesterly
-router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res) {
+// GET /v1/organization/{orgId}/reports/semester
+router.get("/semester", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
+  let semesterId = req.query.id;
+
+  // check that a semester id was given
+  if (!semesterId) {
+    res.status(400).json({ error: error.mustHaveId });
+    return;
+  }
 
   // sanitize
   orgId = sanitizer.sanitize(orgId);
@@ -96,11 +103,17 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
 
 // GET /v1/organization/{orgId}/reports/meeting?id={meetingId}
 router.get(
-  "/meeting/:meetingId",
+  "/meeting",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let meetingId = req.query.meetingId;
+    let meetingId = req.query.id;
+
+    // check that a meetingId was given
+    if (!meetingId) {
+      res.status(400).json({ error: error.mustHaveId });
+      return;
+    }
 
     // sanitize
     orgId = sanitizer.sanitize(orgId);
