@@ -29,10 +29,6 @@ const sanitizer = new Sanitizer();
  * - getAttendanceByMemberAndEvent
  */
 
-// POST /link/to/call/here/with/params (Create Attendance)
-router.post("/:param/link", async (req, res) => {
-    // TODO: Implement sanitation, validation, business logic, and error handling.
-});
 
 // GET /attendance/:attendanceId (Retrieve attendance by ID)
 router.get("/:attendanceId", isAuthorizedHasSessionForAPI, async (req, res) => {
