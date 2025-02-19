@@ -27,7 +27,7 @@ VALUES
 ('Jane Smith', 'janesmith@university.edu', 'jane.smith@gmail.com', '987-654-3210', '2026-05-20', 'S', 'Fine Arts', 'Female', 'Asian', 'undergraduate');
 
 -- Insert into Membership
-INSERT INTO Membership (membership_id, member_id, organization_id, org_role, member_points, active_member) 
+INSERT INTO Membership (membership_id, member_id, organization_id, membership_role, member_points, active_member) 
 VALUES 
 (1, 1, 1, 1, 15, TRUE),
 (2, 2, 2, 0, 5, FALSE);

@@ -31,8 +31,8 @@ module.exports = function () {
 
     if (
       !membership ||
-      membership.org_role == ROLE_MEMBER ||
-      (!isEboardEnough && membership.org_role == ROLE_EBOARD)
+      membership.membership_role == ROLE_MEMBER ||
+      (!isEboardEnough && membership.membership_role == ROLE_EBOARD)
     ) {
       return false;
     }

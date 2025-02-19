@@ -49,7 +49,7 @@ const editMembershipRole = async (membershipId, newRole) => {
       console.error("Membership not found with ID:", membershipId);
       return null;
     }
-    membership.org_role = newRole;
+    membership.membership_role = newRole;
     const updatedMembership = await membership.save();
     return updatedMembership;
   } catch (err) {

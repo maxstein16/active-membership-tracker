@@ -47,11 +47,16 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
 
         const orgInfo = await business.getSpecificOrgData(parseInt(orgId));
 
-        if (orgInfo.error) {
-            return res.status(404).json({ 
-                status: "error", 
-                error: orgInfo.error 
-            });
+        // check if has all the params needed
+        if (
+            !body.hasOwnProperty("organization_name") ||
+            !body.hasOwnProperty("organization_abbreviation") ||
+            !body.hasOwnProperty("organization_desc") ||
+            !body.hasOwnProperty("organization_color") ||
+            !body.hasOwnProperty("organization_threshold")
+        ) {
+            res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
+            return;
         }
 
         return res.status(200).json({ 
