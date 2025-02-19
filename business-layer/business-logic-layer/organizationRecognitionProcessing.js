@@ -48,7 +48,7 @@ async function getAllOrgRecognitionsFromDB(orgId) {
         organization_id: orgId,
         organization_name: organization.organization_name,
         organization_abbreviation: organization.organization_abbreviation,
-        active_membership_threshold: organization.active_membership_threshold,
+        organization_threshold: organization.organization_threshold,
         member_list: recognitions,
       },
     };
