@@ -1,4 +1,4 @@
-const { Member, Membership, Organization } = require("../db.js");
+const { Member, Membership, Organization, Semester } = require("../db.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -32,7 +32,7 @@ async function getSpecificMemberWithOrgData(orgId, memberId) {
 
     return {
       error: error.noError,
-      data: { ...member, membership: membership },
+      data: { ...member.dataValues, membership: membership },
     };
   } catch (err) {
     console.error("Error fetching specific member + membership:", err);
@@ -61,10 +61,26 @@ async function addMemberToAnOrganization(orgId, memberData) {
       return { error: error.orgNotFound, data: null };
     }
 
+    // does the member exist?
+    const member = await Member.findOne({
+      where: { member_id: memberData.member_id },
+    });
+    if (!member) {
+      return { error: error.memberNotFound, data: null };
+    }
+
+    // get current semester
+    const currentSemesters = getCurrentSemesters()
+
+    if (currentSemesters.length < 1) {
+      return { error: error.noCurrentSemesterFound, data: null };
+    }
+
     // get the data from data-layer
     const membership = await Membership.create({
       ...memberData,
       organization_id: orgId,
+      semester_id: currentSemesters[0].semester_id,
     });
 
     // if the result is empty return error
@@ -99,6 +115,9 @@ async function editMemberInOrganization(orgId, memberId, memberDataToUpdate) {
     }
     if (isNaN(memberDataToUpdate.membership_role)) {
       return { error: error.roleMustBeAnInteger, data: null };
+    }
+    if (isNaN(memberDataToUpdate.membership_points)) {
+      return { error: error.memberPointsNaN, data: null };
     }
 
     // get the data from data-layer
@@ -182,7 +201,7 @@ async function getMembersInOrganization(orgId) {
         return;
       }
       return {
-        ...membership,
+        ...membership.dataValues,
         member_name: memberData.member_name,
         member_email: memberData.member_email,
         member_major: memberData.member_major,
@@ -198,6 +217,20 @@ async function getMembersInOrganization(orgId) {
     console.error("Error fetching all members of org", err);
     return { error: error.somethingWentWrong, data: null };
   }
+}
+
+async function getCurrentSemesters() {
+  const allSemesters = await Semester.findAll();
+  const currentSemesters = allSemesters.filter((semester) => {
+
+    let today = new Date();
+    let endDate = new Date(semester.end_date);
+    let startDate = new Date(semester.start_date);
+
+    return startDate <= today && endDate >= today
+
+  });
+  return currentSemesters
 }
 
 module.exports = {

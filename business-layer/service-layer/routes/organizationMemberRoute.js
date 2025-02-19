@@ -122,9 +122,7 @@ router.put(
     // check if has all the params needed
     if (
       !body.hasOwnProperty("role") &&
-      !body.hasOwnProperty("meetings_attended") &&
-      !body.hasOwnProperty("volunteer_events") &&
-      !body.hasOwnProperty("social_events")
+      !body.hasOwnProperty("membership_points")
     ) {
       res
         .status(400)

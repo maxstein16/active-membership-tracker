@@ -67,7 +67,7 @@ async function addTestData() {
     semester_name: "2025 SPRING TEST",
     academic_year: "2024-2025",
     start_date: "2025-01-14",
-    end_date: "2024-05-02",
+    end_date: "2025-05-02",
   });
 
   // MEMBERS
