@@ -84,5 +84,9 @@ module.exports = function () {
   this.fileProcessingFailed = "Failed to process the CSV file.";
   this.emailExistenceCheckError = "Error while checking email existence in the DB"
 
+
+  //Attendance data
+  this.attendanceIdMustBeInteger = "Attendance has to be an Integer."
+  this.attendanceNotFound = "Attendance has not been found"
 };
 
