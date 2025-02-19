@@ -17,12 +17,18 @@ router.get(
   "/:memberId",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
+    // check if memberId is provided
+    if (!req.params.memberId) {
+      res.status(400).json({ error: error.mustIncludeMemberId });
+      return;
+    }
+
     let memberId = req.params.memberId;
 
     // sanitize and validate memberId
     memberId = sanitizer.sanitize(memberId);
     if (isNaN(memberId)) {
-      res.status(400).json({ error: "Must include a valid member ID" });
+      res.status(400).json({ error: error.mustIncludeValidMemberId });
       return;
     }
 
@@ -37,6 +43,11 @@ router.get(
     res.status(200).json({ status: "success", data: memberData.data });
   }
 );
+
+// Handle GET requests without memberId
+router.get("/", (req, res) => {
+  res.status(400).json({ error: error.mustIncludeMemberId });
+});
 
 // PUT /v1/member/:memberId
 router.put(

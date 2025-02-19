@@ -27,6 +27,7 @@ module.exports = function () {
   this.memberCannotBeFoundInDB = "Member cannot be found";
   this.mustIncludeMemberId = "Must include a member id in your call";
   this.mustIncludeValidFieldAddMember = "Must include at least one valid field to update: personal_email, phone_number, gender, race, tshirt_size, major, or graduation_date";
+  this.mustIncludeValidMemberId = "Must include a valid member ID";
 
   // Organization Calls
 
