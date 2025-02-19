@@ -31,10 +31,9 @@ module.exports = function () {
 
   // Organization Calls
 
-  //Adding Org
   // Organization Calls
   this.validationError = "Validation error: One or more fields are invalid";
-  // Adding Org
+  this.mustIncludeOrgId = "Must include an organization ID";
   this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
   this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
   this.invalidOrgDescription = "Organization description is invalid. It must be a non-empty string.";

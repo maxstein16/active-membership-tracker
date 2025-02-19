@@ -137,25 +137,37 @@ async function createMemberInDB(memberData) {
  */
 async function getSpecificMemberOrgStats(memberId, orgId) {
     if (isNaN(memberId)) {
-        return { error: error.memberIdMustBeInteger, data: null };
+        return { error: error.memberIdMustBeInteger };
     }
-    if (!isNaN(orgId)) {
-        return { error: error.organizationIdMustBeInteger, data: null };
+    if (isNaN(orgId)) {
+        return { error: error.organizationIdMustBeInteger };
     }
 
     try {
         const membership = await Membership.findOne({
-            where: { member_id: memberId, organization_id: orgId },
-            include: [{ model: Organization }],
+            where: { 
+                member_id: memberId, 
+                organization_id: orgId 
+            },
+            include: [
+                { 
+                    model: Organization,
+                    as: 'organization'
+                }
+            ]
         });
 
         if (!membership) {
-            return { error: error.membershipNotFound, data: null };
+            return { error: error.membershipNotFound };
         }
 
-        const organization = membership.Organization;
+        const organization = membership.organization;
+        if (!organization) {
+            return { error: error.organizationNotFound };
+        }
 
-        const stats = {
+        // Return clean stats object directly
+        return {
             member_id: membership.member_id,
             organization_id: membership.organization_id,
             membership_id: membership.membership_id,
@@ -164,15 +176,13 @@ async function getSpecificMemberOrgStats(memberId, orgId) {
             meetings_attended: membership.meetings_attended || 0,
             volunteer_events: membership.volunteer_events || 0,
             social_events: membership.social_events || 0,
-            your_points: membership.points || 0,
+            your_points: membership.membership_points || 0,
             organization_threshold: organization.organization_threshold,
-            isActiveMember: (membership.points || 0) >= organization.organization_threshold,
+            isActiveMember: (membership.membership_points || 0) >= organization.organization_threshold
         };
-
-        return { error: null, data: stats };
     } catch (err) {
         console.error("Error fetching member organization stats:", err);
-        return { error: error.somethingWentWrong, data: null };
+        return { error: error.somethingWentWrong };
     }
 }
 
