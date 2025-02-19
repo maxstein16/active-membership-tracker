@@ -66,7 +66,7 @@ app.use("/", serveFrontendRouter);
 app.use("/v1/test", testRouter);
 app.use("/v1/session", sessionRouter);
 app.use("/v1/member", memberRouter);
-app.use("/v1/organization/:orgId", organizationRouter);
+app.use("/v1/organization", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/membership", organizationMembershipRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);

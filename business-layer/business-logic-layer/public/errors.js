@@ -29,11 +29,7 @@ module.exports = function () {
   this.mustIncludeValidFieldAddMember = "Must include at least one valid field to update: personal_email, phone_number, gender, race, tshirt_size, major, or graduation_date";
 
   // Organization Calls
-
-  //Adding Org
-  // Organization Calls
   this.validationError = "Validation error: One or more fields are invalid";
-  // Adding Org
   this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
   this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
   this.invalidOrgDescription = "Organization description is invalid. It must be a non-empty string.";
@@ -45,6 +41,7 @@ module.exports = function () {
   this.permissionDenied = "You do not have permission to add an organization.";
   this.invalidOrganizationId = "Organization ID must be a positive integer.";
   this.noError = "No error.";
+  this.mustIncludeOrgId = "Must include an organization ID in your call.";
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid feild to edit: organization_name, organization_abbreviation, organization_desc, organization_color, active_membership_threshold";
 
   // Edit Organization Errors
