@@ -27,9 +27,11 @@ module.exports = function () {
   this.memberCannotBeFoundInDB = "Member cannot be found";
   this.mustIncludeMemberId = "Must include a member id in your call";
   this.mustIncludeValidFieldAddMember = "Must include at least one valid field to update: personal_email, phone_number, gender, race, tshirt_size, major, or graduation_date";
+  this.mustIncludeValidMemberId = "Must include a valid member ID";
 
   // Organization Calls
   this.validationError = "Validation error: One or more fields are invalid";
+  this.mustIncludeOrgId = "Must include an organization ID";
   this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
   this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
   this.invalidOrgDescription = "Organization description is invalid. It must be a non-empty string.";

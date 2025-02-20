@@ -18,13 +18,15 @@ const sequelize = new Sequelize(
 );
 
 
-const Organization = sequelize.define('Organization', {
+  const Organization = sequelize.define('Organization', {
     organization_id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     organization_name: { type: DataTypes.STRING, allowNull: false },
     organization_description: { type: DataTypes.TEXT },
     organization_color: { type: DataTypes.STRING },
     organization_abbreviation: { type: DataTypes.STRING(10) },
     organization_threshold: { type: DataTypes.INTEGER, defaultValue: 0 }
+  }, {
+    timestamps: false
   });
   
   const Semester = sequelize.define('Semester', {
@@ -33,6 +35,8 @@ const Organization = sequelize.define('Organization', {
     academic_year: { type: DataTypes.STRING(9), allowNull: false },
     start_date: { type: DataTypes.DATE, allowNull: false },
     end_date: { type: DataTypes.DATE, allowNull: false }
+  }, {
+    timestamps: false
   });
   
   const Member = sequelize.define('Member', {
@@ -47,6 +51,8 @@ const Organization = sequelize.define('Organization', {
     member_gender: { type: DataTypes.STRING(50) },
     member_race: { type: DataTypes.STRING(50) },
     member_status: { type: DataTypes.ENUM('undergraduate', 'graduate', 'staff', 'faculty', 'alumni'), defaultValue: 'undergraduate' }
+  }, {
+      timestamps: false
   });
   
   const Membership = sequelize.define('Membership', {
@@ -55,6 +61,8 @@ const Organization = sequelize.define('Organization', {
     membership_points: { type: DataTypes.INTEGER, defaultValue: 0 },
     active_member: { type: DataTypes.BOOLEAN, defaultValue: false },
     active_semesters: { type: DataTypes.INTEGER, defaultValue: 0 }
+  }, {
+    timestamps: false
   });
   
   const Event = sequelize.define('Event', {
@@ -65,12 +73,16 @@ const Organization = sequelize.define('Organization', {
     event_location: { type: DataTypes.STRING },
     event_description: { type: DataTypes.TEXT },
     event_type: { type: DataTypes.ENUM('general_meeting', 'volunteer', 'social', 'workshop', 'fundraiser', 'committee'), allowNull: false }
+  }, {
+    timestamps: false
   });
   
   const Attendance = sequelize.define('Attendance', {
     attendance_id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     check_in: { type: DataTypes.DATE, allowNull: false },
     volunteer_hours: { type: DataTypes.FLOAT, defaultValue: 0 }
+  }, {
+    timestamps: false
   });
   
   const MembershipRequirement = sequelize.define('MembershipRequirement', {
@@ -80,6 +92,8 @@ const Organization = sequelize.define('Organization', {
     amount_type: { type: DataTypes.ENUM('points', 'percentage'), allowNull: false },
     amount: { type: DataTypes.FLOAT, allowNull: false },
     requirement_scope: { type: DataTypes.ENUM('semesterly', 'annually'), allowNull: false }
+  }, {
+    timestamps: false
   });
   
   const EmailSettings = sequelize.define('EmailSettings', {
@@ -88,11 +102,21 @@ const Organization = sequelize.define('Organization', {
     annual_report: { type: DataTypes.BOOLEAN, defaultValue: false },
     semester_report: { type: DataTypes.BOOLEAN, defaultValue: false },
     membership_achieved: { type: DataTypes.BOOLEAN, defaultValue: false }
+  }, {
+    timestamps: false
   });
   
   // Define relationships
+  Member.hasMany(Membership, { 
+      foreignKey: 'member_id',
+      as: 'memberships'
+  });
+
   Membership.belongsTo(Member, { foreignKey: 'member_id' });
-  Membership.belongsTo(Organization, { foreignKey: 'organization_id' });
+  Membership.belongsTo(Organization, { 
+      foreignKey: 'organization_id',
+      as: 'organization'
+  });
   Membership.belongsTo(Semester, { foreignKey: 'semester_id', as: 'MembershipSemester' });
   
   Event.belongsTo(Organization, { foreignKey: 'organization_id' });

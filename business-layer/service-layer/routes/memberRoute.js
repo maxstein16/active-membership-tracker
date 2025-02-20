@@ -17,12 +17,18 @@ router.get(
   "/:memberId",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
+    // check if memberId is provided
+    if (!req.params.memberId) {
+      res.status(400).json({ error: error.mustIncludeMemberId });
+      return;
+    }
+
     let memberId = req.params.memberId;
 
     // sanitize and validate memberId
     memberId = sanitizer.sanitize(memberId);
     if (isNaN(memberId)) {
-      res.status(400).json({ error: "Must include a valid member ID" });
+      res.status(400).json({ error: error.mustIncludeValidMemberId });
       return;
     }
 
@@ -34,9 +40,14 @@ router.get(
       return;
     }
 
-    res.status(200).json({ status: "success", data: memberData.data });
+    res.status(200).json({ data: memberData.data });
   }
 );
+
+// Handle GET requests without memberId
+router.get("/", (req, res) => {
+  res.status(400).json({ error: error.mustIncludeMemberId });
+});
 
 // PUT /v1/member/:memberId
 router.put(
@@ -49,7 +60,7 @@ router.put(
     // sanitize and validate memberId
     memberId = sanitizer.sanitize(memberId);
     if (isNaN(memberId)) {
-      res.status(400).json({ error: "Must include a valid member ID" });
+      res.status(400).json({ error: error.mustIncludeValidMemberId });
       return;
     }
 
@@ -82,7 +93,7 @@ router.put(
       return;
     }
 
-    res.status(200).json({ status: "success", data: updateResult.data });
+    res.status(200).json({ data: updateResult.data });
   }
 );
 
@@ -126,7 +137,7 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     return;
   }
 
-  res.status(200).json({ status: "success", data: createResult.data });
+  res.status(200).json({ data: createResult.data });
 });
 
 /**
@@ -137,39 +148,44 @@ router.get(
   "/:memberId/stats",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
-    // Sanitize input
+    // Immediately check for orgId query parameter
+    if (!req.query.orgId) {
+      return res.status(400).json({
+        error: error.mustIncludeOrgId
+      });
+    }
+
+    // Rest of the validation and processing
     let memberId = sanitizer.sanitize(req.params.memberId);
     let orgId = sanitizer.sanitize(req.query.orgId);
 
-    // Validate inputs
-    if (!memberId || isNaN(memberId)) {
-      return res
-        .status(400)
-        .json({ error: "Must include a valid member ID in your call" });
+    // Validate member ID
+    if (isNaN(memberId)) {
+      return res.status(400).json({
+        error: error.mustIncludeValidMemberId
+      });
     }
-    if (!orgId || isNaN(orgId)) {
-      return res
-        .status(400)
-        .json({ error: "Must include a valid org ID in your call" });
+
+    // Validate organization ID
+    if (isNaN(orgId)) {
+      return res.status(400).json({
+        error: error.mustIncludeValidOrgId
+      });
     }
 
     // Fetch member stats for the organization
     const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
-    // Handle errors from backend
-    if (!memberStats) {
-      return res
-        .status(404)
-        .json({ error: `member with id of ${memberId} not found` });
-    }
-    if (memberStats.error === "org_not_found") {
-      return res
-        .status(404)
-        .json({ error: `org with id of ${orgId} not found` });
+    if (memberStats.error) {
+      return res.status(404).json({
+        error: memberStats.error
+      });
     }
 
     // Return successful response
-    res.status(200).json({ status: "success", data: memberStats });
+    return res.status(200).json({
+      data: memberStats
+    });
   }
 );
 
