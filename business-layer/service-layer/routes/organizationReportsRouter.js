@@ -64,9 +64,10 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   });
 });
 
-// GET /v1/organization/{orgId}/reports/semesterly
-router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res) {
+// GET /v1/organization/{orgId}/reports/semester
+router.get("/semester/:semesterId", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
+  let semesterId = req.query.semesterId;
 
   // sanitize
   orgId = sanitizer.sanitize(orgId);
@@ -78,7 +79,7 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
   }
 
   // send to backend
-  const orgData = await business.getSemesterOrgReport(orgId);
+  const orgData = await business.getSemesterOrgReport(orgId, semesterId);
 
   // check for errors that backend returned
   if (orgData.error && orgData.error !== error.noError) {
@@ -87,7 +88,7 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
   }
 
   res.status(200).json({
-    message: "Semester Report " + orgId,
+    message: "Semester " + semesterId +  " Report for " + orgId,
     org: req.params.orgId,
     orgData,
   });
@@ -120,7 +121,7 @@ router.get(
     // does the user have privileges?
     // const hasPrivileges = hasCredentials.isEboardOrAdmin(
     //   req.session.user.username,
-    //   orgId
+    //   orgIdw
     // );
     // if (!hasPrivileges) {
     //   res.status(401).json({ error: error.youDoNotHavePermission });

@@ -259,43 +259,43 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
   async function getSemesterOrgReport(organizationId, semesterId) {
 
-   const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
-    replacements: [organizationId],
-    type: QueryTypes.SELECT,
-  });
+    const members = await sequelize.query('SELECT Member.member_id, Member.member_name, Membership.membership_role, Member.member_email, Member.member_phone_number FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
 
-  const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
-    replacements: [organizationId],
-    type: QueryTypes.SELECT,
-  });
+    const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
 
-  const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
-    replacements: [organizationId],
-    type: QueryTypes.SELECT,
-  });
+    const organization = await sequelize.query('SELECT organization_id, organization_name, organization_abbreviation FROM `Organization` WHERE organization_id = ?', {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
 
-  const events = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? `, {
-    replacements: [organizationId, start_year, end_year],
-    type: QueryTypes.SELECT,
-    logging: console.log,
-  });
+    const events = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? `, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
 
-  const meetings = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'general_meeting'`, {
-    replacements: [organizationId, start_year, end_year],
-    type: QueryTypes.SELECT,
-    logging: console.log,
-  });
+    const meetings = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'general_meeting'`, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
 
-  const volunteering = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'volunteer'`, {
-    replacements: [organizationId, start_year, end_year],
-    type: QueryTypes.SELECT,
-    logging: console.log,
-  });
+    const volunteering = await sequelize.query(`SELECT event_id, event_start, event_end FROM Event WHERE organization_id = ? AND event_start >= ? AND event_end < ? AND event_type = 'volunteer'`, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+      logging: console.log,
+    });
 
-  const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
-    replacements: [organizationId, start_year, end_year],
-    type: QueryTypes.SELECT,
-  });
+    const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? AND check_in >= ? AND check_in < ? `, {
+      replacements: [organizationId, start_year, end_year],
+      type: QueryTypes.SELECT,
+    });
 
 
     
@@ -415,15 +415,20 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       type: QueryTypes.SELECT,
     });
 
-    const activeMembers = await sequelize.query('SELECT Member.member_id, Member.member_name FROM `Member` INNER JOIN `Membership` ON Membership.member_id = Member.member_id WHERE Membership.organization_id = ?', {
-      replacements: [organizationId],
-      type: QueryTypes.SELECT,
-    });
-
     const attendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id WHERE Event.organization_id = ? `, {
       replacements: [organizationId],
       type: QueryTypes.SELECT,
     });
+
+    const activeAttendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id JOIN Membership ON Attendance.member_id = Membership.member_id WHERE Membership.active_member = TRUE AND Event.organization_id = ? `, {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    });
+
+    const inactiveAttendance = await sequelize.query(`SELECT Attendance.attendance_id FROM Attendance JOIN Event ON Attendance.event_id = Event.event_id JOIN Membership ON Attendance.member_id = Membership.member_id WHERE Membership.active_member = FALSE AND Event.organization_id = ? `, {
+      replacements: [organizationId],
+      type: QueryTypes.SELECT,
+    }); 
 
     const jsonResponse = {
       "organization_id": organizationId,
@@ -434,8 +439,8 @@ async function getSpecificReportOrgData( orgId, memberId ) {
       "meeting_date": meetingData.event_start,
       "attendance": {
         "total_attendance": attendance.length,
-        "active_member_attendance": 4,
-        "inactive_member_attendance": 9,
+        "active_member_attendance": activeAttendance.length,
+        "inactive_member_attendance": inactiveAttendance.length,
         "members_who_attended": members.map(member => ({
           "member_id": member.member_id,
           "role_num": member.role_num,
@@ -444,7 +449,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
           "rit_username": member.member_email.split("@")[0],
           "phone": member.member_phone_number
         }))
-      },
+      }
     
     };
 

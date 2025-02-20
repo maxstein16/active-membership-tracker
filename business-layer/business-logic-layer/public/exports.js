@@ -114,16 +114,16 @@ module.exports = function () {
   }
 
   // Organization Reports Calls
-  this.getAnnualOrgReport = async (orgId) => {
-    return await getAnnualOrgReport(orgId);
+  this.getAnnualOrgReport = async (orgId, year) => {
+    return await getAnnualOrgReport(orgId, year);
   }
 
   this.getMeetingOrgReport = async (orgId, meetingId) => {
     return await getMeetingOrgReport(orgId, meetingId);
   }
 
-  this.getSemesterOrgReport = async (orgId) => {
-    return await getSemesterOrgReport(orgId);
+  this.getSemesterOrgReport = async (orgId, semesterId) => {
+    return await getSemesterOrgReport(orgId, semesterId);
   }
 
   // Organization Membership Calls
