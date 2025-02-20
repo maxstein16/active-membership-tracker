@@ -39,7 +39,7 @@ async function addTestData() {
     organization_name: "WiC TEST ONLY",
     organization_description: "This is a test for WiC Settings",
     organization_color: "#381A58",
-    org_abbreviation: "WiC TEST",
+    organization_abbreviation: "WiC TEST",
     organization_threshold: 42,
   });
 
@@ -47,7 +47,7 @@ async function addTestData() {
     organization_name: "COMS TEST ONLY",
     organization_description: "This is a test for COMS Settings",
     organization_color: "#20BDE4",
-    org_abbreviation: "COMS TEST",
+    organization_abbreviation: "COMS TEST",
     organization_threshold: 23,
   });
 

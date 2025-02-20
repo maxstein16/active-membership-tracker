@@ -70,7 +70,7 @@ async function addMemberToAnOrganization(orgId, memberData) {
     }
 
     // get current semester
-    const currentSemesters = getCurrentSemesters()
+    const currentSemesters = await getCurrentSemesters()
 
     if (currentSemesters.length < 1) {
       return { error: error.noCurrentSemesterFound, data: null };
@@ -108,15 +108,16 @@ async function editMemberInOrganization(orgId, memberId, memberDataToUpdate) {
 
     // is orgId an int?
     if (isNaN(orgId)) {
+      console.log("fail here?")
       return { error: error.organizationIdMustBeInteger, data: null };
     }
     if (isNaN(memberId)) {
       return { error: error.memberIdMustBeInteger, data: null };
     }
-    if (isNaN(memberDataToUpdate.membership_role)) {
+    if (memberDataToUpdate.hasOwnProperty("membership_role") && isNaN(memberDataToUpdate.membership_role)) {
       return { error: error.roleMustBeAnInteger, data: null };
     }
-    if (isNaN(memberDataToUpdate.membership_points)) {
+    if (memberDataToUpdate.hasOwnProperty("membership_points") && isNaN(memberDataToUpdate.membership_points)) {
       return { error: error.memberPointsNaN, data: null };
     }
 
