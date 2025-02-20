@@ -111,7 +111,7 @@ CREATE TABLE MembershipRequirement (
   amount_type ENUM('points', 'percentage') NOT NULL, -- Whether the requirement is measured in points or percentage
   amount FLOAT NOT NULL, -- Required points or percentage
   requirement_scope ENUM('semesterly', 'annually') NOT NULL, -- Whether the requirement applies per semester or annually
-  PRIMARY KEY (setting_id),
+  PRIMARY KEY (requirement_id),
   FOREIGN KEY (organization_id) REFERENCES Organization(organization_id)
 );
 

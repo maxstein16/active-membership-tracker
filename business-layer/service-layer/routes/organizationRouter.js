@@ -60,7 +60,7 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     !body.hasOwnProperty("organization_abbreviation") ||
     !body.hasOwnProperty("organization_desc") ||
     !body.hasOwnProperty("organization_color") ||
-    !body.hasOwnProperty("active_membership_threshold")
+    !body.hasOwnProperty("organization_threshold")
   ) {
     res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
     return;
@@ -108,7 +108,7 @@ router.put("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     !body.hasOwnProperty("organization_abbreviation") ||
     !body.hasOwnProperty("organization_desc") ||
     !body.hasOwnProperty("organization_color") ||
-    !body.hasOwnProperty("active_membership_threshold")
+    !body.hasOwnProperty("organization_threshold")
   ) {
     res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
     return;
