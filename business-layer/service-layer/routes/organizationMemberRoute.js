@@ -122,9 +122,7 @@ router.put(
     // check if has all the params needed
     if (
       !body.hasOwnProperty("role") &&
-      !body.hasOwnProperty("meetings_attended") &&
-      !body.hasOwnProperty("volunteer_events") &&
-      !body.hasOwnProperty("social_events")
+      !body.hasOwnProperty("membership_points")
     ) {
       res
         .status(400)
@@ -177,10 +175,10 @@ router.delete(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
 
     // send off to backend

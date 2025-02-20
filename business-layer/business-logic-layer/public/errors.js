@@ -15,12 +15,14 @@ module.exports = function () {
   // Member In Org Management
 
   this.mustHaveAllFieldsAddMemberInOrg = "Must include all the fields: member_id and role";
-  this.mustHaveAtLeastOneFieldsAddMemberInOrg = "Must include at least one valid field to update: meetings_attended, volunteer_events, social_events, role";
+  this.mustHaveAtLeastOneFieldsAddMemberInOrg = "Must include at least one valid field to update: membership_points, role";
   this.memberCanNotBeAddedToOrg = "Can not add member to organization";
   this.memberNotFoundInOrg = "Member not found in organization";
   this.memberMustEditAttendanceField = "Must edit at least one valid field: meetings_attended, volunteer_events, social_events";
   this.mustHaveAllFieldsEditMemberRoleInOrg = "Missing required fields: member_id, organization_id, role";
   this.couldNotCreateMembership = "Could not create membership";
+  this.noCurrentSemesterFound = "No current semester found";
+  this.memberPointsNaN = "Member Points must be an integer";
 
 
   // Member Calls (not org specific)
@@ -48,7 +50,7 @@ module.exports = function () {
 
   // Edit Organization Errors
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: org_name, org_description, org_category, org_contact_email, org_phone_number.";
-  this.orgNotFound = "Organization not found or update failed.";
+  this.orgNotFound = "Organization not found";
 
 
 
