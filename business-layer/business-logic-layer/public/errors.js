@@ -30,8 +30,6 @@ module.exports = function () {
   this.mustIncludeValidMemberId = "Must include a valid member ID";
 
   // Organization Calls
-
-  // Organization Calls
   this.validationError = "Validation error: One or more fields are invalid";
   this.mustIncludeOrgId = "Must include an organization ID";
   this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
@@ -45,7 +43,8 @@ module.exports = function () {
   this.permissionDenied = "You do not have permission to add an organization.";
   this.invalidOrganizationId = "Organization ID must be a positive integer.";
   this.noError = "No error.";
-  this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid feild to edit: organization_name, organization_abbreviation, organization_desc, organization_color, organization_threshold";
+  this.mustIncludeOrgId = "Must include an organization ID in your call.";
+  this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: organization_name, organization_abbreviation, organization_desc, organization_color, organization_threshold";
 
   // Edit Organization Errors
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: org_name, org_description, org_category, org_contact_email, org_phone_number.";
@@ -84,5 +83,9 @@ module.exports = function () {
   this.fileProcessingFailed = "Failed to process the CSV file.";
   this.emailExistenceCheckError = "Error while checking email existence in the DB"
 
+
+  //Attendance data
+  this.attendanceIdMustBeInteger = "Attendance has to be an Integer."
+  this.attendanceNotFound = "Attendance has not been found"
 };
 
