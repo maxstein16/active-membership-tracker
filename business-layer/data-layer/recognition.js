@@ -53,7 +53,7 @@ async function getRecognitions(memberId) {
   }
 }
 
-export default {
+export {
   createRecognition,
   getRecognitions,
 };

@@ -1,28 +1,33 @@
-const { Event, Attendance } = require("../db"); // Import models
 const Error = require("./public/errors.js");
 const error = new Error();
+const { getAttendanceByEventIdDB } = require("./attendanceProcessing");
+const { getEventsByAttributes, createEvent, getEventById, updateEvent } = require("../data-layer/event.js");
 
 /**
  * Retrieve all events for a specific organization with attendance records.
  */
-async function getAllEventsByOrganization(orgId) {
+async function getAllEventsByOrganizationInDB(orgId) {
   try {
-    const events = await Event.findAll({
-      where: { organization_id: orgId },
-      include: [
-        {
-          model: Attendance,
-          as: "attendances",
-          attributes: ["attendance_id", "member_id", "check_in"],
-        },
-      ],
-    });
-
+    // Get all events for the organization
+    const events = await getEventsByAttributes({ organization_id: orgId });
+    
     if (!events.length) {
       return { error: error.noError, data: [] };
     }
 
-    return { error: error.noError, data: events };
+    // Fetch attendance records for each event
+    const eventsWithAttendance = await Promise.all(
+      events.map(async (event) => {
+        const attendanceResult = await getAttendanceByEventIdDB(event.event_id);
+        const eventJson = event.toJSON();
+        return {
+          ...eventJson,
+          attendances: attendanceResult.error === error.noError ? attendanceResult.data : []
+        };
+      })
+    );
+
+    return { error: error.noError, data: eventsWithAttendance };
   } catch (err) {
     console.error("Error fetching events by organization:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -32,24 +37,24 @@ async function getAllEventsByOrganization(orgId) {
 /**
  * Retrieve a specific event by ID with its attendance records.
  */
-async function getEventById(orgId, eventId) {
+async function getEventByIDInDB(orgId, eventId) {
   try {
-    const event = await Event.findOne({
-      where: { event_id: eventId, organization_id: orgId },
-      include: [
-        {
-          model: Attendance,
-          as: "attendances",
-          attributes: ["attendance_id", "member_id", "check_in"],
-        },
-      ],
-    });
-
-    if (!event) {
+    // Get the event
+    const event = await getEventById(eventId);
+    
+    if (!event || event.organization_id !== orgId) {
       return { error: error.eventNotFound, data: null };
     }
 
-    return { error: error.noError, data: event };
+    // Get attendance records for the event
+    const attendanceResult = await getAttendanceByEventIdDB(eventId);
+    
+    const eventWithAttendance = {
+      ...event.toJSON(),
+      attendances: attendanceResult.error === error.noError ? attendanceResult.data : []
+    };
+
+    return { error: error.noError, data: eventWithAttendance };
   } catch (err) {
     console.error("Error fetching event by ID:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -59,9 +64,9 @@ async function getEventById(orgId, eventId) {
 /**
  * Create a new event.
  */
-async function createEvent(orgId, eventData) {
+async function createEventInDB(orgId, eventData) {
   try {
-    const newEvent = await Event.create({
+    const newEvent = await createEvent({
       organization_id: orgId,
       event_name: eventData.event_name,
       event_start: eventData.event_start,
@@ -81,21 +86,21 @@ async function createEvent(orgId, eventData) {
 /**
  * Update an existing event.
  */
-async function updateEvent(orgId, eventId, updateData) {
+async function updateEventInDB(orgId, eventId, updateData) {
   try {
-    const [updatedRows] = await Event.update(updateData, {
-      where: { event_id: eventId, organization_id: orgId },
-    });
-
-    if (updatedRows === 0) {
+    // First verify the event belongs to the organization
+    const existingEvent = await getEventById(eventId);
+    if (!existingEvent || existingEvent.organization_id !== orgId) {
       return { error: error.eventNotFound, data: null };
     }
 
-    const updatedEvent = await Event.findOne({
-      where: { event_id: eventId, organization_id: orgId },
-    });
+    const updated = await updateEvent(eventId, updateData);
+    if (!updated) {
+      return { error: error.eventNotFound, data: null };
+    }
 
-    return { error: error.noError, data: updatedEvent };
+    // Get the updated event with attendance
+    return await getEventById(orgId, eventId);
   } catch (err) {
     console.error("Error updating event:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -103,8 +108,8 @@ async function updateEvent(orgId, eventId, updateData) {
 }
 
 module.exports = {
-  getAllEventsByOrganization,
-  getEventById,
-  createEvent,
-  updateEvent,
+  getAllEventsByOrganizationInDB,
+  getEventByIDInDB,
+  createEventInDB,
+  updateEventInDB,
 };

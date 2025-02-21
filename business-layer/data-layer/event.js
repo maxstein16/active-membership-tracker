@@ -1,4 +1,4 @@
-import { Event } from "../db"; // Import the Event model from the database
+const { Event } = require("../db");
 
 /**
  * Creates a new event in the database.
@@ -6,7 +6,7 @@ import { Event } from "../db"; // Import the Event model from the database
  * @param {object} eventData - The attributes of the new event.
  * @returns {Promise<object>} The newly created event object.
  */
-const createEvent = async (eventData) => {
+async function createEvent(eventData) {
   try {
     const newEvent = await Event.create(eventData);
     console.log("Event created:", newEvent.toJSON());
@@ -24,7 +24,7 @@ const createEvent = async (eventData) => {
  * @param {object} updateData - The fields to update.
  * @returns {Promise<boolean>} Returns `true` if the event was updated, `false` if no matching event was found.
  */
-const updateEvent = async (eventId, updateData) => {
+async function updateEvent(eventId, updateData) {
   try {
     const [updatedRows] = await Event.update(updateData, {
       where: { event_id: eventId },
@@ -48,7 +48,7 @@ const updateEvent = async (eventId, updateData) => {
  *
  * @returns {Promise<object[]>} An array of event objects (empty if no events found).
  */
-const getAllEvents = async () => {
+async function getAllEvents() {
   try {
     const events = await Event.findAll();
     if (events.length === 0) {
@@ -72,7 +72,7 @@ const getAllEvents = async () => {
  * @param {number} eventId - The unique ID of the event to retrieve.
  * @returns {Promise<object|null>} The event object if found, otherwise `null`.
  */
-const getEventById = async (eventId) => {
+async function getEventById(eventId) {
   try {
     const event = await Event.findByPk(eventId);
 
@@ -95,7 +95,7 @@ const getEventById = async (eventId) => {
  * @param {object} filters - Attributes to filter by.
  * @returns {Promise<object[]>} An array of matching event objects (empty if no matches found).
  */
-const getEventsByAttributes = async (filters) => {
+async function getEventsByAttributes(filters) {
   try {
     const events = await Event.findAll({ where: filters });
 
@@ -116,7 +116,7 @@ const getEventsByAttributes = async (filters) => {
 };
 
 // Export all functions for external use
-export default {
+module.exports = {
   createEvent,
   updateEvent,
   getAllEvents,

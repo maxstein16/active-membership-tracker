@@ -30,7 +30,7 @@ router.get(
       return res.status(400).json({ error: error.roleMustBeAnInteger });
     }
 
-    const result = await business.getMembershipRoleInOrg(orgId, role);
+    const result = await business.getMembershipRoleInfoInOrganization(orgId, role);
 
     if (result.error && result.error !== error.noError) {
       return res.status(404).json({ error: result.error });
@@ -53,7 +53,7 @@ router.get(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
 
-    const result = await business.getAllMembershipsInfoInOrg(orgId);
+    const result = await business.getAllMembershipsInOrganization(orgId);
 
     if (result.error && result.error !== error.noError) {
       return res.status(404).json({ error: result.error });

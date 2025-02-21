@@ -77,7 +77,7 @@ router.put(
     //   res.status(401).json({ error: error.youDoNotHavePermission });
     // }
 
-    const response = await business.editOrganizationMembershipRequirements(
+    const response = await business.editOrganizationMembershipRequirement(
       parseInt(orgId),
       req.body
     );

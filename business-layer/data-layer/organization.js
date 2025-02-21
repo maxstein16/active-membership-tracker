@@ -5,7 +5,7 @@ const { Organization } = require("../db");
  * @param {Object} organizationData - The data to create the organization record
  * @returns {Promise<Object>} The created organization record
  */
-const createOrganization = async (organizationData) => {
+async function createOrganization (organizationData) {
     try {
         const organization = await Organization.create(organizationData);
         return organization;
@@ -20,7 +20,7 @@ const createOrganization = async (organizationData) => {
  * @param {number} organizationId - The ID of the organization record
  * @returns {Promise<Object|null>} The organization record, or null if not found
  */
-const getOrganizationById = async (organizationId) => {
+async function getOrganizationById (organizationId) {
     try {
         const organization = await Organization.findByPk(organizationId);
         return organization;
@@ -34,7 +34,7 @@ const getOrganizationById = async (organizationId) => {
  * Get all Organizations
  * @returns {Promise<Array>} List of organization records
  */
-const getOrganizations = async () => {
+async function getOrganizations() {
     try {
         const organizations = await Organization.findAll();
         return organizations;
@@ -51,7 +51,7 @@ const getOrganizations = async () => {
  * @returns {Promise<boolean>} Returns true if the organization was updated, 
  *    false if no organization with the provided ID exists
  */
-const updateOrganizationByID = async (organizationId, updatedOrgInfo) => {
+async function updateOrganizationByID(organizationId, updatedOrgInfo) {
     try {
         const [updatedOrgRows] = await Organization.update(updatedOrgInfo, {
             where: { organization_id: organizationId }
@@ -77,7 +77,7 @@ const updateOrganizationByID = async (organizationId, updatedOrgInfo) => {
  * @returns {Promise<boolean>} Returns true if the organization was updated, 
  *    false if no organization with the provided name exists
  */
-const updateOrganizationByName = async (organizationName, updatedOrgDesc) => {
+async function updateOrganizationByName (organizationName, updatedOrgDesc) {
     try {
         const [updatedOrgRows] = await Organization.update(updatedOrgDesc, {
             where: { organization_name: organizationName }

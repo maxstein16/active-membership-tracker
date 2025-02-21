@@ -1,5 +1,7 @@
-const { Organization, Membership } = require("../db");
 const Error = require("../business-logic-layer/public/errors.js");
+const { getMembersByAttributes } = require("../data-layer/member.js");
+const { editMembership } = require("../data-layer/membership.js");
+const { getOrganizationById, updateOrganizationByID } = require("../data-layer/organization.js");
 const error = new Error();
 
 /**
@@ -7,22 +9,32 @@ const error = new Error();
  * @param {number} orgId - The ID of the organization
  * @returns {Promise<Object>} Organization settings
  */
-const getOrganizationSettings = async (orgId) => {
+async function getOrganizationSettingsInDB (orgId) {
     try {
-        const organization = await Organization.findByPk(orgId, {
-            include: [
-                {
-                    model: Membership,
-                    attributes: ["settingId", "meeting_type", "frequency", "amount_type", "amount"],
-                }
-            ]
-        });
-
+        // Get organization data
+        const organization = await getOrganizationById(orgId);
         if (!organization) {
             return { error: error.organizationNotFound, data: null };
         }
 
-        return { error: error.noError, data: organization };
+        // Get associated membership settings
+        const membershipSettings = await getMembersByAttributes({ 
+            organization_id: orgId 
+        });
+
+        // Format the response to match expected structure
+        const formattedData = {
+            ...organization.toJSON(),
+            Memberships: membershipSettings.map(membership => ({
+                settingId: membership.settingId,
+                meeting_type: membership.meeting_type,
+                frequency: membership.frequency,
+                amount_type: membership.amount_type,
+                amount: membership.amount
+            }))
+        };
+
+        return { error: error.noError, data: formattedData };
     } catch (err) {
         console.error("Error fetching organization settings:", err);
         return { error: error.somethingWentWrong, data: null };
@@ -35,13 +47,21 @@ const getOrganizationSettings = async (orgId) => {
  * @param {object} orgData - Updated membership requirements data
  * @returns {Promise<Object>} Updated membership requirements
  */
-const editOrganizationMembershipRequirements = async (orgId, orgData) => {
+async function editOrganizationMembershipRequirementsInDB (orgId, orgData) {
     try {
-        const [updatedRows] = await Membership.update(orgData, {
-            where: { organization_id: orgId, setting_id: orgData.setting_id }
-        });
+        // Verify organization exists
+        const organization = await getOrganizationById(orgId);
+        if (!organization) {
+            return { error: error.organizationNotFound, data: null };
+        }
 
-        if (updatedRows === 0) {
+        // Update membership settings
+        const updated = await editMembership(
+            orgData.setting_id,
+            { ...orgData, organization_id: orgId }
+        );
+
+        if (!updated) {
             return { error: error.settingNotFound, data: null };
         }
 
@@ -58,13 +78,11 @@ const editOrganizationMembershipRequirements = async (orgId, orgData) => {
  * @param {object} orgData - Updated email settings
  * @returns {Promise<Object>} Updated email settings
  */
-const editOrganizationEmailSettings = async (orgId, orgData) => {
+async function editOrganizationEmailSettingsInDB (orgId, orgData) {
     try {
-        const [updatedRows] = await Organization.update(orgData, {
-            where: { organization_id: orgId }
-        });
+        const updated = await updateOrganizationByID(orgId, orgData);
 
-        if (updatedRows === 0) {
+        if (!updated) {
             return { error: error.organizationNotFound, data: null };
         }
 
@@ -81,15 +99,26 @@ const editOrganizationEmailSettings = async (orgId, orgData) => {
  * @param {number} membershipId - The ID of the membership requirement
  * @returns {Promise<Object>} Deletion status
  */
-const deleteOrganizationMembershipRequirement = async (orgId, membershipId) => {
+async function deleteOrganizationMembershipRequirementInDB (orgId, membershipId)  {
     try {
-        const deletedRows = await Membership.destroy({
-            where: { organization_id: orgId, membership_id: membershipId }
+        // First verify organization exists
+        const organization = await getOrganizationById(orgId);
+        if (!organization) {
+            return { error: error.organizationNotFound, data: null };
+        }
+
+        // Get the membership to verify it exists and belongs to this org
+        const memberships = await getMembersByAttributes({
+            organization_id: orgId,
+            membership_id: membershipId
         });
 
-        if (deletedRows === 0) {
+        if (!memberships || memberships.length === 0) {
             return { error: error.settingNotFound, data: null };
         }
+
+        // Delete the membership
+        await memberships[0].destroy();
 
         return { error: error.noError, data: { deleted: true } };
     } catch (err) {
@@ -99,8 +128,8 @@ const deleteOrganizationMembershipRequirement = async (orgId, membershipId) => {
 };
 
 module.exports = {
-    getOrganizationSettings,
-    editOrganizationMembershipRequirements,
-    editOrganizationEmailSettings,
-    deleteOrganizationMembershipRequirement
+    getOrganizationSettingsInDB,
+    editOrganizationMembershipRequirementsInDB,
+    editOrganizationEmailSettingsInDB,
+    deleteOrganizationMembershipRequirementInDB
 };

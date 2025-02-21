@@ -1,11 +1,11 @@
-import { Attendance } from "../db";
+const { Attendance } = require("../db")
 
 /**
  * Create an attendance record
  * @param {Object} attendanceData - The data to create the attendance record
  * @returns {Promise<Object>} The created attendance record
  */
-const createAttendance = async (attendanceData) => {
+async function createAttendance(attendanceData) {
   try {
     const attendance = await Attendance.create(attendanceData);
     return attendance;
@@ -20,7 +20,7 @@ const createAttendance = async (attendanceData) => {
  * @param {number} attendanceId - The ID of the attendance record
  * @returns {Promise<Object|null>} The attendance record, or null if not found
  */
-const getAttendanceById = async (attendanceId) => {
+async function getAttendanceById(attendanceId) {
   try {
     const attendance = await Attendance.findByPk(attendanceId);
     return attendance;
@@ -35,7 +35,7 @@ const getAttendanceById = async (attendanceId) => {
  * @param {number} memberId - The ID of the member
  * @returns {Promise<Array>} List of attendance records
  */
-const getAttendanceByMemberId = async (memberId) => {
+async function getAttendanceByMemberId(memberId) {
   try {
     const attendances = await Attendance.findAll({
       where: { member_id: memberId },
@@ -52,7 +52,7 @@ const getAttendanceByMemberId = async (memberId) => {
  * @param {number} eventId - The ID of the event
  * @returns {Promise<Array>} List of attendance records
  */
-const getAttendanceByEventId = async (eventId) => {
+async function getAttendanceByEventId(eventId) {
   try {
     const attendances = await Attendance.findAll({
       where: { event_id: eventId },
@@ -70,7 +70,7 @@ const getAttendanceByEventId = async (eventId) => {
  * @param {number} eventId - The ID of the event
  * @returns {Promise<Object|null>} The attendance record, or null if not found
  */
-const getAttendanceByMemberAndEvent = async (memberId, eventId) => {
+async function getAttendanceByMemberAndEvent(memberId, eventId) {
   try {
     const attendance = await Attendance.findOne({
       where: {

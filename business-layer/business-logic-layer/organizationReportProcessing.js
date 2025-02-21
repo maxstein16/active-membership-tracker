@@ -2,7 +2,7 @@ const Error = require("./public/errors.js");
 const error = new Error();
 
 
-async function getSpecificReportOrgData( orgId, memberId ) {
+async function getSpecificReportOrgDataInDB( orgId, memberId ) {
     
     // TODO: call db
   
@@ -36,7 +36,7 @@ async function getSpecificReportOrgData( orgId, memberId ) {
   }
 
 
-  async function getAnnualOrgReport(orgId) {
+  async function getAnnualOrgReportInDB(orgId) {
     //connect to db
     //in order to get the data for this report, do something like this....
     //for each entry in the Organization table, get the organization info
@@ -97,14 +97,14 @@ async function getSpecificReportOrgData( orgId, memberId ) {
     return {error: error.noError, data: "data-here"}
   }
 
-  async function getSemesterOrgReport(orgId) {
+  async function getSemesterOrgReportInDB(orgId) {
    
 
     
     return {error: error.noError, data: "data-here"}
   }
 
-  async function getMeetingOrgReport (orgId, meetingId) {
+  async function getMeetingOrgReportInDB (orgId, meetingId) {
 
 
 /**
@@ -162,8 +162,8 @@ async function getSpecificReportOrgData( orgId, memberId ) {
 
 
 module.exports = {
-  getSpecificReportOrgData,
-  getAnnualOrgReport,
-  getSemesterOrgReport,
-  getMeetingOrgReport
+  getSpecificReportOrgDataInDB,
+  getAnnualOrgReportInDB,
+  getSemesterOrgReportInDB,
+  getMeetingOrgReportInDB
 };

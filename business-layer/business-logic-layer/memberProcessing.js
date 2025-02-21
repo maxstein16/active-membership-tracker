@@ -1,40 +1,46 @@
-const { Member, Membership, Organization } = require("../db");
-const { sendEmail } = require("../service-layer/emailService");
-const { activeMembershipEmail } = require("./public/emailTemplates");
 const Error = require("./public/errors.js");
 const error = new Error();
+const { sendEmail } = require("../service-layer/emailService");
+const { activeMembershipEmail } = require("./public/emailTemplates");
+
+const { getMemberById, getMembersByAttributes, updateMember, createMember } = require("../data-layer/member.js");
+const { getOrganizationById } = require("../data-layer/organization.js");
 
 /**
  * Retrieves a member by their ID, including their memberships.
  * @param {number} memberId - The unique ID of the member to retrieve.
  * @returns {Promise<object>} The member object if found, otherwise an error.
  */
-async function getMemberById(memberId) {
+async function getMemberByIdInDB(memberId) {
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
 
     try {
-        const member = await Member.findByPk(memberId, {
-            include: [
-                {
-                    model: Membership,
-                    as: 'memberships',
-                    include: [
-                        {
-                            model: Organization,
-                            as: 'organization'
-                        }
-                    ],
-                },
-            ],
-        }); 
-
+        const member = await getMemberById(memberId);
+        
         if (!member) {
             return { error: error.memberNotFound, data: null };
         }
 
-        return { error: null, data: member.toJSON() };
+        // Get all memberships for this member
+        const memberships = await getMembersByAttributes({ member_id: memberId });
+        
+        // Get organization details for each membership
+        const membershipDetails = await Promise.all(
+            memberships.map(async (membership) => {
+                const org = await getOrganizationById(membership.organization_id);
+                return {
+                    ...membership.toJSON(),
+                    organization: org ? org.toJSON() : null
+                };
+            })
+        );
+
+        const memberData = member.toJSON();
+        memberData.memberships = membershipDetails;
+
+        return { error: null, data: memberData };
     } catch (err) {
         console.error("Error fetching member by ID:", err);
         return { error: error.somethingWentWrong, data: null };
@@ -56,12 +62,7 @@ async function updateMemberInDB(memberId, memberData) {
     }
 
     try {
-        const existingMember = await Member.findByPk(memberId);
-        if (!existingMember) {
-            return { error: error.memberNotFound, data: null };
-        }
-
-        // 🔑 Map incoming fields to database fields
+        // Map incoming fields to database fields
         const updateFields = {
             member_personal_email: memberData.personal_email,
             member_phone_number: memberData.phone_number,
@@ -72,17 +73,18 @@ async function updateMemberInDB(memberId, memberData) {
             member_graduation_date: memberData.graduation_date,
         };
 
-        // Remove undefined fields to avoid Sequelize errors
+        // Remove undefined fields
         Object.keys(updateFields).forEach(
             (key) => updateFields[key] === undefined && delete updateFields[key]
         );
 
-        // Perform the update
-        await Member.update(updateFields, { where: { member_id: memberId } });
+        const updated = await updateMember(memberId, updateFields);
+        if (!updated) {
+            return { error: error.memberNotFound, data: null };
+        }
 
         // Fetch updated member data
-        const updatedMember = await Member.findByPk(memberId);
-
+        const updatedMember = await getMemberById(memberId);
         return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
         console.error("Error updating member:", err);
@@ -101,7 +103,7 @@ async function createMemberInDB(memberData) {
     }
 
     try {
-        // Map request body to Sequelize fields
+        // Map request body to database fields
         const mappedFields = {
             member_name: memberData.name,
             member_email: memberData.email,
@@ -120,8 +122,7 @@ async function createMemberInDB(memberData) {
             (key) => mappedFields[key] === undefined && delete mappedFields[key]
         );
 
-        // Create the member in the database
-        const newMember = await Member.create(mappedFields);
+        const newMember = await createMember(mappedFields);
         return { error: null, data: newMember.toJSON() };
     } catch (err) {
         console.error("Error creating member:", err);
@@ -135,7 +136,7 @@ async function createMemberInDB(memberData) {
  * @param {number} orgId - The organization's ID.
  * @returns {Promise<object>} Member's organizational stats or an error.
  */
-async function getSpecificMemberOrgStats(memberId, orgId) {
+async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger };
     }
@@ -144,41 +145,38 @@ async function getSpecificMemberOrgStats(memberId, orgId) {
     }
 
     try {
-        const membership = await Membership.findOne({
-            where: { 
-                member_id: memberId, 
-                organization_id: orgId 
-            },
-            include: [
-                { 
-                    model: Organization,
-                    as: 'organization'
-                }
-            ]
+        const memberships = await getMembersByAttributes({
+            member_id: memberId,
+            organization_id: orgId
         });
 
-        if (!membership) {
+        if (!memberships || memberships.length === 0) {
             return { error: error.membershipNotFound };
         }
 
-        const organization = membership.organization;
+        const membership = memberships[0];
+        const organization = await getOrganizationById(orgId);
+
         if (!organization) {
             return { error: error.organizationNotFound };
         }
 
-        // Return clean stats object directly
+        // Return clean stats object
         return {
-            member_id: membership.member_id,
-            organization_id: membership.organization_id,
-            membership_id: membership.membership_id,
-            organization_name: organization.organization_name,
-            organization_abbreviation: organization.organization_abbreviation,
-            meetings_attended: membership.meetings_attended || 0,
-            volunteer_events: membership.volunteer_events || 0,
-            social_events: membership.social_events || 0,
-            your_points: membership.membership_points || 0,
-            organization_threshold: organization.organization_threshold,
-            isActiveMember: (membership.membership_points || 0) >= organization.organization_threshold
+            error: null,
+            data: {
+                member_id: membership.member_id,
+                organization_id: membership.organization_id,
+                membership_id: membership.membership_id,
+                organization_name: organization.organization_name,
+                organization_abbreviation: organization.organization_abbreviation,
+                meetings_attended: membership.meetings_attended || 0,
+                volunteer_events: membership.volunteer_events || 0,
+                social_events: membership.social_events || 0,
+                your_points: membership.membership_points || 0,
+                organization_threshold: organization.organization_threshold,
+                isActiveMember: (membership.membership_points || 0) >= organization.organization_threshold
+            }
         };
     } catch (err) {
         console.error("Error fetching member organization stats:", err);
@@ -187,8 +185,8 @@ async function getSpecificMemberOrgStats(memberId, orgId) {
 }
 
 module.exports = {
-    getMemberById,
+    getMemberByIdInDB,
     updateMemberInDB,
     createMemberInDB,
-    getSpecificMemberOrgStats
+    getSpecificMemberOrgStatsInDB
 };

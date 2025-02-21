@@ -106,7 +106,7 @@ async function handlePostOrganization(req, res) {
             });
         }
 
-        const result = await business.addOrganization(orgData);
+        const result = await business.createOrganization(orgData);
 
         if (result.error) {
             return res.status(400).json({
@@ -166,7 +166,7 @@ router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
             });
         }
 
-        const result = await business.editOrganization(parseInt(orgId), orgData);
+        const result = await business.updateOrganization(parseInt(orgId), orgData);
 
         if (result.error) {
             return res.status(404).json({

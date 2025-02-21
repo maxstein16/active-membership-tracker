@@ -1,6 +1,7 @@
-const { Membership } = require("../db");
+const { getMembersByAttributes } = require("../data-layer/member.js");
 const Error = require("./public/errors.js");
 const error = new Error();
+
 
 /**
  * Retrieve membership role information for a specific organization
@@ -8,28 +9,32 @@ const error = new Error();
  * @param {number} role - The role ID to filter by
  * @returns {Promise<Object>} Membership details
  */
-async function getMembershipRoleInfoInOrganization(organizationId, role) {
-  try {
-    if (isNaN(organizationId)) {
-      return { error: error.organizationIdMustBeInteger, data: null };
-    }
-    if (isNaN(role)) {
-      return { error: error.roleMustBeAnInteger, data: null };
-    }
+async function getMembershipRoleInfoInOrganizationInDB(organizationId, role) {
+    try {
+        if (isNaN(organizationId)) {
+            return { error: error.organizationIdMustBeInteger, data: null };
+        }
+        if (isNaN(role)) {
+            return { error: error.roleMustBeAnInteger, data: null };
+        }
 
-    const memberships = await Membership.findAll({
-      where: { organization_id: organizationId, membership_role: role },
-    });
+        const memberships = await getMembersByAttributes({ 
+            organization_id: organizationId,
+            membership_role: role 
+        });
 
-    if (!memberships || memberships.length < 1) {
-      return { error: error.membershipNotFound, data: null };
+        if (!memberships || memberships.length < 1) {
+            return { error: error.membershipNotFound, data: null };
+        }
+
+        return { 
+            error: error.noError, 
+            data: memberships.map(membership => membership.toJSON())
+        };
+    } catch (err) {
+        console.error("Error fetching membership role info:", err);
+        return { error: error.somethingWentWrong, data: null };
     }
-
-    return { error: error.noError, data: memberships };
-  } catch (err) {
-    console.error("Error fetching membership role info:", err);
-    return { error: error.somethingWentWrong, data: null };
-  }
 }
 
 /**
@@ -37,28 +42,31 @@ async function getMembershipRoleInfoInOrganization(organizationId, role) {
  * @param {number} organizationId - The ID of the organization
  * @returns {Promise<Object>} List of members in the organization
  */
-async function getAllMembershipsInOrganization(organizationId) {
-  try {
-    if (isNaN(organizationId)) {
-      return { error: error.organizationIdMustBeInteger, data: null };
+async function getAllMembershipsInOrganizationInDB(organizationId) {
+    try {
+        if (isNaN(organizationId)) {
+            return { error: error.organizationIdMustBeInteger, data: null };
+        }
+
+        const memberships = await getMembersByAttributes({ 
+            organization_id: organizationId 
+        });
+
+        if (!memberships) {
+            return { error: error.membershipNotFound, data: null };
+        }
+
+        return { 
+            error: error.noError, 
+            data: memberships.map(membership => membership.toJSON())
+        };
+    } catch (err) {
+        console.error("Error fetching members in organization:", err);
+        return { error: error.somethingWentWrong, data: null };
     }
-
-    const memberships = await Membership.findAll({
-      where: { organization_id: organizationId },
-    });
-
-    if (!memberships) {
-      return { error: error.membershipNotFound, data: null };
-    }
-
-    return { error: error.noError, data: memberships };
-  } catch (err) {
-    console.error("Error fetching members in organization:", err);
-    return { error: error.somethingWentWrong, data: null };
-  }
 }
 
 module.exports = {
-  getMembershipRoleInfoInOrganization,
-  getAllMembershipsInOrganization,
+    getMembershipRoleInfoInOrganizationInDB,
+    getAllMembershipsInOrganizationInDB
 };

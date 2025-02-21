@@ -1,4 +1,4 @@
-import { Membership } from "../db";
+const { Membership } = require("../db");
 
 /**
  * Create a membership record
@@ -58,4 +58,8 @@ const editMembershipRole = async (membershipId, newRole) => {
   }
 };
 
-export { createMembership, editMembership, editMembershipRole };
+module.exports = { 
+  createMembership, 
+  editMembership, 
+  editMembershipRole 
+};
