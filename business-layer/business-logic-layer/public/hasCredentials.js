@@ -5,7 +5,7 @@ const { ROLE_EBOARD, ROLE_MEMBER } = require("../constants");
  * HOW TO USE:
  * req.session.user.username needs to be passed into these functions
  */
-module.exports = function () {
+module.exports = new (function () {
   this.isEboardOrAdmin = (username, orgId) => {
     checkRole(username, orgId, true)
   };
@@ -17,7 +17,7 @@ module.exports = function () {
   checkRole = (username, orgId, isEboardEnough) => {
     // find the member info to get member id
     const memberInfo = Member.findOne({
-      where: { member_rit_username: username },
+      where: { member_email: username },
     });
 
     // if none exists, they do not have privileges
@@ -39,4 +39,4 @@ module.exports = function () {
 
     return true;
   };
-};
+})();
