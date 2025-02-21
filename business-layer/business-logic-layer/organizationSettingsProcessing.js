@@ -1,5 +1,5 @@
-const { Organization, Membership } = require("../db");
-const Error = require("../business-logic-layer/public/errors.js");
+const { Organization, MembershipRequirement, EmailSettings } = require("../db");
+const Error = require("./public/errors.js");
 const error = new Error();
 
 /**
@@ -12,8 +12,12 @@ const getOrganizationSettings = async (orgId) => {
         const organization = await Organization.findByPk(orgId, {
             include: [
                 {
-                    model: Membership,
-                    attributes: ["settingId", "meeting_type", "frequency", "amount_type", "amount"],
+                    model: MembershipRequirement,
+                    attributes: ["requirement_id", "organization_id", "meeting_type", "frequency", "amount_type", "amount", "requirement_scope"],
+                },
+                {
+                    model: EmailSettings,
+                    attributes: ["current_status", "organization_id", "annual_report", "semester_report", "membership_achieved"],
                 }
             ]
         });
@@ -37,8 +41,8 @@ const getOrganizationSettings = async (orgId) => {
  */
 const editOrganizationMembershipRequirements = async (orgId, orgData) => {
     try {
-        const [updatedRows] = await Membership.update(orgData, {
-            where: { organization_id: orgId, setting_id: orgData.setting_id }
+        const [updatedRows] = await MembershipRequirement.update(orgData, {
+            where: { organization_id: orgId, requirement_id: orgData.requirement_id }
         });
 
         if (updatedRows === 0) {
@@ -60,7 +64,7 @@ const editOrganizationMembershipRequirements = async (orgId, orgData) => {
  */
 const editOrganizationEmailSettings = async (orgId, orgData) => {
     try {
-        const [updatedRows] = await Organization.update(orgData, {
+        const [updatedRows] = await EmailSettings.update(orgData, {
             where: { organization_id: orgId }
         });
 
@@ -83,8 +87,8 @@ const editOrganizationEmailSettings = async (orgId, orgData) => {
  */
 const deleteOrganizationMembershipRequirement = async (orgId, membershipId) => {
     try {
-        const deletedRows = await Membership.destroy({
-            where: { organization_id: orgId, membership_id: membershipId }
+        const deletedRows = await MembershipRequirement.destroy({
+            where: { organization_id: orgId, requirement_id: requirementId }
         });
 
         if (deletedRows === 0) {
