@@ -42,7 +42,11 @@ const createMembershipRequirement = async (orgId, requirementData) => {
     try {
       const newRequirement = await MembershipRequirement.create({
         organization_id: orgId,
-        ...requirementData
+        meeting_type: requirementData.meeting_type,
+        frequency: requirementData.frequency,
+        amount_type: requirementData.amount_type,
+        amount: requirementData.amount,
+        requirement_scope: requirementData.requirement_scope
       });
   
       return { error: error.noError, data: newRequirement };
