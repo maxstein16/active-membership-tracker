@@ -147,6 +147,33 @@ router.put(
   }
 );
 
+// POST /v1/organization/:orgId/membership-requirements
+router.post(
+  "/membership-requirements",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    let orgId = req.params.orgId;
+    let { meeting_type, frequency, amount_type, amount, requirement_scope } = req.body;
+
+    orgId = sanitizer.sanitize(orgId);
+
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+    if (!meeting_type || !frequency || !amount_type || !amount || !requirement_scope) {
+      return res.status(400).json({ error: error.mustHaveAllFieldsAddMemberInOrg });
+    }
+
+    const response = await business.createMembershipRequirement(parseInt(orgId), req.body);
+
+    if (response.error !== error.noError) {
+      return res.status(400).json({ error: response.error });
+    }
+
+    return res.status(201).json({ status: "success", data: response.data });
+  }
+);
+
 //DELETE /v1/organization/:orgId/membership-requirements
 router.delete(
   "/membership-requirements",

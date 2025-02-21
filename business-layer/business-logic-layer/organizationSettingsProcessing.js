@@ -32,7 +32,26 @@ const getOrganizationSettings = async (orgId) => {
         return { error: error.somethingWentWrong, data: null };
     }
 };
-
+/**
+ * Add organization membership requirements
+ * @param {number} orgId - The ID of the organization
+ * @param {object} orgData - Updated membership requirements data
+ * @returns {Promise<Object>} Updated membership requirements
+ */
+const createMembershipRequirement = async (orgId, requirementData) => {
+    try {
+      const newRequirement = await MembershipRequirement.create({
+        organization_id: orgId,
+        ...requirementData
+      });
+  
+      return { error: error.noError, data: newRequirement };
+    } catch (err) {
+      console.error("Error creating membership requirement:", err);
+      return { error: error.somethingWentWrong, data: null };
+    }
+  };
+  
 /**
  * Edit organization membership requirements
  * @param {number} orgId - The ID of the organization
@@ -106,5 +125,6 @@ module.exports = {
     getOrganizationSettings,
     editOrganizationMembershipRequirements,
     editOrganizationEmailSettings,
-    deleteOrganizationMembershipRequirement
+    deleteOrganizationMembershipRequirement,
+    createMembershipRequirement
 };
