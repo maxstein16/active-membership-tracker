@@ -1,5 +1,5 @@
-const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberIdDB, getAttendanceByMemberAndEventDB } = require("../attendanceProcessing");
-const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEventByIDInDB, getAttendanceByEventIdDB } = require("../eventsProcessing");
+const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB } = require("../attendanceProcessing");
+const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEventByIDInDB, getAttendanceByEventIdDB, getAllEventsByOrgAndSemesterDB } = require("../eventsProcessing");
 const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
@@ -18,13 +18,17 @@ const { getOrganizationSettingsInDB, editOrganizationMembershipRequirementsInDB,
       return await getAttendanceByIdDB(attendanceId);
     };
   
-    this.getAttendanceByMemberId = async (memberId) => {
-      return await getAttendanceByMemberIdDB(memberId);
+    this.getMemberAttendanceStats = async (memberId) => {
+      return await getMemberAttendanceStatsDB(memberId);
     };
   
     this.getAttendanceByMemberAndEvent = async (memberId, eventId) => {
       return await getAttendanceByMemberAndEventDB(memberId, eventId);
     };
+
+    this.getMemberAttendanceBySemester = async (memberId, semesterId) => {
+      return await getMemberAttendanceBySemesterDB(memberId, semesterId);
+    }
   
     // Event Management
     this.createEvent = async (eventData) => {
@@ -46,6 +50,10 @@ const { getOrganizationSettingsInDB, editOrganizationMembershipRequirementsInDB,
     this.getAttendanceByEventId = async (eventId) => {
       return await getAttendanceByEventIdDB(eventId);
     };
+
+    this.getAllEventsByOrgAndSemester = async (orgId, semesterId) => {
+      return await getAllEventsByOrgAndSemesterDB(orgId, semesterId);
+    }
   
     // Member Management
     this.createMember = async (memberData) => {

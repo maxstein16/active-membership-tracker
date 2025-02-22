@@ -1,4 +1,4 @@
-const { Organization } = require("../db");
+const { Organization, MembershipRequirement } = require("../db");
 
 /**
  * Create an Organization

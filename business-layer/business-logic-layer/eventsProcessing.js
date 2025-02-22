@@ -125,10 +125,52 @@ const getAttendanceByEventIdDB = async (eventId) => {
   }
 }; // getAttendanceByEventId
 
+/**
+ * Retrieve all events for a specific organization filtered by semester IDs with attendance records.
+ * @param {number} orgId - The organization ID
+ * @param {number[]} semesterIds - Array of semester IDs to filter by
+ * @returns {Promise<Object>} Object containing error and data properties
+ */
+async function getAllEventsByOrgAndSemesterDB(orgId, semesterIds) {
+  try {
+    if (!Array.isArray(semesterIds)) {
+      return { error: error.invalidInput, data: null };
+    }
+
+    // Get all events for the organization and specified semesters
+    const events = await getEventsByAttributes({ 
+      organization_id: orgId,
+      semester_id: semesterIds
+    });
+    
+    if (!events.length) {
+      return { error: error.noError, data: [] };
+    }
+
+    // Fetch attendance records for each event
+    const eventsWithAttendance = await Promise.all(
+      events.map(async (event) => {
+        const attendanceResult = await getAttendanceByEventId(event.event_id);
+        const eventJson = event.toJSON();
+        return {
+          ...eventJson,
+          attendances: attendanceResult.error === error.noError ? attendanceResult.data : []
+        };
+      })
+    );
+
+    return { error: error.noError, data: eventsWithAttendance };
+  } catch (err) {
+    console.error("Error fetching events by organization and semesters:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
+}
+
 module.exports = {
   getAllEventsByOrganizationInDB,
   getEventByIDInDB,
   getAttendanceByEventIdDB,
   createEventInDB,
   updateEventInDB,
+  getAllEventsByOrgAndSemesterDB
 };

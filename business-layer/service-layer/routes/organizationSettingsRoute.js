@@ -45,21 +45,21 @@ router.get(
   }
 );
 
-//PUT /v1/organization/:orgId/membership-requirements
+//PUT /v1/organization/:orgId/settings/membership-requirements
 router.put(
   "/membership-requirements",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let { setting_id, meeting_type, frequency, amount_type, amount } = req.body;
+    let { requirement_id, meeting_type, frequency, amount_type, amount } = req.body;
 
     orgId = sanitizer.sanitize(orgId);
-    setting_id = sanitizer.sanitize(setting_id);
+    requirement_id = sanitizer.sanitize(requirement_id);
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-    if (isNaN(setting_id)) {
+    if (isNaN(requirement_id)) {
       return res.status(400).json({ error: error.settingIdMustBeInteger });
     }
     if (!meeting_type && !frequency && !amount_type && !amount) {
@@ -96,7 +96,7 @@ router.put(
   }
 );
 
-//PUT /v1/organization/:orgId/email-settings
+//PUT /v1/organization/:orgId/settings/email-settings
 router.put(
   "/email-settings",
   isAuthorizedHasSessionForAPI,
@@ -147,7 +147,7 @@ router.put(
   }
 );
 
-//DELETE /v1/organization/:orgId/membership-requirements
+//DELETE /v1/organization/:orgId/settings/membership-requirements
 router.delete(
   "/membership-requirements",
   isAuthorizedHasSessionForAPI,

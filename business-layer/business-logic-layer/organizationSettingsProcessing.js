@@ -1,129 +1,93 @@
-const Error = require("../business-logic-layer/public/errors.js");
-const { getOrganizationById, updateOrganizationByID, getOrganizationMembershipRequirements, editOrganizationMembershipRequirement } = require("../data-layer/organization.js");
+const Error = require("./public/errors.js");
+const { getEmailSettings, createEmailSettings, updateEmailSettings, deleteEmailSettings } = require("../data-layer/email-settings.js");
 const error = new Error();
 
 /**
- * Get organization settings by ID
+ * Get organization email settings
  * @param {number} orgId - The ID of the organization
- * @returns {Promise<Object>} Organization settings
+ * @returns {Promise<Object>} Email settings with error status
  */
-async function getOrganizationSettingsInDB(orgId) {
+async function getOrganizationEmailSettingsInDB(orgId) {
     try {
-        // Get organization data
-        const organization = await getOrganizationById(orgId);
-        if (!organization) {
-            return { error: error.organizationNotFound, data: null };
-        }
-
-        // Get associated membership settings
-        const membershipSettings = await getOrganizationMembershipRequirements(orgId);
-
-        // Format the response to match expected structure
-        const formattedData = {
-            ...organization.toJSON(),
-            Memberships: membershipSettings.map(membership => ({
-                requirementId: membership.requirement_id,
-                meeting_type: membership.meeting_type,
-                frequency: membership.frequency,
-                amount_type: membership.amount_type,
-                amount: membership.amount
-            }))
-        };
-
-        return { error: error.noError, data: formattedData };
-    } catch (err) {
-        console.error("Error fetching organization settings:", err);
-        return { error: error.somethingWentWrong, data: null };
-    }
-};
-
-/**
- * Edit organization membership requirements
- * @param {number} orgId - The ID of the organization
- * @param {object} orgData - Updated membership requirements data
- * @returns {Promise<Object>} Updated membership requirements
- */
-async function editOrganizationMembershipRequirementsInDB(orgId, orgData) {
-    try {
-        // Verify organization exists
-        const organization = await getOrganizationById(orgId);
-        if (!organization) {
-            return { error: error.organizationNotFound, data: null };
-        }
-
-        // Update membership settings
-        const updated = await editOrganizationMembershipRequirement(
-            orgData.requirement_id,
-            { ...orgData, organization_id: orgId }
-        );
-
-        if (!updated) {
+        const settings = await getEmailSettings(orgId);
+        
+        if (!settings) {
             return { error: error.settingNotFound, data: null };
         }
 
-        return { error: error.noError, data: orgData };
+        return { error: error.noError, data: settings };
     } catch (err) {
-        console.error("Error updating membership requirements:", err);
+        console.error("Error fetching email settings:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-};
+}
 
 /**
- * Edit organization email settings
+ * Create organization email settings
  * @param {number} orgId - The ID of the organization
- * @param {object} orgData - Updated email settings
- * @returns {Promise<Object>} Updated email settings
+ * @param {Object} settingsData - Email settings data
+ * @returns {Promise<Object>} Created settings with error status
  */
-async function editOrganizationEmailSettingsInDB(orgId, orgData) {
+async function createOrganizationEmailSettingsInDB(orgId, settingsData) {
     try {
-        const updated = await updateOrganizationByID(orgId, orgData);
-
-        if (!updated) {
-            return { error: error.organizationNotFound, data: null };
+        // Check if settings already exist
+        const existingSettings = await getEmailSettings(orgId);
+        if (existingSettings) {
+            return { error: error.settingsAlreadyExist, data: null };
         }
 
-        return { error: error.noError, data: orgData };
+        const newSettings = await createEmailSettings(orgId, settingsData);
+        return { error: error.noError, data: newSettings };
+    } catch (err) {
+        console.error("Error creating email settings:", err);
+        return { error: error.somethingWentWrong, data: null };
+    }
+}
+
+/**
+ * Update organization email settings
+ * @param {number} orgId - The ID of the organization
+ * @param {Object} settingsData - Updated email settings data
+ * @returns {Promise<Object>} Updated settings with error status
+ */
+async function updateOrganizationEmailSettingsInDB(orgId, settingsData) {
+    try {
+        const updatedSettings = await updateEmailSettings(orgId, settingsData);
+        
+        if (!updatedSettings) {
+            return { error: error.settingNotFound, data: null };
+        }
+
+        return { error: error.noError, data: updatedSettings };
     } catch (err) {
         console.error("Error updating email settings:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-};
+}
 
 /**
- * Delete an organization's membership requirement
+ * Delete organization email settings
  * @param {number} orgId - The ID of the organization
- * @param {number} requirementId - The ID of the membership requirement
- * @returns {Promise<Object>} Deletion status
+ * @returns {Promise<Object>} Deletion status with error
  */
-async function deleteOrganizationMembershipRequirementInDB(orgId, requirementId) {
+async function deleteOrganizationEmailSettingsInDB(orgId) {
     try {
-        // Verify organization exists
-        const organization = await getOrganizationById(orgId);
-        if (!organization) {
-            return { error: error.organizationNotFound, data: null };
-        }
-
-        // Get the membership requirement to verify it exists
-        const memberships = await getOrganizationMembershipRequirements(orgId);
-        const membership = memberships.find(m => m.requirement_id === requirementId);
-
-        if (!membership) {
+        const deleted = await deleteEmailSettings(orgId);
+        
+        if (!deleted) {
             return { error: error.settingNotFound, data: null };
         }
 
-        // Delete the membership requirement
-        await membership.destroy();
-
         return { error: error.noError, data: { deleted: true } };
     } catch (err) {
-        console.error("Error deleting membership requirement:", err);
+        console.error("Error deleting email settings:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-};
+}
 
 module.exports = {
-    getOrganizationSettingsInDB,
-    editOrganizationMembershipRequirementsInDB,
-    editOrganizationEmailSettingsInDB,
-    deleteOrganizationMembershipRequirementInDB
+    getOrganizationEmailSettingsInDB,
+    createOrganizationEmailSettingsInDB,
+    updateOrganizationEmailSettingsInDB,
+    deleteOrganizationEmailSettingsInDB
 };
