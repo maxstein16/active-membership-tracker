@@ -5,7 +5,7 @@ const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMem
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
 const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB } = require("../organizationProcessing");
 const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getMeetingOrgReportInDB } = require("../organizationReportProcessing");
-const { getOrganizationSettingsInDB, editOrganizationMembershipRequirementsInDB, editOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB } = require("../organizationSettingsProcessing");
+const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB } = require("../organizationSettingsProcessing");
   
   // export to api calls
   module.exports = function() {
@@ -141,15 +141,27 @@ const { getOrganizationSettingsInDB, editOrganizationMembershipRequirementsInDB,
       return await getOrganizationSettingsInDB(orgId);
     }
 
+    this.getOrganizationEmailSettings = async (orgId) => {
+      return await getOrganizationEmailSettingsInDB(orgId);
+    }
+
+    this.createOrganizationEmailSettings = async (orgId, orgData) => {
+      return await createOrganizationEmailSettingsInDB(orgId, orgData);
+    }
+
     this.editOrganizationMembershipRequirement = async (orgId, orgData) => {
       return await editOrganizationMembershipRequirementsInDB(orgId, orgData);
     }
 
     this.editOrganizationEmailSettings = async (orgId, orgData) => {
-      return await editOrganizationEmailSettingsInDB(orgId, orgData);
+      return await updateOrganizationEmailSettingsInDB(orgId, orgData);
     }
 
     this.deleteOrganizationMembershipRequirement = async (orgId, settingId) => {
       return await deleteOrganizationMembershipRequirementInDB(orgId, settingId);
+    }
+
+    this.deleteOrganizationEmailSettings = async (orgId) => {
+      return await deleteOrganizationEmailSettingsInDB(orgId);
     }
   };
