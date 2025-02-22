@@ -4,7 +4,6 @@ const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getSpecificMember
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
 const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB } = require("../organizationProcessing");
-const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
 const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getMeetingOrgReportInDB } = require("../organizationReportProcessing");
 const { getOrganizationSettingsInDB, editOrganizationMembershipRequirementsInDB, editOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB } = require("../organizationSettingsProcessing");
   

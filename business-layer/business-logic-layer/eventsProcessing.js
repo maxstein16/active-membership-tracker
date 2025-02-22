@@ -1,6 +1,5 @@
 const Error = require("./public/errors.js");
 const error = new Error();
-const { getAttendanceByEventIdDB } = require("./attendanceProcessing");
 const { getEventsByAttributes, createEvent, getEventById, updateEvent, getAttendanceByEventId } = require("../data-layer/event.js");
 
 /**
@@ -18,7 +17,7 @@ async function getAllEventsByOrganizationInDB(orgId) {
     // Fetch attendance records for each event
     const eventsWithAttendance = await Promise.all(
       events.map(async (event) => {
-        const attendanceResult = await getAttendanceByEventIdDB(event.event_id);
+        const attendanceResult = await getAttendanceByEventId(event.event_id);
         const eventJson = event.toJSON();
         return {
           ...eventJson,
@@ -47,7 +46,7 @@ async function getEventByIDInDB(orgId, eventId) {
     }
 
     // Get attendance records for the event
-    const attendanceResult = await getAttendanceByEventIdDB(eventId);
+    const attendanceResult = await getAttendanceByEventId(eventId);
     
     const eventWithAttendance = {
       ...event.toJSON(),
