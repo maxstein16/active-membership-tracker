@@ -1,7 +1,5 @@
 const Error = require("../business-logic-layer/public/errors.js");
-const { getMembersByAttributes } = require("../data-layer/member.js");
-const { editMembership } = require("../data-layer/membership.js");
-const { getOrganizationById, updateOrganizationByID } = require("../data-layer/organization.js");
+const { getOrganizationById, updateOrganizationByID, getOrganizationMembershipRequirements, editOrganizationMembershipRequirement } = require("../data-layer/organization.js");
 const error = new Error();
 
 /**
@@ -9,7 +7,7 @@ const error = new Error();
  * @param {number} orgId - The ID of the organization
  * @returns {Promise<Object>} Organization settings
  */
-async function getOrganizationSettingsInDB (orgId) {
+async function getOrganizationSettingsInDB(orgId) {
     try {
         // Get organization data
         const organization = await getOrganizationById(orgId);
@@ -18,15 +16,13 @@ async function getOrganizationSettingsInDB (orgId) {
         }
 
         // Get associated membership settings
-        const membershipSettings = await getMembersByAttributes({ 
-            organization_id: orgId 
-        });
+        const membershipSettings = await getOrganizationMembershipRequirements(orgId);
 
         // Format the response to match expected structure
         const formattedData = {
             ...organization.toJSON(),
             Memberships: membershipSettings.map(membership => ({
-                settingId: membership.settingId,
+                requirementId: membership.requirement_id,
                 meeting_type: membership.meeting_type,
                 frequency: membership.frequency,
                 amount_type: membership.amount_type,
@@ -47,7 +43,7 @@ async function getOrganizationSettingsInDB (orgId) {
  * @param {object} orgData - Updated membership requirements data
  * @returns {Promise<Object>} Updated membership requirements
  */
-async function editOrganizationMembershipRequirementsInDB (orgId, orgData) {
+async function editOrganizationMembershipRequirementsInDB(orgId, orgData) {
     try {
         // Verify organization exists
         const organization = await getOrganizationById(orgId);
@@ -56,8 +52,8 @@ async function editOrganizationMembershipRequirementsInDB (orgId, orgData) {
         }
 
         // Update membership settings
-        const updated = await editMembership(
-            orgData.setting_id,
+        const updated = await editOrganizationMembershipRequirement(
+            orgData.requirement_id,
             { ...orgData, organization_id: orgId }
         );
 
@@ -78,7 +74,7 @@ async function editOrganizationMembershipRequirementsInDB (orgId, orgData) {
  * @param {object} orgData - Updated email settings
  * @returns {Promise<Object>} Updated email settings
  */
-async function editOrganizationEmailSettingsInDB (orgId, orgData) {
+async function editOrganizationEmailSettingsInDB(orgId, orgData) {
     try {
         const updated = await updateOrganizationByID(orgId, orgData);
 
@@ -96,29 +92,27 @@ async function editOrganizationEmailSettingsInDB (orgId, orgData) {
 /**
  * Delete an organization's membership requirement
  * @param {number} orgId - The ID of the organization
- * @param {number} membershipId - The ID of the membership requirement
+ * @param {number} requirementId - The ID of the membership requirement
  * @returns {Promise<Object>} Deletion status
  */
-async function deleteOrganizationMembershipRequirementInDB (orgId, membershipId)  {
+async function deleteOrganizationMembershipRequirementInDB(orgId, requirementId) {
     try {
-        // First verify organization exists
+        // Verify organization exists
         const organization = await getOrganizationById(orgId);
         if (!organization) {
             return { error: error.organizationNotFound, data: null };
         }
 
-        // Get the membership to verify it exists and belongs to this org
-        const memberships = await getMembersByAttributes({
-            organization_id: orgId,
-            membership_id: membershipId
-        });
+        // Get the membership requirement to verify it exists
+        const memberships = await getOrganizationMembershipRequirements(orgId);
+        const membership = memberships.find(m => m.requirement_id === requirementId);
 
-        if (!memberships || memberships.length === 0) {
+        if (!membership) {
             return { error: error.settingNotFound, data: null };
         }
 
-        // Delete the membership
-        await memberships[0].destroy();
+        // Delete the membership requirement
+        await membership.destroy();
 
         return { error: error.noError, data: { deleted: true } };
     } catch (err) {

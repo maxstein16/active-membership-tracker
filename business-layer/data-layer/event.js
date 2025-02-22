@@ -1,4 +1,4 @@
-const { Event } = require("../db");
+const { Event, Attendance } = require("../db");
 
 /**
  * Creates a new event in the database.
@@ -90,6 +90,23 @@ async function getEventById(eventId) {
 };
 
 /**
+ * Get all attendance records for a specific event
+ * @param {number} eventId - The ID of the event
+ * @returns {Promise<Array>} List of attendance records
+ */
+async function getAttendanceByEventId(eventId) {
+  try {
+    const attendances = await Attendance.findAll({
+      where: { event_id: eventId },
+    });
+    return attendances;
+  } catch (err) {
+    console.error("Error fetching attendance by event ID:", err);
+    throw err;
+  }
+};
+
+/**
  * Retrieves events based on provided filters.
  *
  * @param {object} filters - Attributes to filter by.
@@ -121,5 +138,6 @@ module.exports = {
   updateEvent,
   getAllEvents,
   getEventById,
-  getEventsByAttributes,
+  getAttendanceByEventId,
+  getEventsByAttributes
 };

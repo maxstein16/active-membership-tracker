@@ -48,23 +48,6 @@ async function getAttendanceByMemberId(memberId) {
 };
 
 /**
- * Get all attendance records for a specific event
- * @param {number} eventId - The ID of the event
- * @returns {Promise<Array>} List of attendance records
- */
-async function getAttendanceByEventId(eventId) {
-  try {
-    const attendances = await Attendance.findAll({
-      where: { event_id: eventId },
-    });
-    return attendances;
-  } catch (err) {
-    console.error("Error fetching attendance by event ID:", err);
-    throw err;
-  }
-};
-
-/**
  * Get an attendance record by member ID and event ID
  * @param {number} memberId - The ID of the member
  * @param {number} eventId - The ID of the event
@@ -89,6 +72,5 @@ module.exports = {
   createAttendance,
   getAttendanceById,
   getAttendanceByMemberId,
-  getAttendanceByEventId,
   getAttendanceByMemberAndEvent,
 };

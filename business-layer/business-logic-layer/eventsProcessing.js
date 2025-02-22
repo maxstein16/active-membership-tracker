@@ -1,7 +1,7 @@
 const Error = require("./public/errors.js");
 const error = new Error();
 const { getAttendanceByEventIdDB } = require("./attendanceProcessing");
-const { getEventsByAttributes, createEvent, getEventById, updateEvent } = require("../data-layer/event.js");
+const { getEventsByAttributes, createEvent, getEventById, updateEvent, getAttendanceByEventId } = require("../data-layer/event.js");
 
 /**
  * Retrieve all events for a specific organization with attendance records.
@@ -107,9 +107,29 @@ async function updateEventInDB(orgId, eventId, updateData) {
   }
 }
 
+/**
+ * Retrieves attendance records for a specific event.
+ * @param {number} eventId - The ID of the event
+ * @returns {Promise<Object>} Object containing error and data properties
+ */
+const getAttendanceByEventIdDB = async (eventId) => {
+  try {
+      const attendance = await getAttendanceByEventId(eventId);
+      if (!attendance || attendance.length === 0) {
+          return { error: error.eventNotFound, data: null };
+      }
+
+      return { error: error.noError, data: attendance };
+  } catch (err) {
+      console.error("Error fetching attendance by Event ID:", err);
+      return { error: error.somethingWentWrong, data: null };
+  }
+}; // getAttendanceByEventId
+
 module.exports = {
   getAllEventsByOrganizationInDB,
   getEventByIDInDB,
+  getAttendanceByEventIdDB,
   createEventInDB,
   updateEventInDB,
 };

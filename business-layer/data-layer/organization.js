@@ -96,10 +96,79 @@ async function updateOrganizationByName (organizationName, updatedOrgDesc) {
     }
 };
 
+/**
+ * Get an Organization's membership requirements
+ * @param {number} organizationId - The ID of the organization
+ * @returns {Promise<Array>} List of membership requirements for the organization
+ */
+async function getOrganizationMembershipRequirements(organizationId) {
+    try {
+        const requirements = await MembershipRequirement.findAll({
+            where: { organization_id: organizationId }
+        });
+        
+        if (!requirements || requirements.length === 0) {
+            console.log(`No requirements found for organization ID ${organizationId}`);
+            return [];
+        }
+
+        console.log(`Retrieved requirements for organization ID ${organizationId}`);
+        return requirements;
+    } catch (err) {
+        console.error("Error fetching organization requirements:", err);
+        throw err;
+    }
+}
+
+/**
+ * Create a new membership requirement for an organization
+ * @param {Object} requirementData - The requirement data including organization_id, meeting_type, frequency, amount_type, amount, and requirement_scope
+ * @returns {Promise<Object>} The created requirement record
+ */
+async function createOrganizationMembershipRequirement(requirementData) {
+    try {
+        const requirement = await MembershipRequirement.create(requirementData);
+        console.log(`Created requirement for organization ID ${requirementData.organization_id}`);
+        return requirement;
+    } catch (err) {
+        console.error("Error creating organization requirement:", err);
+        throw err;
+    }
+}
+
+/**
+ * Edit an organization's membership requirement
+ * @param {number} requirementId - The ID of the requirement to edit
+ * @param {Object} requirementData - The updated requirement data
+ * @returns {Promise<boolean>} Returns true if requirement was updated, false if not found
+ */
+async function editOrganizationMembershipRequirement(requirementId, requirementData) {
+    try {
+        const [updatedRows] = await MembershipRequirement.update(requirementData, {
+            where: { requirement_id: requirementId }
+        });
+
+        if (updatedRows > 0) {
+            console.log(`Requirement updated with ID ${requirementId}`);
+            return true;
+        } else {
+            console.log(`No requirement found with ID ${requirementId}`);
+            return false;
+        }
+    } catch (err) {
+        console.error("Error updating organization requirement:", err);
+        throw err;
+    }
+}
+
+
 module.exports = {
     createOrganization,
     getOrganizationById,
     getOrganizations,
     updateOrganizationByID,
-    updateOrganizationByName
+    updateOrganizationByName,
+    getOrganizationMembershipRequirements,
+    createOrganizationMembershipRequirement,
+    editOrganizationMembershipRequirement
 };

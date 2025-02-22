@@ -68,25 +68,6 @@ const getAttendanceByMemberIdDB = async (memberId) => {
 }; // getAttendanceByMemberId
 
 /**
- * Retrieves attendance records for a specific event.
- * @param {number} eventId - The ID of the event
- * @returns {Promise<Object>} Object containing error and data properties
- */
-const getAttendanceByEventIdDB = async (eventId) => {
-    try {
-        const attendance = await getAttendanceByEventId(eventId);
-        if (!attendance || attendance.length === 0) {
-            return { error: error.eventNotFound, data: null };
-        }
-
-        return { error: error.noError, data: attendance };
-    } catch (err) {
-        console.error("Error fetching attendance by Event ID:", err);
-        return { error: error.somethingWentWrong, data: null };
-    }
-}; // getAttendanceByEventId
-
-/**
  * Retrieves the attendance of a specific member at a specific event.
  * @param {number} memberId - The ID of the member
  * @param {number} eventId - The ID of the event
@@ -110,6 +91,5 @@ module.exports = {
     createAttendanceDB,
     getAttendanceByIdDB,
     getAttendanceByMemberIdDB,
-    getAttendanceByEventIdDB,
     getAttendanceByMemberAndEventDB
 };

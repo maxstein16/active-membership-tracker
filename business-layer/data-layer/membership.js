@@ -58,8 +58,61 @@ const editMembershipRole = async (membershipId, newRole) => {
   }
 };
 
+/**
+ * Retrieves memberships based on provided filters
+ * @param {Object} filters - Attributes to filter by (e.g., organization_id, semester_id, membership_role)
+ * @returns {Promise<Object[]>} An array of matching membership objects (empty if no matches found)
+ */
+const getMembershipsByAttributes = async (filters) => {
+  try {
+    const memberships = await Membership.findAll({
+      where: filters
+    });
+
+    if (memberships.length === 0) {
+      console.log("No memberships found matching the given criteria.");
+      return [];
+    }
+
+    console.log(
+      "Memberships found:",
+      memberships.map(m => m.toJSON())
+    );
+    return memberships;
+  } catch (err) {
+    console.error("Error fetching memberships by attributes:", err);
+    throw err;
+  }
+};
+
+/**
+ * Get a single membership by its attributes
+ * @param {Object} filters - Attributes to filter by (e.g., organization_id, member_id, semester_id)
+ * @returns {Promise<Object|null>} The membership object if found, otherwise null
+ */
+const getMembershipByAttributes = async (filters) => {
+  try {
+    const membership = await Membership.findOne({
+      where: filters
+    });
+
+    if (!membership) {
+      console.log("No membership found matching the given criteria.");
+      return null;
+    }
+
+    console.log("Membership found:", membership.toJSON());
+    return membership;
+  } catch (err) {
+    console.error("Error fetching membership by attributes:", err);
+    throw err;
+  }
+};
+
 module.exports = { 
   createMembership, 
   editMembership, 
-  editMembershipRole 
+  editMembershipRole,
+  getMembershipsByAttributes,
+  getMembershipByAttributes
 };
