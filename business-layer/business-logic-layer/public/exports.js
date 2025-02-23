@@ -120,21 +120,21 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
     };
   
     // Organization Report Management
-    this.getSpecificReportOrgData = async (orgId, memberId) => {
-      return await getSpecificReportOrgDataInDB(orgId, memberId);
+    this.getSpecificReportOrgData = async (orgId) => {
+      return await getSpecificReportOrgDataInDB(orgId);
     }
 
-    this.getAnnualOrgReport = async (orgId) => {
-      return await getAnnualOrgReportInDB(orgId);
+    this.getAnnualOrgReport = async (orgId, year) => {
+      return await getAnnualOrgReportInDB(orgId, year);
     }
 
-    this.getSemesterOrgReport = async (orgId) => {
-      return await getSemesterOrgReportInDB(orgId);
+    this.getSemesterOrgReport = async (orgId, semesterId) => {
+      return await getSemesterOrgReportInDB(orgId, semesterId);
     }
 
-    this.getMeetingOrgReport = async (orgId) => {
-      return await getMeetingOrgReportInDB(orgId);
-    } 
+    this.getMeetingOrgReport = async (orgId, meetingId) => {
+      return await getMeetingOrgReportInDB(orgId, meetingId);
+    }
 
     // Organization Settings Management
     this.getOrganizationSettings = async (orgId) => {
