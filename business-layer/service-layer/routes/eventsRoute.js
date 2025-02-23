@@ -14,7 +14,7 @@ const sanitizer = new Sanitizer();
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 /**
- * GET v1/organizations/{orgId}/events
+ * GET v1/organization/{orgId}/events
  * Get all events for an organization.
  */
 router.get(
@@ -44,7 +44,7 @@ router.get(
 );
 
 /**
- * GET /organizations/{orgId}/events/{eventId}
+ * GET /organization/{orgId}/events/{eventId}
  * Get a specific event's details.
  */
 router.get(
@@ -78,7 +78,7 @@ router.get(
 );
 
 /**
- * POST v1/organizations/{orgId}/events
+ * POST v1/organization/{orgId}/events
  * Create a new event for an organization.
  */
 router.post(
@@ -129,7 +129,7 @@ router.post(
 );
 
 /**
- * POST /organizations/{orgId}/events/{eventId}
+ * POST /organization/{orgId}/events/{eventId}
  * Update a specific event's details.
  */
 router.put(

@@ -130,7 +130,7 @@ async function getEventsByAttributes(filters) {
     console.error("Error fetching events by attributes:", error);
     throw error;
   }
-};
+}
 
 // Export all functions for external use
 module.exports = {

@@ -7,10 +7,15 @@ const { getEventsByAttributes, createEvent, getEventById, updateEvent, getAttend
  */
 async function getAllEventsByOrganizationInDB(orgId) {
   try {
+    // Validate input
+    if (!orgId || isNaN(orgId) || orgId <= 0) {
+      return { error: error.invalidInput, data: null };
+    }
+
     // Get all events for the organization
     const events = await getEventsByAttributes({ organization_id: orgId });
     
-    if (!events.length) {
+    if (!events || !events.length) {
       return { error: error.noError, data: [] };
     }
 
@@ -21,7 +26,7 @@ async function getAllEventsByOrganizationInDB(orgId) {
         const eventJson = event.toJSON();
         return {
           ...eventJson,
-          attendances: attendanceResult.error === error.noError ? attendanceResult.data : []
+          attendances: attendanceResult || []
         };
       })
     );
