@@ -70,24 +70,30 @@ async function getAllEvents() {
  * Retrieves a specific event by its ID.
  *
  * @param {number} eventId - The unique ID of the event to retrieve.
+ * @param {number} orgId - The organization ID of the event.
  * @returns {Promise<object|null>} The event object if found, otherwise `null`.
  */
-async function getEventById(eventId) {
+async function getEventById(eventId, orgId) {
   try {
-    const event = await Event.findByPk(eventId);
+      const where = { event_id: eventId };
+      if (orgId !== undefined) {
+          where.organization_id = orgId;
+      }
+      
+      const event = await Event.findOne({ where });
 
-    if (!event) {
-      console.log(`No event found with ID ${eventId}.`);
-      return null;
-    }
+      if (!event) {
+          console.log(`No event found with ID ${eventId}`);
+          return null;
+      }
 
-    console.log("Event found:", event.toJSON());
-    return event;
+      console.log("Event found:", event.toJSON());
+      return event;
   } catch (error) {
-    console.error("Error fetching event by ID:", error);
-    throw error;
+      console.error("Error fetching event by ID:", error);
+      throw error;
   }
-};
+}
 
 /**
  * Get all attendance records for a specific event

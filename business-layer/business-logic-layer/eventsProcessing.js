@@ -41,27 +41,25 @@ async function getAllEventsByOrganizationInDB(orgId) {
 /**
  * Retrieve a specific event by ID with its attendance records.
  */
-async function getEventByIDInDB(orgId, eventId) {
+async function getEventByIDInDB(eventId, orgId) {
   try {
-    // Get the event
-    const event = await getEventById(eventId);
-    
-    if (!event || event.organization_id !== orgId) {
-      return { error: error.eventNotFound, data: null };
-    }
+      const event = await getEventById(eventId, orgId);
+      
+      if (!event) {
+          return { error: error.eventNotFound, data: null };
+      }
 
-    // Get attendance records for the event
-    const attendanceResult = await getAttendanceByEventId(eventId);
-    
-    const eventWithAttendance = {
-      ...event.toJSON(),
-      attendances: attendanceResult.error === error.noError ? attendanceResult.data : []
-    };
+      const attendanceResult = await getAttendanceByEventId(eventId);
+      
+      const eventWithAttendance = {
+          ...event.toJSON(),
+          attendances: attendanceResult.error === error.noError ? attendanceResult.data : []
+      };
 
-    return { error: error.noError, data: eventWithAttendance };
+      return { error: error.noError, data: eventWithAttendance };
   } catch (err) {
-    console.error("Error fetching event by ID:", err);
-    return { error: error.somethingWentWrong, data: null };
+      console.error("Error fetching event by ID:", err);
+      return { error: error.somethingWentWrong, data: null };
   }
 }
 
@@ -93,7 +91,7 @@ async function createEventInDB(orgId, eventData) {
 async function updateEventInDB(orgId, eventId, updateData) {
   try {
     // First verify the event belongs to the organization
-    const existingEvent = await getEventById(eventId);
+    const existingEvent = await getEventById(eventId, orgId);
     if (!existingEvent || existingEvent.organization_id !== orgId) {
       return { error: error.eventNotFound, data: null };
     }
@@ -104,7 +102,7 @@ async function updateEventInDB(orgId, eventId, updateData) {
     }
 
     // Get the updated event with attendance
-    return await getEventById(orgId, eventId);
+    return await getEventById(eventId, orgId);
   } catch (err) {
     console.error("Error updating event:", err);
     return { error: error.somethingWentWrong, data: null };

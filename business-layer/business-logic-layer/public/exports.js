@@ -43,8 +43,8 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await getAllEventsByOrganizationInDB(orgId);
     };
   
-    this.getEventById = async (eventId) => {
-      return await getEventByIDInDB(eventId);
+    this.getEventById = async (eventId, orgId) => {
+      return await getEventByIDInDB(eventId, orgId);
     };
 
     this.getAttendanceByEventId = async (eventId) => {

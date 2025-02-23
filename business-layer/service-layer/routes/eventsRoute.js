@@ -66,8 +66,8 @@ router.get(
     }
 
     // Fetch data from business layer
-    const event = await business.getEventById(orgId, eventId);
-
+    const event = await business.getEventById(eventId, orgId);
+    
     // Handle errors
     if (event.error && event.error !== error.noError) {
       return res.status(404).json({ error: event.error, orgId, eventId });
