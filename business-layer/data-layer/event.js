@@ -138,6 +138,22 @@ async function getEventsByAttributes(filters) {
   }
 }
 
+async function getEventsWithAttendance(orgId) {
+  try {
+    const events = await Event.findAll({
+      where: { organization_id: orgId },
+      include: {
+        model: Attendance,
+        as: 'Attendances'
+      }
+    });
+    return events;
+  } catch (err) {
+    console.error("Error in getEventsWithAttendance:", err);
+    throw err;
+  }
+}
+
 // Export all functions for external use
 module.exports = {
   createEvent,
@@ -145,5 +161,6 @@ module.exports = {
   getAllEvents,
   getEventById,
   getAttendanceByEventId,
-  getEventsByAttributes
+  getEventsByAttributes,
+  getEventsWithAttendance
 };

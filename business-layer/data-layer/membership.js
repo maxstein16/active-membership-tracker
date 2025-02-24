@@ -109,10 +109,31 @@ const getMembershipByAttributes = async (filters) => {
   }
 };
 
+async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
+  try {
+    const memberships = await Membership.findAll({
+      where: { 
+        organization_id: orgId,
+        semester_id: semesterIds
+      },
+      include: [{
+        model: Member,
+        required: true
+      }]
+    });
+    
+    return memberships;
+  } catch (err) {
+    console.error("Error in getMembershipsByOrgAndSemester:", err);
+    throw err;
+  }
+}
+
 module.exports = { 
   createMembership, 
   editMembership, 
   editMembershipRole,
   getMembershipsByAttributes,
-  getMembershipByAttributes
+  getMembershipByAttributes,
+  getMembershipsByOrgAndSemester
 };

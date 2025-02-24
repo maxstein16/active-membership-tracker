@@ -2,10 +2,11 @@ const Error = require("./public/errors.js");
 const error = new Error();
 const { getOrganizationById } = require("../data-layer/organization.js");
 const { getMemberById } = require("../data-layer/member.js");
-const { getMemberAttendanceWithEvents, getEventsWithAttendance, getSemesterEventsWithAttendance, getMeetingAttendanceWithMembers, getMembershipsByOrgAndSemester, getSemestersByYear, getCurrentYearSemesters, getCurrentSemester, getMeetingDetails } = require("../data-layer/reports.js");
-const { getMembershipsByAttributes } = require("../data-layer/membership.js");
-const { getAttendanceByMemberAndEvent } = require("../data-layer/attendance.js");
-const { getCurrentSemesters } = require("../data-layer/semester.js");
+const { getMeetingDetails } = require("../data-layer/reports.js");
+const { getMembershipsByAttributes, getMembershipsByOrgAndSemester } = require("../data-layer/membership.js");
+const { getMemberAttendanceWithEvents, getMeetingAttendanceWithMembers } = require("../data-layer/attendance.js");
+const { getCurrentSemesters, getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
+const { getEventsWithAttendance } = require("../data-layer/event.js");
 
 /**
  * Get specific report data for a member in an organization
@@ -68,7 +69,7 @@ async function getAnnualOrgReportInDB(orgId) {
     const lastYear = currentYear - 1;
 
     // Get semesters for current and last year
-    const currentYearSemesters = await getSemestersByYear(currentYear);
+    const currentYearSemesters = await getCurrentSemesters(currentYear);
     const lastYearSemesters = await getSemestersByYear(lastYear);
 
     const currentYearSemesterIds = currentYearSemesters.map(s => s.semester_id);

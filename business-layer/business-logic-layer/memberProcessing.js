@@ -5,6 +5,7 @@ const { activeMembershipEmail } = require("./public/emailTemplates");
 
 const { getMemberById, getMembersByAttributes, updateMember, createMember } = require("../data-layer/member.js");
 const { getOrganizationById } = require("../data-layer/organization.js");
+const { getMembershipsByAttributes } = require("../data-layer/membership.js");
 
 /**
  * Retrieves a member by their ID, including their memberships.
@@ -24,7 +25,7 @@ async function getMemberByIdInDB(memberId) {
         }
 
         // Get all memberships for this member
-        const memberships = await getMembersByAttributes({ member_id: memberId });
+        const memberships = await getMembershipsByAttributes({ member_id: memberId });
         
         // Get organization details for each membership
         const membershipDetails = await Promise.all(
@@ -145,7 +146,7 @@ async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
     }
 
     try {
-        const memberships = await getMembersByAttributes({
+        const memberships = await getMembershipsByAttributes({
             member_id: memberId,
             organization_id: orgId
         });

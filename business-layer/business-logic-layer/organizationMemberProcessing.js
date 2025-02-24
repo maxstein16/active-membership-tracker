@@ -4,7 +4,8 @@ const error = new Error();
 const { Semester } = require("../db.js");
 const { getMemberById, getMembersByAttributes } = require("../data-layer/member.js");
 const { getOrganizationById } = require("../data-layer/organization.js");
-const { createMembership, editMembership } = require("../data-layer/membership.js");
+const { createMembership, editMembership, getMembershipsByAttributes, getMembershipByAttributes } = require("../data-layer/membership.js");
+const { getCurrentSemesters } = require("../data-layer/semester.js");
 
 async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
     try {
@@ -22,7 +23,7 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
         }
 
         // Get membership data
-        const memberships = await getMembersByAttributes({
+        const memberships = await getMembershipsByAttributes({
             member_id: memberId,
             organization_id: orgId
         });
@@ -115,7 +116,7 @@ async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate)
         }
 
         // Get the membership first to ensure it exists
-        const memberships = await getMembersByAttributes({
+        const memberships = await getMembershipByAttributes({
             member_id: memberId,
             organization_id: orgId
         });
@@ -150,7 +151,7 @@ async function deleteMemberInOrganizationInDB(orgId, memberId) {
             return { error: error.memberIdMustBeInteger, data: null };
         }
 
-        const memberships = await getMembersByAttributes({
+        const memberships = await getMembershipsByAttributes({
             member_id: memberId,
             organization_id: orgId
         });
@@ -180,7 +181,7 @@ async function getMembersInOrganizationInDB(orgId) {
 
         // Get all members and memberships for this organization
         const members = await getMembersByAttributes({});
-        const memberships = await getMembersByAttributes({ organization_id: orgId });
+        const memberships = await getMembershipsByAttributes({ organization_id: orgId });
 
         if (!members || !memberships) {
             return { error: error.membershipNotFound, data: null };

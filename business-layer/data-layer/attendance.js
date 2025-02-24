@@ -68,9 +68,44 @@ async function getAttendanceByMemberAndEvent(memberId, eventId) {
   }
 };
 
+async function getMemberAttendanceWithEvents(orgId, memberId) {
+  try {
+    const attendances = await Attendance.findAll({
+      where: { member_id: memberId },
+      include: {
+        model: Event,
+        where: { organization_id: orgId },
+        required: true
+      }
+    });
+    return attendances;
+  } catch (err) {
+    console.error("Error in getMemberAttendanceWithEvents:", err);
+    throw err;
+  }
+}
+
+async function getMeetingAttendanceWithMembers(meetingId) {
+  try {
+    const attendances = await Attendance.findAll({
+      where: { event_id: meetingId },
+      include: {
+        model: Member,
+        required: true
+      }
+    });
+    return attendances;
+  } catch (err) {
+    console.error("Error in getMeetingAttendanceWithMembers:", err);
+    throw err;
+  }
+}
+
 module.exports = {
   createAttendance,
   getAttendanceById,
   getAttendanceByMemberId,
   getAttendanceByMemberAndEvent,
+  getMemberAttendanceWithEvents,
+  getMeetingAttendanceWithMembers
 };

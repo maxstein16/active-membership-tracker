@@ -1,12 +1,6 @@
-const {
-    createAttendance,
-    getAttendanceById,
-    getAttendanceByMemberAndEvent,
-    getAttendanceByEventId,
-    getAttendanceByMemberId,
-    getMembershipStatus,
-    getEventsBySemester
-} = require("../data-layer/attendance.js");
+const { createAttendance, getAttendanceById, getAttendanceByMemberAndEvent, getAttendanceByMemberId } = require("../data-layer/attendance.js");
+const { getEventsByAttributes } = require("../data-layer/event.js");
+const { getMembershipByAttributes } = require("../data-layer/membership.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -73,7 +67,7 @@ const getMemberAttendanceStatsDB = async (memberId, semesterId = null) => {
         }
 
         // Get membership status
-        const membershipStatus = await getMembershipStatus(memberId);
+        const membershipStatus = await getMembershipByAttributes(memberId);
 
         // Filter by semester if specified
         const filteredRecords = semesterId
@@ -130,7 +124,7 @@ const getAttendanceByMemberAndEventDB = async (memberId, eventId) => {
  */
 const getMemberAttendanceBySemesterDB = async (memberId, semesterId) => {
     try {
-        const semesterEvents = await getEventsBySemester(semesterId);
+        const semesterEvents = await getEventsByAttributes(semesterId);
         const memberAttendance = await getAttendanceByMemberId(memberId);
 
         const filteredAttendance = memberAttendance.filter(attendance => 

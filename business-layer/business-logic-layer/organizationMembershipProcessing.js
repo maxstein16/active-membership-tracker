@@ -21,7 +21,7 @@ async function getMembershipRoleInfoInOrganizationInDB(organizationId, role, sem
             return { error: error.semesterIdMustBeInteger, data: null };
         }
 
-        const memberships = await getMembershipByAttributes({ 
+        const memberships = await getMembershipsByAttributes({ 
             organization_id: organizationId,
             membership_role: role,
             semester_id: semesterId 
