@@ -135,11 +135,16 @@ async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   }
 }
 
+async function deleteMembershipRequirement(requirementId) {
+  return await Membership.destroy({ where: { membership_id: requirementId } });
+}
+
 module.exports = { 
   createMembership, 
   editMembership, 
   editMembershipRole,
   getMembershipsByAttributes,
   getMembershipByAttributes,
-  getMembershipsByOrgAndSemester
+  getMembershipsByOrgAndSemester,
+  deleteMembershipRequirement
 };

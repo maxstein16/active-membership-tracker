@@ -1,6 +1,6 @@
-const { getSpecificOrgDataInDB, createOrganizationInDB, updateOrganizationInDB, getAllOrganizationDataInDB } = require("../../business-logic-layer/organizationProcessing");
+const { getSpecificOrgDataInDB, createOrganizationInDB, updateOrganizationInDB, getAllOrganizationDataInDB } = require("../../business-logic-layer/organizationProcessing.js");
 
-const { getOrganizationById, createOrganization, updateOrganizationByID, getOrganizations } = require("../../data-layer/organization");
+const { getOrganizationById, createOrganization, updateOrganizationByID, getOrganizations } = require("../../data-layer/organization.js");
 
 const Error = require("../../business-logic-layer/public/errors.js");
 const error = new Error();
