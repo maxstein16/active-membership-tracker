@@ -40,8 +40,10 @@ app.use(
 // CORS policy middleware
 app.use(
   cors({
-    origin: 'true',
-    credentials: true,
+    origin: ["http://localhost:3000", "http://localhost:8080"], // Allow requests from frontend
+    credentials: true, // Allow cookies and authorization headers
+    methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
   })
 );
 app.enable("trust proxy");
