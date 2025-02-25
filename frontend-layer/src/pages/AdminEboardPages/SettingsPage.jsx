@@ -11,10 +11,12 @@ import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEm
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
 import { CircularProgress } from "@mui/material";
+import { getOrganizationSettingsData } from "../../utils/handleSettingsData";
+import { useParams } from "react-router";
 
 export default function SettingsPage() {
   // Define my variables
-  // const { orgId } = useParams();
+  const { orgId } = useParams()
   const [orgData, setOrgData] = React.useState(undefined);
 
   // Get user data
@@ -22,6 +24,14 @@ export default function SettingsPage() {
     // TODO
     // get API data with org Id above, uncomment
     // set org data
+    getOrganizationSettingsData(orgId).then((result) => {
+      console.log(result)
+      if (!result.hasOwnProperty("error")) {
+        console.log("Set it!")
+        //setOrgData(result)
+      }
+    })
+    
 
     // temp data
     // DO NOT CHANGE THE LABELS OR FORMAT OF THIS DATA, it is used in MANY files
@@ -67,7 +77,7 @@ export default function SettingsPage() {
         },
       ],
     });
-  }, []);
+  }, [orgId]);
 
   /* Update Settings*/
   const saveBasicSetting = (newValue, valueName) => {

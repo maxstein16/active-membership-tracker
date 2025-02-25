@@ -4,7 +4,7 @@ const connect4server = "http://localhost:8080/v1";
  * Call our backend via a REST api call. 
  * @param {String} endpoint - the route you want to access, after the /v1 for example: /organization
  * @param {API_METHODS} method - what REST method do you want, GET, POST, PUT, DELETE?
- * @param {Object} payload - this is the request body, leave it empty for GET
+ * @param {Object} payload - this is the request body, leave it an empty obj for GET
  * @returns {Object} data that the api returns
  */
 export async function getAPIData(endpoint, method, payload) {
