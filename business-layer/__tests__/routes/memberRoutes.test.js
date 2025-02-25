@@ -1,145 +1,218 @@
-const request = require("supertest");
-const express = require("express");
-const router = require("../../service-layer/routes/memberRoute.js"); // Adjust the path
+const { createMember, updateMember, getAllMembers, getMemberById, getMembersByAttributes } = require('../../data-layer/member');
 
-// Mock business logic and middleware
-jest.mock("../../business-logic-layer/public/exports.js", () => {
-  return jest.fn().mockImplementation(() => ({
-    getMember: jest.fn(),
-    updateMember: jest.fn(),
-    createMember: jest.fn(),
-    getSpecificMemberOrgStats: jest.fn(),
-  }));
-});
+const { Member } = require('../../db');
 
-jest.mock("../../service-layer/sessionMiddleware.js", () => ({
-  isAuthorizedHasSessionForAPI: (req, res, next) => next(),
+// Mock the database model
+jest.mock('../../db.js', () => ({
+  Member: {
+    create: jest.fn(),
+    update: jest.fn(),
+    findAll: jest.fn(),
+    findByPk: jest.fn()
+  }
 }));
 
-// Setup Express app
-const app = express();
-app.use(express.json());
-app.use("/v1/member", router);
-
-describe("Member API Routes", () => {
-  describe("GET /v1/member/:memberId", () => {
-    it("should return 400 if memberId is missing", async () => {
-      const res = await request(app).get("/v1/member/");
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty("error");
-    });
-
-    it("should return 400 if memberId is invalid", async () => {
-      const res = await request(app).get("/v1/member/invalid");
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty("error");
-    });
-
-    it("should return 404 if member is not found", async () => {
-      const { getMember } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      getMember.mockResolvedValue({ error: "member_not_found" });
-
-      const res = await request(app).get("/v1/member/123");
-      expect(res.status).toBe(404);
-      expect(res.body).toHaveProperty("error");
-    });
-
-    it("should return 200 with member data", async () => {
-      const { getMember } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      getMember.mockResolvedValue({ data: { id: 123, name: "John Doe" }, error: null });
-
-      const res = await request(app).get("/v1/member/123");
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("data");
-      expect(res.body.data).toEqual({ id: 123, name: "John Doe" });
-    });
+describe('Member module', () => {
+  beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    
+    // Configure console methods to prevent logging during tests
+    console.log = jest.fn();
+    console.error = jest.fn();
   });
 
-  describe("PUT /v1/member/:memberId", () => {
-    it("should return 400 if memberId is invalid", async () => {
-      const res = await request(app).put("/v1/member/invalid").send({ phone_number: "1234567890" });
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 400 if no valid fields are provided", async () => {
-      const res = await request(app).put("/v1/member/123").send({});
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 404 if member is not found", async () => {
-      const { updateMember } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      updateMember.mockResolvedValue({ error: "member_not_found" });
-
-      const res = await request(app).put("/v1/member/123").send({ phone_number: "1234567890" });
-      expect(res.status).toBe(404);
-    });
-
-    it("should return 200 with updated data", async () => {
-      const { updateMember } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      updateMember.mockResolvedValue({ data: { id: 123, phone_number: "1234567890" }, error: null });
-
-      const res = await request(app).put("/v1/member/123").send({ phone_number: "1234567890" });
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("data");
-    });
-  });
-
-  describe("POST /v1/member", () => {
-    it("should return 400 if required fields are missing", async () => {
-      const res = await request(app).post("/v1/member").send({});
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 200 with created member data", async () => {
-      const { createMember } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      createMember.mockResolvedValue({ data: { id: 1, name: "John Doe" }, error: null });
-
-      const res = await request(app)
-        .post("/v1/member")
-        .send({
-          name: "John Doe",
-          email: "john@example.com",
-          personal_email: "john.personal@example.com",
-          phone_number: "1234567890",
-          graduation_date: "2025",
-          tshirt_size: "M",
-          major: "CS",
-          gender: "Male",
-          race: "White",
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("data");
-      expect(res.body.data.name).toBe("John Doe");
+  describe('createMember', () => {
+    it('should create a new member successfully', async () => {
+      // Mock data
+      const memberData = {
+        member_name: 'John Doe',
+        member_email: 'john@example.com',
+        member_personal_email: 'john.personal@example.com'
+      };
+      
+      const mockCreatedMember = {
+        ...memberData,
+        member_id: 1,
+        toJSON: jest.fn().mockReturnValue({ ...memberData, member_id: 1 })
+      };
+      
+      // Set up the mock implementation
+      Member.create.mockResolvedValue(mockCreatedMember);
+      
+      // Call the function
+      const result = await createMember(memberData);
+      
+      // Assertions
+      expect(Member.create).toHaveBeenCalledWith(memberData);
+      expect(result).toEqual(mockCreatedMember);
+      expect(console.log).toHaveBeenCalledWith('Member created:', mockCreatedMember.toJSON());
     });
   });
-
-  describe("GET /v1/member/:memberId/stats", () => {
-    it("should return 400 if orgId is missing", async () => {
-      const res = await request(app).get("/v1/member/123/stats");
-      expect(res.status).toBe(400);
+  
+  describe('updateMember', () => {
+    it('should update a member successfully', async () => {
+      // Mock data
+      const memberId = 1;
+      const updateData = {
+        member_name: 'John Updated',
+        member_email: 'john.updated@example.com'
+      };
+      
+      // Set up the mock implementation
+      Member.update.mockResolvedValue([1]); // means 1 row was updated
+      
+      // Call the function
+      const result = await updateMember(memberId, updateData);
+      
+      // Assertions
+      expect(Member.update).toHaveBeenCalledWith(updateData, {
+        where: { member_id: memberId }
+      });
+      expect(result).toBe(true);
+      expect(console.log).toHaveBeenCalledWith(`Member with ID ${memberId} updated successfully.`);
     });
-
-    it("should return 400 if orgId is invalid", async () => {
-      const res = await request(app).get("/v1/member/123/stats?orgId=invalid");
-      expect(res.status).toBe(400);
+    
+    it('should return false when no member is found to update', async () => {
+      // Mock data
+      const memberId = 999;
+      const updateData = {
+        member_name: 'Non-existent Member'
+      };
+      
+      // Set up the mock implementation
+      Member.update.mockResolvedValue([0]); // means 0 rows were updated
+      
+      // Call the function
+      const result = await updateMember(memberId, updateData);
+      
+      // Assertions
+      expect(result).toBe(false);
+      expect(console.log).toHaveBeenCalledWith(`No member found with ID ${memberId}.`);
     });
-
-    it("should return 404 if member stats are not found", async () => {
-      const { getSpecificMemberOrgStats } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      getSpecificMemberOrgStats.mockResolvedValue({ error: "stats_not_found" });
-
-      const res = await request(app).get("/v1/member/123/stats?orgId=456");
-      expect(res.status).toBe(404);
+  });
+  
+  describe('getAllMembers', () => {
+    it('should return all members', async () => {
+      // Mock data
+      const mockMembers = [
+        {
+          member_id: 1,
+          member_name: 'John Doe',
+          toJSON: jest.fn().mockReturnValue({ member_id: 1, member_name: 'John Doe' })
+        },
+        {
+          member_id: 2,
+          member_name: 'Jane Doe',
+          toJSON: jest.fn().mockReturnValue({ member_id: 2, member_name: 'Jane Doe' })
+        }
+      ];
+      
+      // Set up the mock implementation
+      Member.findAll.mockResolvedValue(mockMembers);
+      
+      // Call the function
+      const result = await getAllMembers();
+      
+      // Assertions
+      expect(Member.findAll).toHaveBeenCalled();
+      expect(result).toEqual(mockMembers);
+      expect(console.log).toHaveBeenCalledWith('Members found:', mockMembers.map(m => m.toJSON()));
     });
-
-    it("should return 200 with member stats", async () => {
-      const { getSpecificMemberOrgStats } = require("../../business-logic-layer/public/exports.js").mock.instances[0];
-      getSpecificMemberOrgStats.mockResolvedValue({ activities: 5, events: 3 });
-
-      const res = await request(app).get("/v1/member/123/stats?orgId=456");
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("data");
+    
+    it('should return an empty array when no members exist', async () => {
+      // Set up the mock implementation
+      Member.findAll.mockResolvedValue([]);
+      
+      // Call the function
+      const result = await getAllMembers();
+      
+      // Assertions
+      expect(result).toEqual([]);
+      expect(console.log).toHaveBeenCalledWith('No members found in the database.');
+    });
+  });
+  
+  describe('getMemberById', () => {
+    it('should return a member when found by id', async () => {
+      // Mock data
+      const memberId = 1;
+      const mockMember = {
+        member_id: memberId,
+        member_name: 'John Doe',
+        toJSON: jest.fn().mockReturnValue({ member_id: memberId, member_name: 'John Doe' })
+      };
+      
+      // Set up the mock implementation
+      Member.findByPk.mockResolvedValue(mockMember);
+      
+      // Call the function
+      const result = await getMemberById(memberId);
+      
+      // Assertions
+      expect(Member.findByPk).toHaveBeenCalledWith(memberId);
+      expect(result).toEqual(mockMember);
+      expect(console.log).toHaveBeenCalledWith('Member found:', mockMember.toJSON());
+    });
+    
+    it('should return null when no member is found by id', async () => {
+      // Mock data
+      const memberId = 999;
+      
+      // Set up the mock implementation
+      Member.findByPk.mockResolvedValue(null);
+      
+      // Call the function
+      const result = await getMemberById(memberId);
+      
+      // Assertions
+      expect(result).toBeNull();
+      expect(console.log).toHaveBeenCalledWith(`No member found with ID ${memberId}.`);
+    });
+  });
+  
+  describe('getMembersByAttributes', () => {
+    it('should return members matching the given attributes', async () => {
+      // Mock data
+      const filters = { member_email: 'test@example.com' };
+      const mockMembers = [
+        {
+          member_id: 1,
+          member_name: 'Test User',
+          member_email: 'test@example.com',
+          toJSON: jest.fn().mockReturnValue({ 
+            member_id: 1, 
+            member_name: 'Test User', 
+            member_email: 'test@example.com' 
+          })
+        }
+      ];
+      
+      // Set up the mock implementation
+      Member.findAll.mockResolvedValue(mockMembers);
+      
+      // Call the function
+      const result = await getMembersByAttributes(filters);
+      
+      // Assertions
+      expect(Member.findAll).toHaveBeenCalledWith({ where: filters });
+      expect(result).toEqual(mockMembers);
+      expect(console.log).toHaveBeenCalledWith('Members found:', mockMembers.map(m => m.toJSON()));
+    });
+    
+    it('should return an empty array when no members match the attributes', async () => {
+      // Mock data
+      const filters = { member_email: 'nonexistent@example.com' };
+      
+      // Set up the mock implementation
+      Member.findAll.mockResolvedValue([]);
+      
+      // Call the function
+      const result = await getMembersByAttributes(filters);
+      
+      // Assertions
+      expect(result).toEqual([]);
+      expect(console.log).toHaveBeenCalledWith('No members found matching the given criteria.');
     });
   });
 });

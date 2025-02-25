@@ -5,7 +5,7 @@ const { getMemberById } = require("../data-layer/member.js");
 const { getMeetingDetails } = require("../data-layer/reports.js");
 const { getMembershipsByAttributes, getMembershipsByOrgAndSemester } = require("../data-layer/membership.js");
 const { getMemberAttendanceWithEvents, getMeetingAttendanceWithMembers } = require("../data-layer/attendance.js");
-const { getCurrentSemesters, getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
+const { getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
 const { getEventsWithAttendance } = require("../data-layer/event.js");
 
 /**
@@ -59,88 +59,64 @@ async function getSpecificReportOrgDataInDB(orgId, memberId) {
  */
 async function getAnnualOrgReportInDB(orgId) {
   try {
-    // Get organization info
+    console.log(`Fetching organization with ID: ${orgId}`);
     const organization = await getOrganizationById(orgId);
+    
     if (!organization) {
+      console.log("Organization not found.");
       return { error: error.organizationNotFound, data: null };
     }
 
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
 
-    // Get semesters for current and last year
+    console.log("Fetching semesters...");
     const currentYearSemesters = await getSemestersByYear(currentYear);
     const lastYearSemesters = await getSemestersByYear(lastYear);
+
+    console.log("Current Year Semesters:", currentYearSemesters);
+    console.log("Last Year Semesters:", lastYearSemesters);
+
+    if (!currentYearSemesters || !lastYearSemesters) {
+      console.log("Semesters not found.");
+      return { error: error.databaseError, data: null };
+    }
 
     const currentYearSemesterIds = currentYearSemesters.map(s => s.semester_id);
     const lastYearSemesterIds = lastYearSemesters.map(s => s.semester_id);
 
-    // Get members for current and last year based on semesters
-    const currentYearMembers = await getMembershipsByOrgAndSemester(
-      orgId, 
-      currentYearSemesterIds
-    );
-    
-    const lastYearMembers = await getMembershipsByOrgAndSemester(
-      orgId, 
-      lastYearSemesterIds
-    );
+    console.log("Fetching memberships...");
+    const currentYearMembers = await getMembershipsByOrgAndSemester(orgId, currentYearSemesterIds);
+    const lastYearMembers = await getMembershipsByOrgAndSemester(orgId, lastYearSemesterIds);
 
-    // Get events with attendance
+    console.log("Current Year Members:", currentYearMembers);
+    console.log("Last Year Members:", lastYearMembers);
+
+    if (!currentYearMembers || !lastYearMembers) {
+      console.log("Members data is missing.");
+      return { error: error.databaseError, data: null };
+    }
+
+    console.log("Fetching events...");
     const events = await getEventsWithAttendance(orgId);
-    
-    // Filter events by year
-    const currentYearEvents = events.filter(e => {
-      const eventDate = new Date(e.event_start);
-      return eventDate.getFullYear() === currentYear;
-    });
-    
-    const lastYearEvents = events.filter(e => {
-      const eventDate = new Date(e.event_start);
-      return eventDate.getFullYear() === lastYear;
-    });
+    console.log("Events:", events);
 
-    // Format response data
+    if (!events) {
+      console.log("Events data is missing.");
+      return { error: error.databaseError, data: null };
+    }
+
+    // If execution reaches here, we have valid data.
+    console.log("Data fetch complete, formatting response...");
+
     const data = {
       organization_id: organization.organization_id,
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
       current_year: currentYear,
-      "member-data": {
-        total_members: currentYearMembers.length,
-        new_members: currentYearMembers.filter(m => 
-          !lastYearMembers.some(lym => lym.member_id === m.member_id)
-        ).length,
-        total_active_members: currentYearMembers.filter(m => m.active_member).length,
-        new_active_members: currentYearMembers.filter(m => 
-          m.active_member && !lastYearMembers.some(lym => lym.member_id === m.member_id)
-        ).length,
-        members: currentYearMembers.map(m => ({
-          member_id: m.Member.member_id,
-          role_num: m.membership_role,
-          firstName: m.Member.member_name.split(' ')[0],
-          lastName: m.Member.member_name.split(' ')[1],
-          rit_username: m.Member.member_email.split('@')[0],
-          phone: m.Member.member_phone_number
-        }))
-      },
-      "member-data-last-year": {
-        total_members: lastYearMembers.length,
-        new_members: lastYearMembers.length,
-        total_active_members: lastYearMembers.filter(m => m.active_member).length,
-        new_active_members: lastYearMembers.filter(m => m.active_member).length
-      },
       "meetings_data_this_year": {
-        number_of_meetings: currentYearEvents.filter(e => e.event_type === 'general_meeting').length,
-        number_of_events: currentYearEvents.filter(e => e.event_type !== 'general_meeting').length,
-        number_of_volunteering: currentYearEvents.filter(e => e.event_type === 'volunteer').length,
-        total_attendance: currentYearEvents.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
-      },
-      "meetings_data_last_year": {
-        number_of_meetings: lastYearEvents.filter(e => e.event_type === 'general_meeting').length,
-        number_of_events: lastYearEvents.filter(e => e.event_type !== 'general_meeting').length,
-        number_of_volunteering: lastYearEvents.filter(e => e.event_type === 'volunteer').length,
-        total_attendance: lastYearEvents.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
+        number_of_meetings: events.filter(e => e.event_type === 'general_meeting').length,
+        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
       }
     };
 
@@ -156,36 +132,28 @@ async function getAnnualOrgReportInDB(orgId) {
  */
 async function getSemesterOrgReportInDB(orgId) {
   try {
-    // Get organization info
     const organization = await getOrganizationById(orgId);
     if (!organization) {
       return { error: error.organizationNotFound, data: null };
     }
 
-    // Get current semester
     const currentSemester = await getCurrentSemester();
     if (!currentSemester) {
       return { error: error.semesterNotFound, data: null };
     }
 
-    // Get semester data
-    const semesterMembers = await getMembershipsByOrgAndSemester(
-      orgId,
-      [currentSemester.semester_id]
-    );
+    const semesterMembers = await getMembershipsByOrgAndSemester(orgId, [currentSemester.semester_id]);
 
-    // Get events with attendance
+    if (!semesterMembers || semesterMembers.length === 0) {
+      return { error: error.databaseError, data: null };
+    }
+
     const events = await getEventsWithAttendance(orgId);
-    
-    // Filter events for current semester
-    const semesterEvents = events.filter(e => {
-      const eventDate = new Date(e.event_start);
-      const semesterStart = new Date(currentSemester.start_date);
-      const semesterEnd = new Date(currentSemester.end_date);
-      return eventDate >= semesterStart && eventDate <= semesterEnd;
-    });
 
-    // Format response data
+    if (!events || events.length === 0) {
+      return { error: error.databaseError, data: null };
+    }
+
     const data = {
       organization_id: organization.organization_id,
       organization_name: organization.organization_name,
@@ -196,37 +164,29 @@ async function getSemesterOrgReportInDB(orgId) {
         total_members: semesterMembers.length,
         active_members: semesterMembers.filter(m => m.active_member).length,
         members: semesterMembers.map(m => ({
-          member_id: m.Member.member_id,
-          role_num: m.membership_role,
-          firstName: m.Member.member_name.split(' ')[0],
-          lastName: m.Member.member_name.split(' ')[1],
-          rit_username: m.Member.member_email.split('@')[0],
-          phone: m.Member.member_phone_number,
-          points: m.membership_points
+          member_id: m?.Member?.member_id || null,
+          role_num: m?.membership_role || 0,
+          firstName: m?.Member?.member_name?.split(' ')[0] || "",
+          lastName: m?.Member?.member_name?.split(' ')[1] || "",
+          rit_username: m?.Member?.member_email?.split('@')[0] || "",
+          phone: m?.Member?.member_phone_number || "",
+          points: m?.membership_points || 0
         }))
       },
       event_data: {
-        total_events: semesterEvents.length,
-        events_by_type: {
-          general_meetings: semesterEvents.filter(e => e.event_type === 'general_meeting').length,
-          volunteer: semesterEvents.filter(e => e.event_type === 'volunteer').length,
-          social: semesterEvents.filter(e => e.event_type === 'social').length,
-          workshop: semesterEvents.filter(e => e.event_type === 'workshop').length,
-          fundraiser: semesterEvents.filter(e => e.event_type === 'fundraiser').length,
-          committee: semesterEvents.filter(e => e.event_type === 'committee').length
-        },
-        total_attendance: semesterEvents.reduce((sum, event) => 
-          sum + (event.Attendances ? event.Attendances.length : 0), 0
-        )
+        total_events: events.length,
+        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
       }
     };
 
+    console.log("Final data:", data);
     return { error: error.noError, data };
   } catch (err) {
     console.error("Error in getSemesterOrgReportInDB:", err);
     return { error: error.databaseError, data: null };
   }
 }
+
 
 /**
  * Generate meeting report for organization
