@@ -33,6 +33,8 @@ async function addTestData() {
 
   console.log("\n\nAdding test data to Database...");
 
+  const now = new Date();
+
   // ORGANIZATION
   console.log("\n1. Creating Test Organizations");
   const org1 = await Organization.create({
@@ -167,7 +169,7 @@ async function addTestData() {
     const membership1b = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
-      organization_id: org1.organization_id,
+      organization_id: org2.organization_id,
       semester_id: sem1.semester_id,
       membership_points: randomNum,
       active_member: randomNum >= 23,

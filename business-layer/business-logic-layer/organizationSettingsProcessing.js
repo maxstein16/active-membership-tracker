@@ -19,10 +19,14 @@ async function getOrganizationSettingsInDB(orgId) {
         // Get associated membership settings
         const membershipSettings = await getOrganizationMembershipRequirements(orgId);
 
+        // Get email settings
+        const emailSettings = await getOrganizationEmailSettingsInDB(orgId)
+
         // Format the response to match expected structure
         const formattedData = {
             ...organization.toJSON(),
-            Memberships: membershipSettings.map(membership => ({
+            email_settings: emailSettings.data.dataValues,
+            membership_requirements: membershipSettings.map(membership => ({
                 requirementId: membership.requirement_id,
                 meeting_type: membership.meeting_type,
                 frequency: membership.frequency,

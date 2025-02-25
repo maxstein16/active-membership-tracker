@@ -33,16 +33,6 @@ import { API_METHODS, getAPIData } from "./callAPI";
     }
  */
 export async function getOrganizationSettingsData(orgId) {
-  // get the org info
-  const infoSettings = await getAPIData(
-    `/organization/${orgId}`,
-    API_METHODS.get,
-    {}
-  );
-  if (!infoSettings || infoSettings.data == null) {
-    return { error: true };
-  }
-
   // get settings
   const detailSettings = await getAPIData(
     `/organization/${orgId}/settings`,
@@ -53,33 +43,35 @@ export async function getOrganizationSettingsData(orgId) {
     return { error: true };
   }
 
-  // TODO fill in the membership requirements part
-
   // format
   let orgData = {
-    name: infoSettings.data.organization_name,
-    abbreviation: infoSettings.data.organization_abbreviation,
-    color: infoSettings.data.organization_color,
-    description: infoSettings.data.organization_description,
-    threshold: infoSettings.data.organization_threshold,
+    name: detailSettings.data.organization_name,
+    abbreviation: detailSettings.data.organization_abbreviation,
+    color: detailSettings.data.organization_color,
+    description: detailSettings.data.organization_description,
+    threshold: detailSettings.data.organization_threshold,
     emailSettings: {
-      id: detailSettings.email_settings.email_settings_id,
-      monthlyStatus: detailSettings.email_settings.current_status,
-      annual: detailSettings.email_settings.annual_report,
-      semester: detailSettings.email_settings.semester_report,
-      membershipAchieved: detailSettings.email_settings.membershipAchieved,
+      id: detailSettings.data.email_settings.email_setting_id,
+      monthlyStatus: detailSettings.data.email_settings.current_status,
+      annual: detailSettings.data.email_settings.annual_report,
+      semester: detailSettings.data.email_settings.semester_report,
+      membershipAchieved:
+        detailSettings.data.email_settings.membership_achieved,
     },
-    membershipRequirements: [
-      {
-        id: 4,
-          meetingType: "Volunteer",
-          frequency: "Semesterly",
-          amountType: "points",
-          amount: 4,
-          requirementScope: "umm",
-      },
-    ],
-  }
+    membershipRequirements: [],
+  };
+
+  // fill in membership requirements
+  detailSettings.data.membership_requirements.forEach(requirement => {
+    orgData.membershipRequirements.push({
+        id: requirement.requirementId,
+        meetingType: requirement.meeting_type,
+        frequency: requirement.frequency,
+        amountType: requirement.amount_type,
+        amount: requirement.amount
+    })
+  });
+
   return orgData;
 }
 
@@ -97,14 +89,14 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
 /**
  * Save the email settings to the db on each toggle
  * @param {Number} orgId - organization id from the db
- * @param {Number} emailSettingsId - id for the org's email settings
+ * @param {Number} settingId - email setting id from the db
  * @param {Boolean} newValue - whether the setting is now turned on or off
  * @param {String} settingName - name of the specific email setting in question
  * @returns true of there was no error, otherwise false
  */
 export async function saveEmailSetting(
   orgId,
-  emailSettingsId,
+  settingId,
   newValue,
   settingName
 ) {
@@ -145,8 +137,8 @@ export async function createNewMembershipRequirement(orgId, isPoints) {
  * @returns true if no error, false otherwise
  */
 export async function deleteMemberRequirement(orgId, requirementId) {
-    return true;
-  }
+  return true;
+}
 
 /**
  * Get all the members of an organization to display
@@ -154,11 +146,14 @@ export async function deleteMemberRequirement(orgId, requirementId) {
  * @returns list of members
  */
 export async function getOrganizationMembers(orgId) {
-  const result = getAPIData(
-    `/organization/${orgId}/members`,
+  const result = await getAPIData(
+    `/organization/${orgId}/member`,
     API_METHODS.get,
     {}
   );
   console.log(result);
-  return [];
+  if (!result || result.hasOwnProperty("error")) {
+    return [];
+  }
+  return result.data;
 }

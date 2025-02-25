@@ -25,13 +25,13 @@ export default function DashboardPage() {
       name: "Name Here",
       organizations: [
         {
-          id: 41,
+          id: 1,
           abbreviation: "WiC",
           color: "#381A58",
           role: 0,
         },
         {
-          id: 42,
+          id: 2,
           abbreviation: "COMS",
           color: "#20BDE4",
           role: 2,

@@ -78,8 +78,8 @@ export default function SettingsPage() {
           <p>Data is automatically saved after you enter it</p>
           <br />
 
-          <OrgSettingsBasicInfo orgData={orgData} saveData={saveBasicSetting} />
-          <DisplayEmailSettings orgData={orgData} saveData={saveEmailSetting} />
+          <OrgSettingsBasicInfo orgData={orgData} saveSetting={saveBasicSetting} />
+          <DisplayEmailSettings orgData={orgData} saveSetting={saveEmailSetting} />
           <DisplayMembershipRequirements
             color={orgData.color}
             orgData={orgData}
@@ -88,7 +88,7 @@ export default function SettingsPage() {
             deleteRequirementInDB={deleteRequirementInDB}
           />
 
-          <MemberTable />
+          <MemberTable orgId={orgId} />
         </>
       )}
     </PageSetup>
