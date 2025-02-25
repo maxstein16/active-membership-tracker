@@ -129,7 +129,7 @@ router.post(
 );
 
 /**
- * POST /organization/{orgId}/events/{eventId}
+ * PUT /organization/{orgId}/events/{eventId}
  * Update a specific event's details.
  */
 router.put(

@@ -69,7 +69,7 @@ async function getAnnualOrgReportInDB(orgId) {
     const lastYear = currentYear - 1;
 
     // Get semesters for current and last year
-    const currentYearSemesters = await getCurrentSemesters(currentYear);
+    const currentYearSemesters = await getSemestersByYear(currentYear);
     const lastYearSemesters = await getSemestersByYear(lastYear);
 
     const currentYearSemesterIds = currentYearSemesters.map(s => s.semester_id);
@@ -247,10 +247,9 @@ async function getMeetingOrgReportInDB(orgId, meetingId) {
 
     // Get attendance and member info
     const attendances = await getMeetingAttendanceWithMembers(meetingId);
-    const memberIds = attendances.map(a => a.Member.member_id);
     const membershipStatuses = await getMembershipsByAttributes({
-      organization_id: orgId,
-      member_id: memberIds
+        organization_id: orgId,
+        member_id: attendances.map(a => a.Member.member_id),
     });
 
     // Format response data
