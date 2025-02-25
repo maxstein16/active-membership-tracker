@@ -46,6 +46,13 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
         }
 
         const orgInfo = await business.getSpecificOrgData(parseInt(orgId));
+        
+        if (!orgInfo || !orgInfo.data) {
+            return res.status(404).json({
+                status: "error",
+                error: error.organizationNotFound
+            });
+        }
 
         return res.status(200).json({ 
             status: "success", 
@@ -94,7 +101,7 @@ async function handlePostOrganization(req, res) {
             });
         }
 
-        const result = await business.addOrganization(orgData);
+        const result = await business.createOrganization(orgData);
 
         if (result.error) {
             return res.status(400).json({
@@ -154,7 +161,7 @@ router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
             });
         }
 
-        const result = await business.editOrganization(parseInt(orgId), orgData);
+        const result = await business.updateOrganization(parseInt(orgId), orgData);
 
         if (result.error) {
             return res.status(404).json({

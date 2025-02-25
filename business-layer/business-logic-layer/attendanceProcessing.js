@@ -1,4 +1,6 @@
-const { Event, Member, Attendance } = require("../db"); // Import models
+const { createAttendance, getAttendanceById, getAttendanceByMemberAndEvent, getAttendanceByMemberId } = require("../data-layer/attendance.js");
+const { getEventsByAttributes } = require("../data-layer/event.js");
+const { getMembershipByAttributes } = require("../data-layer/membership.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -9,124 +11,100 @@ const error = new Error();
  * - event_id
  * - check_in
  * - volunteer_hours
+ * - semester_id (new field to support semester filtering)
+ * - points_earned (new field to track points per event)
  */
 
 /**
- * Create a new attendance. IDs should be auto-generated, hence not in the params.
+ * Create a new attendance record
+ * @param {Object} attendanceData - The data to create the attendance record
+ * @returns {Promise<Object>} Object containing error and data properties
  */
-async function createAttendance(attendanceData) {
+const createAttendanceDB = async (attendanceData) => {
     try {
-        const newAttendance = await Attendance.create({
-            member_id: attendanceData.member_id,
-            event_id: attendanceData.event_id,
-            check_in: attendanceData.check_in,
-            volunteer_hours: attendanceData.volunteer_hours,
-        });
-
+        const newAttendance = await createAttendance(attendanceData);
         return { error: error.noError, data: newAttendance };
     } catch (err) {
         console.error("Error creating attendance:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-} // createAttendance
+};
 
 /**
- * Get attendance info from a specific ID.
+ * Get attendance info from a specific ID
+ * @param {number} attendanceId - The ID of the attendance record
+ * @returns {Promise<Object>} Object containing error and data properties
  */
-async function getAttendanceById(attendanceId) {
+const getAttendanceByIdDB = async (attendanceId) => {
     if (isNaN(attendanceId)) {
         return { error: error.attendanceIdMustBeInteger, data: null };
     }
 
     try {
-        const attendance = await Attendance.findByPk(attendanceId);
+        const attendance = await getAttendanceById(attendanceId);
         if (!attendance) {
             return { error: error.attendanceNotFound, data: null };
         }
-        return { error: null, data: attendance.toJSON() };
+        return { error: error.noError, data: attendance };
     } catch (err) {
         console.error("Error fetching attendance by ID:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-} // getAttendanceById
+};
 
 /**
- * Get attendance(s) of a specific member noted by their ID.
+ * Get comprehensive member attendance statistics
+ * @param {number} memberId - The ID of the member
+ * @param {number} [semesterId] - Optional semester ID for filtering
+ * @returns {Promise<Object>} Object containing error and attendance statistics
  */
-async function getAttendanceByMemberId(memberId) {
+const getMemberAttendanceStatsDB = async (memberId, semesterId = null) => {
     try {
-        const attendance = await Attendance.findAll({
-            where: { member_id: memberId },
-            include: [
-                {
-                    model: Member,
-                    attributes: ["member_id", "member_name", "member_email"], // Can add more fields if needed
-                },
-            ],
-        });
-
-        if (attendance.length === 0) {
-            return { error: error.eventNotFound, data: null };
+        // Get basic attendance records
+        const attendanceRecords = await getAttendanceByMemberId(memberId);
+        if (!attendanceRecords || attendanceRecords.length === 0) {
+            return { error: error.noAttendanceFound, data: null };
         }
 
-        return { error: error.noError, data: attendance };
+        // Get membership status
+        const membershipStatus = await getMembershipByAttributes(memberId);
+
+        // Filter by semester if specified
+        const filteredRecords = semesterId
+            ? attendanceRecords.filter(record => record.semester_id === semesterId)
+            : attendanceRecords;
+
+        // Calculate statistics
+        const stats = {
+            totalEventsAttended: filteredRecords.length,
+            totalVolunteerHours: filteredRecords.reduce((sum, record) => sum + record.volunteer_hours, 0),
+            totalPointsAccumulated: filteredRecords.reduce((sum, record) => sum + record.points_earned, 0),
+            membershipStatus: membershipStatus,
+            attendanceHistory: filteredRecords.map(record => ({
+                eventId: record.event_id,
+                checkIn: record.check_in,
+                volunteerHours: record.volunteer_hours,
+                pointsEarned: record.points_earned,
+                semesterId: record.semester_id
+            }))
+        };
+
+        return { error: error.noError, data: stats };
     } catch (err) {
-        console.error("Error fetching attendance by member ID:", err);
+        console.error("Error fetching member attendance statistics:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-} // getAttendanceByMemberId
+};
 
 /**
- * Retrieves attendance records for a specific event.
- * 
- * @param {number} eventId - The unique identifier of the event.
- * @returns {Promise<Object>} - A promise resolving to an object containing attendance data or an error.
+ * Get member attendance for a specific event
+ * @param {number} memberId - The ID of the member
+ * @param {number} eventId - The ID of the event
+ * @returns {Promise<Object>} Object containing error and data properties
  */
-async function getAttendanceByEventId(eventId) {
+const getAttendanceByMemberAndEventDB = async (memberId, eventId) => {
     try {
-        const attendance = await Attendance.findAll({
-            where: { event_id: eventId },
-            include: [
-                {
-                    model: Event,
-                    attributes: [], // Excludes all attributes from Event but could be some if we wanted to
-                },
-            ],
-        });
-
-        if (attendance.length === 0) {
-            return { error: error.eventNotFound, data: null };
-        }
-
-        return { error: error.noError, data: attendance };
-    } catch (err) {
-        console.error("Error fetching attendance by Event ID:", err);
-        return { error: error.somethingWentWrong, data: null };
-    }
-} // getAttendanceByEventId
-
-/**
- * Retrieves the attendance of a specific member at a specific event.
- * @param {number} memberId 
- * @param {number} eventId 
- * @returns {Promise<Object>} A promise of an object containing attendance data, member info, and event info.
- */
-async function getAttendanceByMemberAndEvent(memberId, eventId) {
-    try {
-        const attendance = await Attendance.findOne({
-            where: { member_id: memberId, event_id: eventId },
-            include: [
-                {
-                    model: Member,
-                    attributes: ["member_name", "member_email"],
-                },
-                {
-                    model: Event,
-                    attributes: ["event_name", "event_date"],
-                },
-            ],
-        });
-
+        const attendance = await getAttendanceByMemberAndEvent(memberId, eventId);
         if (!attendance) {
             return { error: error.eventNotFound, data: null };
         }
@@ -136,12 +114,38 @@ async function getAttendanceByMemberAndEvent(memberId, eventId) {
         console.error("Error fetching attendance by Member and Event ID:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-} // getAttendanceByMemberAndEvent
+};
+
+/**
+ * Get member attendance filtered by semester
+ * @param {number} memberId - The ID of the member
+ * @param {number} semesterId - The ID of the semester
+ * @returns {Promise<Object>} Object containing error and filtered attendance data
+ */
+const getMemberAttendanceBySemesterDB = async (memberId, semesterId) => {
+    try {
+        const semesterEvents = await getEventsByAttributes(semesterId);
+        const memberAttendance = await getAttendanceByMemberId(memberId);
+
+        const filteredAttendance = memberAttendance.filter(attendance => 
+            semesterEvents.some(event => event.event_id === attendance.event_id)
+        );
+
+        if (filteredAttendance.length === 0) {
+            return { error: error.noAttendanceFound, data: null };
+        }
+
+        return { error: error.noError, data: filteredAttendance };
+    } catch (err) {
+        console.error("Error fetching attendance by semester:", err);
+        return { error: error.somethingWentWrong, data: null };
+    }
+};
 
 module.exports = {
-    createAttendance,
-    getAttendanceById,
-    getAttendanceByMemberId,
-    getAttendanceByEventId,
-    getAttendanceByMemberAndEvent
+    createAttendanceDB,
+    getAttendanceByIdDB,
+    getMemberAttendanceStatsDB,
+    getAttendanceByMemberAndEventDB,
+    getMemberAttendanceBySemesterDB
 };

@@ -14,7 +14,7 @@ const sanitizer = new Sanitizer();
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 /**
- * GET v1/organizations/{orgId}/events
+ * GET v1/organization/{orgId}/events
  * Get all events for an organization.
  */
 router.get(
@@ -44,7 +44,7 @@ router.get(
 );
 
 /**
- * GET /organizations/{orgId}/events/{eventId}
+ * GET /organization/{orgId}/events/{eventId}
  * Get a specific event's details.
  */
 router.get(
@@ -66,8 +66,8 @@ router.get(
     }
 
     // Fetch data from business layer
-    const event = await business.getEventById(orgId, eventId);
-
+    const event = await business.getEventById(eventId, orgId);
+    
     // Handle errors
     if (event.error && event.error !== error.noError) {
       return res.status(404).json({ error: event.error, orgId, eventId });
@@ -78,7 +78,7 @@ router.get(
 );
 
 /**
- * POST v1/organizations/{orgId}/events
+ * POST v1/organization/{orgId}/events
  * Create a new event for an organization.
  */
 router.post(
@@ -129,7 +129,7 @@ router.post(
 );
 
 /**
- * POST /organizations/{orgId}/events/{eventId}
+ * PUT /organization/{orgId}/events/{eventId}
  * Update a specific event's details.
  */
 router.put(

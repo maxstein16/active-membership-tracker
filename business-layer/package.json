@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./service-layer/server.js",
     "dev": "nodemon ./service-layer/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "The 7 Musketeers",
   "license": "ISC",

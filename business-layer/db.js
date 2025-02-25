@@ -121,7 +121,8 @@ const sequelize = new Sequelize(
   
   Event.belongsTo(Organization, { foreignKey: 'organization_id' });
   Event.belongsTo(Semester, { foreignKey: 'semester_id', as: 'EventSemester' });
-  
+  Event.hasMany(Attendance, { as: 'Attendances', foreignKey: 'event_id' });
+
   Attendance.belongsTo(Member, { foreignKey: 'member_id' });
   Attendance.belongsTo(Event, { foreignKey: 'event_id' });
   
