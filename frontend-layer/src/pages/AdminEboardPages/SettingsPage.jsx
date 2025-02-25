@@ -18,65 +18,22 @@ export default function SettingsPage() {
   // Define my variables
   const { orgId } = useParams()
   const [orgData, setOrgData] = React.useState(undefined);
+  const [error, setError] = React.useState("");
 
   // Get user data
   React.useEffect(() => {
-    // TODO
-    // get API data with org Id above, uncomment
-    // set org data
+    
+    // get API data with orgId - format it to the frontend org format
     getOrganizationSettingsData(orgId).then((result) => {
       console.log(result)
       if (!result.hasOwnProperty("error")) {
-        console.log("Set it!")
-        //setOrgData(result)
+        setError("")
+        setOrgData(result)
+      } else {
+        setError("Error fetching your data. Contact Support")
       }
     })
     
-
-    // temp data
-    // DO NOT CHANGE THE LABELS OR FORMAT OF THIS DATA, it is used in MANY files
-    // instead, format the api result to look like this
-    setOrgData({
-      name: "Computing Organization for Multicultural Students",
-      abbreviation: "COMS",
-      color: "#20BDE4",
-      description:
-        "Our Mission is to build a supportive community that celebrates the talent of underrepresented students in Computing. We work to accomplish our mission by providing mentorship, mental health awareness, and leadership opportunities.",
-      threshold: 24,
-      emailSettings: {
-        id: 0,
-        monthlyStatus: true,
-        annual: false,
-        semester: true,
-        membershipAchieved: true,
-      },
-      membershipRequirements: [
-        {
-          id: 0,
-          meetingType: "Meeting",
-          frequency: "Yearly",
-          amountType: "points",
-          amount: 1,
-          requirementScope: "umm",
-        },
-        {
-          id: 4,
-          meetingType: "Volunteer",
-          frequency: "Semesterly",
-          amountType: "points",
-          amount: 4,
-          requirementScope: "umm",
-        },
-        {
-          id: 10,
-          meetingType: "Event",
-          frequency: "Monthly",
-          amountType: "percent",
-          amount: 50,
-          requirementScope: "umm",
-        },
-      ],
-    });
   }, [orgId]);
 
   /* Update Settings*/
@@ -113,7 +70,7 @@ export default function SettingsPage() {
   return (
     <PageSetup>
       <BackButton route={"/"} />
-      {!orgData ? (
+      {error !== "" ? <p>{error}</p> : !orgData ? (
         <CircularProgress/>
       ) : (
         <>

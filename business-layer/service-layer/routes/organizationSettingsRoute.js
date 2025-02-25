@@ -38,7 +38,7 @@ router.get(
     const response = await business.getOrganizationSettings(parseInt(orgId));
 
     if (response.error !== error.noError) {
-      return res.status(404).json({ error: error.organizationNotFound });
+      return res.status(404).json({ error: response.error });
     }
 
     return res.status(200).json({ status: "success", data: response.data });
