@@ -33,7 +33,7 @@ router.get(
     }
 
     // fetch member data from backend
-    const memberData = await business.getMember(memberId);
+    const memberData = await business.getMemberById(memberId);
 
     if (memberData.error && memberData.error !== error.noError) {
       res.status(404).json({ error: error.memberCannotBeFoundInDB });

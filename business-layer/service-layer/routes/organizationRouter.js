@@ -46,17 +46,12 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
         }
 
         const orgInfo = await business.getSpecificOrgData(parseInt(orgId));
-
-        // check if has all the params needed
-        if (
-            !body.hasOwnProperty("organization_name") ||
-            !body.hasOwnProperty("organization_abbreviation") ||
-            !body.hasOwnProperty("organization_desc") ||
-            !body.hasOwnProperty("organization_color") ||
-            !body.hasOwnProperty("organization_threshold")
-        ) {
-            res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
-            return;
+        
+        if (!orgInfo || !orgInfo.data) {
+            return res.status(404).json({
+                status: "error",
+                error: error.organizationNotFound
+            });
         }
 
         return res.status(200).json({ 
@@ -106,7 +101,7 @@ async function handlePostOrganization(req, res) {
             });
         }
 
-        const result = await business.addOrganization(orgData);
+        const result = await business.createOrganization(orgData);
 
         if (result.error) {
             return res.status(400).json({
@@ -166,7 +161,7 @@ router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
             });
         }
 
-        const result = await business.editOrganization(parseInt(orgId), orgData);
+        const result = await business.updateOrganization(parseInt(orgId), orgData);
 
         if (result.error) {
             return res.status(404).json({
