@@ -33,7 +33,7 @@ export default function NavigationDropdown() {
         <div>
           <Link to="/">Dashboard</Link>
           <Link to="/profile">Profile</Link>
-          <Link to="/login">Logout</Link>
+          {/* <Link to="/login">Logout</Link> */}
         </div>
 
         {/* TODO: If they are a admin */}
