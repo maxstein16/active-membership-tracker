@@ -14,28 +14,23 @@ function validateOrgFields(fields) {
 
     const { org_name, org_description, org_category, org_contact_email, org_phone_number } = fields;
 
-    // Validate organization name
-    if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
+    if (!org_name || typeof org_name !== 'string' || org_name.trim() === '') {
         return error.invalidOrgName;
     }
 
-    // Validate organization description
     if (org_description && (typeof org_description !== 'string' || org_description.trim() === '')) {
         return error.invalidOrgDescription;
     }
 
-    // Validate organization category
     if (org_category && (typeof org_category !== 'string' || org_category.trim() === '')) {
         return error.invalidOrgCategory;
     }
 
-    // Validate contact email
     if (org_contact_email && (typeof org_contact_email !== 'string' || 
         !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(org_contact_email))) {
         return error.invalidOrgEmail;
     }
 
-    // Validate phone number
     if (org_phone_number && (typeof org_phone_number !== 'string' || 
         !/^\d{3}-\d{3}-\d{4}$/.test(org_phone_number))) {
         return error.invalidOrgPhoneNumber;
