@@ -62,14 +62,14 @@ export async function getOrganizationSettingsData(orgId) {
   };
 
   // fill in membership requirements
-  detailSettings.data.membership_requirements.forEach(requirement => {
+  detailSettings.data.membership_requirements.forEach((requirement) => {
     orgData.membershipRequirements.push({
-        id: requirement.requirementId,
-        meetingType: requirement.meeting_type,
-        frequency: requirement.frequency,
-        amountType: requirement.amount_type,
-        amount: requirement.amount
-    })
+      id: requirement.requirementId,
+      meetingType: requirement.meeting_type,
+      frequency: requirement.frequency,
+      amountType: requirement.amount_type,
+      amount: requirement.amount,
+    });
   });
 
   return orgData;
@@ -79,28 +79,62 @@ export async function getOrganizationSettingsData(orgId) {
  * Save the info settings to the database
  * @param {Number} orgId - organization id from the db
  * @param {String} newValue - new value the user just entered
- * @param {String} settingName - appropriate settingName (organization_name, organization_abbreviation, organization_description, organization_color, active_memberhsip_threshold)
+ * @param {String} settingName - appropriate settingName (name, abbreviation, description, color, threshold)
  * @returns true if no errors, false if error :(
  */
 export async function saveInfoSetting(orgId, newValue, settingName) {
-  return true;
+  let body = {};
+  body[`organization_${settingName}`] = newValue;
+  // console.log(body)
+  const result = await getAPIData(
+    `/organization/${orgId}`,
+    API_METHODS.put,
+    body
+  );
+  // console.log(result)
+
+  if (result.status && result.status === "success") {
+    return true;
+  }
+  return false;
 }
 
 /**
  * Save the email settings to the db on each toggle
  * @param {Number} orgId - organization id from the db
- * @param {Number} settingId - email setting id from the db
  * @param {Boolean} newValue - whether the setting is now turned on or off
  * @param {String} settingName - name of the specific email setting in question
  * @returns true of there was no error, otherwise false
  */
-export async function saveEmailSetting(
+export async function saveEmailSettingInDB(
   orgId,
-  settingId,
   newValue,
   settingName
 ) {
-  return true;
+  // set the body variable to edit correctly
+  const switchTable = {
+    monthlyStatus: "current_status",
+    annual: "annual_report",
+    semester: "semester_report",
+    membershipAchieved: "membership_achieved",
+  };
+  let body = {};
+  body[switchTable[settingName]] = newValue;
+  console.log(body);
+
+  // call the api
+  const result = await getAPIData(
+    `/organization/${orgId}/settings/email-settings`,
+    API_METHODS.put,
+    body
+  );
+  console.log(result);
+
+  // decide return
+  if (result.status && result.status === "success") {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -151,7 +185,7 @@ export async function getOrganizationMembers(orgId) {
     API_METHODS.get,
     {}
   );
-  console.log(result);
+  //   console.log(result);
   if (!result || result.hasOwnProperty("error")) {
     return [];
   }

@@ -102,12 +102,17 @@ router.put(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let {
-      current_status,
-      annual_report,
-      semester_report,
-      membership_achieved,
-    } = req.body;
+    // let {
+    //   current_status,
+    //   annual_report,
+    //   semester_report,
+    //   membership_achieved,
+    // } = req.body;
+
+    // console.log(current_status)
+    // console.log(annual_report)
+    // console.log(semester_report)
+    // console.log(membership_achieved)
 
     orgId = sanitizer.sanitize(orgId);
 
@@ -115,10 +120,10 @@ router.put(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (
-      !current_status &&
-      !annual_report &&
-      !semester_report &&
-      !membership_achieved
+      !req.body.hasOwnProperty("current_status") &&
+      !req.body.hasOwnProperty("annual_report") &&
+      !req.body.hasOwnProperty("semester_report") &&
+      !req.body.hasOwnProperty("membership_achieved")
     ) {
       return res
         .status(400)

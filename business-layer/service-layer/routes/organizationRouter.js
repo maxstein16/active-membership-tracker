@@ -140,7 +140,7 @@ router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
 
         const orgData = {
             org_name: req.body.organization_name,
-            org_description: req.body.organization_desc,
+            org_description: req.body.organization_description,
             org_category: req.body.organization_category,
             org_contact_email: req.body.contact_email,
             org_phone_number: req.body.phone_number,

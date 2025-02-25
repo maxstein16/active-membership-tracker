@@ -21,7 +21,7 @@ export default function MemberTable({ orgId, membersList }) {
     } else if (orgId) {
       // else if given org id, get all the members
       getOrganizationMembers(orgId).then((result) => {
-        console.log(result);
+        // console.log(result);
         if (!result.hasOwnProperty("error")) {
           setError("");
           setMembers(result);

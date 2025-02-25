@@ -11,8 +11,9 @@ import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEm
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
 import { CircularProgress } from "@mui/material";
-import { getOrganizationSettingsData } from "../../utils/handleSettingsData";
+import { getOrganizationSettingsData, saveEmailSettingInDB, saveInfoSetting, saveMembershipRequirementDetail } from "../../utils/handleSettingsData";
 import { useParams } from "react-router";
+import displayErrors from "../../utils/displayErrors";
 
 export default function SettingsPage() {
   // Define my variables
@@ -25,12 +26,12 @@ export default function SettingsPage() {
     
     // get API data with orgId - format it to the frontend org format
     getOrganizationSettingsData(orgId).then((result) => {
-      console.log(result)
+      // console.log(result)
       if (!result.hasOwnProperty("error")) {
         setError("")
         setOrgData(result)
       } else {
-        setError("Error fetching your data. Contact Support")
+        setError(displayErrors.errorFetchingContactSupport)
       }
     })
     
@@ -39,32 +40,50 @@ export default function SettingsPage() {
   /* Update Settings*/
   const saveBasicSetting = (newValue, valueName) => {
     // use the newValue variable to update the db (using getAPIdata method)
-
+    saveInfoSetting(orgId, newValue, valueName).then((success) => {
+      if (!success) {
+        setError(displayErrors.somethingWentWrong)
+      }
+    })
     // this can be done at the same time as the getAPIdata method is running
     // update the org data variable
     let newData = { ...orgData };
     newData[valueName] = newValue;
     setOrgData(newData);
-    console.log(newData);
+    // console.log(newData);
   };
 
   const saveEmailSetting = (newValue, valueName) => {
     // use the newValue variable to update the db (using getAPIdata method)
-    
+    saveEmailSettingInDB(orgId, newValue, valueName).then((success) => {
+      if (!success) {
+        setError(displayErrors.somethingWentWrong)
+      }
+    })
     // this can be done at the same time as the getAPIdata method is running
     // update the org data variable
     let newData = { ...orgData };
     newData.emailSettings[valueName] = newValue;
     setOrgData(newData);
-    console.log(newData);
+    // console.log(newData);
   };
 
   const updateValueInDB = (newValue, reqId, valueName) => {
     // update a value for a membership requirement in the db
       // example param values: '3' '39' 'amount'
+      saveMembershipRequirementDetail(orgId, reqId, newValue, valueName).then((success) => {
+        if (!success) {
+          setError(displayErrors.somethingWentWrong)
+        }
+      })
   };
   const deleteRequirementInDB = (reqId) => {
-    // delete the requirement by reqId in the databse
+    // delete the requirement by reqId in the database
+    deleteRequirementInDB(orgId, reqId).then((success) => {
+      if (!success) {
+        setError(displayErrors.somethingWentWrong)
+      }
+    })
   };
 
   return (
