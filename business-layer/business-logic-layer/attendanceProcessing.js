@@ -104,7 +104,20 @@ const getMemberAttendanceStatsDB = async (memberId, semesterId = null) => {
  */
 const getAttendanceByMemberAndEventDB = async (memberId, eventId) => {
     try {
-        const attendance = await getAttendanceByMemberAndEvent(memberId, eventId);
+        const attendance = await Attendance.findOne({
+            where: { member_id: memberId, event_id: eventId },
+            include: [
+                {
+                    model: Member,
+                    attributes: ["member_name", "member_email"],
+                },
+                {
+                    model: Event,
+                    attributes: ["event_name", "event_date"],
+                },
+            ],
+        });
+
         if (!attendance) {
             return { error: error.eventNotFound, data: null };
         }
@@ -127,7 +140,7 @@ const getMemberAttendanceBySemesterDB = async (memberId, semesterId) => {
         const semesterEvents = await getEventsByAttributes(semesterId);
         const memberAttendance = await getAttendanceByMemberId(memberId);
 
-        const filteredAttendance = memberAttendance.filter(attendance => 
+        const filteredAttendance = memberAttendance.filter(attendance =>
             semesterEvents.some(event => event.event_id === attendance.event_id)
         );
 
