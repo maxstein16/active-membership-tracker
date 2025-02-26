@@ -61,7 +61,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
 
       {/* Threshold */}
       <UserInput
-        label="Active Membership Point Threshold (leave empty if not applicable)"
+        label="Active Membership Point Threshold"
         color={orgData.color}
         value={threshold}
         setValue={setThreshold}

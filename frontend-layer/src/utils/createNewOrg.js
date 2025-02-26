@@ -14,7 +14,7 @@ export async function createNewOrgInDB(orgData) {
   }
 
   // add org basic details to db + create default email settings
-  const newOrg = getAPIData("/organization", API_METHODS.post, {
+  const newOrg = await getAPIData("/organization", API_METHODS.post, {
     organization_name: orgData.name,
     organization_abbreviation: orgData.abbreviation,
     organization_desc: orgData.description,
@@ -23,29 +23,50 @@ export async function createNewOrgInDB(orgData) {
   });
 
   if (!newOrg || newOrg.hasOwnProperty("error")) {
-    console.log("Something went wrong creating the new org")
-    return displayErrors.somethingWentWrong
+    console.log("Something went wrong creating the new org: ", newOrg);
+    return displayErrors.somethingWentWrong;
   }
+
+  // save org id for easier use later
+  const newOrgId = newOrg.data.organization_id;
 
   // edit email settings
   const result = await getAPIData(
-    `/organization/${newOrg.organization_id}/settings/email-settings`,
+    `/organization/${newOrgId}/settings/email-settings`,
     API_METHODS.put,
     {
-        current_status: orgData.emailSettings.monthlyStatus,
-        annual_report: orgData.emailSettings.annual,
-        semester_report: orgData.emailSettings.semester,
-        membership_achieved: orgData.emailSettings.membershipAchieved,
-      }
+      current_status: orgData.emailSettings.monthlyStatus,
+      annual_report: orgData.emailSettings.annual,
+      semester_report: orgData.emailSettings.semester,
+      membership_achieved: orgData.emailSettings.membershipAchieved,
+    }
   );
 
   if (!result || result.hasOwnProperty("error")) {
-    console.log("Something went wrong saving the email settings")
-    return displayErrors.somethingWentWrong
+    console.log("Something went wrong saving the email settings: ", result);
+    return displayErrors.somethingWentWrong;
   }
-  
 
-  return displayErrors.somethingWentWrong;
+  // add membership requirements
+  await orgData.membershipRequirements.forEach(async (requirement) => {
+    const newRequirement = await getAPIData(
+      `/organization/${newOrgId}/settings/membership-requirements`,
+      API_METHODS.post,
+      {
+        meeting_type: requirement.meetingType,
+        frequency: requirement.frequency,
+        amount_type: requirement.amountType,
+        amount: requirement.amount,
+      }
+    );
+
+    if (!newRequirement || newRequirement.hasOwnProperty("error")) {
+        console.log("Something went wrong saving membership requirements: ", newRequirement)
+      return displayErrors.somethingWentWrong;
+    }
+  });
+
+  return null;
 }
 
 // check to make sure all data is there
@@ -54,8 +75,7 @@ function checkData(orgData) {
   let missingFields = [];
   Object.keys(orgData).forEach((key) => {
     let data = orgData[key];
-    // threshold is allowed to be empty
-    if (key !== "threshold" && data === "") {
+    if (data === "") {
       missingFields.push(key);
     }
   });

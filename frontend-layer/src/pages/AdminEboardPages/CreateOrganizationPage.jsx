@@ -10,6 +10,7 @@ import { createNewOrgInDB } from "../../utils/createNewOrg";
 
 export default function CreateOrganizationPage() {
   const [error, setError] = React.useState("");
+  const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
   const navigate = useNavigate();
 
   // default values of org data - don't remove or change
@@ -41,7 +42,7 @@ export default function CreateOrganizationPage() {
       newData[valueName] = newValue;
     }
     setOrgData(newData);
-    console.log(newData);
+    // console.log(newData);
   };
 
   const createNewRequirementLocally = (isPoints) => {
@@ -69,12 +70,10 @@ export default function CreateOrganizationPage() {
   };
 
   const createOrg = () => {
-    console.log("[MEP] here")
     createNewOrgInDB(orgData).then((error) => {
-      console.log("[MEP] here", error)
       if (!error) {
         // success!
-        navigate("/");
+        setShowSuccessDialog(true)
         return;
       }
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
@@ -129,6 +128,7 @@ export default function CreateOrganizationPage() {
         </button>
         <button onClick={createOrg}>Create Organization</button>
       </div>
+      
     </PageSetup>
   );
 }
