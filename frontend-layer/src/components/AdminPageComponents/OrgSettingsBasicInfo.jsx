@@ -12,6 +12,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
   const [abbreviation, setAbbreviation] = React.useState(orgData.abbreviation);
   const [description, setDescription] = React.useState(orgData.description);
   const [color, setColor] = React.useState(orgData.color);
+  const [threshold, setThreshold] = React.useState(orgData.threshold);
 
   return (
     <div className="org-settings-basic-info">
@@ -57,6 +58,16 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
           onLeaveField={(newValue) => {saveSetting(newValue, 'color')}}
           />
       </div>
+
+      {/* Threshold */}
+      <UserInput
+        label="Active Membership Point Threshold (leave empty if not applicable)"
+        color={orgData.color}
+        value={threshold}
+        setValue={setThreshold}
+        isMultiline={false}
+        onLeaveField={(newValue) => {saveSetting(newValue, 'threshold')}}
+      />
     </div>
   );
 }
