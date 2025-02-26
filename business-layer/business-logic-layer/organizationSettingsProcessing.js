@@ -1,5 +1,5 @@
 const Error = require("./public/errors.js");
-const { getOrganizationById, getOrganizationMembershipRequirements, editOrganizationMembershipRequirement } = require("../data-layer/organization.js");
+const { getOrganizationById, getOrganizationMembershipRequirements, editOrganizationMembershipRequirement, createOrganizationMembershipRequirement } = require("../data-layer/organization.js");
 const { getEmailSettings, createEmailSettings, updateEmailSettings, deleteEmailSettings } = require("../data-layer/email-settings.js");
 const error = new Error();
 
@@ -127,6 +127,36 @@ async function deleteOrganizationEmailSettingsInDB(orgId) {
 
 
 /**
+ * Create membership requirement
+ * @param {number} orgId - The ID of the organization
+ * @param {object} data - new membership requirements data
+ * @returns {Promise<Object>} Updated membership requirements
+ */
+async function createOrganizationMembershipRequirementsInDB(orgId, data) {
+    try {
+        // Verify organization exists
+        const organization = await getOrganizationById(orgId);
+        if (!organization) {
+            return { error: error.organizationNotFound, data: null };
+        }
+
+        // Update membership settings
+        const created = await createOrganizationMembershipRequirement({...data, organization_id: orgId, requirement_scope: data.frequency});
+
+        console.log(created)
+        if (!created) {
+            return { error: error.settingNotFound, data: null };
+        }
+
+        return { error: error.noError, data: created };
+    } catch (err) {
+        console.error("Error creating membership requirements:", err);
+        return { error: error.somethingWentWrong, data: null };
+    }
+};
+
+
+/**
  * Edit organization membership requirements
  * @param {number} orgId - The ID of the organization
  * @param {object} orgData - Updated membership requirements data
@@ -193,6 +223,7 @@ module.exports = {
     getOrganizationSettingsInDB,
     getOrganizationEmailSettingsInDB,
     editOrganizationMembershipRequirementsInDB,
+    createOrganizationMembershipRequirementsInDB,
     createOrganizationEmailSettingsInDB,
     updateOrganizationEmailSettingsInDB,
     deleteOrganizationEmailSettingsInDB,

@@ -85,13 +85,13 @@ export async function getOrganizationSettingsData(orgId) {
 export async function saveInfoSetting(orgId, newValue, settingName) {
   let body = {};
   body[`organization_${settingName}`] = newValue;
-  // console.log(body)
+  console.log(body);
   const result = await getAPIData(
     `/organization/${orgId}`,
     API_METHODS.put,
     body
   );
-  // console.log(result)
+  console.log(result);
 
   if (result.status && result.status === "success") {
     return true;
@@ -106,11 +106,7 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
  * @param {String} settingName - name of the specific email setting in question
  * @returns true of there was no error, otherwise false
  */
-export async function saveEmailSettingInDB(
-  orgId,
-  newValue,
-  settingName
-) {
+export async function saveEmailSettingInDB(orgId, newValue, settingName) {
   // set the body variable to edit correctly
   const switchTable = {
     monthlyStatus: "current_status",
@@ -120,7 +116,7 @@ export async function saveEmailSettingInDB(
   };
   let body = {};
   body[switchTable[settingName]] = newValue;
-  console.log(body);
+  //   console.log(body);
 
   // call the api
   const result = await getAPIData(
@@ -128,7 +124,7 @@ export async function saveEmailSettingInDB(
     API_METHODS.put,
     body
   );
-  console.log(result);
+  //   console.log(result);
 
   // decide return
   if (result.status && result.status === "success") {
@@ -151,7 +147,30 @@ export async function saveMembershipRequirementDetail(
   newValue,
   settingName
 ) {
-  return true;
+  // set the body variable to edit correctly
+  const switchTable = {
+    meetingType: "meeting_type",
+    frequency: "frequency",
+    amountType: "amount_type",
+    amount: "amount",
+  };
+  let body = { requirement_id: requirementId };
+  body[switchTable[settingName]] = newValue;
+  console.log(body);
+
+  // call the api
+  const result = await getAPIData(
+    `/organization/${orgId}/settings/membership-requirements`,
+    API_METHODS.put,
+    body
+  );
+  console.log(result);
+
+  // decide return
+  if (result.status && result.status === "success") {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -160,8 +179,22 @@ export async function saveMembershipRequirementDetail(
  * @param {Boolean} isPoints - points or percentage?
  * @returns the new requirement
  */
-export async function createNewMembershipRequirement(orgId, isPoints) {
-  return {};
+export async function createNewMembershipRequirementInDB(orgId, isPoints) {
+  const newMembership = await getAPIData(
+    `/organization/${orgId}/settings/membership-requirements`,
+    API_METHODS.post,
+    {
+      meeting_type: "general meeting",
+      frequency: "semesterly",
+      amount_type: isPoints ? "points" : "percentage",
+      amount: 1,
+    }
+  );
+
+  if (!newMembership || newMembership.hasOwnProperty("error")) {
+    return { error: true };
+  }
+  return newMembership.data;
 }
 
 /**
@@ -171,6 +204,15 @@ export async function createNewMembershipRequirement(orgId, isPoints) {
  * @returns true if no error, false otherwise
  */
 export async function deleteMemberRequirement(orgId, requirementId) {
+  const result = await getAPIData(
+    `/organization/${orgId}/settings/membership-requirements?id=${requirementId}`,
+    API_METHODS.delete,
+    {}
+  );
+
+  if (!result || result.hasOwnProperty("error")) {
+    return false;
+  }
   return true;
 }
 

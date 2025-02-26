@@ -45,7 +45,7 @@ export default function MembershipRequirementLine({
         <CustomSelect
           label="Meeting Type"
           color={color}
-          options={["Meeting", "Event", "Volunteer"]}
+          options={["general meeting", "volunteer", "social", "workshop", "fundraiser", "committee"]}
           startingValue={requirement.meetingType}
           onSelect={(value) => updateValueWhenDone(value, requirement.id, "meetingType")}
         />
@@ -54,7 +54,7 @@ export default function MembershipRequirementLine({
         <CustomSelect
           label="Frequency"
           color={color}
-          options={["Monthly", "Semesterly", "Yearly"]}
+          options={["semesterly", "annually"]}
           startingValue={requirement.frequency}
           onSelect={(value) => updateValueWhenDone(value, requirement.id, "frequency")}
         />

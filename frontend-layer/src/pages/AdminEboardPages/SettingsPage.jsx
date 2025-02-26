@@ -11,30 +11,36 @@ import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEm
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
 import { CircularProgress } from "@mui/material";
-import { getOrganizationSettingsData, saveEmailSettingInDB, saveInfoSetting, saveMembershipRequirementDetail } from "../../utils/handleSettingsData";
+import {
+  createNewMembershipRequirementInDB,
+  deleteMemberRequirement,
+  getOrganizationSettingsData,
+  saveEmailSettingInDB,
+  saveInfoSetting,
+  saveMembershipRequirementDetail,
+} from "../../utils/handleSettingsData";
 import { useParams } from "react-router";
 import displayErrors from "../../utils/displayErrors";
+import CreateNewRequirement from "../../components/AdminPageComponents/CreateNewRequirement";
 
 export default function SettingsPage() {
   // Define my variables
-  const { orgId } = useParams()
+  const { orgId } = useParams();
   const [orgData, setOrgData] = React.useState(undefined);
   const [error, setError] = React.useState("");
 
   // Get user data
   React.useEffect(() => {
-    
     // get API data with orgId - format it to the frontend org format
     getOrganizationSettingsData(orgId).then((result) => {
       // console.log(result)
       if (!result.hasOwnProperty("error")) {
-        setError("")
-        setOrgData(result)
+        setError("");
+        setOrgData(result);
       } else {
-        setError(displayErrors.errorFetchingContactSupport)
+        setError(displayErrors.errorFetchingContactSupport);
       }
-    })
-    
+    });
   }, [orgId]);
 
   /* Update Settings*/
@@ -42,9 +48,9 @@ export default function SettingsPage() {
     // use the newValue variable to update the db (using getAPIdata method)
     saveInfoSetting(orgId, newValue, valueName).then((success) => {
       if (!success) {
-        setError(displayErrors.somethingWentWrong)
+        setError(displayErrors.somethingWentWrong);
       }
-    })
+    });
     // this can be done at the same time as the getAPIdata method is running
     // update the org data variable
     let newData = { ...orgData };
@@ -57,9 +63,9 @@ export default function SettingsPage() {
     // use the newValue variable to update the db (using getAPIdata method)
     saveEmailSettingInDB(orgId, newValue, valueName).then((success) => {
       if (!success) {
-        setError(displayErrors.somethingWentWrong)
+        setError(displayErrors.somethingWentWrong);
       }
-    })
+    });
     // this can be done at the same time as the getAPIdata method is running
     // update the org data variable
     let newData = { ...orgData };
@@ -70,41 +76,76 @@ export default function SettingsPage() {
 
   const updateValueInDB = (newValue, reqId, valueName) => {
     // update a value for a membership requirement in the db
-      // example param values: '3' '39' 'amount'
-      saveMembershipRequirementDetail(orgId, reqId, newValue, valueName).then((success) => {
+    // example param values: '3' '39' 'amount'
+    saveMembershipRequirementDetail(orgId, reqId, newValue, valueName).then(
+      (success) => {
         if (!success) {
-          setError(displayErrors.somethingWentWrong)
+          setError(displayErrors.somethingWentWrong);
         }
-      })
+      }
+    );
   };
   const deleteRequirementInDB = (reqId) => {
     // delete the requirement by reqId in the database
-    deleteRequirementInDB(orgId, reqId).then((success) => {
+    deleteMemberRequirement(orgId, reqId).then((success) => {
       if (!success) {
-        setError(displayErrors.somethingWentWrong)
+        setError(displayErrors.somethingWentWrong);
       }
-    })
+    });
+  };
+
+  const createNewRequirement = (isPoints) => {
+    // create the requirement in the database
+    createNewMembershipRequirementInDB(orgId, isPoints).then((success) => {
+      if (!success) {
+        setError(displayErrors.somethingWentWrong);
+        return;
+      }
+      // add to orgData variable to display without reload
+      let newData = { ...orgData };
+      newData.membershipRequirements.push({
+        id: success.requirement_id,
+        meetingType: success.meeting_type,
+        frequency: success.frequency,
+        amountType: success.amountType,
+        amount: success.amount,
+        requirementScope: success.requirement_scope
+      })
+      setOrgData(newData);
+    });
   };
 
   return (
     <PageSetup>
       <BackButton route={"/"} />
-      {error !== "" ? <p>{error}</p> : !orgData ? (
-        <CircularProgress/>
+      {error !== "" ? (
+        <p>{error}</p>
+      ) : !orgData ? (
+        <CircularProgress />
       ) : (
         <>
           <h1>Settings</h1>
           <p>Data is automatically saved after you enter it</p>
           <br />
 
-          <OrgSettingsBasicInfo orgData={orgData} saveSetting={saveBasicSetting} />
-          <DisplayEmailSettings orgData={orgData} saveSetting={saveEmailSetting} />
+          <OrgSettingsBasicInfo
+            orgData={orgData}
+            saveSetting={saveBasicSetting}
+          />
+          <DisplayEmailSettings
+            orgData={orgData}
+            saveSetting={saveEmailSetting}
+          />
           <DisplayMembershipRequirements
             color={orgData.color}
             orgData={orgData}
             setOrgData={setOrgData}
             updateValueInDB={updateValueInDB}
             deleteRequirementInDB={deleteRequirementInDB}
+          />
+          <CreateNewRequirement
+            color={orgData.color}
+            createNewRequirement={createNewRequirement}
           />
 
           <MemberTable orgId={orgId} />

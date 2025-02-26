@@ -55,12 +55,6 @@ export default function DisplayMembershipRequirements({
           })}
         </>
       )}
-      <button
-        className="custom-color-button"
-        style={{ backgroundColor: color, borderColor: color }}
-      >
-        Add New Requirement
-      </button>
     </div>
   );
 }

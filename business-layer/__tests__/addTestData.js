@@ -201,8 +201,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "Meeting",
-    frequency: "Semesterly",
+    meeting_type: "general meeting",
+    frequency: "semesterly",
     amount_type: "points",
     amount: 4,
     requirement_scope: "semesterly",
@@ -210,8 +210,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "Event",
-    frequency: "Yearly",
+    meeting_type: "social",
+    frequency: "annually",
     amount_type: "points",
     amount: 2,
     requirement_scope: "annually",
@@ -219,8 +219,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "Volunteer",
-    frequency: "Semesterly",
+    meeting_type: "volunteer",
+    frequency: "semesterly",
     amount_type: "percentage",
     amount: 50,
     requirement_scope: "semesterly",
@@ -228,8 +228,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "Meeting",
-    frequency: "Yearly",
+    meeting_type: "general meeting",
+    frequency: "annually",
     amount_type: "points",
     amount: 1,
     requirement_scope: "annually",
@@ -237,8 +237,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "Event",
-    frequency: "Semesterly",
+    meeting_type: "fundraiser",
+    frequency: "semesterly",
     amount_type: "percentage",
     amount: 25,
     requirement_scope: "semesterly",
@@ -246,8 +246,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "Volunteer",
-    frequency: "Semesterly",
+    meeting_type: "volunteer",
+    frequency: "semesterly",
     amount_type: "percentage",
     amount: 50,
     requirement_scope: "semesterly",

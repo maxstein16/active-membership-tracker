@@ -61,6 +61,7 @@ module.exports = function () {
   this.settingNotFound = "Organization setting with the given ID not found";
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
+  this.newReqMustHaveAllParams = "Must include at meeting_type, frequency, amount_type, amount";
 
   // Organization Reports Calls
   this.cannotCreateReport = "Error Creating Report";

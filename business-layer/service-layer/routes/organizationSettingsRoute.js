@@ -96,6 +96,51 @@ router.put(
   }
 );
 
+
+//PUT /v1/organization/:orgId/settings/membership-requirements
+router.post(
+  "/membership-requirements",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+
+    let orgId = req.params.orgId;
+
+    orgId = sanitizer.sanitize(orgId);
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+    if (
+      !req.body.hasOwnProperty("meeting_type") ||
+      !req.body.hasOwnProperty("frequency") ||
+      !req.body.hasOwnProperty("amount_type") ||
+      !req.body.hasOwnProperty("amount")
+    ) {
+      return res
+        .status(400)
+        .json({ error: error.newReqMustHaveAllParams });
+    }
+    // does the user have privileges?
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    //   req.session.user.username,
+    //   orgId
+    // );
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
+
+    const response = await business.createOrganizationMembershipRequirements(
+      parseInt(orgId),
+      req.body
+    );
+
+    if (response.error !== error.noError) {
+      return res.status(400).json({ error: response.error });
+    }
+    return res.status(200).json({ status: "success", data: response.data });
+  }
+);
+
+
 //PUT /v1/organization/:orgId/settings/email-settings
 router.put(
   "/email-settings",
