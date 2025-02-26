@@ -91,10 +91,14 @@ app.use(passport.session());
 // CORS policy middleware
 app.use(
   cors({
-    origin: 'true',
-    credentials: true,
+    origin: ["http://localhost:3000", "http://localhost:8080"], // Allow requests from frontend
+    credentials: true, // Allow cookies and authorization headers
+    methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
   })
 );
+app.enable("trust proxy");
+app.set("trust proxy", true);
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
@@ -104,9 +108,11 @@ let sessionRouter = require("./service-layer/routes/sessionRoute.js");
 let memberRouter = require("./service-layer/routes/memberRoute.js");
 let organizationRouter = require("./service-layer/routes/organizationRouter.js");
 let organizationMemberRouter = require("./service-layer/routes/organizationMemberRoute.js");
+let organizationMembershipRouter = require("./service-layer/routes/organizationMembershipRouter.js");
 let organizationReportsRouter = require("./service-layer/routes/organizationReportsRouter.js");
 let organizationSettingsRouter = require("./service-layer/routes/organizationSettingsRoute.js");
 let organizationRecognitionsRouter = require("./service-layer/routes/organizationRecognitionRouter.js")
+let eventsRouter = require("./service-layer/routes/eventsRoute.js");
 
 // Middleware to ensure the user is authenticated
 function ensureAuthenticated(req, res, next) {
@@ -122,11 +128,13 @@ app.use("/", serveFrontendRouter);
 app.use("/v1/test", testRouter);
 app.use("/v1/session", sessionRouter);
 app.use("/v1/member", memberRouter);
-app.use("/v1/organization/:orgId", organizationRouter);
+app.use("/v1/organization", organizationRouter);
 app.use("/v1/organization/:orgId/member", organizationMemberRouter);
+app.use("/v1/organization/:orgId/membership", organizationMembershipRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);
+app.use("/v1/organization/:orgId/events", eventsRouter);
 
 
 // Handle routes that do not exist

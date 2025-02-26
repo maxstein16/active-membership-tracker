@@ -14,11 +14,11 @@ const sanitizer = new Sanitizer();
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 /**
- * GET v1/organizations/{orgId}/events
+ * GET v1/organization/{orgId}/events
  * Get all events for an organization.
  */
 router.get(
-  "v1/organizations/:orgId/events",
+  "/",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let orgId = req.params.orgId;
@@ -44,11 +44,11 @@ router.get(
 );
 
 /**
- * GET /organizations/{orgId}/events/{eventId}
+ * GET /organization/{orgId}/events/{eventId}
  * Get a specific event's details.
  */
 router.get(
-  "v1/organizations/:orgId/events/:eventId",
+  "/:eventId",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let { orgId, eventId } = req.params;
@@ -66,8 +66,8 @@ router.get(
     }
 
     // Fetch data from business layer
-    const event = await business.getEventById(orgId, eventId);
-
+    const event = await business.getEventById(eventId, orgId);
+    
     // Handle errors
     if (event.error && event.error !== error.noError) {
       return res.status(404).json({ error: event.error, orgId, eventId });
@@ -78,11 +78,11 @@ router.get(
 );
 
 /**
- * POST v1/organizations/{orgId}/events
+ * POST v1/organization/{orgId}/events
  * Create a new event for an organization.
  */
 router.post(
-  "v1/organizations/:orgId/events",
+  "/",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let orgId = req.params.orgId;
@@ -111,10 +111,10 @@ router.post(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     // Send to business layer
     const result = await business.createEvent(orgId, body);
@@ -129,11 +129,11 @@ router.post(
 );
 
 /**
- * POST /organizations/{orgId}/events/{eventId}
+ * PUT /organization/{orgId}/events/{eventId}
  * Update a specific event's details.
  */
 router.put(
-  "v1/organizations/:orgId/events/:eventId",
+  "/:eventId",
   isAuthorizedHasSessionForAPI,
   async (req, res) => {
     let { orgId, eventId } = req.params;
@@ -165,10 +165,10 @@ router.put(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     // Send to business layer
     const result = await business.updateEvent(orgId, eventId, body);

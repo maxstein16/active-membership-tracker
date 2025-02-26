@@ -1,0 +1,106 @@
+/* Columns */
+.two-columns-big-screen {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Member Profile Content */
+
+.member-profile-wrapper h1 {
+    margin-bottom: 0.2em;
+}
+
+.member-profile-wrapper hr {
+    margin: 3em 0;
+    border-color: var(--light-grey);
+    filter: brightness(1.7);
+}
+
+.member-profile-wrapper a, .member-profile-wrapper .phone-num {
+    display: block;
+    font-weight: bold;
+    margin: 0.5em 0;
+    color: var(--orange);
+}
+
+.icon-data {
+    display: flex;
+    margin-top: 3em;
+   
+}
+
+/* Icon and Caption */
+.icon-and-caption {
+    text-align: center;
+    margin: auto 1em;
+}
+
+/* Organization Box */
+
+.org-box-wrapper {
+    display: inline-block;
+    margin: 0.5em;
+}
+
+.org-box-wrapper:hover {
+    filter: brightness(0.65);
+}
+
+.org-box-wrapper .org-box-color {
+    width: 15em;
+    height: 10em;
+
+    margin-bottom: -8em;
+}
+
+.org-box-wrapper .org-box-name {
+    width: 13em;
+    height: 10em;
+    background-color: var(--black);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+
+    margin: 0.5em 1em;
+    padding: 0.5em 1em;
+}   
+
+.org-box-wrapper .org-box-name h2 {
+    color: var(--white);
+}
+
+.org-box-with-admin-links {
+    display: inline-flex;
+    flex-direction: column;
+
+    background-color: rgba(0, 0, 0, 0.05);
+    margin: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+.org-box-with-admin-links .org-box-wrapper {
+    margin: 0;
+}
+
+.org-box-with-admin-links a, .org-box-with-admin-links p {
+    display: block;
+    color: var(--black);
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+
+    margin: 0.2em 0;
+}
+
+.org-box-with-admin-links a:hover, .org-box-with-admin-links p:hover {
+    color: var(--medium-grey);
+}
+
+/* How to add org block */
+.how-to-add-org-block {
+    margin-top: 4em;
+    color: var(--dark-grey);
+    font-style: italic;
+}

@@ -41,7 +41,7 @@ router.get(
     }
 
     // send off to backend
-    const memberData = await business.getSpecificMemberOrgData(orgId, memberId);
+    const memberData = await business.getSpecificMemberWithOrgData(orgId, memberId);
 
     // check for errors that backend returned
     if (memberData.error && memberData.error !== error.noError) {
@@ -77,14 +77,14 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // does the user have privileges?
-  const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
 
 
   // send off to backend
-  const result = await business.addMemberToOrg(orgId, body);
+  const result = await business.addMemberToAnOrganization(orgId, body);
 
   // check for errors that backend returned
   if (result.error && result.error !== error.noError) {
@@ -122,9 +122,7 @@ router.put(
     // check if has all the params needed
     if (
       !body.hasOwnProperty("role") &&
-      !body.hasOwnProperty("meetings_attended") &&
-      !body.hasOwnProperty("volunteer_events") &&
-      !body.hasOwnProperty("social_events")
+      !body.hasOwnProperty("membership_points")
     ) {
       res
         .status(400)
@@ -133,13 +131,13 @@ router.put(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
     // send off to backend
-    const result = await business.editMemberInOrg(orgId, memberId, body);
+    const result = await business.editMemberInOrganization(orgId, memberId, body);
 
     // check for errors that backend returned
     if (result.error && result.error !== error.noError) {
@@ -177,14 +175,14 @@ router.delete(
     }
 
     // does the user have privileges?
-    const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
-    if (!hasPrivileges) {
-      res.status(401).json({ error: error.youDoNotHavePermission });
-    }
+    // const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
 
 
     // send off to backend
-    const result = await business.deleteMemberInOrg(orgId, memberId);
+    const result = await business.deleteMemberInOrganization(orgId, memberId);
 
     // check for errors that backend returned
     if (result.error && result.error !== error.noError) {
@@ -195,42 +193,6 @@ router.delete(
     }
 
     // return with appropriate status error and message
-    res.status(200).json({ status: "success", data: result.data });
-  }
-);
-
-// GET /v1/organization/{orgId}/membership/{role}
-router.get(
-  "/membership/:role",
-  isAuthorizedHasSessionForAPI,
-  async function (req, res) {
-    let orgId = req.params.orgId;
-    let role = req.params.role;
-
-    // sanitize params
-    orgId = sanitizer.sanitize(orgId);
-    role = sanitizer.sanitize(role);
-
-    // check if params are valid
-    if (isNaN(orgId)) {
-      res.status(400).json({ error: error.organizationIdMustBeInteger });
-      return;
-    }
-    if (isNaN(role)) {
-      res.status(400).json({ error: error.roleMustBeInteger });
-      return;
-    }
-
-    // send off to backend
-    const result = await business.getMembershipRoleInOrg(orgId, role);
-
-    // check for errors that backend returned
-    if (result.error && result.error !== error.noError) {
-      res.status(404).json({ error: error.membershipNotFound });
-      return;
-    }
-
-    // return with appropriate status and message
     res.status(200).json({ status: "success", data: result.data });
   }
 );
@@ -249,7 +211,7 @@ router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 
   // Send off to backend
-  const result = await business.getMembersInOrg(orgId);
+  const result = await business.getMembersInOrganization(orgId);
 
   // check for errors that backend returned
   if (result.error && result.error !== error.noError) {

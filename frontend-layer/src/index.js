@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Router } from "./Router.jsx";
@@ -10,7 +9,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 // Creates the theme for MUI
 const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     primary: { main: "#F76902" },
     secondary: { main: "#ACA39A" },
     text: {
