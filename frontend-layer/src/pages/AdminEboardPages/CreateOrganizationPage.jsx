@@ -4,10 +4,9 @@ import BackButton from "../../components/BackButton";
 import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettingsBasicInfo";
 import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
+import CreateNewRequirement from "../../components/AdminPageComponents/CreateNewRequirement";
 
 export default function CreateOrganizationPage() {
-  // Define Variables
-
   // default values of org data - don't remove or change
   const [orgData, setOrgData] = React.useState({
     name: "",
@@ -66,20 +65,23 @@ export default function CreateOrganizationPage() {
         color={orgData.color}
         orgData={orgData}
         setOrgData={setOrgData}
-        updateValueInDB={() => {/* Don't need to do anything here */}}
-        deleteRequirementInDB={() => {/* Don't need to do anything here */}}
+        updateValueInDB={() => {
+          /* Don't need to do anything here */
+        }}
+        deleteRequirementInDB={() => {
+          /* Don't need to do anything here */
+        }}
+      />
+      <CreateNewRequirement
+        color={orgData.color}
+        createNewRequirement={() => {}}
       />
 
       {/* When clicked: cancel needs to have an are you sure popup,  */}
       <div className="create-org-buttons">
-      <button className="secondary">
-        Cancel
-      </button>
-      <button>
-        Create Organization
-      </button>
+        <button className="secondary">Cancel</button>
+        <button>Create Organization</button>
       </div>
-      
     </PageSetup>
   );
 }
