@@ -77,6 +77,7 @@ export default function CreateOrganizationPage() {
         navigate("/");
         return;
       }
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
       setError(error)
     })
   };
@@ -120,6 +121,7 @@ export default function CreateOrganizationPage() {
         createNewRequirement={createNewRequirementLocally}
       />
 
+      {error !== "" ? <p className="error" style={{marginTop: '40px'}}>{error}</p> : <></>}
       {/* When clicked: cancel needs to have an are you sure popup,  */}
       <div className="create-org-buttons">
         <button className="secondary" onClick={cancel}>

@@ -71,6 +71,7 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
  * Handler for creating new organization
  */
 async function handlePostOrganization(req, res) {
+
     try {
         const orgData = {
             org_name: req.body.organization_name,
