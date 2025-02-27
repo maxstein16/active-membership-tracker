@@ -163,7 +163,7 @@ async function editOrganizationMembershipRequirementsInDB(orgId, orgData) {
  * @param {number} requirementId - The ID of the membership requirement
  * @returns {Promise<Object>} Deletion status
  */
-async function deleteOrganizationMembershipRequirementInDB(orgId, membershipId) {
+async function deleteOrganizationMembershipRequirementInDB(orgId, requirementId) {
     try {
         // Verify organization exists
         const organization = await getOrganizationById(orgId);
@@ -174,13 +174,13 @@ async function deleteOrganizationMembershipRequirementInDB(orgId, membershipId) 
 
         // Get the membership requirement to verify it exists
         const memberships = await getOrganizationMembershipRequirements(orgId);
-        const membership = memberships.find(m => m.membership_id === membershipId);
+        const membership = memberships.find(m => m.requirement_id === requirementId);
 
         if (!membership) {
             return { error: error.settingNotFound, data: null };
         }
 
-        const deleted = await deleteMembershipRequirement(membershipId);
+        const deleted = await deleteMembershipRequirement(requirementId);
 
         if (!deleted) {
             return { error: error.settingNotFound, data: null };

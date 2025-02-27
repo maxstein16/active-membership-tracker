@@ -60,7 +60,6 @@ let organizationMemberRouter = require("./service-layer/routes/organizationMembe
 let organizationMembershipRouter = require("./service-layer/routes/organizationMembershipRouter.js");
 let organizationReportsRouter = require("./service-layer/routes/organizationReportsRouter.js");
 let organizationSettingsRouter = require("./service-layer/routes/organizationSettingsRoute.js");
-let organizationRecognitionsRouter = require("./service-layer/routes/organizationRecognitionRouter.js")
 let eventsRouter = require("./service-layer/routes/eventsRoute.js");
 
 // use the routes
@@ -74,7 +73,6 @@ app.use("/v1/organization/:orgId/member", organizationMemberRouter);
 app.use("/v1/organization/:orgId/membership", organizationMembershipRouter);
 app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
-app.use("/v1/organization/:orgId/recognitions", organizationRecognitionsRouter);
 app.use("/v1/organization/:orgId/events", eventsRouter);
 
 // Handle routes that do not exist

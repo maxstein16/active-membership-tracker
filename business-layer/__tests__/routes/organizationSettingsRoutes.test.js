@@ -5,11 +5,13 @@ const { getOrganizationById, getOrganizationMembershipRequirements, editOrganiza
 const { getEmailSettings, createEmailSettings, updateEmailSettings, deleteEmailSettings } = require("../../data-layer/email-settings");
 
 const Error = require("../../business-logic-layer/public/errors.js");
+const { deleteMembershipRequirement } = require("../../data-layer/membership.js");
 const error = new Error();
 
 // Mock dependencies
 jest.mock("../../data-layer/organization");
 jest.mock("../../data-layer/email-settings");
+jest.mock("../../data-layer/membership");
 
 describe("Organization Settings Module", () => {
     beforeEach(() => {
@@ -195,15 +197,17 @@ describe("Organization Settings Module", () => {
         beforeEach(() => {
             jest.clearAllMocks();
         });
-    
+        
         it("should delete a membership requirement successfully", async () => {
             getOrganizationById.mockResolvedValue({ organization_id: 1 });
             getOrganizationMembershipRequirements.mockResolvedValue([{ requirement_id: 10 }]);
-    
+            // Add this mock
+            deleteMembershipRequirement.mockResolvedValue(true);
+            
             const result = await deleteOrganizationMembershipRequirementInDB(1, 10);
-    
+            
             console.log("Test result:", result);
-    
+            
             expect(result.error).toBe("No error.");
             expect(result.data).not.toBeNull();
             expect(result.data.deleted).toBe(true);
