@@ -15,9 +15,13 @@ export default function DisplayMembershipRequirements({
 }) {
   const updateValueAsTyping = (newValue, reqId, valueName) => {
     let newData = { ...orgData };
-    newData.membershipRequirements[reqId][valueName] = newValue;
+    newData.membershipRequirements.forEach((requirement) => {
+      if (requirement.id === reqId) {
+        requirement[valueName] = newValue;
+      }
+    })
+    // console.log(newData)
     setOrgData(newData);
-    // console.log(newData);
   };
 
   const deleteRequirement = (id) => {

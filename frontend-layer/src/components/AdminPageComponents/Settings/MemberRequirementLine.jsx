@@ -16,8 +16,12 @@ export default function MembershipRequirementLine({
   updateValueWhenDone,
   deleteRequirement,
 }) {
+
+  const [error, setError] = React.useState("");
+
   return (
     <div className="requirement-wrapper">
+      { error !== "" ? <p className="error">{error}</p> : <></>}
       <div className="percent-or-amount">
         <p>A member must participate in</p>
         {/* Amount */}
@@ -25,11 +29,18 @@ export default function MembershipRequirementLine({
           label={requirement.amountType}
           color={color}
           value={requirement.amount}
-          setValue={(newValue) =>
-            updateValueAsTyping(newValue, requirement.id, "amount")
-          }
+          setValue={(newValue) => updateValueAsTyping(newValue, requirement.id, "amount")}
           isMultiline={false}
           onLeaveField={(newValue) => {
+            if (newValue.trim() === "") {
+              setError("Amount must have a value")
+              return;
+            }
+            if (isNaN(newValue)) {
+              setError("Amount must be a number")
+              return
+            }
+            setError("")
             updateValueWhenDone(newValue, requirement.id, "amount");
           }}
         />
