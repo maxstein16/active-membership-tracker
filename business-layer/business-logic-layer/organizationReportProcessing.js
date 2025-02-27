@@ -144,14 +144,14 @@ async function getSemesterOrgReportInDB(orgId) {
       member_data: {
         total_members: semesterMembers.length,
         active_members: semesterMembers.filter(m => m.active_member).length,
-        members: semesterMembers.map(m => ({
-          member_id: m?.Member?.member_id || null,
-          role_num: m?.membership_role || 0,
-          firstName: m?.Member?.member_name?.split(' ')[0] || "",
-          lastName: m?.Member?.member_name?.split(' ')[1] || "",
-          rit_username: m?.Member?.member_email?.split('@')[0] || "",
-          phone: m?.Member?.member_phone_number || "",
-          points: m?.membership_points || 0
+        members: semesterMembers.map(member => ({
+          member_id: member?.Member?.member_id || null,
+          role_num: member?.membership_role || 0,
+          firstName: member?.Member?.member_name?.split(' ')[0] || "",
+          lastName: member?.Member?.member_name?.split(' ')[1] || "",
+          rit_username: member?.Member?.member_email?.split('@')[0] || "",
+          phone: member?.Member?.member_phone_number || "",
+          points: member?.membership_points || 0
         }))
       },
       event_data: {
