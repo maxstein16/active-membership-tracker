@@ -5,14 +5,14 @@ import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettin
 import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
 import CreateNewRequirement from "../../components/AdminPageComponents/CreateNewRequirement";
-import { useNavigate } from "react-router";
 import { createNewOrgInDB } from "../../utils/createNewOrg";
 import SuccessDialog from "../../components/SuccessDialog";
+import AreYouSure from "../../components/AreYouSure";
 
 export default function CreateOrganizationPage() {
   const [error, setError] = React.useState("");
   const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
-  const navigate = useNavigate();
+  const [showAreYouSureDialog, setShowAreYouSureDialog] = React.useState(false);
 
   // default values of org data - don't remove or change
   const [orgData, setOrgData] = React.useState({
@@ -67,8 +67,7 @@ export default function CreateOrganizationPage() {
   };
 
   const cancel = () => {
-    // TODO: needs an are you sure dialog
-    navigate("/");
+    setShowAreYouSureDialog(true)
   };
 
   const createOrg = () => {
@@ -85,7 +84,7 @@ export default function CreateOrganizationPage() {
 
   return (
     <PageSetup>
-      <BackButton route={"/"} />
+      <BackButton areYouSure={setShowAreYouSureDialog} />
 
       {error !== "" ? <p className="error">{error}</p> : <></>}
       <h1>Create Organization Page</h1>
@@ -131,6 +130,7 @@ export default function CreateOrganizationPage() {
         <button onClick={createOrg}>Create Organization</button>
       </div>
       <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog}/>
+      <AreYouSure open={showAreYouSureDialog} setOpen={setShowAreYouSureDialog} navLink={"/"}/>
     </PageSetup>
   );
 }
