@@ -59,55 +59,37 @@ async function getSpecificReportOrgDataInDB(orgId, memberId) {
  */
 async function getAnnualOrgReportInDB(orgId) {
   try {
-    console.log(`Fetching organization with ID: ${orgId}`);
     const organization = await getOrganizationById(orgId);
     
     if (!organization) {
-      console.log("Organization not found.");
       return { error: error.organizationNotFound, data: null };
     }
 
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
 
-    console.log("Fetching semesters...");
     const currentYearSemesters = await getSemestersByYear(currentYear);
     const lastYearSemesters = await getSemestersByYear(lastYear);
 
-    console.log("Current Year Semesters:", currentYearSemesters);
-    console.log("Last Year Semesters:", lastYearSemesters);
-
     if (!currentYearSemesters || !lastYearSemesters) {
-      console.log("Semesters not found.");
       return { error: error.databaseError, data: null };
     }
 
     const currentYearSemesterIds = currentYearSemesters.map(s => s.semester_id);
     const lastYearSemesterIds = lastYearSemesters.map(s => s.semester_id);
 
-    console.log("Fetching memberships...");
     const currentYearMembers = await getMembershipsByOrgAndSemester(orgId, currentYearSemesterIds);
     const lastYearMembers = await getMembershipsByOrgAndSemester(orgId, lastYearSemesterIds);
 
-    console.log("Current Year Members:", currentYearMembers);
-    console.log("Last Year Members:", lastYearMembers);
-
     if (!currentYearMembers || !lastYearMembers) {
-      console.log("Members data is missing.");
       return { error: error.databaseError, data: null };
     }
 
-    console.log("Fetching events...");
     const events = await getEventsWithAttendance(orgId);
-    console.log("Events:", events);
 
     if (!events) {
-      console.log("Events data is missing.");
       return { error: error.databaseError, data: null };
     }
-
-    // If execution reaches here, we have valid data.
-    console.log("Data fetch complete, formatting response...");
 
     const data = {
       organization_id: organization.organization_id,
@@ -122,7 +104,6 @@ async function getAnnualOrgReportInDB(orgId) {
 
     return { error: error.noError, data };
   } catch (err) {
-    console.error("Error in getAnnualOrgReportInDB:", err);
     return { error: error.databaseError, data: null };
   }
 }
@@ -179,7 +160,6 @@ async function getSemesterOrgReportInDB(orgId) {
       }
     };
 
-    console.log("Final data:", data);
     return { error: error.noError, data };
   } catch (err) {
     console.error("Error in getSemesterOrgReportInDB:", err);

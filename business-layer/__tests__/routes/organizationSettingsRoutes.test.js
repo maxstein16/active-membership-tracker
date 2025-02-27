@@ -205,9 +205,7 @@ describe("Organization Settings Module", () => {
             deleteMembershipRequirement.mockResolvedValue(true);
             
             const result = await deleteOrganizationMembershipRequirementInDB(1, 10);
-            
-            console.log("Test result:", result);
-            
+                    
             expect(result.error).toBe("No error.");
             expect(result.data).not.toBeNull();
             expect(result.data.deleted).toBe(true);
