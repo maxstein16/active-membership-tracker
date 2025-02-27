@@ -2,6 +2,7 @@ const { getOrganizationById, createOrganization, updateOrganizationByID, getOrga
 const Error = require("./public/errors.js");
 const error = new Error();
 
+
 /**
  * Validates the fields of an organization.
  * @param {Object} fields - The organization data to validate.
