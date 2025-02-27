@@ -11,7 +11,7 @@ import { ROLE_ADMIN, ROLE_EBOARD } from "../../utils/constants";
 import MemberPopUpInfo from "./MemberPopUpInfo";
 
 /**
- * Give either an orgId or a members list
+ * Give either an orgId or a members list to display and org id to get membership data
  * 
  * FOR MEMBER LIST:
  * Must be in the same format that you get from the db:
@@ -68,7 +68,7 @@ export default function MemberTable({ color, orgId, membersList }) {
     } else {
       // given nothing is not acceptable
       setError(
-        "Error displaying members: must have either an org id or list of members"
+        "Error displaying members: must have either an [org id] or [list of members and org id]"
       );
     }
   }, [orgId, membersList]);
@@ -140,6 +140,7 @@ export default function MemberTable({ color, orgId, membersList }) {
             color={color}
             open={popUpOpen}
             setOpen={setPopUpOpen}
+            orgId={orgId}
             memberId={memberId}
             membershipId={memberShipId}
           />

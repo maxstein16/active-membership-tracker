@@ -13,6 +13,7 @@ export default function MemberPopUpInfo({
   color,
   open,
   setOpen,
+  orgId,
   memberId,
   membershipId,
 }) {
@@ -34,6 +35,7 @@ export default function MemberPopUpInfo({
       <DialogTitle>TODO Member Name</DialogTitle>
       <DialogContent>
         <p>
+          org id: {orgId} <br />
           member id: {memberId} <br />
           membership id: {membershipId}
         </p>
