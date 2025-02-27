@@ -83,3 +83,8 @@
 .reports-wrapper > div {
     margin: 5em 0;
 }
+
+/* Member Table */
+.child-buttons-no-hover button:hover {
+    border: none;
+}
