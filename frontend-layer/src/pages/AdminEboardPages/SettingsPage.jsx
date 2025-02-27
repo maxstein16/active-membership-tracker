@@ -34,7 +34,9 @@ export default function SettingsPage() {
     // get API data with orgId - format it to the frontend org format
     getOrganizationSettingsData(orgId).then((result) => {
       // console.log(result)
-      if (!result.hasOwnProperty("error")) {
+      if (result.hasOwnProperty("session")) {
+        setError(displayErrors.noSession);
+      } else if (!result.hasOwnProperty("error")) {
         setError("");
         setOrgData(result);
       } else {
@@ -97,6 +99,9 @@ export default function SettingsPage() {
   const createNewRequirement = (isPoints) => {
     // create the requirement in the database
     createNewMembershipRequirementInDB(orgId, isPoints).then((success) => {
+      if (success.hasOwnProperty("session")) {
+        setError(displayErrors.noSession);
+      }
       if (!success) {
         setError(displayErrors.somethingWentWrong);
         return;

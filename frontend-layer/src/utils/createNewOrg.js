@@ -13,16 +13,30 @@ export async function createNewOrgInDB(orgData) {
     return check;
   }
 
+  let numberThreshold = 0
+  try {
+    numberThreshold = parseInt(orgData.threshold)
+  } catch (error) {
+    return displayErrors.thresholdMustBeNumber
+  }
+ 
+
   // add org basic details to db + create default email settings
   const newOrg = await getAPIData("/organization", API_METHODS.post, {
     organization_name: orgData.name,
     organization_abbreviation: orgData.abbreviation,
     organization_desc: orgData.description,
     organization_color: orgData.color,
-    active_membership_threshold: orgData.threshold,
+    active_membership_threshold: numberThreshold,
   });
 
-  if (!newOrg || newOrg.hasOwnProperty("error")) {
+  
+  if (!newOrg) {
+    console.log("must login", newOrg)
+    return displayErrors.noSession;
+  }
+
+  if (newOrg.hasOwnProperty("error")) {
     console.log("Something went wrong creating the new org: ", newOrg);
     return displayErrors.somethingWentWrong;
   }
@@ -42,10 +56,15 @@ export async function createNewOrgInDB(orgData) {
     }
   );
 
-  if (!result || result.hasOwnProperty("error")) {
+  if (!result) {
+    console.log("must login", result)
+    return displayErrors.noSession;
+  }
+  if (result.hasOwnProperty("error")) {
     console.log("Something went wrong saving the email settings: ", result);
     return displayErrors.somethingWentWrong;
   }
+
 
   // add membership requirements
   await orgData.membershipRequirements.forEach(async (requirement) => {

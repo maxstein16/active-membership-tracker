@@ -176,7 +176,7 @@ async function editOrganizationMembershipRequirementsInDB(orgId, orgData) {
             { ...orgData, organization_id: orgId }
         );
 
-        if (!updated) {
+        if (!updated) { 
             return { error: error.settingNotFound, data: null };
         }
 

@@ -7,6 +7,7 @@ import { getOrganizationMembers } from "../../utils/handleSettingsData";
 import { CircularProgress, Paper } from "@mui/material";
 import { DataGrid } from '@mui/x-data-grid';
 
+import displayErrors from "../../utils/displayErrors";
 
 /**
  * Give either an orgId or a members list
@@ -25,11 +26,14 @@ export default function MemberTable({ orgId, membersList }) {
       // else if given org id, get all the members
       getOrganizationMembers(orgId).then((result) => {
         // console.log(result);
-        if (!result.hasOwnProperty("error")) {
+        if (result.hasOwnProperty("session")) {
+          setError(displayErrors.noSession)
+        }
+        else if (!result.hasOwnProperty("error")) {
           setError("");
           setMembers(result);
         } else {
-          setError("Error fetching your data. Contact Support");
+          setError(displayErrors.errorFetchingContactSupport);
         }
       });
     } else {

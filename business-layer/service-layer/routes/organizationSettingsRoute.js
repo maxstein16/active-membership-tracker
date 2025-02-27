@@ -83,13 +83,7 @@ router.put(
     );
 
     if (response.error !== error.noError) {
-      if (response.error === error.organizationNotFound) {
-        return res.status(404).json({ error: error.organizationNotFound });
-      }
-      if (response.error === error.settingNotFound) {
-        return res.status(404).json({ error: error.settingNotFound });
-      }
-      return res.status(400).json({ error: error.somethingWentWrong });
+      return res.status(400).json({ error: response.error });
     }
 
     return res.status(200).json({ status: "success", data: response.data });

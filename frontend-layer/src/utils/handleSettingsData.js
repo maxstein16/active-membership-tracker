@@ -39,6 +39,11 @@ export async function getOrganizationSettingsData(orgId) {
     API_METHODS.get,
     {}
   );
+
+  if (!detailSettings) {
+    console.log("must login", detailSettings)
+    return { session: false };
+  }
   if (!detailSettings || detailSettings.data == null) {
     return { error: true };
   }
@@ -82,7 +87,16 @@ export async function getOrganizationSettingsData(orgId) {
  * @param {String} settingName - appropriate settingName (name, abbreviation, description, color, threshold)
  * @returns true if no errors, false if error :(
  */
-export async function saveInfoSetting(orgId, newValue, settingName) {
+export async function saveInfoSetting(orgId, newValue, settingName) {  
+  if (settingName === 'threshold') {
+      try {
+        newValue = parseInt(newValue)
+      } catch (error) {
+        console.log("Threshold must be a number")
+        return false
+      }
+  }
+  
   let body = {};
   body[`organization_${settingName}`] = newValue;
   console.log(body);
@@ -93,6 +107,10 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
   );
   console.log(result);
 
+  if (!result) {
+    console.log("must login", result)
+    return false;
+  }
   if (result.status && result.status === "success") {
     return true;
   }
@@ -126,6 +144,10 @@ export async function saveEmailSettingInDB(orgId, newValue, settingName) {
   );
   //   console.log(result);
 
+  if (!result) {
+    console.log("must login", result)
+    return false;
+  }
   // decide return
   if (result.status && result.status === "success") {
     return true;
@@ -166,6 +188,10 @@ export async function saveMembershipRequirementDetail(
   );
   console.log(result);
 
+  if (!result) {
+    console.log("must login", result)
+    return false;
+  }
   // decide return
   if (result.status && result.status === "success") {
     return true;
@@ -191,7 +217,11 @@ export async function createNewMembershipRequirementInDB(orgId, isPoints) {
     }
   );
 
-  if (!newMembership || newMembership.hasOwnProperty("error")) {
+  if (!newMembership) {
+      console.log("must login", newMembership)
+      return { session: false };
+    }
+  if (newMembership.hasOwnProperty("error")) {
     return { error: true };
   }
   return newMembership.data;
@@ -227,8 +257,11 @@ export async function getOrganizationMembers(orgId) {
     API_METHODS.get,
     {}
   );
-  //   console.log(result);
-  if (!result || result.hasOwnProperty("error")) {
+  if (!result) {
+    console.log("must login", result)
+    return { session: false };
+  }
+  if (result.hasOwnProperty("error")) {
     return [];
   }
   return result.data;
