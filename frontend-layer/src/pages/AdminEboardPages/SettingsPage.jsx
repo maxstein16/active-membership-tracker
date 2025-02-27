@@ -153,7 +153,7 @@ export default function SettingsPage() {
             createNewRequirement={createNewRequirement}
           />
 
-          <MemberTable orgId={orgId} />
+          <MemberTable color={orgData.color} orgId={orgId} />
         </>
       )}
     </PageSetup>
