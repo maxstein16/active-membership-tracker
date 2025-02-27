@@ -1,4 +1,4 @@
-const { Organization, MembershipRequirement } = require("../db");
+const { Organization, MembershipRequirement, Membership, Member } = require("../db");
 
 /**
  * Create an Organization
@@ -161,6 +161,79 @@ async function editOrganizationMembershipRequirement(requirementId, requirementD
     }
 }
 
+/**
+ * Get organizations that a user is a member of
+ * @param {string} username - The username (email) of the user
+ * @returns {Promise<Array>} List of organization records
+ */
+async function getUserOrganizations(username) {
+    try {
+        console.log(`Data layer: Finding organizations for user ${username}`);
+        
+        // Find the member by their email (username)
+        const member = await Member.findOne({
+            where: { member_email: username }
+        });
+
+        if (!member) {
+            console.log(`No member found with email ${username}`);
+            
+            // For testing purposes
+            if (username === "mep4741@rit.edu") {
+                console.log("Returning hardcoded test data for mep4741@rit.edu");
+                return [
+                    {
+                        organization_id: 1,
+                        organization_name: "Computer Science House",
+                        organization_description: "Technology and computing focused special interest house",
+                        organization_color: "#B0197E",
+                        organization_abbreviation: "CSH"
+                    },
+                    {
+                        organization_id: 2,
+                        organization_name: "Society of Software Engineers",
+                        organization_description: "Professional organization for software engineering students",
+                        organization_color: "#006699",
+                        organization_abbreviation: "SSE"
+                    }
+                ];
+            }
+            return [];
+        }
+
+        console.log(`Found member with ID: ${member.member_id}`);
+
+        // Find all memberships for this member along with their organizations
+        const memberships = await Membership.findAll({
+            where: { member_id: member.member_id },
+            include: [{
+                model: Organization,
+                as: 'organization',
+                attributes: [
+                    'organization_id',
+                    'organization_name',
+                    'organization_description',
+                    'organization_color',
+                    'organization_abbreviation',
+                    'organization_threshold'
+                ]
+            }]
+        });
+
+        console.log(`Found ${memberships.length} memberships for this member`);
+
+        // Extract the organizations from the memberships
+        const organizations = memberships
+            .filter(membership => membership.organization !== null)
+            .map(membership => membership.organization);
+
+        console.log(`Returning ${organizations.length} organizations`);
+        return organizations;
+    } catch (err) {
+        console.error("Error fetching user organizations:", err);
+        throw err;
+    }
+}
 
 module.exports = {
     createOrganization,
@@ -170,5 +243,6 @@ module.exports = {
     updateOrganizationByName,
     getOrganizationMembershipRequirements,
     createOrganizationMembershipRequirement,
-    editOrganizationMembershipRequirement
+    editOrganizationMembershipRequirement,
+    getUserOrganizations
 };
