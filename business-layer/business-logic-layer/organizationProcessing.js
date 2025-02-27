@@ -1,4 +1,4 @@
-const { getOrganizationById, createOrganization, updateOrganizationByID, getOrganizations } = require("../data-layer/organization.js");
+const { getOrganizationById, createOrganization, updateOrganizationByID, getOrganizations, getUserOrganizations } = require("../data-layer/organization.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -178,9 +178,47 @@ async function getAllOrganizationDataInDB() {
     }
 }
 
+/**
+ * Get the organizations a user is a member of
+ * @param {string} username - The username of the user
+ * @returns {Promise<Object>} - Returns error and organization data
+ */
+async function getUserOrganizationsInDB(username) {
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return { error: error.invalidUsername || { message: "Invalid username" }, data: null };
+    }
+
+    try {
+        const organizations = await getUserOrganizations(username);
+        
+        if (!organizations || organizations.length === 0) {
+            return { 
+                error: null, 
+                data: [] 
+            };
+        }
+
+        // Map database fields to API fields
+        const formattedOrganizations = organizations.map(org => ({
+            org_id: org.organization_id,
+            org_name: org.organization_name,
+            org_description: org.organization_description,
+            org_category: org.organization_category,
+            org_contact_email: org.contact_email,
+            org_phone_number: org.phone_number
+        }));
+
+        return { error: null, data: formattedOrganizations };
+    } catch (err) {
+        console.error("Error in getUserOrganizationsInDB:", err);
+        return { error: error.databaseError || { message: "Database error occurred" }, data: null };
+    }
+}
+
 module.exports = {
     getSpecificOrgDataInDB,
     createOrganizationInDB,
     updateOrganizationInDB,
-    getAllOrganizationDataInDB
+    getAllOrganizationDataInDB,
+    getUserOrganizationsInDB
 };
