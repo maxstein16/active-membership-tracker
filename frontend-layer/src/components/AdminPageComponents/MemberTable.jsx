@@ -5,6 +5,7 @@ import "../../assets/css/general.css";
 import "../../assets/css/adminPages.css";
 import { getOrganizationMembers } from "../../utils/handleSettingsData";
 import { CircularProgress } from "@mui/material";
+import displayErrors from "../../utils/displayErrors";
 
 /**
  * Give either an orgId or a members list
@@ -22,11 +23,14 @@ export default function MemberTable({ orgId, membersList }) {
       // else if given org id, get all the members
       getOrganizationMembers(orgId).then((result) => {
         // console.log(result);
-        if (!result.hasOwnProperty("error")) {
+        if (result.hasOwnProperty("session")) {
+          setError(displayErrors.noSession)
+        }
+        else if (!result.hasOwnProperty("error")) {
           setError("");
           setMembers(result);
         } else {
-          setError("Error fetching your data. Contact Support");
+          setError(displayErrors.errorFetchingContactSupport);
         }
       });
     } else {

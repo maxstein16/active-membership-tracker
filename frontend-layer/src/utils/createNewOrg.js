@@ -22,7 +22,12 @@ export async function createNewOrgInDB(orgData) {
     active_membership_threshold: orgData.threshold,
   });
 
-  if (!newOrg || newOrg.hasOwnProperty("error")) {
+  if (!newOrg) {
+    console.log("must login", newOrg)
+    return displayErrors.noSession;
+  }
+
+  if (newOrg.hasOwnProperty("error")) {
     console.log("Something went wrong creating the new org: ", newOrg);
     return displayErrors.somethingWentWrong;
   }
@@ -42,10 +47,15 @@ export async function createNewOrgInDB(orgData) {
     }
   );
 
-  if (!result || result.hasOwnProperty("error")) {
+  if (!result) {
+    console.log("must login", result)
+    return displayErrors.noSession;
+  }
+  if (result.hasOwnProperty("error")) {
     console.log("Something went wrong saving the email settings: ", result);
     return displayErrors.somethingWentWrong;
   }
+
 
   // add membership requirements
   await orgData.membershipRequirements.forEach(async (requirement) => {
