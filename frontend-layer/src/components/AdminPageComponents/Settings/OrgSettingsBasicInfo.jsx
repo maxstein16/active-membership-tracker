@@ -1,10 +1,10 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/adminPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/adminPages.css";
 
-import UserInput from "../UserInput";
+import UserInput from "../../UserInput";
 
 export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
   // define my variables

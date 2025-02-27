@@ -1,15 +1,15 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/memberPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/memberPages.css";
 
-import CustomSelect from "../../components/CustomSelect";
+import CustomSelect from "../../CustomSelect";
 import DownloadReport from "./DownloadReport";
 import { CircularProgress } from "@mui/material";
 import BarGraphForYearSemReports from "./BarGraphForYearSemReports";
 
-export default function SemesterReport({ orgId, color }) {
+export default function YearlyReport({ orgId, color }) {
   // define variables
   const [reportData, setReportData] = React.useState(undefined);
   const [yearList, setYearList] = React.useState([]);
@@ -22,12 +22,10 @@ export default function SemesterReport({ orgId, color }) {
     // set the reportData state variable
     // the data MUST BE FORMATTED AND LABELLED LIKE THIS
     const currentYear = new Date().getFullYear();
-    setSelectedYear(`${currentYear} Spring`);
+    setSelectedYear(currentYear);
 
     setReportData({
       currentYear: currentYear, // must be a number
-      currentSemesterStart: '234-234-234',
-      currentSemesterEnd: '234-234-234',
       memberDataThis: {
         totalMembers: 35,
         newMembers: 4,
@@ -36,16 +34,16 @@ export default function SemesterReport({ orgId, color }) {
         members: [],
       },
       memberDataLast: {
-        totalMembers: 35,
-        newMembers: 4,
-        totalActiveMembers: 16,
-        newActiveMembers: 6,
+        totalMembers: 24,
+        newMembers: 9,
+        totalActiveMembers: 12,
+        newActiveMembers: 4,
       },
       meetingsDataThis: {
         numMeetings: 35,
         numEvents: 329,
         numVolunteering: 23,
-        totalAttendance: 32942,
+        totalAttendance: 3292,
       },
       meetingsDataLast: {
         numMeetings: 24,
@@ -62,8 +60,7 @@ export default function SemesterReport({ orgId, color }) {
     let possibleYears = [];
     for (let i = currentYear; i >= earliestEventYear; i--) {
       console.log(i);
-      possibleYears.push(`${i} Spring`);
-      possibleYears.push(`${i} Fall`);
+      possibleYears.push(i);
     }
     setYearList(possibleYears);
   }, []);
@@ -73,8 +70,8 @@ export default function SemesterReport({ orgId, color }) {
       {!reportData ? (
         <CircularProgress/>
       ) : (
-        <div className="semester-report">
-          <h2>Semester Report</h2>
+        <div className="yearly-report">
+          <h2>Yearly Report</h2>
 
           <div className="report-pick-and-download">
             <CustomSelect
@@ -87,13 +84,12 @@ export default function SemesterReport({ orgId, color }) {
                 // get new report data
               }
             />
-            <DownloadReport color={color} classToDownload={"semester-report-content"}/>
+            <DownloadReport color={color} classToDownload={"yearly-report"} />
           </div>
 
-
-          <div className="semester-report-content">
+          <div className="yearly-report-content">
               <h3 style={{color: color}}>{selectedYear}</h3>
-              <BarGraphForYearSemReports color={color} data={reportData} isYearly={false} />
+              <BarGraphForYearSemReports color={color} data={reportData} isYearly={true}/>
           </div>
         </div>
       )}

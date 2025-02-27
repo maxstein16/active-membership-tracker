@@ -1,10 +1,10 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/adminPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/adminPages.css";
 
-import CustomColorToggle from "../CustomColorToggle";
+import CustomColorToggle from "../../CustomColorToggle";
 
 export default function DisplayEmailSettings({ orgData, saveSetting }) {
   // define my variables

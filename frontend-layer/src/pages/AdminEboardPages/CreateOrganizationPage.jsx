@@ -1,10 +1,10 @@
 import * as React from "react";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
-import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettingsBasicInfo";
-import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
-import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
-import CreateNewRequirement from "../../components/AdminPageComponents/CreateNewRequirement";
+import OrgSettingsBasicInfo from "../../components/AdminPageComponents/Settings/OrgSettingsBasicInfo";
+import DisplayEmailSettings from "../../components/AdminPageComponents/Settings/DisplayEmailSettings";
+import DisplayMembershipRequirements from "../../components/AdminPageComponents/Settings/DisplayMembershipRequirements";
+import CreateNewRequirement from "../../components/AdminPageComponents/Settings/CreateNewRequirement";
 import { createNewOrgInDB } from "../../utils/createNewOrg";
 import SuccessDialog from "../../components/SuccessDialog";
 import AreYouSure from "../../components/AreYouSure";

@@ -6,9 +6,10 @@ import "../../assets/css/memberPages.css";
 
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
-import OrgSettingsBasicInfo from "../../components/AdminPageComponents/OrgSettingsBasicInfo";
-import DisplayEmailSettings from "../../components/AdminPageComponents/DisplayEmailSettings";
-import DisplayMembershipRequirements from "../../components/AdminPageComponents/DisplayMembershipRequirements";
+import OrgSettingsBasicInfo from "../../components/AdminPageComponents/Settings/OrgSettingsBasicInfo";
+import DisplayEmailSettings from "../../components/AdminPageComponents/Settings/DisplayEmailSettings";
+import DisplayMembershipRequirements from "../../components/AdminPageComponents/Settings/DisplayMembershipRequirements";
+import CreateNewRequirement from "../../components/AdminPageComponents/Settings/CreateNewRequirement";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
 import { CircularProgress } from "@mui/material";
 import {
@@ -21,7 +22,6 @@ import {
 } from "../../utils/handleSettingsData";
 import { useParams } from "react-router";
 import displayErrors from "../../utils/displayErrors";
-import CreateNewRequirement from "../../components/AdminPageComponents/CreateNewRequirement";
 
 export default function SettingsPage() {
   // Define my variables
