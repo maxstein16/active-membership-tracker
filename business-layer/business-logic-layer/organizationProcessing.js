@@ -4,8 +4,8 @@ const {
   createOrganization,
   updateOrganizationByID,
   getOrganizations,
+  getUserOrganizations,
 } = require("../data-layer/organization.js");
-const { getOrganizationById, createOrganization, updateOrganizationByID, getOrganizations, getUserOrganizations } = require("../data-layer/organization.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -28,7 +28,10 @@ function validateOrgFields(fields) {
   } = fields;
 
   // Validate organization name
-  if (organization_name && (typeof organization_name !== "string" || organization_name.trim() === "")) {
+  if (
+    organization_name &&
+    (typeof organization_name !== "string" || organization_name.trim() === "")
+  ) {
     return error.invalidOrgName;
   }
 
@@ -43,7 +46,8 @@ function validateOrgFields(fields) {
   // abbreviation
   if (
     organization_abbreviation &&
-    (typeof organization_abbreviation !== "string" || organization_abbreviation.trim() === "")
+    (typeof organization_abbreviation !== "string" ||
+      organization_abbreviation.trim() === "")
   ) {
     return error.invalidOrgAbbreviation;
   }
@@ -51,21 +55,23 @@ function validateOrgFields(fields) {
   // color
   if (
     organization_color &&
-    (typeof organization_color !== "string" || organization_color.trim() === ""  || organization_color.charAt(0) !== '#' || organization_color.length !== 7)
+    (typeof organization_color !== "string" ||
+      organization_color.trim() === "" ||
+      organization_color.charAt(0) !== "#" ||
+      organization_color.length !== 7)
   ) {
     return error.invalidOrgAbbreviation;
   }
 
-  console.log()
+  console.log();
 
   // threshold
-  if (active_membership_threshold
-     &&
-    (typeof active_membership_threshold !== "number")
+  if (
+    active_membership_threshold &&
+    typeof active_membership_threshold !== "number"
   ) {
     return error.invalidOrgThreshold;
   }
-
 
   return null;
 }
@@ -137,7 +143,7 @@ async function createOrganizationInDB(orgData) {
   }
 
   try {
-    console.log(orgData)
+    console.log(orgData);
     const newOrganization = await createOrganization({
       organization_name: orgData.organization_name,
       organization_description: orgData.organization_desc,
@@ -145,16 +151,25 @@ async function createOrganizationInDB(orgData) {
       organization_abbreviation: orgData.organization_abbreviation,
       organization_threshold: orgData.active_membership_threshold,
     });
-    
-    // create email settings for the org
-    const newEmailSettings = await createEmailSettings(newOrganization.organization_id, {
-      current_status: true,
-      annual_report: true,
-      semester_report: true,
-      membership_achieved: true
-    });
 
-    return { error: null, data: {...newOrganization.dataValues, email_setting_id: newEmailSettings.email_setting_id }};
+    // create email settings for the org
+    const newEmailSettings = await createEmailSettings(
+      newOrganization.organization_id,
+      {
+        current_status: true,
+        annual_report: true,
+        semester_report: true,
+        membership_achieved: true,
+      }
+    );
+
+    return {
+      error: null,
+      data: {
+        ...newOrganization.dataValues,
+        email_setting_id: newEmailSettings.email_setting_id,
+      },
+    };
   } catch (err) {
     console.error("Error in addOrganization:", err);
     return { error: error.databaseError, data: null };
@@ -225,41 +240,47 @@ async function getAllOrganizationDataInDB() {
  * @returns {Promise<Object>} - Returns error and organization data
  */
 async function getUserOrganizationsInDB(username) {
-    if (!username || typeof username !== 'string' || username.trim() === '') {
-        return { error: error.invalidUsername || { message: "Invalid username" }, data: null };
+  if (!username || typeof username !== "string" || username.trim() === "") {
+    return {
+      error: error.invalidUsername || { message: "Invalid username" },
+      data: null,
+    };
+  }
+
+  try {
+    const organizations = await getUserOrganizations(username);
+
+    if (!organizations || organizations.length === 0) {
+      return {
+        error: null,
+        data: [],
+      };
     }
 
-    try {
-        const organizations = await getUserOrganizations(username);
-        
-        if (!organizations || organizations.length === 0) {
-            return { 
-                error: null, 
-                data: [] 
-            };
-        }
+    // Map database fields to API fields
+    const formattedOrganizations = organizations.map((org) => ({
+      org_id: org.organization_id,
+      org_name: org.organization_name,
+      org_description: org.organization_description,
+      org_category: org.organization_category,
+      org_contact_email: org.contact_email,
+      org_phone_number: org.phone_number,
+    }));
 
-        // Map database fields to API fields
-        const formattedOrganizations = organizations.map(org => ({
-            org_id: org.organization_id,
-            org_name: org.organization_name,
-            org_description: org.organization_description,
-            org_category: org.organization_category,
-            org_contact_email: org.contact_email,
-            org_phone_number: org.phone_number
-        }));
-
-        return { error: null, data: formattedOrganizations };
-    } catch (err) {
-        console.error("Error in getUserOrganizationsInDB:", err);
-        return { error: error.databaseError || { message: "Database error occurred" }, data: null };
-    }
+    return { error: null, data: formattedOrganizations };
+  } catch (err) {
+    console.error("Error in getUserOrganizationsInDB:", err);
+    return {
+      error: error.databaseError || { message: "Database error occurred" },
+      data: null,
+    };
+  }
 }
 
 module.exports = {
-    getSpecificOrgDataInDB,
-    createOrganizationInDB,
-    updateOrganizationInDB,
-    getAllOrganizationDataInDB,
-    getUserOrganizationsInDB
+  getSpecificOrgDataInDB,
+  createOrganizationInDB,
+  updateOrganizationInDB,
+  getAllOrganizationDataInDB,
+  getUserOrganizationsInDB,
 };
