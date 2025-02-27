@@ -33,6 +33,8 @@ async function addTestData() {
 
   console.log("\n\nAdding test data to Database...");
 
+  const now = new Date();
+
   // ORGANIZATION
   console.log("\n1. Creating Test Organizations");
   const org1 = await Organization.create({
@@ -167,7 +169,7 @@ async function addTestData() {
     const membership1b = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
-      organization_id: org1.organization_id,
+      organization_id: org2.organization_id,
       semester_id: sem1.semester_id,
       membership_points: randomNum,
       active_member: randomNum >= 23,
@@ -199,8 +201,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "Meeting",
-    frequency: "Semesterly",
+    meeting_type: "general meeting",
+    frequency: "semesterly",
     amount_type: "points",
     amount: 4,
     requirement_scope: "semesterly",
@@ -208,8 +210,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "Event",
-    frequency: "Yearly",
+    meeting_type: "social",
+    frequency: "annually",
     amount_type: "points",
     amount: 2,
     requirement_scope: "annually",
@@ -217,8 +219,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "Volunteer",
-    frequency: "Semesterly",
+    meeting_type: "volunteer",
+    frequency: "semesterly",
     amount_type: "percentage",
     amount: 50,
     requirement_scope: "semesterly",
@@ -226,8 +228,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "Meeting",
-    frequency: "Yearly",
+    meeting_type: "general meeting",
+    frequency: "annually",
     amount_type: "points",
     amount: 1,
     requirement_scope: "annually",
@@ -235,8 +237,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "Event",
-    frequency: "Semesterly",
+    meeting_type: "fundraiser",
+    frequency: "semesterly",
     amount_type: "percentage",
     amount: 25,
     requirement_scope: "semesterly",
@@ -244,8 +246,8 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "Volunteer",
-    frequency: "Semesterly",
+    meeting_type: "volunteer",
+    frequency: "semesterly",
     amount_type: "percentage",
     amount: 50,
     requirement_scope: "semesterly",

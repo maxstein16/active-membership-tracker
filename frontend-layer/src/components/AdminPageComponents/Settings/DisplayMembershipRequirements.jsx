@@ -1,8 +1,8 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/adminPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/adminPages.css";
 
 import MembershipRequirementLine from "./MemberRequirementLine";
 
@@ -15,9 +15,13 @@ export default function DisplayMembershipRequirements({
 }) {
   const updateValueAsTyping = (newValue, reqId, valueName) => {
     let newData = { ...orgData };
-    newData.membershipRequirements[reqId][valueName] = newValue;
+    newData.membershipRequirements.forEach((requirement) => {
+      if (requirement.id === reqId) {
+        requirement[valueName] = newValue;
+      }
+    })
+    // console.log(newData)
     setOrgData(newData);
-    // console.log(newData);
   };
 
   const deleteRequirement = (id) => {
@@ -55,12 +59,6 @@ export default function DisplayMembershipRequirements({
           })}
         </>
       )}
-      <button
-        className="custom-color-button"
-        style={{ backgroundColor: color, borderColor: color }}
-      >
-        Add New Requirement
-      </button>
     </div>
   );
 }

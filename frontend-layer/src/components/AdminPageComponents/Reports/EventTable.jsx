@@ -1,8 +1,8 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/memberPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/memberPages.css";
 
 export default function EventTable({ orgId, color }) {
   // define variables
