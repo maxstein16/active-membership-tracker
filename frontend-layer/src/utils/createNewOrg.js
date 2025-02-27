@@ -13,15 +13,24 @@ export async function createNewOrgInDB(orgData) {
     return check;
   }
 
+  let numberThreshold = 0
+  try {
+    numberThreshold = parseInt(orgData.threshold)
+  } catch (error) {
+    return displayErrors.thresholdMustBeNumber
+  }
+ 
+
   // add org basic details to db + create default email settings
   const newOrg = await getAPIData("/organization", API_METHODS.post, {
     organization_name: orgData.name,
     organization_abbreviation: orgData.abbreviation,
     organization_desc: orgData.description,
     organization_color: orgData.color,
-    active_membership_threshold: orgData.threshold,
+    active_membership_threshold: numberThreshold,
   });
 
+  
   if (!newOrg) {
     console.log("must login", newOrg)
     return displayErrors.noSession;

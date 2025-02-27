@@ -4,4 +4,5 @@ module.exports = new (function () {
     "Something went wrong. Reload and try again. If it still doesn't work, contact support.";
   this.errorFetchingContactSupport = "Error fetching your data. Contact Support";
   this.noSession = "You must login";
+  this.thresholdMustBeNumber = "Threshold Must be a number"
 })();

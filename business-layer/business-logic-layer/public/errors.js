@@ -34,12 +34,12 @@ module.exports = function () {
   // Organization Calls
   this.validationError = "Validation error: One or more fields are invalid";
   this.mustIncludeOrgId = "Must include an organization ID";
-  this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
+  this.mustHaveAllFieldsAddOrg = "Must include fields: organization_name, organization_description, organization_abbreviation, organization_color, active_membership_threshold";
   this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
   this.invalidOrgDescription = "Organization description is invalid. It must be a non-empty string.";
-  this.invalidOrgCategory = "Organization category is invalid. It must be a non-empty string.";
-  this.invalidOrgEmail = "Invalid contact email format.";
-  this.invalidOrgPhoneNumber = "Invalid phone number format. Example: 555-123-4567.";
+  this.invalidOrgAbbreviation = "organization abbreviation is invalid. It must be a non-empty string.";
+  this.ColorAbbreviation = "organization color is invalid. It must be a non-empty string starting with '#' with 6 following hex numbers or characters.";
+  this.invalidOrgThreshold = "organization threshold is invalid. It must be a number";
   this.addOrgFailed = "Organization creation failed. Please try again.";
   this.databaseError = "Database error. Unable to process the request.";
   this.permissionDenied = "You do not have permission to add an organization.";

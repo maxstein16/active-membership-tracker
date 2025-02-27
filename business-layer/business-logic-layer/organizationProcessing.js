@@ -19,53 +19,52 @@ function validateOrgFields(fields) {
   }
 
   const {
-    org_name,
-    org_description,
-    org_category,
-    org_contact_email,
-    org_phone_number,
+    organization_name,
+    organization_desc,
+    organization_abbreviation,
+    organization_color,
+    active_membership_threshold,
   } = fields;
 
   // Validate organization name
-  if (org_name && (typeof org_name !== "string" || org_name.trim() === "")) {
+  if (organization_name && (typeof organization_name !== "string" || organization_name.trim() === "")) {
     return error.invalidOrgName;
   }
 
   // Validate organization description
   if (
-    org_description &&
-    (typeof org_description !== "string" || org_description.trim() === "")
+    organization_desc &&
+    (typeof organization_desc !== "string" || organization_desc.trim() === "")
   ) {
     return error.invalidOrgDescription;
   }
 
-  // Validate organization category
+  // abbreviation
   if (
-    org_category &&
-    (typeof org_category !== "string" || org_category.trim() === "")
+    organization_abbreviation &&
+    (typeof organization_abbreviation !== "string" || organization_abbreviation.trim() === "")
   ) {
-    return error.invalidOrgCategory;
+    return error.invalidOrgAbbreviation;
   }
 
-  // Validate contact email
+  // color
   if (
-    org_contact_email &&
-    (typeof org_contact_email !== "string" ||
-      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
-        org_contact_email
-      ))
+    organization_color &&
+    (typeof organization_color !== "string" || organization_color.trim() === ""  || organization_color.charAt(0) !== '#' || organization_color.length !== 7)
   ) {
-    return error.invalidOrgEmail;
+    return error.invalidOrgAbbreviation;
   }
 
-  // Validate phone number
-  if (
-    org_phone_number &&
-    (typeof org_phone_number !== "string" ||
-      !/^\d{3}-\d{3}-\d{4}$/.test(org_phone_number))
+  console.log()
+
+  // threshold
+  if (active_membership_threshold
+     &&
+    (typeof active_membership_threshold !== "number")
   ) {
-    return error.invalidOrgPhoneNumber;
+    return error.invalidOrgThreshold;
   }
+
 
   return null;
 }
@@ -137,9 +136,15 @@ async function createOrganizationInDB(orgData) {
   }
 
   try {
-    const mappedData = mapToDbFields(orgData);
-    const newOrganization = await createOrganization(mappedData);
-
+    console.log(orgData)
+    const newOrganization = await createOrganization({
+      organization_name: orgData.organization_name,
+      organization_description: orgData.organization_desc,
+      organization_color: orgData.organization_color,
+      organization_abbreviation: orgData.organization_abbreviation,
+      organization_threshold: orgData.active_membership_threshold,
+    });
+    
     // create email settings for the org
     const newEmailSettings = await createEmailSettings(newOrganization.organization_id, {
       current_status: true,

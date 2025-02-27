@@ -87,7 +87,16 @@ export async function getOrganizationSettingsData(orgId) {
  * @param {String} settingName - appropriate settingName (name, abbreviation, description, color, threshold)
  * @returns true if no errors, false if error :(
  */
-export async function saveInfoSetting(orgId, newValue, settingName) {
+export async function saveInfoSetting(orgId, newValue, settingName) {  
+  if (settingName === 'threshold') {
+      try {
+        newValue = parseInt(newValue)
+      } catch (error) {
+        console.log("Threshold must be a number")
+        return false
+      }
+  }
+  
   let body = {};
   body[`organization_${settingName}`] = newValue;
   console.log(body);
