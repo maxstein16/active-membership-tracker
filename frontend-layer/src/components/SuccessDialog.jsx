@@ -8,9 +8,11 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import { useNavigate } from "react-router";
 
 export default function SuccessDialog({ open, setOpen }) {
   // Define my variables
+  const navigate = useNavigate();
 
   return (
     <Dialog
@@ -19,20 +21,14 @@ export default function SuccessDialog({ open, setOpen }) {
       }}
       open={open}
     >
-      <DialogTitle>Upload CSV Data File</DialogTitle>
+      <DialogTitle>Success!</DialogTitle>
       <DialogContent>
         <p>
-          You can find CSV data files on campus groups, or you can upload your
-          own data files. Make sure you follow the same format as campus groups
-          :)
+          Your organization has been created. Add it to campus groups and host events to get members.
         </p>
-        <input type="file" />
       </DialogContent>
       <DialogActions>
-        <button autoFocus className="secondary" onClick={() => setOpen(false)}>
-          Cancel
-        </button>
-        <button onClick={() => setOpen(false)}>Upload</button>
+        <button onClick={() => {setOpen(false); navigate("/")}}>Ok</button>
       </DialogActions>
     </Dialog>
   );

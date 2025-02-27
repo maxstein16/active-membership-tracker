@@ -7,6 +7,7 @@ import DisplayMembershipRequirements from "../../components/AdminPageComponents/
 import CreateNewRequirement from "../../components/AdminPageComponents/CreateNewRequirement";
 import { useNavigate } from "react-router";
 import { createNewOrgInDB } from "../../utils/createNewOrg";
+import SuccessDialog from "../../components/SuccessDialog";
 
 export default function CreateOrganizationPage() {
   const [error, setError] = React.useState("");
@@ -66,6 +67,7 @@ export default function CreateOrganizationPage() {
   };
 
   const cancel = () => {
+    // TODO: needs an are you sure dialog
     navigate("/");
   };
 
@@ -128,7 +130,7 @@ export default function CreateOrganizationPage() {
         </button>
         <button onClick={createOrg}>Create Organization</button>
       </div>
-      
+      <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog}/>
     </PageSetup>
   );
 }
