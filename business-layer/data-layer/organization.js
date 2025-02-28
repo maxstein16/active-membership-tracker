@@ -52,11 +52,15 @@ async function getOrganizations() {
  *    false if no organization with the provided ID exists
  */
 async function updateOrganizationByID(organizationId, updatedOrgInfo) {
+    console.log("in update function");
     try {
         const [updatedOrgRows] = await Organization.update(updatedOrgInfo, {
-            where: { organization_id: organizationId }
+            where: { organization_id: organizationId }, 
+            logging: true
         });
 
+        console.log("before update returns");
+        console.log(updatedOrgRows);
         if (updatedOrgRows > 0) {
             console.log(`Organization with ID ${organizationId} updated successfully.`);
             return true;

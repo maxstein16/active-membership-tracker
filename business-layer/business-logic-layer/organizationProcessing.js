@@ -13,13 +13,18 @@ function validateOrgFields(fields) {
         return error.invalidData;
     }
 
-    const { org_name, org_description, org_category, org_contact_email, org_phone_number } = fields;
+    const { org_name, organization_abbreviation, org_description, org_category, org_contact_email, org_phone_number } = fields;
 
     // Validate organization name
     if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
         return error.invalidOrgName;
     }
 
+     // Validate organization name
+     if (organization_abbreviation && (typeof organization_abbreviation !== 'string' || organization_abbreviation.trim() === '')) {
+        return error.invalidOrgDescription;
+    }
+    
     // Validate organization description
     if (org_description && (typeof org_description !== 'string' || org_description.trim() === '')) {
         return error.invalidOrgDescription;
@@ -53,6 +58,7 @@ function validateOrgFields(fields) {
 function mapToDbFields(orgData) {
     return {
         organization_name: orgData.org_name,
+        organization_abbreviation: orgData.organization_abbreviation,
         organization_description: orgData.org_description,
         organization_category: orgData.org_category,
         contact_email: orgData.org_contact_email,
@@ -69,6 +75,7 @@ function mapToApiFields(dbData) {
     return {
         org_id: dbData.organization_id,
         org_name: dbData.organization_name,
+        organization_abbreviation: dbData.organization_abbreviation,
         org_description: dbData.organization_description,
         org_category: dbData.organization_category,
         org_contact_email: dbData.contact_email,
@@ -128,6 +135,8 @@ async function createOrganizationInDB(orgData) {
  * @returns {Promise<Object>} - Returns error and success message.
  */
 async function updateOrganizationInDB(orgId, orgDataToUpdate) {
+    console.log("in update org in db");
+    console.log(orgDataToUpdate);
     if (!Number.isInteger(orgId) || orgId <= 0) {
         return { error: error.invalidOrganizationId, data: null };
     }
@@ -137,19 +146,24 @@ async function updateOrganizationInDB(orgId, orgDataToUpdate) {
     }
 
     const validationError = validateOrgFields(orgDataToUpdate);
+    console.log("validation error: " + validationError);
     if (validationError) {
         return { error: validationError, data: null };
     }
 
     try {
+        console.log("in TRY update org in db");
         const mappedData = mapToDbFields(orgDataToUpdate);
-
+        console.log("mapped data");
+        console.log(mappedData);
         // Remove undefined fields
         Object.keys(mappedData).forEach(key => 
             mappedData[key] === undefined && delete mappedData[key]
         );
 
+        console.log("update success");
         const updateSuccess = await updateOrganizationByID(orgId, mappedData);
+        console.log(updateSuccess);
         if (updateSuccess) {
             return { 
                 error: null, 
