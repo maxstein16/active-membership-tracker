@@ -119,8 +119,49 @@ router.put(
   }
 );
 
-router.put("/", (req, res) => {
-  res.status(400).json({ error: error.mustIncludeMemberId });
+router.put("/", async (req, res) => {
+  let body = req.body;
+  const memberInfo = await Member.findOne({
+    where: { member_email: req.session.user.username },
+  });
+     
+  if(!memberInfo){
+    res.status(400).json({ error: error.mustIncludeMemberId });
+    return;
+  }
+  let memberId = memberInfo.member_id;
+ // console.log( memberInfo.member_id);
+  // check if at least one valid field is provided for update
+  const allowedFields = [
+    "personal_email",
+    "phone_number",
+    "gender",
+    "race",
+    "tshirt_size",
+    "major",
+    "graduation_date",
+  ];
+  const hasValidFields = Object.keys(body).some((key) =>
+    allowedFields.includes(key)
+  );
+
+  if (!hasValidFields) {
+    res.status(400).json({
+      error: error.mustIncludeValidFieldAddMember,
+    });
+    return;
+  }
+
+  // send data to backend for update
+  const updateResult = await business.updateMember(memberId, body);
+
+  if (updateResult.error && updateResult.error !== error.noError) {
+    res.status(404).json({ error: error.memberCannotBeFoundInDB });
+    return;
+  }
+
+  res.status(200).json({ data: updateResult.data });
+
 });
 
 // POST /v1/member
