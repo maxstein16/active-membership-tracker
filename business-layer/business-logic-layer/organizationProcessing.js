@@ -1,3 +1,11 @@
+const { createEmailSettings } = require("../data-layer/email-settings.js");
+const {
+  getOrganizationById,
+  createOrganization,
+  updateOrganizationByID,
+  getOrganizations,
+  getUserOrganizations,
+} = require("../data-layer/organization.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -7,82 +15,163 @@ const error = new Error();
  * @returns {Object|null} - Error object if invalid, null if valid.
  */
 function validateOrgFields(fields) {
-  if (!fields || typeof fields !== 'object') {
+  if (!fields || typeof fields !== "object") {
     return error.invalidData;
   }
 
-  const { org_name, org_description, org_category, org_contact_email, org_phone_number } = fields;
+  const {
+    organization_name,
+    organization_desc,
+    organization_abbreviation,
+    organization_color,
+    active_membership_threshold,
+  } = fields;
 
   // Validate organization name
-  if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
+  if (
+    organization_name &&
+    (typeof organization_name !== "string" || organization_name.trim() === "")
+  ) {
     return error.invalidOrgName;
   }
 
   // Validate organization description
-  if (org_description && (typeof org_description !== 'string' || org_description.trim() === '')) {
+  if (
+    organization_desc &&
+    (typeof organization_desc !== "string" || organization_desc.trim() === "")
+  ) {
     return error.invalidOrgDescription;
   }
 
-  // Validate organization category
-  if (org_category && (typeof org_category !== 'string' || org_category.trim() === '')) {
-    return error.invalidOrgCategory;
+  // abbreviation
+  if (
+    organization_abbreviation &&
+    (typeof organization_abbreviation !== "string" ||
+      organization_abbreviation.trim() === "")
+  ) {
+    return error.invalidOrgAbbreviation;
   }
 
-  // Validate contact email
-  if (org_contact_email && (typeof org_contact_email !== 'string' || !/^[a-zA-Z0-9._%+-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,}$/.test(org_contact_email))) {
-    return error.invalidOrgEmail;
+  // color
+  if (
+    organization_color &&
+    (typeof organization_color !== "string" ||
+      organization_color.trim() === "" ||
+      organization_color.charAt(0) !== "#" ||
+      organization_color.length !== 7)
+  ) {
+    return error.invalidOrgAbbreviation;
   }
 
-  // Validate phone number
-  if (org_phone_number && (typeof org_phone_number !== 'string' || !/^\d{3}-\d{3}-\d{4}$/.test(org_phone_number))) {
-    return error.invalidOrgPhoneNumber;
+  console.log();
+
+  // threshold
+  if (
+    active_membership_threshold &&
+    typeof active_membership_threshold !== "number"
+  ) {
+    return error.invalidOrgThreshold;
   }
 
   return null;
 }
 
 /**
- * Fetches organization data by ID.
- * @param {number} orgId - Organization ID.
- * @returns {Object} - Returns error and organization data.
+ * Maps API fields to database fields
+ * @param {Object} orgData - Organization data with API field names
+ * @returns {Object} Organization data with database field names
  */
-async function getSpecificOrgData(orgId) {
-  if (!Number.isInteger(orgId)) {
-    return { error: error.organizationIdMustBeInteger, data: null };
-  }
-
-  const orgData = await getOrganizationById(orgId);
-
-  if (!orgData) {
-    return { error: error.notFound, data: null };
-  }
-
-  return { error: error.noError, data: orgData };
+function mapToDbFields(orgData) {
+  return {
+    organization_name: orgData.org_name,
+    organization_description: orgData.org_description,
+    organization_category: orgData.org_category,
+    contact_email: orgData.org_contact_email,
+    phone_number: orgData.org_phone_number,
+  };
 }
 
 /**
- * Adds a new organization.
- * @param {number} orgId - New organization's ID.
- * @param {Object} orgData - Organization data.
- * @returns {Object} - Returns error and new organization data.
+ * Maps database fields to API fields
+ * @param {Object} dbData - Organization data with database field names
+ * @returns {Object} Organization data with API field names
  */
-async function addOrganization(orgId, orgData) {
-  const validationError = validateOrgFields(orgData);
-  if (validationError) {
-    return { error: error.validationError, data: null };
-  }
+function mapToApiFields(dbData) {
+  return {
+    org_id: dbData.organization_id,
+    org_name: dbData.organization_name,
+    org_description: dbData.organization_description,
+    org_category: dbData.organization_category,
+    org_contact_email: dbData.contact_email,
+    org_phone_number: dbData.phone_number,
+    message: "Organization fetched successfully",
+  };
+}
 
+/**
+ * Fetches organization data by ID.
+ * @param {number} orgId - Organization ID.
+ * @returns {Promise<Object>} - Returns error and organization data.
+ */
+async function getSpecificOrgDataInDB(orgId) {
   if (!Number.isInteger(orgId)) {
     return { error: error.organizationIdMustBeInteger, data: null };
   }
 
   try {
-    const newOrganization = await createOrganization(orgId, orgData);
-    if (!newOrganization) {
-      return { error: error.addOrgFailed, data: null };
+    const orgData = await getOrganizationById(orgId);
+    if (!orgData) {
+      return { error: error.notFound, data: null };
     }
-    return { error: error.noError, data: newOrganization };
+
+    return { error: null, data: mapToApiFields(orgData) };
   } catch (err) {
+    console.error("Error in getSpecificOrgData:", err);
+    return { error: error.databaseError, data: null };
+  }
+}
+
+/**
+ * Adds a new organization.
+ * @param {Object} orgData - Organization data.
+ * @returns {Promise<Object>} - Returns error and new organization data.
+ */
+async function createOrganizationInDB(orgData) {
+  const validationError = validateOrgFields(orgData);
+  if (validationError) {
+    return { error: validationError, data: null };
+  }
+
+  try {
+    console.log(orgData);
+    const newOrganization = await createOrganization({
+      organization_name: orgData.organization_name,
+      organization_description: orgData.organization_desc,
+      organization_color: orgData.organization_color,
+      organization_abbreviation: orgData.organization_abbreviation,
+      organization_threshold: orgData.active_membership_threshold,
+    });
+
+    // create email settings for the org
+    const newEmailSettings = await createEmailSettings(
+      newOrganization.organization_id,
+      {
+        current_status: true,
+        annual_report: true,
+        semester_report: true,
+        membership_achieved: true,
+      }
+    );
+
+    return {
+      error: null,
+      data: {
+        ...newOrganization.dataValues,
+        email_setting_id: newEmailSettings.email_setting_id,
+      },
+    };
+  } catch (err) {
+    console.error("Error in addOrganization:", err);
     return { error: error.databaseError, data: null };
   }
 }
@@ -91,15 +180,14 @@ async function addOrganization(orgId, orgData) {
  * Edits an existing organization's details.
  * @param {number} orgId - Organization ID to update.
  * @param {Object} orgDataToUpdate - Fields to update.
- * @returns {Object} - Returns error and success message.
+ * @returns {Promise<Object>} - Returns error and success message.
  */
-async function editOrganization(orgId, orgDataToUpdate) {
+async function updateOrganizationInDB(orgId, orgDataToUpdate) {
   if (!Number.isInteger(orgId) || orgId <= 0) {
     return { error: error.invalidOrganizationId, data: null };
   }
 
-  const validFields = Object.keys(orgDataToUpdate);
-  if (validFields.length === 0) {
+  if (Object.keys(orgDataToUpdate).length === 0) {
     return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
   }
 
@@ -108,85 +196,91 @@ async function editOrganization(orgId, orgDataToUpdate) {
     return { error: validationError, data: null };
   }
 
-  const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
-  if (updateSuccess) {
-    return { error: error.noError, data: { message: "Organization updated successfully." } };
-  } else {
-    return { error: error.orgNotFound, data: null };
-  }
-}
-
-/**
- * Deletes an organization by ID.
- * @param {number} orgId - Organization ID to delete.
- * @returns {Object} - Returns error and deletion data.
- */
-async function deleteOrganization(orgId) {
-  if (!Number.isInteger(orgId) || orgId <= 0) {
-    return { error: error.invalidOrganizationId, data: null };
-  }
-
   try {
-    const org = await Organization.getOrganizationById(orgId);
-    if (!org) {
+    const mappedData = mapToDbFields(orgDataToUpdate);
+
+    // Remove undefined fields
+    Object.keys(mappedData).forEach(
+      (key) => mappedData[key] === undefined && delete mappedData[key]
+    );
+
+    const updateSuccess = await updateOrganizationByID(orgId, mappedData);
+    if (updateSuccess) {
+      return {
+        error: null,
+        data: { message: "Organization updated successfully." },
+      };
+    } else {
       return { error: error.orgNotFound, data: null };
     }
-
-    await org.destroy();
-    const deletionData = {
-      message: 'Organization successfully deleted',
-      org_id: orgId,
-      removed_by: "admin@rit.edu",  // Adjust with real user data
-      removed_at: new Date().toISOString(),
-    };
-
-    return { error: error.noError, data: deletionData };
   } catch (err) {
+    console.error("Error in editOrganization:", err);
     return { error: error.databaseError, data: null };
   }
 }
 
 /**
  * Retrieves all organizations.
- * @returns {Object} - Returns error and formatted organization data.
+ * @returns {Promise<Object>} - Returns error and formatted organization data.
  */
-async function getAllOrganizationData() {
+async function getAllOrganizationDataInDB() {
   try {
-    const organizations = await getOrganizations(Organization);
-    const formattedOrganizations = organizations.map(org => {
-      const error = validateOrgFields({
-        org_name: org.organization_name,
-        org_description: org.organization_description,
-        org_category: org.organization_category,
-        org_contact_email: org.contact_email,
-        org_phone_number: org.phone_number
-      });
-
-      if (error) {
-        return { error: error, data: null };
-      }
-
-      return {
-        org_id: org.id,
-        org_name: org.organization_name,
-        org_description: org.organization_description,
-        org_category: org.organization_category,
-        org_contact_email: org.contact_email,
-        org_phone_number: org.phone_number,
-        message: "Organization fetched successfully",
-      };
-    });
-
-    return { error: error.noError, data: formattedOrganizations };
+    const organizations = await getOrganizations();
+    const formattedOrganizations = organizations.map(mapToApiFields);
+    return { error: null, data: formattedOrganizations };
   } catch (err) {
+    console.error("Error in getAllOrganizationData:", err);
     return { error: error.databaseError, data: null };
   }
 }
 
+/**
+ * Get the organizations a user is a member of
+ * @param {string} username - The username of the user
+ * @returns {Promise<Object>} - Returns error and organization data
+ */
+async function getUserOrganizationsInDB(username) {
+  if (!username || typeof username !== "string" || username.trim() === "") {
+    return {
+      error: error.invalidUsername || { message: "Invalid username" },
+      data: null,
+    };
+  }
+
+  try {
+    const organizations = await getUserOrganizations(username);
+
+    if (!organizations || organizations.length === 0) {
+      return {
+        error: null,
+        data: [],
+      };
+    }
+
+    // Map database fields to API fields
+    const formattedOrganizations = organizations.map((org) => ({
+      org_id: org.organization_id,
+      org_name: org.organization_name,
+      org_description: org.organization_description,
+      org_category: org.organization_category,
+      org_contact_email: org.contact_email,
+      org_phone_number: org.phone_number,
+    }));
+
+    return { error: null, data: formattedOrganizations };
+  } catch (err) {
+    console.error("Error in getUserOrganizationsInDB:", err);
+    return {
+      error: error.databaseError || { message: "Database error occurred" },
+      data: null,
+    };
+  }
+}
+
 module.exports = {
-  getSpecificOrgData,
-  addOrganization,
-  editOrganization,
-  deleteOrganization,
-  getAllOrganizationData,
+  getSpecificOrgDataInDB,
+  createOrganizationInDB,
+  updateOrganizationInDB,
+  getAllOrganizationDataInDB,
+  getUserOrganizationsInDB,
 };

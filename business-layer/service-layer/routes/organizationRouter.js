@@ -1,4 +1,4 @@
-let express = require("express");
+const express = require("express");
 const router = express.Router({ mergeParams: true });
 
 const Error = require("../../business-logic-layer/public/errors.js");
@@ -13,127 +13,201 @@ const sanitizer = new Sanitizer();
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
-/* https://api.rit.edu/v1/organization/{orgId} */
-
-// GET /v1/organization/{orgId}
-router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
-  //sanitize
-  let orgId = req.params.orgId;
-
-  orgId = sanitizer.sanitize(req.params.orgId);
-
-  //checking if params are valid
-  if (isNaN(orgId)) {
-    res.status(400).json({ error: error.organizationIdMustBeInteger });
-    return;
+/**
+ * Base route /v1/organization/
+ * Returns error when no organization ID is provided for methods that require it
+ */
+router.all("/", isAuthorizedHasSessionForAPI, (req, res) => {
+  // POST is allowed without an ID
+  if (req.method === "POST") {
+    return handlePostOrganization(req, res);
   }
 
-  //send off to backend
-  var orgInfo = await business.getSpecificOrgData(orgId);
-
-  // Handle errors from data returned from backend
-  if (orgInfo.error && orgInfo.error !== error.noError) {
-    res.status(404).json({ error: orgId.error, orgId: orgId });
-    return;
-  }
-
-  //return data
-  return res.status(200).json({ status: "success", data: orgInfo.data });
+  // All other methods require an ID
+  return res.status(400).json({
+    status: "error",
+    error: error.mustIncludeOrgId,
+  });
 });
 
-// POST /v1/organization/
-router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
-  let orgId = req.params.orgId;
-  let body = req.body;
+/**
+ * GET /v1/organization/my
+ * Retrieves organizations that the logged-in user is a member of
+ */
+router.get("/my", isAuthorizedHasSessionForAPI, async (req, res) => {
+    try {
+        // Check if user is logged in with valid session
+        if (!req.session || !req.session.user || !req.session.user.username) {
+            return res.status(401).json({
+                status: "error",
+                error: error.notAuthorized || { message: "User must be logged in" }
+            });
+        }
 
-  orgId = sanitizer.sanitize(req.params.orgId);
+        // Get username from session exactly as it appears
+        const username = sanitizer.sanitize(req.session.user.username);
+        console.log(`Fetching organizations for user: ${username}`);
+        
+        // Call business logic to get user's organizations
+        const result = await business.getUserOrganizations(username);
+        
+        if (result.error) {
+            return res.status(400).json({
+                status: "error",
+                error: result.error
+            });
+        }
 
-  // check if params are valid!
-  if (isNaN(orgId)) {
-    res.status(400).json({ error: error.organizationIdMustBeInteger });
-    return;
-  }
-
-  // check if has all the params needed
-  if (
-    !body.hasOwnProperty("organization_name") ||
-    !body.hasOwnProperty("organization_abbreviation") ||
-    !body.hasOwnProperty("organization_desc") ||
-    !body.hasOwnProperty("organization_color") ||
-    !body.hasOwnProperty("active_membership_threshold")
-  ) {
-    res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
-    return;
-  }
-
-  // does the user have privileges?
-  const hasPrivileges = hasCredentials.isAdmin(
-    req.session.user.username,
-    orgId
-  );
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
-  }
-
-  //send off to backend
-  var result = await business.addOrganization(orgId, body);
-
-  // check for errors that backend returned
-  if (result.error && result.error !== error.noError) {
-    res.status(404).json({ error: result.error, orgId: orgId });
-    return;
-  }
-
-  // return with appropriate status error and message
-  res.status(200).json({ status: "success", data: result.data });
+        return res.status(200).json({
+            status: "success",
+            data: result.data
+        });
+    } catch (err) {
+        console.error("Error in GET /organization/my:", err);
+        return res.status(500).json({
+            status: "error",
+            error: error.somethingWentWrong
+        });
+    }
 });
 
-//PUT /v1/organization/{orgId}
-router.put("/", isAuthorizedHasSessionForAPI, async function (req, res) {
-  //sanitize
-  let orgId = req.params.orgId;
-  let body = req.body;
+/**
+ * GET /v1/organization/{orgId}
+ * Retrieves specific organization data
+ */
+router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
+  try {
+    const orgId = sanitizer.sanitize(req.params.orgId);
 
-  orgId = sanitizer.sanitize(req.params.orgId);
+    if (isNaN(orgId)) {
+      return res.status(400).json({
+        status: "error",
+        error: error.organizationIdMustBeInteger,
+      });
+    }
 
-  // check if params are valid!
-  if (isNaN(orgId)) {
-    res.status(400).json({ error: error.organizationIdMustBeInteger });
-    return;
+    const orgInfo = await business.getSpecificOrgData(parseInt(orgId));
+
+    if (!orgInfo || !orgInfo.data) {
+      return res.status(404).json({
+        status: "error",
+        error: error.organizationNotFound,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: orgInfo.data,
+    });
+  } catch (err) {
+    console.error("Error in GET /organization/:", err);
+    return res.status(500).json({
+      status: "error",
+      error: error.somethingWentWrong,
+    });
   }
+});
 
-  // check if has all the params needed
-  if (
-    !body.hasOwnProperty("organization_name") ||
-    !body.hasOwnProperty("organization_abbreviation") ||
-    !body.hasOwnProperty("organization_desc") ||
-    !body.hasOwnProperty("organization_color") ||
-    !body.hasOwnProperty("active_membership_threshold")
-  ) {
-    res.status(400).json({ error: error.mustHaveAllFieldsAddOrg });
-    return;
+/**
+ * Handler for creating new organization
+ */
+async function handlePostOrganization(req, res) {
+  try {
+    
+
+    if (
+      !req.body.hasOwnProperty("organization_name") ||
+      !req.body.hasOwnProperty("organization_abbreviation") ||
+      !req.body.hasOwnProperty("organization_desc") ||
+      !req.body.hasOwnProperty("organization_color") ||
+      !req.body.hasOwnProperty("active_membership_threshold") 
+    ) {
+        return res.status(400).json({
+            status: "error",
+            error: error.mustHaveAllFieldsAddOrg,
+          });
+    }
+
+    const result = await business.createOrganization(req.body);
+
+    if (result.error) {
+      return res.status(400).json({
+        status: "error",
+        error: result.error,
+      });
+    }
+
+    return res.status(201).json({
+      status: "success",
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("Error in POST /organization/:", err);
+    return res.status(500).json({
+      status: "error",
+      error: error.somethingWentWrong,
+    });
   }
+}
 
-  // does the user have privileges?
-  const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    req.session.user.username,
-    orgId
-  );
-  if (!hasPrivileges) {
-    res.status(401).json({ error: error.youDoNotHavePermission });
+/**
+ * PUT /v1/organization/{orgId}
+ * Updates an existing organization
+ */
+router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
+  try {
+    const orgId = sanitizer.sanitize(req.params.orgId);
+
+    if (isNaN(orgId)) {
+      return res.status(400).json({
+        status: "error",
+        error: error.organizationIdMustBeInteger,
+      });
+    }
+
+    const orgData = {
+      org_name: req.body.organization_name,
+      org_description: req.body.organization_description,
+      org_category: req.body.organization_category,
+      org_contact_email: req.body.contact_email,
+      org_phone_number: req.body.phone_number,
+      organization_abbreviation: req.body.organization_abbreviation,
+      organization_color: req.body.organization_color,
+      active_membership_threshold: req.body.active_membership_threshold,
+    };
+
+    // Remove undefined fields
+    Object.keys(orgData).forEach(
+      (key) => orgData[key] === undefined && delete orgData[key]
+    );
+
+    if (Object.keys(orgData).length === 0) {
+      return res.status(400).json({
+        status: "error",
+        error: error.mustHaveAtLeastOneFieldToEditOrg,
+      });
+    }
+    
+    const result = await business.updateOrganization(parseInt(orgId), orgData);
+
+    if (result.error) {
+      return res.status(404).json({
+        status: "error",
+        error: result.error,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("Error in PUT /organization/:", err);
+    return res.status(500).json({
+      status: "error",
+      error: error.somethingWentWrong,
+    });
   }
-
-  //send off to backend
-  var result = await business.editOrganization(orgId, body);
-
-  // check for errors that backend returned
-  if (result.error && result.error !== error.noError) {
-    res.status(404).json({ error: result.error, orgId: orgId });
-    return;
-  }
-
-  // return with appropriate status error and message
-  res.status(200).json({ status: "success", data: result.data });
 });
 
 module.exports = router;

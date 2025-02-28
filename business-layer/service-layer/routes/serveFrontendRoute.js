@@ -52,8 +52,29 @@ router.get(
   }
 );
 
-// GET admin
-router.get("/admin", isAuthorizedHasSessionForWebsite, function (req, res) {
+// GET org status
+router.get("/:orgId/status", isAuthorizedHasSessionForWebsite, function (req, res) {
+  res.sendFile(
+    path.join(__dirname, "../../../frontend-layer/build", "index.html")
+  );
+});
+
+// GET org settings
+router.get("/:orgId/settings", isAuthorizedHasSessionForWebsite, function (req, res) {
+  res.sendFile(
+    path.join(__dirname, "../../../frontend-layer/build", "index.html")
+  );
+});
+
+// GET org reports
+router.get("/:orgId/reports", isAuthorizedHasSessionForWebsite, function (req, res) {
+  res.sendFile(
+    path.join(__dirname, "../../../frontend-layer/build", "index.html")
+  );
+});
+
+// GET create organization
+router.get("/createOrg", isAuthorizedHasSessionForWebsite, function (req, res) {
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );

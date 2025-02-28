@@ -1,164 +1,175 @@
+const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB } = require("../attendanceProcessing");
+const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEventByIDInDB, getAttendanceByEventIdDB, getAllEventsByOrgAndSemesterDB } = require("../eventsProcessing");
+const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
+const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
+const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
+const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB, getUserOrganizationsInDB } = require("../organizationProcessing");
+const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getMeetingOrgReportInDB } = require("../organizationReportProcessing");
+const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB, getOrganizationEmailSettingsInDB, createOrganizationMembershipRequirementsInDB } = require("../organizationSettingsProcessing");
+  
+  // export to api calls
+  module.exports = function() {
+    // Attendance Management
+    this.createAttendance = async (attendanceData) => {
+      return await createAttendanceDB(attendanceData);
+    };
+  
+    this.getAttendanceById = async (attendanceId) => {
+      return await getAttendanceByIdDB(attendanceId);
+    };
+  
+    this.getMemberAttendanceStats = async (memberId) => {
+      return await getMemberAttendanceStatsDB(memberId);
+    };
+  
+    this.getAttendanceByMemberAndEvent = async (memberId, eventId) => {
+      return await getAttendanceByMemberAndEventDB(memberId, eventId);
+    };
 
-const {
-  getAllEventsByOrganization,
-  getEventById,
-  createEvent,
-  updateEvent,
-} = require ("../eventsProcessing")
+    this.getMemberAttendanceBySemester = async (memberId, semesterId) => {
+      return await getMemberAttendanceBySemesterDB(memberId, semesterId);
+    }
+  
+    // Event Management
+    this.createEvent = async (eventData) => {
+      return await createEventInDB(eventData);
+    };
+  
+    this.updateEvent = async (eventId, updateData) => {
+      return await updateEventInDB(eventId, updateData);
+    };
+  
+    this.getAllEventsByOrganization = async (orgId) => {
+      return await getAllEventsByOrganizationInDB(orgId);
+    };
+  
+    this.getEventById = async (eventId, orgId) => {
+      return await getEventByIDInDB(eventId, orgId);
+    };
 
-const {
-  getSpecificMemberWithOrgData, 
-  addMemberToAnOrganization, 
-  editMemberInOrganization, 
-  updateMemberAttendanceInOrganization, 
-  getMembersInOrganization, 
-  getMembershipRoleInfoInOrganization, 
-  updateMembershipRoleInfoInOrganization 
-} = require("../organizationMemberProcessing");
-const { getOrganizationSettings, editOrganizationMembershipRequirements, editOrganizationEmailSettings, deleteOrganizationMembershipRequirement } = require("../organizationSettingsProcessing");
-const { getSpecificOrgData, getAllOrganizationData, addOrganization, editOrganization, deleteOrganization } = require("../organizationProcessing");
-const hashPassword = require("./hash");
-const { getAllOrgRecognitionsFromDB, getSpecificRecognitionFromDB, updateSpecificRecognitionInDB } = require("../organizationRecognitionProcessing");
-const { getSpecificReportOrgData, getAnnualOrgReport, getSemesterOrgReport, getMeetingOrgReport } = require("../organizationReportProcessing");
+    this.getAttendanceByEventId = async (eventId) => {
+      return await getAttendanceByEventIdDB(eventId);
+    };
 
-// export to api calls
-module.exports = function () {
-  // Member In Org Management
+    this.getAllEventsByOrgAndSemester = async (orgId, semesterId) => {
+      return await getAllEventsByOrgAndSemesterDB(orgId, semesterId);
+    }
+  
+    // Member Management
+    this.createMember = async (memberData) => {
+      return await createMemberInDB(memberData);
+    };
+  
+    this.updateMember = async (memberId, memberData) => {
+      return await updateMemberInDB(memberId, memberData);
+    };
+  
+    this.getMemberById = async (memberId) => {
+      return await getMemberByIdInDB(memberId);
+    };
+  
+    this.getSpecificMemberOrgStats = async (filters) => {
+      return await getSpecificMemberOrgStatsInDB(filters);
+    };
+  
+    // Organization Member Management
+    this.getSpecificMemberWithOrgData = async (orgId, memberData) => {
+      return await getSpecificMemberWithOrgDataInDB(orgId, memberData);
+    };
 
-  this.getSpecificMemberOrgData = async (orgId, memberId) => {
-    return await getSpecificMemberWithOrgData(orgId, memberId);
-  };
+    this.addMemberToAnOrganization = async (orgId, memberData) => {
+      return await addMemberToAnOrganizationInDB(orgId, memberData);
+    }
 
-  this.addMemberToOrg = async (orgId, memberData) => {
-    return await addMemberToAnOrganization(orgId, memberData);
-  };
+    this.editMemberInOrganization = async (orgId, memberId, updatedRole) => {
+      return await editMemberInOrganizationInDB(orgId, memberId, updatedRole);
+    }
 
-  this.editMemberInOrg = async (orgId, memberId, memberDataToUpdate) => {
-    return await editMemberInOrganization(orgId, memberId, memberDataToUpdate);
-  };
+    this.deleteMemberInOrganization= async (orgId, memberId) => {
+      return await deleteMemberInOrganizationInDB(orgId, memberId);
+    }
 
-  this.deleteMemberInOrg = async (orgId, memberId) => {
-    return await editMemberInOrganization(orgId, memberId);
-  };
+    this.getMembersInOrganization = async (orgId) => {
+      return await getMembersInOrganizationInDB(orgId);
+    }
 
-  this.updateMemberAttendanceInOrg = async (orgId, memberId, attendanceData) => {
-    return await updateMemberAttendanceInOrganization(orgId, memberId, attendanceData);
-  }
+    // Organization Membership Management
+    this.getMembershipRoleInfoInOrganization = async (organizationId, role, semesterId) => {
+      return await getMembershipRoleInfoInOrganizationInDB(organizationId, role, semesterId);
+    };
 
-  this.getMembersInOrg = async (orgId) => {
-    return await getMembersInOrganization(orgId);
-  }
+    this.getAllMembershipsInOrganization = async (organizationId, semesterId) => {
+      return await getAllMembershipsInOrganizationInDB(organizationId, semesterId);
+    }
+  
+    // Organization Management
+    this.createOrganization = async (organizationData) => {
+      return await createOrganizationInDB(organizationData);
+    };
+  
+    this.getSpecificOrgData = async (organizationId) => {
+      return await getSpecificOrgDataInDB(organizationId);
+    };
+  
+    this.getAllOrganizationData = async () => {
+      return await getAllOrganizationDataInDB();
+    };
+  
+    this.updateOrganization = async (organizationId, updatedOrgInfo) => {
+      return await updateOrganizationInDB(organizationId, updatedOrgInfo);
+    };
 
-  this.getMembershipRoleInOrg = async (orgId, role) => {
-    return await getMembershipRoleInfoInOrganization(orgId, role);
-  }
-
-  this.editMembershipRoleInOrg = async (orgId, memberId, body) => {
-    return await updateMembershipRoleInfoInOrganization(orgId, memberId, body);
-  }
-
-  // Member Calls (not org specific)
-  this.getMember = async (memberId) => {
-    return await getMemberById(memberId);
-  }
-
-  this.updateMember = async (memberId, memberData) => {
-    return await updateMemberInDB(memberId, memberData);
-  }
-
-  this.createMember = async (memberData) => {
-    memberData.password = await hashPassword(memberData.password);
-    return await createMemberInDB(memberData);
-  }
-  this.getSpecificMemberOrgStats = async (memberId, orgId) => {
-    return await getSpecificMemberOrgStats(memberId, orgId);
-  };
-
-  // Organization Calls
-
-  this.getSpecificOrgData = async (orgId) => {
-    return await getSpecificOrgData(orgId);
-  };
-
-  this.getAllOrganizationData = async () => {
-    return await getAllOrganizationData(orgId);
-
-  };
-
-  this.addOrganization = async (organizationData) => {
-    return await addOrganization(organizationData);
-
-  };
-
-  this.editOrganization = async (orgId, orgDataToUpdate) => {
-    return await editOrganization(orgId, orgDataToUpdate);
-
-  };
-
-  this.deleteOrganization = async (orgId) => {
-    return await deleteOrganization(orgId);
-
-  };
-
-  // Organization Settings Calls
-
-  this.getOrganizationSettings = async (orgId) => {
-    return await getOrganizationSettings(orgId);
-  };
-
-  this.editOrganizationMembershipRequirements = async (orgId, settingDataToUpdate) => {
-    return await editOrganizationMembershipRequirements(orgId, settingDataToUpdate);
-  }
-
-  this.editOrganizationEmailSettings = async (orgId, emailDataToUpdate) => {
-    return await editOrganizationEmailSettings(orgId, emailDataToUpdate);
-  }
-
-  this.deleteOrganizationMembershipRequirement = async (orgId, membershipId) => {
-    return await deleteOrganizationMembershipRequirement(orgId, membershipId);
-  }
-
-  // Organization Reports Calls
-  this.getAnnualOrgReport = async (orgId) => {
-    return await getAnnualOrgReport(orgId);
-  }
-
-  this.getMeetingOrgReport = async (orgId, meetingId) => {
-    return await getMeetingOrgReport(orgId, meetingId);
-  }
-
-  this.getSemesterOrgReport = async (orgId) => {
-    return await getSemesterOrgReport(orgId);
+    this.getUserOrganizations = async (username) => {
+      return await getUserOrganizationsInDB(username);
   }
   
-  // Event Management
-  this.getAllEventsByOrganization = async (orgId) => {
-    return await getAllEventsByOrganization(orgId);
+    // Organization Report Management
+    this.getSpecificReportOrgData = async (orgId) => {
+      return await getSpecificReportOrgDataInDB(orgId);
+    }
+
+    this.getAnnualOrgReport = async (orgId, year) => {
+      return await getAnnualOrgReportInDB(orgId, year);
+    }
+
+    this.getSemesterOrgReport = async (orgId, semesterId) => {
+      return await getSemesterOrgReportInDB(orgId, semesterId);
+    }
+
+    this.getMeetingOrgReport = async (orgId, meetingId) => {
+      return await getMeetingOrgReportInDB(orgId, meetingId);
+    }
+
+    // Organization Settings Management
+    this.getOrganizationSettings = async (orgId) => {
+      return await getOrganizationSettingsInDB(orgId);
+    }
+
+    this.getOrganizationEmailSettings = async (orgId) => {
+      return await getOrganizationEmailSettingsInDB(orgId);
+    }
+
+    this.createOrganizationEmailSettings = async (orgId, orgData) => {
+      return await createOrganizationEmailSettingsInDB(orgId, orgData);
+    }
+
+    this.editOrganizationMembershipRequirement = async (orgId, orgData) => {
+      return await editOrganizationMembershipRequirementsInDB(orgId, orgData);
+    }
+
+    this.createOrganizationMembershipRequirements = async (orgId, data) => {
+      return await createOrganizationMembershipRequirementsInDB(orgId, data)
+    }
+
+    this.editOrganizationEmailSettings = async (orgId, orgData) => {
+      return await updateOrganizationEmailSettingsInDB(orgId, orgData);
+    }
+
+    this.deleteOrganizationMembershipRequirement = async (orgId, settingId) => {
+      return await deleteOrganizationMembershipRequirementInDB(orgId, settingId);
+    }
+
+    this.deleteOrganizationEmailSettings = async (orgId) => {
+      return await deleteOrganizationEmailSettingsInDB(orgId);
+    }
   };
-
-  this.getEventById = async (orgId, eventId) => {
-    return await getEventById(orgId, eventId);
-  };
-
-  this.createEvent = async (orgId, eventData) => {
-    return await createEvent(orgId, eventData);
-  };
-
-  this.updateEvent = async (orgId, eventId, updateData) => {
-    return await updateEvent(orgId, eventId, updateData);
-  };
-
-
-  // Organization Recognition Calls
-  this.getAllOrgRecognitions = async (orgId) => {
-    return await getAllOrgRecognitionsFromDB(orgId);
-  }
-
-  this.getSpecificRecognition = async (orgId, memberId) => {
-    return await getSpecificRecognitionFromDB(orgId, memberId);
-  }
-
-  this.updateSpecificRecognition = async (orgId, memberId, membershipYears) => {
-    return await updateSpecificRecognitionInDB(orgId, memberId, membershipYears);
-  }
-};

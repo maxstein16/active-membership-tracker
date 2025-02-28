@@ -1,4 +1,4 @@
-import { Member } from "../db"; // Import the Member model from the database
+const { Member } = require("../db");
 
 /**
  * Creates a new member in the database.
@@ -6,10 +6,10 @@ import { Member } from "../db"; // Import the Member model from the database
  * @param {object} memberData - The attributes of the new member
  * @returns {Promise<object>} The newly created member object.
  */
-const createMember = async (memberData) => {
+async function createMember (memberData) {
   try {
     const newMember = await Member.create(memberData);
-    console.log("Member created:", newMember.toJSON());
+    // console.log("Member created:", newMember.toJSON());
     return newMember;
   } catch (error) {
     console.error("Error creating member:", error);
@@ -24,7 +24,7 @@ const createMember = async (memberData) => {
  * @param {object} updateData - The fields to update
  * @returns {Promise<boolean>} Returns `true` if the member was updated, `false` if no matching member was found.
  */
-const updateMember = async (memberId, updateData) => {
+async function updateMember (memberId, updateData) {
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },
@@ -48,17 +48,17 @@ const updateMember = async (memberId, updateData) => {
  *
  * @returns {Promise<object[]>} An array of member objects (empty if no members found).
  */
-const getAllMembers = async () => {
+async function getAllMembers() {
   try {
     const members = await Member.findAll();
     if (members.length === 0) {
       console.log("No members found in the database.");
       return [];
     }
-    console.log(
-      "Members found:",
-      members.map((m) => m.toJSON())
-    );
+    // console.log(
+    //   "Members found:",
+    //   members.map((m) => m.toJSON())
+    // );
     return members;
   } catch (error) {
     console.error("Error fetching members:", error);
@@ -72,7 +72,7 @@ const getAllMembers = async () => {
  * @param {number} memberId - The unique ID of the member to retrieve.
  * @returns {Promise<object|null>} The member object if found, otherwise `null`.
  */
-const getMemberById = async (memberId) => {
+async function getMemberById(memberId) {
   try {
     const member = await Member.findByPk(memberId);
 
@@ -81,7 +81,7 @@ const getMemberById = async (memberId) => {
       return null;
     }
 
-    console.log("Member found:", member.toJSON());
+    // console.log("Member found:", member.toJSON());
     return member;
   } catch (error) {
     console.error("Error fetching member by ID:", error);
@@ -95,7 +95,7 @@ const getMemberById = async (memberId) => {
  * @param {object} filters - Attributes to filter by
  * @returns {Promise<object[]>} An array of matching member objects (empty if no matches found).
  */
-const getMembersByAttributes = async (filters) => {
+async function getMembersByAttributes(filters) {
   try {
     const members = await Member.findAll({ where: filters });
 
@@ -104,10 +104,10 @@ const getMembersByAttributes = async (filters) => {
       return [];
     }
 
-    console.log(
-      "Members found:",
-      members.map((m) => m.toJSON())
-    );
+    // console.log(
+    //   "Members found:",
+    //   members.map((m) => m.toJSON())
+    // );
     return members;
   } catch (error) {
     console.error("Error fetching members by attributes:", error);
@@ -116,7 +116,7 @@ const getMembersByAttributes = async (filters) => {
 };
 
 // Export all functions for external use
-export default {
+module.exports = {
   createMember,
   updateMember,
   getAllMembers,
