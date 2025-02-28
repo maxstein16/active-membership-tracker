@@ -12,12 +12,15 @@ const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
+const { Member } = require("../../db");
+
 // GET /v1/member/:memberId
 router.get(
   "/:memberId",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     // check if memberId is provided
+   
     if (!req.params.memberId) {
       res.status(400).json({ error: error.mustIncludeMemberId });
       return;
@@ -45,8 +48,27 @@ router.get(
 );
 
 // Handle GET requests without memberId
-router.get("/", (req, res) => {
-  res.status(400).json({ error: error.mustIncludeMemberId });
+router.get("/", async (req, res) => {  
+  const memberInfo = await Member.findOne({
+    where: { member_email: req.session.user.username },
+  });
+     
+  if(!memberInfo){
+    res.status(400).json({ error: error.mustIncludeMemberId });
+    return;
+  }
+  let memberId = memberInfo.member_id;
+ // console.log( memberInfo.member_id);
+
+  const memberData = await business.getMemberById(memberId);
+
+  if (memberData.error && memberData.error !== error.noError) {
+    res.status(404).json({ error: error.memberCannotBeFoundInDB });
+    return;
+  }
+
+  res.status(200).json({ data: memberData.data });
+
 });
 
 // PUT /v1/member/:memberId
