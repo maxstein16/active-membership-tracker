@@ -13,7 +13,7 @@ function validateOrgFields(fields) {
         return error.invalidData;
     }
 
-    const { org_name, organization_abbreviation, organization_color, org_description, org_category, org_contact_email, org_phone_number } = fields;
+    const { org_name, organization_abbreviation, organization_color, org_description, organization_threshold, org_category, org_contact_email, org_phone_number } = fields;
 
     // Validate organization name
     if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
@@ -61,6 +61,7 @@ function mapToDbFields(orgData) {
         organization_color: orgData.organization_color,
         organization_abbreviation: orgData.organization_abbreviation,
         organization_description: orgData.org_description,
+        organization_threshold: orgData.active_membership_threshold,
         organization_category: orgData.org_category,
         contact_email: orgData.org_contact_email,
         phone_number: orgData.org_phone_number
@@ -79,6 +80,7 @@ function mapToApiFields(dbData) {
         organization_color: dbData.organization_color,
         organization_abbreviation: dbData.organization_abbreviation,
         org_description: dbData.organization_description,
+        organization_threshold: dbData.organization_threshold,
         org_category: dbData.organization_category,
         org_contact_email: dbData.contact_email,
         org_phone_number: dbData.phone_number,
@@ -137,6 +139,8 @@ async function createOrganizationInDB(orgData) {
  * @returns {Promise<Object>} - Returns error and success message.
  */
 async function updateOrganizationInDB(orgId, orgDataToUpdate) {
+
+    //orgDataToUpdate has active_membership_threshold
     console.log("in update org in db");
     console.log(orgDataToUpdate);
     if (!Number.isInteger(orgId) || orgId <= 0) {
