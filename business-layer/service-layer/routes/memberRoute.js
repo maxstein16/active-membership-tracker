@@ -58,7 +58,6 @@ router.get("/", async (req, res) => {
     return;
   }
   let memberId = memberInfo.member_id;
- // console.log( memberInfo.member_id);
 
   const memberData = await business.getMemberById(memberId);
 
@@ -130,7 +129,7 @@ router.put("/", async (req, res) => {
     return;
   }
   let memberId = memberInfo.member_id;
- // console.log( memberInfo.member_id);
+
   // check if at least one valid field is provided for update
   const allowedFields = [
     "personal_email",
@@ -222,20 +221,6 @@ router.get(
    let memberId = sanitizer.sanitize(req.params.memberId);
     var orgId = sanitizer.sanitize(req.query.orgId);
 
-    // Validate member ID
-    // if(!memberId){
-    //   const memberInfo = await Member.findOne({
-    //     where: { member_email: req.session.user.username },
-    //   });
-         
-    //   if(!memberInfo){
-    //     res.status(400).json({ error: error.mustIncludeMemberId });
-    //     return;
-    //   }
-    //  memberId = memberInfo.member_id;
-    //  console.log("member id isnt real");
-    // }
-
     if (isNaN(memberId)) {
       return res.status(400).json({
         error: error.mustIncludeValidMemberId
@@ -249,10 +234,6 @@ router.get(
       });
     }
 
-    console.log("Member id: " + memberId + ", organization id: " + orgId);
-    if (typeof orgId === 'undefined') {
-      console.log('myVariable is undefined');
-    }
     // Fetch member stats for the organization
     const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
@@ -269,5 +250,6 @@ router.get(
     });
   }
 );
+
 
 module.exports = router;
