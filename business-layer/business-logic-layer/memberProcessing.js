@@ -138,18 +138,20 @@ async function createMemberInDB(memberData) {
  * @returns {Promise<object>} Member's organizational stats or an error.
  */
 async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
+   
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger };
     }
     if (isNaN(orgId)) {
         return { error: error.organizationIdMustBeInteger };
     }
-
+   
     try {
         const memberships = await getMembershipsByAttributes({
             member_id: memberId,
             organization_id: orgId
         });
+        
 
         if (!memberships || memberships.length === 0) {
             return { error: error.membershipNotFound };

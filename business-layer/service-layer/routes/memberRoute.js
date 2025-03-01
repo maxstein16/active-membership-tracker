@@ -217,10 +217,10 @@ router.get(
         error: error.mustIncludeOrgId
       });
     }
-    let memberId;
+   
     // Rest of the validation and processing
-    memberId = sanitizer.sanitize(req.params.memberId);
-    let orgId = sanitizer.sanitize(req.query.orgId);
+   let memberId = sanitizer.sanitize(req.params.memberId);
+    var orgId = sanitizer.sanitize(req.query.orgId);
 
     // Validate member ID
     // if(!memberId){
@@ -249,9 +249,14 @@ router.get(
       });
     }
 
+    console.log("Member id: " + memberId + ", organization id: " + orgId);
+    if (typeof orgId === 'undefined') {
+      console.log('myVariable is undefined');
+    }
     // Fetch member stats for the organization
     const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
+    console.log(memberStats);
     if (memberStats.error) {
       return res.status(404).json({
         error: memberStats.error

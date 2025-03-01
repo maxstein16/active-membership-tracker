@@ -68,8 +68,8 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await getMemberByIdInDB(memberId);
     };
   
-    this.getSpecificMemberOrgStats = async (filters) => {
-      return await getSpecificMemberOrgStatsInDB(filters);
+    this.getSpecificMemberOrgStats = async (memberId, orgId) => {
+      return await getSpecificMemberOrgStatsInDB(memberId, orgId);
     };
   
     // Organization Member Management
