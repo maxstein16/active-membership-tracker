@@ -149,7 +149,6 @@ router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
             active_membership_threshold: req.body.active_membership_threshold
         };
 
-        console.log("in org router");
         // Remove undefined fields
         Object.keys(orgData).forEach(key => 
             orgData[key] === undefined && delete orgData[key]

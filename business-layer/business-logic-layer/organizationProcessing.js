@@ -140,9 +140,6 @@ async function createOrganizationInDB(orgData) {
  */
 async function updateOrganizationInDB(orgId, orgDataToUpdate) {
 
-    //orgDataToUpdate has active_membership_threshold
-    console.log("in update org in db");
-    console.log(orgDataToUpdate);
     if (!Number.isInteger(orgId) || orgId <= 0) {
         return { error: error.invalidOrganizationId, data: null };
     }
@@ -152,24 +149,21 @@ async function updateOrganizationInDB(orgId, orgDataToUpdate) {
     }
 
     const validationError = validateOrgFields(orgDataToUpdate);
-    console.log("validation error: " + validationError);
+   
     if (validationError) {
         return { error: validationError, data: null };
     }
 
     try {
-        console.log("in TRY update org in db");
         const mappedData = mapToDbFields(orgDataToUpdate);
-        console.log("mapped data");
-        console.log(mappedData);
+       
         // Remove undefined fields
         Object.keys(mappedData).forEach(key => 
             mappedData[key] === undefined && delete mappedData[key]
         );
-
-        console.log("update success");
+      
         const updateSuccess = await updateOrganizationByID(orgId, mappedData);
-        console.log(updateSuccess);
+       
         if (updateSuccess) {
             return { 
                 error: null, 
