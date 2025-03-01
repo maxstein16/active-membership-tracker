@@ -1,5 +1,3 @@
--- Drop the database if it exists (use with caution)
--- DROP DATABASE membertracker;
 
 -- Create the database
 CREATE DATABASE membertracker;
@@ -17,6 +15,7 @@ CREATE TABLE Organization (
   organization_color VARCHAR(255), -- Primary color theme
   organization_abbreviation VARCHAR(10), -- Shortened name or acronym
   organization_threshold INT DEFAULT 0, -- Minimum threshold for active membership
+  organization_email VARCHAR(255), -- Contact email for the organization
   PRIMARY KEY (organization_id)
 );
 
@@ -54,19 +53,21 @@ CREATE TABLE Member (
 -- Membership Table
 -- ==============================
 CREATE TABLE Membership (
-  membership_id INT AUTO_INCREMENT, -- Unique ID for each membership record
-  member_id INT, -- Member associated with this membership
-  organization_id INT, -- Organization the member belongs to
-  semester_id INT, -- Semester in which this membership is valid
-  membership_role INT, -- Role within the organization (e.g., 0=Member, 1=E-Board, 2=Admin)
-  membership_points INT DEFAULT 0, -- Points earned in the organization
-  active_member BOOLEAN DEFAULT FALSE, -- Whether the member is currently active
-  active_semesters INT DEFAULT 0, -- Total number of active semesters
+  membership_id INT AUTO_INCREMENT,
+  member_id INT,
+  organization_id INT,
+  semester_id VARCHAR(6),
+  membership_role INT,
+  membership_points INT DEFAULT 0,
+  active_member BOOLEAN DEFAULT FALSE,
+  active_semesters INT DEFAULT 0,
   PRIMARY KEY (membership_id),
-  FOREIGN KEY (member_id) REFERENCES Member(member_id),
-  FOREIGN KEY (organization_id) REFERENCES Organization(organization_id),
-  FOREIGN KEY (semester_id) REFERENCES Semester(semester_id)
+  FOREIGN KEY (member_id) REFERENCES Member(member_id) ON DELETE CASCADE,
+  FOREIGN KEY (organization_id) REFERENCES Organization(organization_id) ON DELETE CASCADE,
+  FOREIGN KEY (semester_id) REFERENCES Semester(semester_id) ON DELETE CASCADE,
+  UNIQUE (member_id, organization_id, semester_id) -- Ensures no duplicate memberships
 );
+
 
 -- ==============================
 -- Event Table
@@ -93,7 +94,7 @@ CREATE TABLE Attendance (
   attendance_id INT AUTO_INCREMENT, -- Unique ID for each attendance record
   member_id INT, -- Member who attended
   event_id INT, -- Event attended
-  check_in DATE NOT NULL, -- Date of attendance
+  check_in DATETIME NOT NULL, -- Date and time of attendance
   volunteer_hours FLOAT DEFAULT 0, -- Number of volunteer hours contributed
   PRIMARY KEY (attendance_id),
   FOREIGN KEY (member_id) REFERENCES Member(member_id),
