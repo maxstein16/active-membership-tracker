@@ -2,12 +2,9 @@ const fs = require("fs");
 const csv = require("fast-csv");
 const ErrorMessages = require("../../business-logic-layer/public/errors.js");
 const error = new ErrorMessages();
-
-const { createMemberInDB } = require("./memberProcessing");
-
-const { createAttendanceDB } = require("./attendanceProcessing");
-
-const { getMembersByAttributes } = require("../data-layer/member.js");
+const { createAttendance } = require("../data-layer/attendance.js");
+const { createMembership } = require("../data-layer/membership.js");
+const { getMembersByAttributes, createMember } = require("../data-layer/member.js");
 
 /**
  * Maps CSV row data to member data format
@@ -16,12 +13,26 @@ const { getMembersByAttributes } = require("../data-layer/member.js");
  */
 function mapToMemberData(row) {
     return {
-        name: `${row.firstName} ${row.lastName}`.trim(),
-        email: row.email,
-        personal_email: row.email,  // Using the same email as both for now
-        major: row.degree,
-        status: row.accountType === "Student" ? "undergraduate" : "graduate",
+        member_name: `${row.firstName} ${row.lastName}`.trim(),
+        member_email: row.email,
+        member_personal_email: row.email,  // Using the same email for now
+        member_major: row.degree,
         // Add other relevant mappings as needed
+    };
+}
+
+/**
+ * Maps CSV row data to membership data format
+ * @param {number} memberId Member ID
+ * @param {number} organizationId Organization ID
+ * @param {string} semesterId Semester ID
+ * @returns {Object} Formatted membership data
+ */
+function mapToMembershipData(memberId, organizationId, semesterId) {
+    return {
+        member_id: memberId,
+        organization_id: organizationId,
+        semester_id: semesterId
     };
 }
 
@@ -47,18 +58,21 @@ class CSVProcessor {
      * Process a CSV file and handle member and attendance records
      * @param {string} filePath Path to the CSV file
      * @param {number} eventId Event ID for attendance records
+     * @param {number} organizationId Organization ID
+     * @param {string} semesterId Semester ID
      * @returns {Promise<Object>} Processing results
      */
-    async processCSV(filePath, eventId) {
+    async processCSV(filePath, eventId, organizationId, semesterId) {
         return new Promise((resolve, reject) => {
             const results = [];
             const processedEmails = new Set();
             const promises = [];
 
+            // Reading from the file path
             fs.createReadStream(filePath)
-                .pipe(csv.parse({ 
-                    headers: true, 
-                    skipEmptyLines: true,
+                .pipe(csv.parse({
+                    headers: true,
+                    skipEmptyLines: false,
                     trim: true
                 }))
                 .on("data", async (row) => {
@@ -84,33 +98,47 @@ class CSVProcessor {
 
                             processedEmails.add(processedRow.email);
 
-                            // Check for existing member
-                            const existingMemberResult = await getMembersByAttributes({ 
-                                member_email: processedRow.email 
+                            // Check for existing member by email
+                            const existingMemberResult = await getMembersByAttributes({
+                                member_email: processedRow.email
                             });
 
                             let memberId;
-                            
+
+                            // If member does not exist, create new member
                             if (existingMemberResult.error || !existingMemberResult.data?.length) {
-                                // Create new member if doesn't exist
                                 const memberData = mapToMemberData(processedRow);
-                                const createResult = await createMemberInDB(memberData);
-                                
+                                const createResult = await createMember(memberData);
+
                                 if (createResult.error) {
                                     console.error("Error creating member:", createResult.error);
                                     return resolve();
                                 }
-                                
+
                                 memberId = createResult.data.member_id;
                             } else {
                                 memberId = existingMemberResult.data[0].member_id;
                             }
 
-                            // Add attendance record
+                            // Check if the member already has a membership
+                            const existingMembershipResult = await getMembershipsByAttributes(memberId, organizationId, semesterId);
+
+                            // If no membership exists, create a new membership
+                            if (existingMembershipResult.error || !existingMembershipResult.data?.length) {
+                                const membershipData = mapToMembershipData(memberId, organizationId, semesterId);
+                                const createMembershipResult = await createMembership(membershipData);
+
+                                if (createMembershipResult.error) {
+                                    console.error("Error creating membership:", createMembershipResult.error);
+                                    return resolve();
+                                }
+                            }
+
+                            // Now, record attendance
                             if (memberId && eventId) {
                                 const attendanceData = mapToAttendanceData(processedRow, eventId, memberId);
-                                const attendanceResult = await createAttendanceDB(attendanceData);
-                                
+                                const attendanceResult = await createAttendance(attendanceData);
+
                                 if (attendanceResult.error) {
                                     console.error("Error creating attendance:", attendanceResult.error);
                                 }
@@ -138,9 +166,9 @@ class CSVProcessor {
                     try {
                         await Promise.all(promises);
                         await fs.promises.unlink(filePath);
-                        
-                        resolve({ 
-                            error: error.noError, 
+
+                        resolve({
+                            error: error.noError,
                             data: {
                                 total: results.length,
                                 processed: results.filter(r => r.processed).length,
@@ -149,16 +177,16 @@ class CSVProcessor {
                             }
                         });
                     } catch (err) {
-                        reject({ 
-                            error: error.fileCleanupFailed, 
-                            details: err 
+                        reject({
+                            error: error.fileCleanupFailed,
+                            details: err
                         });
                     }
                 })
                 .on("error", (err) => {
-                    reject({ 
-                        error: error.csvProcessingFailed, 
-                        details: err 
+                    reject({
+                        error: error.csvProcessingFailed,
+                        details: err
                     });
                 });
         });
