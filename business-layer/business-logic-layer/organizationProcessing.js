@@ -13,7 +13,7 @@ function validateOrgFields(fields) {
         return error.invalidData;
     }
 
-    const { org_name, organization_abbreviation, org_description, org_category, org_contact_email, org_phone_number } = fields;
+    const { org_name, organization_abbreviation, organization_color, org_description, org_category, org_contact_email, org_phone_number } = fields;
 
     // Validate organization name
     if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
@@ -58,6 +58,7 @@ function validateOrgFields(fields) {
 function mapToDbFields(orgData) {
     return {
         organization_name: orgData.org_name,
+        organization_color: orgData.organization_color,
         organization_abbreviation: orgData.organization_abbreviation,
         organization_description: orgData.org_description,
         organization_category: orgData.org_category,
@@ -75,6 +76,7 @@ function mapToApiFields(dbData) {
     return {
         org_id: dbData.organization_id,
         org_name: dbData.organization_name,
+        organization_color: dbData.organization_color,
         organization_abbreviation: dbData.organization_abbreviation,
         org_description: dbData.organization_description,
         org_category: dbData.organization_category,
