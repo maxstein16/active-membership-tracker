@@ -217,12 +217,25 @@ router.get(
         error: error.mustIncludeOrgId
       });
     }
-
+    let memberId;
     // Rest of the validation and processing
-    let memberId = sanitizer.sanitize(req.params.memberId);
+    memberId = sanitizer.sanitize(req.params.memberId);
     let orgId = sanitizer.sanitize(req.query.orgId);
 
     // Validate member ID
+    // if(!memberId){
+    //   const memberInfo = await Member.findOne({
+    //     where: { member_email: req.session.user.username },
+    //   });
+         
+    //   if(!memberInfo){
+    //     res.status(400).json({ error: error.mustIncludeMemberId });
+    //     return;
+    //   }
+    //  memberId = memberInfo.member_id;
+    //  console.log("member id isnt real");
+    // }
+
     if (isNaN(memberId)) {
       return res.status(400).json({
         error: error.mustIncludeValidMemberId
