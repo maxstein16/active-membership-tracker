@@ -51,11 +51,11 @@ var samlStrategy = new SamlStrategy({
   issuer: process.env.ISSUER,
   identifierFormat: null,
   // Service Provider private key
-  decryptionPvk: fs.readFileSync(__dirname + './cert/service.key', 'utf8'),
+  decryptionPvk: fs.readFileSync(__dirname + '/cert/service.key', 'utf8'),
   // Service Provider Certificate
-  privateCert: fs.readFileSync(__dirname + './cert/service.crt', 'utf8'),
+  privateCert: fs.readFileSync(__dirname + '/cert/service.crt', 'utf8'),
   // Identity Provider's public key
-  cert: fs.readFileSync(__dirname + './cert/idp_cert.pem', 'utf8'),
+  cert: fs.readFileSync(__dirname + '/cert/cert_idp.pem', 'utf8'),
   validateInResponseTo: false,
   disableRequestedAuthnContext: true
 }, function(profile, done) {
