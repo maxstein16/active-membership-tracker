@@ -42,7 +42,7 @@ app.use(
 );
 
 // Passport SAML configuration
-var samlStrategy = new saml.Strategy({
+var samlStrategy = new SamlStrategy({
   // URL that goes from the Identity Provider -> Service Provider
   callbackUrl: process.env.CALLBACK_URL,
   // URL that goes from the Service Provider -> Identity Provider
