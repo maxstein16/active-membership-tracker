@@ -146,19 +146,19 @@ app.get('/login/fail',
   }
 );
 
-app.get("*", (req, res) => {
-
-  console.log("redirecting from where? ", req.originalUrl)
-  console.log("Redirecting...")
-  res.redirect('/')
-});
-
 app.get('/saml2/metadata',
   (req, res) => {
     res.set("Content-Type", "text/xml");
     res.status(200).send(samlStrategy.generateServiceProviderMetadata(fs.readFileSync(__dirname + '/cert/service.crt', 'utf8')));
   }
   );
+
+app.get("*", (req, res) => {
+
+  console.log("redirecting from where? ", req.originalUrl)
+  console.log("Redirecting...")
+  res.redirect('/')
+});
 
 // Database
 const ensureDatabaseExists = async () => {
