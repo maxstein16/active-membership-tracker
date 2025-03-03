@@ -176,7 +176,7 @@ app.get("*", (req, res) => {
 app.get("/saml2/metadata",
   (req, res) => {
     res.set("Content-Type", "text/xml");
-    res.send(samlStrategy.generateServiceProviderMetadata(fs.readFileSync(__dirname + '/cert/service.crt', 'utf8')));
+    res.status(200).send(samlStrategy.generateServiceProviderMetadata(fs.readFileSync(__dirname + '/cert/service.crt', 'utf8')));
   }
   );
 
