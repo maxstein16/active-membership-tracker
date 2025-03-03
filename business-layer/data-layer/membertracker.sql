@@ -16,6 +16,8 @@ CREATE TABLE Organization (
   organization_description TEXT, -- Description of the organization
   organization_color VARCHAR(255), -- Primary color theme
   organization_abbreviation VARCHAR(10), -- Shortened name or acronym
+  organization_email VARCHAR (50) -- Email for automated notifications
+  organization_membership_type ENUM('points', 'attendance') -- Primary way of achieving membership
   organization_threshold INT DEFAULT 0, -- Minimum threshold for active membership
   PRIMARY KEY (organization_id)
 );
@@ -93,8 +95,6 @@ CREATE TABLE Attendance (
   attendance_id INT AUTO_INCREMENT, -- Unique ID for each attendance record
   member_id INT, -- Member who attended
   event_id INT, -- Event attended
-  check_in DATE NOT NULL, -- Date of attendance
-  volunteer_hours FLOAT DEFAULT 0, -- Number of volunteer hours contributed
   PRIMARY KEY (attendance_id),
   FOREIGN KEY (member_id) REFERENCES Member(member_id),
   FOREIGN KEY (event_id) REFERENCES Event(event_id)
@@ -106,13 +106,23 @@ CREATE TABLE Attendance (
 CREATE TABLE MembershipRequirement (
   requirement_id INT AUTO_INCREMENT, -- Unique ID for each requirement setting
   organization_id INT, -- Organization this requirement applies to
-  meeting_type VARCHAR(255) NOT NULL, -- Type of meeting (e.g., general meeting, social)
-  frequency VARCHAR(255) NOT NULL, -- Frequency of the requirement (e.g., weekly, monthly)
-  amount_type ENUM('points', 'percentage') NOT NULL, -- Whether the requirement is measured in points or percentage
-  amount FLOAT NOT NULL, -- Required points or percentage
-  requirement_scope ENUM('semesterly', 'annually') NOT NULL, -- Whether the requirement applies per semester or annually
+  event_type VARCHAR(255) NOT NULL, -- Type of meeting (e.g., general meeting, social)
+  requirement_type ENUM('points', 'percentage', 'attendance_count') NOT NULL, -- What the requirement is measured in
+  requirement_value FLOAT NOT NULL, -- Required points or percentage
   PRIMARY KEY (requirement_id),
   FOREIGN KEY (organization_id) REFERENCES Organization(organization_id)
+);
+
+-- ==============================
+-- Bonus Requirement Table
+-- ==============================
+CREATE TABLE BonusRequirement (
+  bonus_id INT AUTO_INCREMENT PRIMARY KEY,
+  requirement_id INT NOT NULL,  -- Links to the relevant membership requirement
+  threshold_percentage FLOAT NOT NULL,  -- Attendance percentage needed
+  bonus_points FLOAT NOT NULL,  -- Points awarded at this threshold
+  PRIMARY KEY (bonus_id),
+  FOREIGN KEY (requirement_id) REFERENCES MembershipRequirement(requirement_id)
 );
 
 -- ==============================
