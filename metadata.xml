@@ -4,28 +4,13 @@
       <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
         <X509Data>
          <X509Certificate>
-            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
+            
           </X509Certificate>
         </X509Data>
       </KeyInfo>
     </KeyDescriptor>
     <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://gccis-dio.gccis.rit.edu/logout"/>
-    <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+    <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
     <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://gccis-dio.gccis.rit.edu/login/callback" index="1"/>
   </SPSSODescriptor>
 </EntityDescriptor>
