@@ -3,9 +3,9 @@ const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEve
 const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
-const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB } = require("../organizationProcessing");
+const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB, getUserOrganizationsInDB } = require("../organizationProcessing");
 const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getMeetingOrgReportInDB } = require("../organizationReportProcessing");
-const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB } = require("../organizationSettingsProcessing");
+const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB, getOrganizationEmailSettingsInDB, createOrganizationMembershipRequirementsInDB } = require("../organizationSettingsProcessing");
   
   // export to api calls
   module.exports = function() {
@@ -118,6 +118,10 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
     this.updateOrganization = async (organizationId, updatedOrgInfo) => {
       return await updateOrganizationInDB(organizationId, updatedOrgInfo);
     };
+
+    this.getUserOrganizations = async (username) => {
+      return await getUserOrganizationsInDB(username);
+  }
   
     // Organization Report Management
     this.getSpecificReportOrgData = async (orgId) => {
@@ -151,6 +155,10 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
 
     this.editOrganizationMembershipRequirement = async (orgId, orgData) => {
       return await editOrganizationMembershipRequirementsInDB(orgId, orgData);
+    }
+
+    this.createOrganizationMembershipRequirements = async (orgId, data) => {
+      return await createOrganizationMembershipRequirementsInDB(orgId, data)
     }
 
     this.editOrganizationEmailSettings = async (orgId, orgData) => {

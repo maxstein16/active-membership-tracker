@@ -9,7 +9,7 @@
 .page-content {
     height: 100%;
     flex: 1;
-    padding: 4em 3em;
+    padding: 2em 3em;
 }
 
 /* Navigation Bar */
@@ -119,9 +119,7 @@
 
 /* Back button */
 .back-button {
-    position: absolute;
-    top: 60px;
-    left: 10px;
+    margin: 0 0 0em -1em;
 }
 
 .back-button button:hover {

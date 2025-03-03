@@ -74,10 +74,10 @@ const getMembershipsByAttributes = async (filters) => {
       return [];
     }
 
-    console.log(
-      "Memberships found:",
-      memberships.map(m => m.toJSON())
-    );
+    // console.log(
+    //   "Memberships found:",
+    //   memberships.map(m => m.toJSON())
+    // );
     return memberships;
   } catch (err) {
     console.error("Error fetching memberships by attributes:", err);
@@ -101,7 +101,7 @@ const getMembershipByAttributes = async (filters) => {
       return null;
     }
 
-    console.log("Membership found:", membership.toJSON());
+    // console.log("Membership found:", membership.toJSON());
     return membership;
   } catch (err) {
     console.error("Error fetching membership by attributes:", err);
