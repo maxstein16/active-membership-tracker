@@ -6,7 +6,7 @@ const { Member } = require("../db");
  * @param {object} memberData - The attributes of the new member
  * @returns {Promise<object>} The newly created member object.
  */
-async function createMember (memberData) {
+async function createMember(memberData) {
   try {
     const newMember = await Member.create(memberData);
     // console.log("Member created:", newMember.toJSON());
@@ -15,7 +15,7 @@ async function createMember (memberData) {
     console.error("Error creating member:", error);
     throw error;
   }
-};
+}
 
 /**
  * Updates an existing member by their ID.
@@ -24,7 +24,7 @@ async function createMember (memberData) {
  * @param {object} updateData - The fields to update
  * @returns {Promise<boolean>} Returns `true` if the member was updated, `false` if no matching member was found.
  */
-async function updateMember (memberId, updateData) {
+async function updateMember(memberId, updateData) {
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },
@@ -41,7 +41,7 @@ async function updateMember (memberId, updateData) {
     console.error("Error updating member:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves all members from the database.
@@ -64,7 +64,7 @@ async function getAllMembers() {
     console.error("Error fetching members:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves a specific member by their ID.
@@ -87,7 +87,32 @@ async function getMemberById(memberId) {
     console.error("Error fetching member by ID:", error);
     throw error;
   }
-};
+}
+
+/**
+ * Retrieves a specific member by their ID.
+ *
+ * @param {number} username - The username of the member to retrieve.
+ * @returns {Promise<object|null>} The member object if found, otherwise `null`.
+ */
+async function getMemberByUsername(username) {
+  try {
+    const member = await Member.findOne({
+      where: { member_email: username },
+    });
+
+    if (!member) {
+      console.log(`No member found with username ${username}.`);
+      return null;
+    }
+
+    // console.log("Member found:", member.toJSON());
+    return member;
+  } catch (error) {
+    console.error("Error fetching member by username:", error);
+    throw error;
+  }
+}
 
 /**
  * Retrieves members based on provided filters.
@@ -113,7 +138,7 @@ async function getMembersByAttributes(filters) {
     console.error("Error fetching members by attributes:", error);
     throw error;
   }
-};
+}
 
 // Export all functions for external use
 module.exports = {
@@ -121,5 +146,6 @@ module.exports = {
   updateMember,
   getAllMembers,
   getMemberById,
+  getMemberByUsername,
   getMembersByAttributes,
 };

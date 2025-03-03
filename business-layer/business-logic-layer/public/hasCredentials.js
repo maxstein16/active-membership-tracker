@@ -1,3 +1,4 @@
+const { getMemberByUsername } = require("../../data-layer/member");
 const { Membership, Member } = require("../../db");
 const { ROLE_EBOARD, ROLE_MEMBER } = require("../constants");
 
@@ -7,18 +8,16 @@ const { ROLE_EBOARD, ROLE_MEMBER } = require("../constants");
  */
 module.exports = new (function () {
   this.isEboardOrAdmin = (username, orgId) => {
-    checkRole(username, orgId, true)
+    checkRole(username, orgId, true);
   };
 
   this.isAdmin = (username, orgId) => {
-    checkRole(username, orgId, false)
+    checkRole(username, orgId, false);
   };
 
   checkRole = (username, orgId, isEboardEnough) => {
     // find the member info to get member id
-    const memberInfo = Member.findOne({
-      where: { member_email: username },
-    });
+    const memberInfo = getMemberByUsername(username);
 
     // if none exists, they do not have privileges
     if (!memberInfo) {
