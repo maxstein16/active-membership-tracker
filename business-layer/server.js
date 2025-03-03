@@ -63,19 +63,7 @@ var samlStrategy = new SamlStrategy({
 });
 passport.use(samlStrategy);
 
-passport.use(
-  new SamlStrategy(
-    {
-      path: "/login/callback",
-      entryPoint: process.env.ENTRY_POINT,
-      issuer: process.env.ISSUER,
-      cert: fs.readFileSync(path.join(__dirname, "/cert/cert_idp.pem"), "utf8"),
-    },
-    function (profile, done) {
-      return done(null, profile);
-    }
-  )
-);
+passport.use(samlStrategy);
 passport.serializeUser((user, done) => {
   done(null, user);
 });
