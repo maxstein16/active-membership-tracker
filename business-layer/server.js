@@ -138,14 +138,6 @@ app.use("/v1/organization/:orgId/events", eventsRouter);
 
 
 // Handle routes that do not exist
-
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated())
-    return next();
-  else
-    return res.redirect('/login');
-}
-
 app.get('/login',
   passport.authenticate('saml', { failureRedirect: '/login/fail' }),
   function (req, res) {
