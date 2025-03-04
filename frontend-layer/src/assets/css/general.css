@@ -82,3 +82,8 @@ button.secondary:hover {
 .dialog {
     padding: 1em;
 }
+
+/* Events */
+.rbc-button-link:hover {
+    border: none !important;
+}

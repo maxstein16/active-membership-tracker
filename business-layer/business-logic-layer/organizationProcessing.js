@@ -124,7 +124,7 @@ async function getSpecificOrgDataInDB(orgId) {
       return { error: error.notFound, data: null };
     }
 
-    return { error: null, data: mapToApiFields(orgData) };
+    return { error: null, data: orgData };
   } catch (err) {
     console.error("Error in getSpecificOrgData:", err);
     return { error: error.databaseError, data: null };
