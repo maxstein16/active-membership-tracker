@@ -22,10 +22,10 @@ export default function NavigationDropdown() {
 
           <Link to="/2/status">COMS</Link>
           {/* TODO: If they are a COMs eboard for example */}
-          <Link className="sub-link" to="/2/settings">
+          <Link className="sub-link" to="/42/settings">
             Settings
           </Link>
-          <Link className="sub-link" to="/2/reports">
+          <Link className="sub-link" to="/42/reports">
             Reports
           </Link>
         </div>

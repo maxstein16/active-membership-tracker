@@ -9,7 +9,7 @@ const { Event, Attendance } = require("../db");
 async function createEvent(eventData) {
   try {
     const newEvent = await Event.create(eventData);
-    console.log("Event created:", newEvent.toJSON());
+    // console.log("Event created:", newEvent.toJSON());
     return newEvent;
   } catch (error) {
     console.error("Error creating event:", error);
@@ -55,10 +55,10 @@ async function getAllEvents() {
       console.log("No events found in the database.");
       return [];
     }
-    console.log(
-      "Events found:",
-      events.map((e) => e.toJSON())
-    );
+    // console.log(
+    //   "Events found:",
+    //   events.map((e) => e.toJSON())
+    // );
     return events;
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -87,7 +87,7 @@ async function getEventById(eventId, orgId) {
           return null;
       }
 
-      console.log("Event found:", event.toJSON());
+      // console.log("Event found:", event.toJSON());
       return event;
   } catch (error) {
       console.error("Error fetching event by ID:", error);
@@ -127,10 +127,10 @@ async function getEventsByAttributes(filters) {
       return [];
     }
 
-    console.log(
-      "Events found:",
-      events.map((e) => e.toJSON())
-    );
+    // console.log(
+    //   "Events found:",
+    //   events.map((e) => e.toJSON())
+    // );
     return events;
   } catch (error) {
     console.error("Error fetching events by attributes:", error);

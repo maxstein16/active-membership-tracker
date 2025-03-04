@@ -34,9 +34,12 @@ module.exports = function () {
   // Organization Calls
   this.validationError = "Validation error: One or more fields are invalid";
   this.mustIncludeOrgId = "Must include an organization ID";
-  this.mustHaveAllFieldsAddOrg = "Must include fields: org_name, org_description, org_category, org_contact_email, org_phone_number";
+  this.mustHaveAllFieldsAddOrg = "Must include fields: organization_name, organization_description, organization_abbreviation, organization_color, active_membership_threshold";
   this.invalidOrgName = "Organization name is invalid. It must be a non-empty string.";
   this.invalidOrgDescription = "Organization description is invalid. It must be a non-empty string.";
+  this.invalidOrgAbbreviation = "organization abbreviation is invalid. It must be a non-empty string.";
+  this.ColorAbbreviation = "organization color is invalid. It must be a non-empty string starting with '#' with 6 following hex numbers or characters.";
+  this.invalidOrgThreshold = "organization threshold is invalid. It must be a number";
   this.invalidOrgCategory = "Organization category is invalid. It must be a non-empty string.";
   this.invalidOrgShortening = "Organization abbreviation is invalid. It must be a non-empty string less no more than 10 characters long.";
   this.invalidOrgEmail = "Invalid contact email format.";
@@ -63,6 +66,7 @@ module.exports = function () {
   this.settingNotFound = "Organization setting with the given ID not found";
   this.mustIncludeIdQueryParam = "Must include an ID as a query param";
   this.mustIncludeAtLeastOneValidFieldToEdit = "Must include at least one valid field to edit: current_status, annual_report, semester_report, membership_achieved";
+  this.newReqMustHaveAllParams = "Must include at meeting_type, frequency, amount_type, amount";
 
   // Organization Reports Calls
   this.cannotCreateReport = "Error Creating Report";

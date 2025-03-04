@@ -1,4 +1,4 @@
-const { Organization, MembershipRequirement } = require("../db");
+const { Organization, MembershipRequirement, Membership, Member } = require("../db");
 
 /**
  * Create an Organization
@@ -163,6 +163,53 @@ async function editOrganizationMembershipRequirement(requirementId, requirementD
     }
 }
 
+/**
+ * Get organizations that a user is a member of
+ * @param {string} username - The username (email) of the user
+ * @returns {Promise<Array>} List of organization records
+ */
+async function getUserOrganizations(username) {
+    try {        
+        // Find the member by their email (username)
+        const member = await Member.findOne({
+            where: { member_email: username }
+        });
+
+        if (!member) {
+            console.log(`No member found with email ${username}`);
+            return [];
+        }
+
+        console.log(`Found member with ID: ${member.member_id}`);
+
+        // Find all memberships for this member along with their organizations
+        const memberships = await Membership.findAll({
+            where: { member_id: member.member_id },
+            include: [{
+                model: Organization,
+                as: 'organization',
+                attributes: [
+                    'organization_id',
+                    'organization_name',
+                    'organization_description',
+                    'organization_color',
+                    'organization_abbreviation',
+                    'organization_threshold'
+                ]
+            }]
+        });
+
+        // Extract the organizations from the memberships
+        const organizations = memberships
+            .filter(membership => membership.organization !== null)
+            .map(membership => membership.organization);
+
+        return organizations;
+    } catch (err) {
+        console.error("Error fetching user organizations:", err);
+        throw err;
+    }
+}
 
 module.exports = {
     createOrganization,
@@ -172,5 +219,6 @@ module.exports = {
     updateOrganizationByName,
     getOrganizationMembershipRequirements,
     createOrganizationMembershipRequirement,
-    editOrganizationMembershipRequirement
+    editOrganizationMembershipRequirement,
+    getUserOrganizations
 };
