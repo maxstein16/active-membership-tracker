@@ -99,10 +99,9 @@ router.post(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (
-      !req.body.hasOwnProperty("meeting_type") ||
-      !req.body.hasOwnProperty("frequency") ||
-      !req.body.hasOwnProperty("amount_type") ||
-      !req.body.hasOwnProperty("amount")
+      !req.body.hasOwnProperty("event_type") ||
+      !req.body.hasOwnProperty("requirement_type") ||
+      !req.body.hasOwnProperty("requirement_value")
     ) {
       return res.status(400).json({ error: error.newReqMustHaveAllParams });
     }
@@ -241,13 +240,13 @@ router.post(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (isNaN(requirement_id)) {
-      return res.status(400).json({ error: error.requirementIdMustBeInteger });
+      return res.status(400).json({ error: error.settingNotFound });
     }
     if (!threshold_percentage || isNaN(threshold_percentage)) {
-      return res.status(400).json({ error: error.invalidThresholdPercentage });
+      return res.status(400).json({ error: error.somethingWentWrong });
     }
     if (!bonus_points || isNaN(bonus_points)) {
-      return res.status(400).json({ error: error.invalidBonusPoints });
+      return res.status(400).json({ error: error.somethingWentWrong });
     }
 
     const response = await business.createBonusRequirementInDB(requirement_id, {
@@ -278,7 +277,7 @@ router.put(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (isNaN(bonus_id)) {
-      return res.status(400).json({ error: error.bonusIdMustBeInteger });
+      return res.status(400).json({ error: error.settingNotFound });
     }
     if (!threshold_percentage && !bonus_points) {
       return res
@@ -314,7 +313,7 @@ router.delete(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (!bonusId || isNaN(bonusId)) {
-      return res.status(400).json({ error: error.bonusIdMustBeInteger });
+      return res.status(400).json({ error: error.settingNotFound });
     }
 
     const response = await business.deleteBonusRequirementInDB(
