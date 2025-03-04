@@ -200,10 +200,26 @@ async function getMembersInOrganization(orgId) {
   }
 }
 
+async function countAdminsInOrganization(organizationId) {
+  try {
+    const count = await Membership.count({
+      where: {
+        organization_id: organizationId,
+        role: 'admin'
+      }
+    });
+    return { error: error.noError, data: count };
+  } catch (err) {
+    console.error("Error counting admins:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
+}
+
 module.exports = {
   getSpecificMemberWithOrgData,
   addMemberToAnOrganization,
   editMemberInOrganization,
   deleteMemberInOrganization,
   getMembersInOrganization,
+  countAdminsInOrganization,
 };

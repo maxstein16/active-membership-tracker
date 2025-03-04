@@ -51,7 +51,10 @@ module.exports = function () {
   this.mustHaveAtLeastOneFieldsEditOrg = "Must include at least one valid field to edit: org_name, org_description, org_category, org_contact_email, org_phone_number.";
   this.orgNotFound = "Organization not found or update failed.";
 
-
+  // Organization Admins 
+  this.cannotRemoveLastAdmin = "Cannot remove the last admin from the organization";
+  this.failedToSetAdmin = "Failed to set organization admin";
+  this.failedToRemoveAdmin = "Failed to remove organization admin";
 
   // Organization Settings Calls
   this.settingIdMustBeInteger = "Setting ID must be an integer";

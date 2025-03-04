@@ -182,6 +182,15 @@ router.delete(
       res.status(401).json({ error: error.youDoNotHavePermission });
     }
 
+    const memberInfo = await business.getMemberInOrganization(orgId, memberId);
+  if (memberInfo.data.role === 'admin' && role !== 'admin') {
+    // Count current admins
+    const adminCount = await business.countAdminsInOrganization(orgId);
+    if (adminCount.data <= 1) {
+      return res.status(400).json({ error: error.cannotRemoveLastAdmin });
+    }
+  }
+
 
     // send off to backend
     const result = await business.deleteMemberInOrg(orgId, memberId);

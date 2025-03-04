@@ -45,6 +45,7 @@ router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
 router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
   let orgId = req.params.orgId;
   let body = req.body;
+  let creatorId = req.session.user.id; // GET the session varible for user 
 
   orgId = sanitizer.sanitize(req.params.orgId);
 
@@ -83,6 +84,19 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     res.status(404).json({ error: result.error, orgId: orgId });
     return;
   }
+
+    // Set the creator as admin
+    const adminResult = await business.addMemberToOrganization(result.data.organization_id, {
+      username: creatorId,
+      role: 'admin'
+    });
+  
+    if (adminResult.error && adminResult.error !== error.noError) {
+      // If setting admin failed, delete the organization
+      await business.deleteOrganization(result.data.organization_id);
+      res.status(500).json({ error: "Failed to set organization admin" });
+      return;
+    }
 
   // return with appropriate status error and message
   res.status(200).json({ status: "success", data: result.data });
