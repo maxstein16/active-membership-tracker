@@ -251,6 +251,7 @@ MembershipRequirement.belongsTo(Organization, {
   foreignKey: "organization_id",
   onDelete: "CASCADE",
 });
+
 BonusRequirement.belongsTo(MembershipRequirement, {
   foreignKey: "requirement_id",
   onDelete: "CASCADE",
