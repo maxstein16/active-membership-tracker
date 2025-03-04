@@ -48,16 +48,8 @@ router.get(
 );
 
 // Handle GET requests without memberId
-router.get("/", async (req, res) => {  
-  const memberInfo = await Member.findOne({
-    where: { member_email: req.session.user.username },
-  });
-     
-  if(!memberInfo){
-    res.status(400).json({ error: error.mustIncludeMemberId });
-    return;
-  }
-  let memberId = memberInfo.member_id;
+router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {  
+  let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
 
   const memberData = await business.getMemberById(memberId);
 
@@ -118,17 +110,9 @@ router.put(
   }
 );
 
-router.put("/", async (req, res) => {
+router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   let body = req.body;
-  const memberInfo = await Member.findOne({
-    where: { member_email: req.session.user.username },
-  });
-     
-  if(!memberInfo){
-    res.status(400).json({ error: error.mustIncludeMemberId });
-    return;
-  }
-  let memberId = memberInfo.member_id;
+  let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
 
   // check if at least one valid field is provided for update
   const allowedFields = [

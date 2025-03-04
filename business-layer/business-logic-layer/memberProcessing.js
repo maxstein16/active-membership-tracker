@@ -6,6 +6,7 @@ const { activeMembershipEmail } = require("./public/emailTemplates");
 const { getMemberById, getMembersByAttributes, updateMember, createMember } = require("../data-layer/member.js");
 const { getOrganizationById } = require("../data-layer/organization.js");
 const { getMembershipsByAttributes } = require("../data-layer/membership.js");
+const { Member } = require("../db");
 
 /**
  * Retrieves a member by their ID, including their memberships.
@@ -131,6 +132,20 @@ async function createMemberInDB(memberData) {
     }
 }
 
+async function getMemberIDByUsernameInDB(username){
+    const memberInfo = await Member.findOne({
+        where: { member_email: username },
+      });
+
+      if(!memberInfo){
+        return { error: error.mustIncludeMemberId };
+       
+      }
+
+      return memberInfo.member_id;
+}
+
+
 /**
  * Retrieves a member's stats within a specific organization.
  * @param {number} memberId - The member's ID.
@@ -191,5 +206,6 @@ module.exports = {
     getMemberByIdInDB,
     updateMemberInDB,
     createMemberInDB,
+    getMemberIDByUsernameInDB,
     getSpecificMemberOrgStatsInDB
 };
