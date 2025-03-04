@@ -7,7 +7,7 @@ import { Paper, Dialog, DialogTitle, DialogContent, CircularProgress } from "@mu
 import { DataGrid } from "@mui/x-data-grid";
 import MemberTable from "../MemberTable";
 import DownloadReport from "./DownloadReport";
-import { getOrganizationEvents, getEventAttendees } from "../../../utils/handleSettingsData";
+import { getPastOrganizationEvents, getMeetingReport } from "../../../utils/handleSettingsData";
 
 export default function EventTable({ orgId, color }) {
   const [events, setEvents] = React.useState([]);
@@ -15,9 +15,9 @@ export default function EventTable({ orgId, color }) {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    getOrganizationEvents(orgId).then((result) => {
+    getPastOrganizationEvents(orgId).then((result) => {
       if (!result || result.error) {
-        console.error("Error fetching events:", result?.error);
+        console.error("Error fetching past events:", result?.error);
         setLoading(false);
         return;
       }
@@ -38,25 +38,28 @@ export default function EventTable({ orgId, color }) {
       setEvents(formattedEvents);
       setLoading(false);
     }).catch(error => {
-      console.error("Error fetching events:", error);
+      console.error("Error fetching past events:", error);
       setLoading(false);
     });
   }, [orgId]);
 
   const handleRowClick = (event) => {
     const selectedEvent = event.row;
-    setSelectedEvent(selectedEvent);
 
-    getEventAttendees(selectedEvent.eventId)
-      .then((attendees) => {
+    setSelectedEvent({ ...selectedEvent, loading: true });
+
+    getMeetingReport(orgId, selectedEvent.eventId)
+      .then((report) => {
         setSelectedEvent((prevEvent) => ({
           ...prevEvent,
-          members: attendees || [],
-          totalAttendance: attendees ? attendees.length : 0,
+          members: report?.members || [],
+          totalAttendance: report?.totalAttendance || 0,
+          loading: false
         }));
       })
       .catch(error => {
-        console.error("Error fetching attendees:", error);
+        console.error("Error fetching meeting report:", error);
+        setSelectedEvent((prevEvent) => ({ ...prevEvent, loading: false }));
       });
   };
 
@@ -88,7 +91,7 @@ export default function EventTable({ orgId, color }) {
           <DataGrid
             rows={events}
             columns={columns}
-            pageSizeOptions={[5, 10, 15, 25, 100]} // Fix for MUI warning
+            pageSizeOptions={[5, 10, 15, 25, 100]}
             sx={{
               border: 0,
               "& .MuiDataGrid-row:hover": { backgroundColor: `${color}33` },
@@ -98,27 +101,30 @@ export default function EventTable({ orgId, color }) {
         </Paper>
       )}
       {selectedEvent && (
-        <Dialog open={Boolean(selectedEvent)} onClose={() => setSelectedEvent(null)}>
-          <DialogTitle>Event Details</DialogTitle>
+        <Dialog open={Boolean(selectedEvent)} onClose={() => setSelectedEvent(null)} fullWidth maxWidth="md">
+          <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span>Meeting Details</span>
+            <DownloadReport color={color} classToDownload="meeting-details" /> {/* ✅ Moved to the top-right */}
+          </DialogTitle>
           <DialogContent>
-            <p><strong>Event Name:</strong> {selectedEvent.eventName}</p>
-            <p>
-              <strong>Event Type:</strong> 
-              <span style={{ textTransform: "capitalize" }}>
-                {selectedEvent.eventType || "Unknown"}
-              </span>
-            </p>
-            <p><strong>Start Date:</strong> {selectedEvent.eventStart}</p>
-            <p><strong>End Date:</strong> {selectedEvent.eventEnd}</p>
+            <p><strong>Meeting Name:</strong> {selectedEvent.eventName}</p>
+            <p><strong>Type:</strong> {selectedEvent.eventType ? selectedEvent.eventType.charAt(0).toUpperCase() + selectedEvent.eventType.slice(1) : "Unknown"}</p>
+            <p><strong>Date:</strong> {selectedEvent.eventStart}</p>
             <p><strong>Location:</strong> {selectedEvent.eventLocation}</p>
             <p><strong>Description:</strong> {selectedEvent.eventDescription}</p>
             <p><strong>Total Attendance:</strong> {selectedEvent.totalAttendance}</p>
-            {selectedEvent.members.length > 0 ? (
-              <MemberTable color={color} membersList={selectedEvent.members} />
+
+            {selectedEvent.loading ? (
+              <CircularProgress />
+            ) : selectedEvent.members.length > 0 ? (
+              <MemberTable 
+                color={color} 
+                membersList={selectedEvent.members} 
+                orgId={orgId} 
+              />
             ) : (
               <p>No attendees for this event.</p>
             )}
-            <DownloadReport color={color} classToDownload="event-details" />
           </DialogContent>
         </Dialog>
       )}

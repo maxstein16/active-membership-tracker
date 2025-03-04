@@ -267,7 +267,7 @@ export async function getOrganizationMembers(orgId) {
   return result.data;
 }
 
-export async function getOrganizationEvents(orgId) {
+export async function getPastOrganizationEvents(orgId) {
   const result = await getAPIData(
     `/organization/${orgId}/events`,
     API_METHODS.get,
@@ -281,22 +281,40 @@ export async function getOrganizationEvents(orgId) {
   if (result.hasOwnProperty("error")) {
     return [];
   }
-  return result.data;
+
+  const currentDate = new Date().toISOString().split("T")[0];
+
+  const pastEvents = result.data.filter(event => {
+    return event.event_end && event.event_end < currentDate;
+  });
+
+  return pastEvents;
 }
 
-export async function getEventAttendees(eventId) {
-  const result = await getAPIData(
-    `/attendance/event/${eventId}/attendees`,
-    API_METHODS.get,
-    {}
-  );
+export async function getMeetingReport(orgId, meetingId) {
+  const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
 
-  if (!result) {
-    console.log("must login", result);
-    return { session: false };
+  const result = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!result || !result.orgData) {
+    return { members: [], totalAttendance: 0 };
   }
-  if (result.hasOwnProperty("error")) {
-    return [];
+
+  const attendanceData = result.orgData.attendance;
+
+  if (!attendanceData || !attendanceData.members_who_attended) {
+    return { members: [], totalAttendance: 0 };
   }
-  return result.data;
+
+  const formattedMembers = attendanceData.members_who_attended.map(member => ({
+    id: member.member_id,
+    member_name: `${member.firstName} ${member.lastName}`,
+    member_email: `${member.rit_username}@rit.edu`,
+    role: member.role_num
+  }));
+
+  return {
+    members: formattedMembers,
+    totalAttendance: attendanceData.total_attendance || 0,
+  };
 }
