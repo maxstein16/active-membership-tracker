@@ -15,19 +15,25 @@ function validateOrgFields(fields) {
 
     const { org_name, organization_abbreviation, organization_color, org_description, organization_threshold, org_category, org_contact_email, org_phone_number } = fields;
 
+
     // Validate organization name
     if (org_name && (typeof org_name !== 'string' || org_name.trim() === '')) {
         return error.invalidOrgName;
     }
 
-     // Validate organization name
+     // Validate organization abbreviation
      if (organization_abbreviation && (typeof organization_abbreviation !== 'string' || organization_abbreviation.trim() === '')) {
-        return error.invalidOrgDescription;
+        return error.invalidOrgShortening;
     }
     
     // Validate organization description
     if (org_description && (typeof org_description !== 'string' || org_description.trim() === '')) {
         return error.invalidOrgDescription;
+    }
+
+    // Validate organization name
+    if (organization_color && (typeof organization_color !== 'string' || organization_color.trim() === '')) {
+        return error.invalidOrgColor;
     }
 
     // Validate organization category
