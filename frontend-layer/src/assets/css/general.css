@@ -83,7 +83,3 @@ button.secondary:hover {
     padding: 1em;
 }
 
-/* Events */
-.rbc-button-link:hover {
-    border: none !important;
-}

@@ -23,13 +23,29 @@ export default function EventCalendar({ color, events }) {
         // events={test.events}
         defaultDate={new Date()}
         defaultView="month"
-        style={{ height: '70vh' }}
+        min={new Date(0, 0, 0, 7, 0, 0)}
+        max={new Date(0, 0, 0, 22, 0, 0)}
         onSelectEvent={(eventInfo) => {
-            let expandedEventInfo = events.filter((event) => event.event_id === eventInfo.id)[0]
-            setOpenEvent(expandedEventInfo)
+          let expandedEventInfo = events.filter(
+            (event) => event.event_id === eventInfo.id
+          )[0];
+          setOpenEvent(expandedEventInfo);
+        }}
+        style={{
+          height: "70vh",
+          "--org-color": color,
+          "--org-color-light": `${color}55`,
+          "--org-color-light-2": `${color}15`,
         }}
       />
-      <EventInfoPopup open={openEvent !== undefined} close={() => {setOpenEvent(undefined)}} color={color} event={openEvent}/>
+      <EventInfoPopup
+        open={openEvent !== undefined}
+        close={() => {
+          setOpenEvent(undefined);
+        }}
+        color={color}
+        event={openEvent}
+      />
     </div>
   );
 }
