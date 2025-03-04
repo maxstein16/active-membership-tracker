@@ -9,8 +9,12 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import UploadDataModal from "../AdminPageComponents/UploadDataModal";
 
-export default function EventInfoPopup({ open, close, color, event }) {
+export default function EventInfoPopup({ orgId, open, close, color, event }) {
+
+    // if the event is in the future you can edit it
+    
   return (
     <Dialog
       onClose={close}
@@ -19,6 +23,7 @@ export default function EventInfoPopup({ open, close, color, event }) {
       <DialogTitle>{event ? event.event_name : "Title Here"}</DialogTitle>
       <DialogContent>
         <p>{JSON.stringify(event)}</p>
+        <UploadDataModal orgId={orgId} color={color} />
       </DialogContent>
       <DialogActions>
         <button

@@ -59,7 +59,7 @@ export default function YearlyReport({ orgId, color }) {
     // set the array of possible years to get reports from
     let possibleYears = [];
     for (let i = currentYear; i >= earliestEventYear; i--) {
-      console.log(i);
+      // console.log(i);
       possibleYears.push(i);
     }
     setYearList(possibleYears);

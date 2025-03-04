@@ -46,7 +46,8 @@ export default function EventsPage() {
       ) : (
         <>
           <h1>{orgData.organization_abbreviation} Events</h1>
-          <EventCalendar color={orgData.organization_color} events={events}/>
+          {/* Add new event */}
+          <EventCalendar orgId={orgId} color={orgData.organization_color} events={events}/>
         </>
       )}
     </PageSetup>
