@@ -13,7 +13,7 @@ export default function EventTable({ orgId, color }) {
   const [events, setEvents] = React.useState([]);
   const [selectedEvent, setSelectedEvent] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  
+
   React.useEffect(() => {
     getOrganizationEvents(orgId).then((result) => {
       if (!result || result.error) {
@@ -21,15 +21,14 @@ export default function EventTable({ orgId, color }) {
         setLoading(false);
         return;
       }
-      // Format events data to match the expected structure
       const formattedEvents = result.map(event => ({
         eventId: event.event_id,
         eventName: event.event_name,
-        eventStart: event.event_start.split('T')[0],
-        eventEnd: event.event_end ? event.event_end.split('T')[0] : null,
-        eventLocation: event.event_location,
-        eventDescription: event.event_description,
-        eventType: event.event_type,
+        eventStart: event.event_start?.split('T')[0] || "N/A",
+        eventEnd: event.event_end ? event.event_end.split('T')[0] : "N/A",
+        eventLocation: event.event_location || "Unknown",
+        eventDescription: event.event_description || "No description available",
+        eventType: event.event_type || "Unknown",
         organizationId: event.organization_id,
         semesterId: event.semester_id,
         totalAttendance: 0,
@@ -47,24 +46,36 @@ export default function EventTable({ orgId, color }) {
   const handleRowClick = (event) => {
     const selectedEvent = event.row;
     setSelectedEvent(selectedEvent);
-    
-    getEventAttendees(selectedEvent.eventId).then((attendees) => {
-      setSelectedEvent(prevEvent => ({ 
-        ...prevEvent, 
-        members: attendees, 
-        totalAttendance: attendees.length 
-      }));
-    });
+
+    getEventAttendees(selectedEvent.eventId)
+      .then((attendees) => {
+        setSelectedEvent((prevEvent) => ({
+          ...prevEvent,
+          members: attendees || [],
+          totalAttendance: attendees ? attendees.length : 0,
+        }));
+      })
+      .catch(error => {
+        console.error("Error fetching attendees:", error);
+      });
   };
 
   const columns = [
     { field: "eventId", headerName: "Event ID", width: 100 },
     { field: "eventName", headerName: "Event Name", width: 250 },
-    { field: "eventType", headerName: "Event Type", width: 200 },
+    { 
+      field: "eventType", 
+      headerName: "Event Type", 
+      width: 200,
+      renderCell: (params) => (
+        <span style={{ textTransform: "capitalize" }}>
+          {params.value}
+        </span>
+      )
+    },
     { field: "eventStart", headerName: "Start Date", width: 200 },
     { field: "eventEnd", headerName: "End Date", width: 200 },
-    { field: "eventLocation", headerName: "Location", width: 200 },
-    { field: "totalAttendance", headerName: "Total Attendance", width: 180 },
+    { field: "eventLocation", headerName: "Location", width: 200 }
   ];
 
   return (
@@ -77,7 +88,7 @@ export default function EventTable({ orgId, color }) {
           <DataGrid
             rows={events}
             columns={columns}
-            pageSizeOptions={[5, 10, 15, 25]}
+            pageSizeOptions={[5, 10, 15, 25, 100]} // Fix for MUI warning
             sx={{
               border: 0,
               "& .MuiDataGrid-row:hover": { backgroundColor: `${color}33` },
@@ -91,7 +102,12 @@ export default function EventTable({ orgId, color }) {
           <DialogTitle>Event Details</DialogTitle>
           <DialogContent>
             <p><strong>Event Name:</strong> {selectedEvent.eventName}</p>
-            <p><strong>Event Type:</strong> {selectedEvent.eventType}</p>
+            <p>
+              <strong>Event Type:</strong> 
+              <span style={{ textTransform: "capitalize" }}>
+                {selectedEvent.eventType || "Unknown"}
+              </span>
+            </p>
             <p><strong>Start Date:</strong> {selectedEvent.eventStart}</p>
             <p><strong>End Date:</strong> {selectedEvent.eventEnd}</p>
             <p><strong>Location:</strong> {selectedEvent.eventLocation}</p>
