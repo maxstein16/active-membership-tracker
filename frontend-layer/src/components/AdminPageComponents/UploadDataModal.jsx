@@ -9,7 +9,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 
-export default function UploadDataModal({ orgId, color }) {
+export default function UploadDataModal({ orgId, eventId, color }) {
   const [open, setOpen] = React.useState(false);
 
   return (

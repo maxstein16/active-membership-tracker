@@ -38,15 +38,19 @@ export default function EventCalendar({ orgId, color, events }) {
           "--org-color-light-2": `${color}15`,
         }}
       />
-      <EventInfoPopup
-        orgId={orgId}
-        open={openEvent !== undefined}
-        close={() => {
-          setOpenEvent(undefined);
-        }}
-        color={color}
-        event={openEvent}
-      />
+      {openEvent ? (
+        <EventInfoPopup
+          orgId={orgId}
+          open={openEvent !== undefined}
+          close={() => {
+            setOpenEvent(undefined);
+          }}
+          color={color}
+          event={openEvent}
+        />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
