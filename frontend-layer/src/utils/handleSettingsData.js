@@ -266,3 +266,37 @@ export async function getOrganizationMembers(orgId) {
   }
   return result.data;
 }
+
+export async function getOrganizationEvents(orgId) {
+  const result = await getAPIData(
+    `/organization/${orgId}/events`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  if (result.hasOwnProperty("error")) {
+    return [];
+  }
+  return result.data;
+}
+
+export async function getEventAttendees(eventId) {
+  const result = await getAPIData(
+    `/attendance/event/${eventId}/attendees`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  if (result.hasOwnProperty("error")) {
+    return [];
+  }
+  return result.data;
+}

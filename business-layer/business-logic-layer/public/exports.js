@@ -1,4 +1,4 @@
-const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB } = require("../attendanceProcessing");
+const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB, getAttendeesDetailsByEventIdDB } = require("../attendanceProcessing");
 const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEventByIDInDB, getAttendanceByEventIdDB, getAllEventsByOrgAndSemesterDB } = require("../eventsProcessing");
 const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getMemberIDByUsernameInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
@@ -28,6 +28,10 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
 
     this.getMemberAttendanceBySemester = async (memberId, semesterId) => {
       return await getMemberAttendanceBySemesterDB(memberId, semesterId);
+    }
+
+    this.getAttendeesDetailsByEventId = async (eventId) => {
+      return await getAttendeesDetailsByEventIdDB(eventId);
     }
   
     // Event Management
