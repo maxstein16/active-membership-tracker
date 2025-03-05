@@ -14,6 +14,7 @@ import moment from "moment";
 import DisplayEventAttendance from "./DisplayEventAttendance";
 import { ROLE_MEMBER } from "../../utils/constants";
 import { toAMPMtime } from "../../utils/toAMPMtime";
+import EditEventsDialog from "./EditEventsDialog";
 
 export default function EventInfoPopup({
   orgId,
@@ -63,13 +64,6 @@ export default function EventInfoPopup({
 
   return (
     <>
-      {isEditing ? (
-        <EventInfoPopup orgId={orgId}
-        open={open}
-        close={() => {setIsEditing(false); close()}}
-        color={color}
-        event={event} />
-      ) : (
         <Dialog onClose={close} open={open}>
           <DialogTitle>{event ? event.event_name : "Title Here"}</DialogTitle>
           <DialogContent>
@@ -88,13 +82,8 @@ export default function EventInfoPopup({
             {role !== ROLE_MEMBER ? (
               <div className="event-info-popup-buttons">
                 {isFuture ? (
-                  <button
-                    onClick={() => {}}
-                    style={{ color: color, borderColor: color }}
-                    className="secondary custom-color-button"
-                  >
-                    Edit Event
-                  </button>
+                  <EditEventsDialog orgId={orgId} color={color} event={event} />
+                  
                 ) : (
                   <></>
                 )}
@@ -130,7 +119,6 @@ export default function EventInfoPopup({
             </button>
           </DialogActions>
         </Dialog>
-      )}
     </>
   );
 }
