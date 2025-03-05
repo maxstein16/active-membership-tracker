@@ -71,14 +71,33 @@ export async function getEventsAndOrgColor(orgId) {
  * }
  */
 export function turnEventsToCalendarEvents(events) {
-    let calendarEvents = []
-    events.forEach(event => {
-        calendarEvents.push({
-            id: event.event_id,
-            start: moment(event.event_start).toDate(),
-            end: moment(event.event_end).toDate(),
-            title: event.event_name
-        })
+  let calendarEvents = [];
+  events.forEach((event) => {
+    calendarEvents.push({
+      id: event.event_id,
+      start: moment(event.event_start).toDate(),
+      end: moment(event.event_end).toDate(),
+      title: event.event_name,
     });
-    return calendarEvents
+  });
+  return calendarEvents;
+}
+
+/**
+ * Give the event and it will return all the attendees member information
+ * @param {*} event 
+ * @returns An array of member data 
+ */
+export async function getAttendanceMemberData(event) {
+  let attendeesMemberData = []
+  await event.attendances.forEach(async (attendee) => {
+      const memberData = await getAPIData(`/member/${attendee.member_id}`, API_METHODS.get, {})
+      console.log(memberData)
+      if (memberData && memberData.hasOwnProperty('data')) {
+        console.log(memberData.data)
+        attendeesMemberData.push(memberData.data)
+      }
+  })
+  console.log(attendeesMemberData)
+  return attendeesMemberData
 }

@@ -12,8 +12,17 @@ import {
 import UploadDataModal from "../AdminPageComponents/UploadDataModal";
 import moment from "moment";
 import DisplayEventAttendance from "./DisplayEventAttendance";
+import { ROLE_MEMBER } from "../../utils/constants";
+import { toAMPMtime } from "../../utils/toAMPMtime";
 
-export default function EventInfoPopup({ orgId, open, close, color, event }) {
+export default function EventInfoPopup({
+  orgId,
+  role,
+  open,
+  close,
+  color,
+  event,
+}) {
   // if the event is in the future you can edit it
   const [isFuture, setIsFuture] = React.useState(false);
 
@@ -27,55 +36,64 @@ export default function EventInfoPopup({ orgId, open, close, color, event }) {
     }
   }, [event]);
 
-  const temp = {
-    event_id: 4,
-    event_name: "COMS Workshop: Resume Building",
-    event_start: "2025-02-12T22:30:00.000Z",
-    event_end: "2025-02-13T00:00:00.000Z",
-    event_location: "GOL 2250",
-    event_description:
-      "Learn how to craft a compelling resume with industry professionals.",
-    event_type: "workshop",
-    organization_id: 2,
-    semester_id: null,
+  const getDateTimeRange = () => {
+    let start = moment(event.event_start).toDate();
+    let end = moment(event.event_end).toDate();
+    
+    // is the event on one day?
+    if (
+      start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth() &&
+      start.getDate() === end.getDate()
+    ) {
+    return `${start.toDateString()} from ${toAMPMtime(start)} to ${toAMPMtime(end)}`;
+    }
+
+    return `${start.toDateString()} at ${toAMPMtime(start)} to ${end.toDateString()} at ${toAMPMtime(end)}`;
   };
 
-  const getDateTimeRange = () => {
-    let start = moment(event.event_start).getDate()
-    let end = moment(event.event_end).getDate()
-    return 0
+  const formattedMeetingType = () => {
+    return event.event_type.replace("_", " ")
   }
 
   return (
     <Dialog onClose={close} open={open}>
       <DialogTitle>{event ? event.event_name : "Title Here"}</DialogTitle>
       <DialogContent>
-        <p>{JSON.stringify(event)}</p>
         {/* EVENT DATA */}
-        <p>Event Time: {() => getDateTimeRange()}</p>
+        <p style={{textTransform: 'capitalize'}}><i>{formattedMeetingType()}</i></p>
+        <p>{getDateTimeRange()}</p>
+        <p><strong>{event.event_location}</strong></p>
+        <br/>
+        <p>{event.event_description}</p>
 
         {/* ACTION BUTTONS */}
-        <div className="event-info-popup-buttons">
-          {isFuture ? (
-            <button
-              onClick={() => {}}
-              style={{ color: color, borderColor: color }}
-              className="secondary custom-color-button"
-            >
-              Edit Event
-            </button>
-          ) : (
-            <></>
-          )}
-          <UploadDataModal
-            orgId={orgId}
-            eventId={event.event_id}
-            color={color}
-          />
-        </div>
+        {role !== ROLE_MEMBER ? (
+          <div className="event-info-popup-buttons">
+            {isFuture ? (
+              <button
+                onClick={() => {}}
+                style={{ color: color, borderColor: color }}
+                className="secondary custom-color-button"
+              >
+                Edit Event
+              </button>
+            ) : (
+              <></>
+            )}
+            <UploadDataModal
+              orgId={orgId}
+              eventId={event.event_id}
+              color={color}
+            />
+          </div>
+        ) : (
+          <></>
+        )}
 
         {/* ATTENDANCE DATA */}
-        <DisplayEventAttendance orgId={orgId} color={color} event={event} />
+        { role !== ROLE_MEMBER ? <DisplayEventAttendance orgId={orgId} color={color} event={event} /> : <></>}
+        
       </DialogContent>
       <DialogActions>
         {/* CLOSE DIALOG */}

@@ -144,6 +144,13 @@
     border-color: var(--white) !important;
 }
 
+.rbc-button-link:hover {
+    border: none !important;
+    background-color: var(--white) !important;
+    color: var(--medium-grey) !important;
+}
+
 .event-info-popup-buttons {
     display: flex;
+    margin-bottom: -1em;
 }

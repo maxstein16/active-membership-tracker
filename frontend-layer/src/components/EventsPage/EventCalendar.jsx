@@ -9,7 +9,7 @@ import moment from "moment";
 import { turnEventsToCalendarEvents } from "../../utils/eventsCalls";
 import EventInfoPopup from "./EventInfoPopup";
 
-export default function EventCalendar({ orgId, color, events }) {
+export default function EventCalendar({ orgId, color, events, role }) {
   const localizer = momentLocalizer(moment);
   const [calendarEvents] = React.useState(turnEventsToCalendarEvents(events));
   const [openEvent, setOpenEvent] = React.useState(undefined);
@@ -41,6 +41,7 @@ export default function EventCalendar({ orgId, color, events }) {
       {openEvent ? (
         <EventInfoPopup
           orgId={orgId}
+          role={role}
           open={openEvent !== undefined}
           close={() => {
             setOpenEvent(undefined);

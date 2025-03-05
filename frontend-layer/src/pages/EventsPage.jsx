@@ -12,12 +12,15 @@ import { CircularProgress } from "@mui/material";
 import { getEventsAndOrgColor } from "../utils/eventsCalls";
 import displayErrors from "../utils/displayErrors";
 import EventCalendar from "../components/EventsPage/EventCalendar";
+import { ROLE_MEMBER } from "../utils/constants";
+import { whatRoleAmI } from "../utils/whatRoleAmI";
 
 export default function EventsPage() {
   // Define my variables
   const { orgId } = useParams();
   const [orgData, setOrgData] = React.useState(undefined);
   const [events, setEvents] = React.useState(undefined);
+  const [role, setRole] = React.useState(ROLE_MEMBER);
   const [error, setError] = React.useState("");
 
   React.useEffect(() => {
@@ -34,6 +37,9 @@ export default function EventsPage() {
         setError(displayErrors.errorFetchingContactSupport);
       }
     });
+
+    // get role 
+    whatRoleAmI(orgId).then((role) => setRole(role))
   }, [orgId]);
 
   return (
@@ -47,7 +53,7 @@ export default function EventsPage() {
         <>
           <h1>{orgData.organization_abbreviation} Events</h1>
           {/* Add new event */}
-          <EventCalendar orgId={orgId} color={orgData.organization_color} events={events}/>
+          <EventCalendar orgId={orgId} color={orgData.organization_color} events={events} role={role}/>
         </>
       )}
     </PageSetup>

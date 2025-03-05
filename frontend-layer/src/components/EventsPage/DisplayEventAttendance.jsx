@@ -7,19 +7,22 @@ import {
   CircularProgress,
 } from "@mui/material";
 import MemberTable from "../AdminPageComponents/MemberTable";
+import { getAttendanceMemberData } from "../../utils/eventsCalls";
 
 export default function DisplayEventAttendance({ orgId, color, event }) {
-  const [attendanceMembers, setAttendanceMembers] = React.useState(undefined);
-  const [error, setError] = React.useState("TODO");
+  const [attendanceMembers, setAttendanceMembers] = React.useState([]);
 
   React.useEffect(() => {
-    
+    getAttendanceMemberData(event).then((data) => {
+        console.log(data)
+        setAttendanceMembers(data)
+    })
   }, []);
 
   return (
     <div style={{marginTop: '2em'}}>
-      {error ? (
-        <p className="error">{error}</p>
+      {attendanceMembers.length === 0 ? (
+        <p>No Attendees</p>
       ) : attendanceMembers ? (
         <MemberTable
           color={color}
