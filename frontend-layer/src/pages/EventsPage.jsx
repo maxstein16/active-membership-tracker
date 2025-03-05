@@ -3,7 +3,7 @@ import "../assets/css/constants.css";
 import "../assets/css/pageSetup.css";
 import "../assets/css/general.css";
 import "../assets/css/memberPages.css";
-import "react-big-calendar/lib/css/react-big-calendar.css"
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
 import { useParams } from "react-router";
 import PageSetup from "../components/PageSetup/PageSetup";
@@ -14,6 +14,7 @@ import displayErrors from "../utils/displayErrors";
 import EventCalendar from "../components/EventsPage/EventCalendar";
 import { ROLE_MEMBER } from "../utils/constants";
 import { whatRoleAmI } from "../utils/whatRoleAmI";
+import EditEventsDialog from "../components/EventsPage/EditEventsDialog";
 
 export default function EventsPage() {
   // Define my variables
@@ -24,7 +25,7 @@ export default function EventsPage() {
   const [error, setError] = React.useState("");
 
   React.useEffect(() => {
-    // get API data 
+    // get API data
     getEventsAndOrgColor(orgId).then((result) => {
       // console.log(result)
       if (result.hasOwnProperty("session")) {
@@ -32,14 +33,14 @@ export default function EventsPage() {
       } else if (!result.hasOwnProperty("error")) {
         setError("");
         setOrgData(result.orgData);
-        setEvents(result.events)
+        setEvents(result.events);
       } else {
         setError(displayErrors.errorFetchingContactSupport);
       }
     });
 
-    // get role 
-    whatRoleAmI(orgId).then((role) => setRole(role))
+    // get role
+    whatRoleAmI(orgId).then((role) => setRole(role));
   }, [orgId]);
 
   return (
@@ -52,8 +53,28 @@ export default function EventsPage() {
       ) : (
         <>
           <h1>{orgData.organization_abbreviation} Events</h1>
+          {role !== ROLE_MEMBER ? (
+            <div>
+              <EditEventsDialog
+                isEdit={false}
+                orgId={orgId}
+                color={orgData.organization_color}
+                event={undefined}
+              />
+              <br />
+              <br />
+              <br />
+            </div>
+          ) : (
+            <></>
+          )}
           {/* Add new event */}
-          <EventCalendar orgId={orgId} color={orgData.organization_color} events={events} role={role}/>
+          <EventCalendar
+            orgId={orgId}
+            color={orgData.organization_color}
+            events={events}
+            role={role}
+          />
         </>
       )}
     </PageSetup>

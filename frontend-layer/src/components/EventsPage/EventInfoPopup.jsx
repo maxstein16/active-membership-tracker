@@ -26,7 +26,6 @@ export default function EventInfoPopup({
 }) {
   // if the event is in the future you can edit it
   const [isFuture, setIsFuture] = React.useState(false);
-  const [isEditing, setIsEditing] = React.useState(false);
 
   React.useEffect(() => {
     // is the event in the future?
@@ -82,7 +81,7 @@ export default function EventInfoPopup({
             {role !== ROLE_MEMBER ? (
               <div className="event-info-popup-buttons">
                 {isFuture ? (
-                  <EditEventsDialog orgId={orgId} color={color} event={event} />
+                  <EditEventsDialog isEdit={true} orgId={orgId} color={color} event={event} />
                   
                 ) : (
                   <></>

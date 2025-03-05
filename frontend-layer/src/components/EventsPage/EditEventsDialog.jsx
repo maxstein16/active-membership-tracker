@@ -12,15 +12,21 @@ import {
 import UserInput from "../UserInput.jsx";
 import DatePicker from "../DatePicker.jsx";
 import moment from "moment";
+import AreYouSure from "../AreYouSure.jsx";
 
-export default function EditEventsDialog({ orgId, color, event }) {
+export default function EditEventsDialog({ isEdit, orgId, color, event }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [error, setError] = React.useState("");
-  const [name, setName] = React.useState(event.event_name);
-  const [desc, setDesc] = React.useState(event.event_description);
-  const [location, setLocation] = React.useState(event.event_location);
-  const [start, setStart] = React.useState(moment(event.event_start));
-  const [end, setEnd] = React.useState(moment(event.event_end));
+  const [name, setName] = React.useState(event?.event_name || "");
+  const [desc, setDesc] = React.useState(event?.event_description || "");
+  const [location, setLocation] = React.useState(event?.event_location || "");
+  const [start, setStart] = React.useState(
+    moment(event?.event_start || moment())
+  );
+  const [end, setEnd] = React.useState(moment(event?.event_end || moment()));
+  const [showAreYouSureDialog, setShowAreYouSureDialog] = React.useState(false);
+
+  const handleCreateEvent = () => {};
 
   return (
     <div>
@@ -31,7 +37,7 @@ export default function EditEventsDialog({ orgId, color, event }) {
         style={{ color: color, borderColor: color }}
         className="secondary custom-color-button"
       >
-        Edit Event
+        {isEdit ? "Edit Event" : "Create Event"}
       </button>
       <Dialog
         onClose={() => {
@@ -39,9 +45,9 @@ export default function EditEventsDialog({ orgId, color, event }) {
         }}
         open={isOpen}
       >
-        <DialogTitle>Edit Event</DialogTitle>
+        <DialogTitle>{isEdit ? "Edit Event" : "Create Event"}</DialogTitle>
         <DialogContent>
-          <p>Changes are saved as you enter them</p>
+          {isEdit ? <p>Changes are saved as you enter them</p> : <></>}
           {error !== "" ? <p className="error">{error}</p> : <></>}
           {/* Name */}
           <UserInput
@@ -113,15 +119,37 @@ export default function EditEventsDialog({ orgId, color, event }) {
           />
         </DialogContent>
         <DialogActions>
-          <button
-            onClick={() => {
-              setIsOpen(false);
-            }}
-            className="custom-color-button"
-            style={{ backgroundColor: color, borderColor: color }}
-          >
-            Done
-          </button>
+          {isEdit ? (
+            <div>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                }}
+                className="custom-color-button"
+                style={{ backgroundColor: color, borderColor: color }}
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div>
+                <button
+                onClick={() => {setShowAreYouSureDialog(true)}}
+                className="secondary custom-color-button"
+                style={{ color: color, borderColor: color }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateEvent}
+                className="custom-color-button"
+                style={{ backgroundColor: color, borderColor: color }}
+              >
+                Create
+              </button>
+              <AreYouSure open={showAreYouSureDialog} setOpen={setShowAreYouSureDialog} funcInsteadOfNavLink={() => {setIsOpen(false)}}/>
+            </div>
+          )}
         </DialogActions>
       </Dialog>
     </div>
