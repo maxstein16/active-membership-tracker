@@ -249,7 +249,7 @@ router.post(
       return res.status(400).json({ error: error.somethingWentWrong });
     }
 
-    const response = await business.createBonusRequirementInDB(requirement_id, {
+    const response = await business.createBonusRequirement(requirement_id, {
       threshold_percentage,
       bonus_points,
     });
@@ -285,7 +285,7 @@ router.put(
         .json({ error: error.mustHaveAtLeastOneFieldToUpdate });
     }
 
-    const response = await business.editBonusRequirementInDB(bonus_id, {
+    const response = await business.editBonusRequirement(bonus_id, {
       threshold_percentage,
       bonus_points,
     });
@@ -316,9 +316,7 @@ router.delete(
       return res.status(400).json({ error: error.settingNotFound });
     }
 
-    const response = await business.deleteBonusRequirementInDB(
-      parseInt(bonusId)
-    );
+    const response = await business.deleteBonusRequirement(parseInt(bonusId));
 
     if (response.error !== error.noError) {
       return res.status(400).json({ error: response.error });

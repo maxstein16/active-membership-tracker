@@ -34,9 +34,9 @@ async function getOrganizationSettingsInDB(orgId) {
     const membershipSettings = await getOrganizationMembershipRequirements(
       orgId
     );
-        if (!membershipSettings) {
-            return { error: error.settingNotFound, data: null };
-        }
+    if (!membershipSettings) {
+      return { error: error.settingNotFound, data: null };
+    }
 
     // Get email settings
     const emailSettings = await getOrganizationEmailSettingsInDB(orgId);
@@ -61,11 +61,11 @@ async function getOrganizationSettingsInDB(orgId) {
       })),
     };
 
-        return { error: error.noError, data: formattedData };
-    } catch (err) {
-        console.error("Error fetching organization settings:", err);
-        return { error: error.somethingWentWrong, data: null };
-    }
+    return { error: error.noError, data: formattedData };
+  } catch (err) {
+    console.error("Error fetching organization settings:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
 /**
@@ -229,7 +229,7 @@ async function deleteOrganizationMembershipRequirementInDB(
     // Verify organization exists
     const organization = await getOrganizationById(orgId);
     if (!organization) {
-            console.error(`Organization not found with ID: ${orgId}`);
+      console.error(`Organization not found with ID: ${orgId}`);
       return { error: error.organizationNotFound, data: null };
     }
 
@@ -243,17 +243,70 @@ async function deleteOrganizationMembershipRequirementInDB(
       return { error: error.settingNotFound, data: null };
     }
 
-        const deleted = await deleteMembershipRequirement(requirementId);
+    const deleted = await deleteMembershipRequirement(requirementId);
 
-        if (!deleted) {
-            return { error: error.settingNotFound, data: null };
-        }
-
-        return { error: error.noError, data: { deleted: true } };
-    } catch (err) {
-        console.error("Error deleting membership requirement:", err);
-        return { error: error.somethingWentWrong, data: null };
+    if (!deleted) {
+      return { error: error.settingNotFound, data: null };
     }
+
+    return { error: error.noError, data: { deleted: true } };
+  } catch (err) {
+    console.error("Error deleting membership requirement:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
+}
+
+/**
+ * Create a bonus requirement for a membership requirement
+ * @param {number} requirementId - The ID of the membership requirement
+ * @param {object} bonusData - Threshold percentage and bonus points
+ * @returns {Promise<Object>} Created bonus requirement
+ */
+async function createBonusRequirementInDB(requirementId, bonusData) {
+  try {
+    const newBonus = await createBonusRequirement(requirementId, bonusData);
+    return { error: error.noError, data: newBonus };
+  } catch (err) {
+    console.error("Error creating bonus requirement:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
+}
+
+/**
+ * Edit a bonus requirement
+ * @param {number} bonusId - The ID of the bonus requirement
+ * @param {object} updateData - Updated bonus data
+ * @returns {Promise<Object>} Updated bonus requirement
+ */
+async function editBonusRequirementInDB(bonusId, updateData) {
+  try {
+    const updatedBonus = await editBonusRequirement(bonusId, updateData);
+    if (!updatedBonus) {
+      return { error: error.settingNotFound, data: null };
+    }
+    return { error: error.noError, data: updatedBonus };
+  } catch (err) {
+    console.error("Error updating bonus requirement:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
+}
+
+/**
+ * Delete a bonus requirement
+ * @param {number} bonusId - The ID of the bonus requirement
+ * @returns {Promise<Object>} Deletion status
+ */
+async function deleteBonusRequirementInDB(bonusId) {
+  try {
+    const deleted = await deleteBonusRequirement(bonusId);
+    if (!deleted) {
+      return { error: error.settingNotFound, data: null };
+    }
+    return { error: error.noError, data: { deleted: true } };
+  } catch (err) {
+    console.error("Error deleting bonus requirement:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
 module.exports = {
