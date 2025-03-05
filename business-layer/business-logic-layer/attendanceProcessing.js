@@ -77,14 +77,9 @@ const getMemberAttendanceStatsDB = async (memberId, semesterId = null) => {
         // Calculate statistics
         const stats = {
             totalEventsAttended: filteredRecords.length,
-            totalVolunteerHours: filteredRecords.reduce((sum, record) => sum + record.volunteer_hours, 0),
-            totalPointsAccumulated: filteredRecords.reduce((sum, record) => sum + record.points_earned, 0),
             membershipStatus: membershipStatus,
             attendanceHistory: filteredRecords.map(record => ({
                 eventId: record.event_id,
-                checkIn: record.check_in,
-                volunteerHours: record.volunteer_hours,
-                pointsEarned: record.points_earned,
                 semesterId: record.semester_id
             }))
         };

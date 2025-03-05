@@ -4,7 +4,7 @@ const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getMemberIDByUser
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
 const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB, getUserOrganizationsInDB } = require("../organizationProcessing");
-const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getMeetingOrgReportInDB } = require("../organizationReportProcessing");
+const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getEventOrgReportInDB } = require("../organizationReportProcessing");
 const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB, getOrganizationEmailSettingsInDB, createOrganizationMembershipRequirementsInDB } = require("../organizationSettingsProcessing");
   
   // export to api calls
@@ -140,8 +140,8 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await getSemesterOrgReportInDB(orgId, semesterId);
     }
 
-    this.getMeetingOrgReport = async (orgId, meetingId) => {
-      return await getMeetingOrgReportInDB(orgId, meetingId);
+    this.getEventOrgReport = async (orgId, meetingId) => {
+      return await getEventOrgReportInDB(orgId, meetingId);
     }
 
     // Organization Settings Management

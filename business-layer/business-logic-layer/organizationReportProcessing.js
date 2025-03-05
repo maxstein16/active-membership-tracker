@@ -2,11 +2,10 @@ const Error = require("./public/errors.js");
 const error = new Error();
 const { getOrganizationById } = require("../data-layer/organization.js");
 const { getMemberById } = require("../data-layer/member.js");
-const { getMeetingDetails } = require("../data-layer/reports.js");
 const { getMembershipsByAttributes, getMembershipsByOrgAndSemester } = require("../data-layer/membership.js");
-const { getMemberAttendanceWithEvents, getMeetingAttendanceWithMembers } = require("../data-layer/attendance.js");
-const { getCurrentSemesters, getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
-const { getEventsWithAttendance } = require("../data-layer/event.js");
+const { getMemberAttendanceWithEvents, getEventAttendanceWithMembers } = require("../data-layer/attendance.js");
+const { getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
+const { getEventsWithAttendance, getEventById } = require("../data-layer/event.js");
 
 /**
  * Get specific report data for a member in an organization
@@ -44,7 +43,6 @@ async function getSpecificReportOrgDataInDB(orgId, memberId) {
         event_id: att.Event.event_id,
         event_name: att.Event.event_name,
         event_date: att.Event.event_start,
-        check_in: att.check_in
       }))
     };
 
@@ -106,41 +104,9 @@ async function getAnnualOrgReportInDB(orgId) {
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
       current_year: currentYear,
-      "member-data": {
-        total_members: currentYearMembers.length,
-        new_members: currentYearMembers.filter(m => 
-          !lastYearMembers.some(lym => lym.member_id === m.member_id)
-        ).length,
-        total_active_members: currentYearMembers.filter(m => m.active_member).length,
-        new_active_members: currentYearMembers.filter(m => 
-          m.active_member && !lastYearMembers.some(lym => lym.member_id === m.member_id)
-        ).length,
-        members: currentYearMembers.map(m => ({
-          member_id: m.Member.member_id,
-          role_num: m.membership_role,
-          firstName: m.Member.member_name.split(' ')[0],
-          lastName: m.Member.member_name.split(' ')[1],
-          rit_username: m.Member.member_email.split('@')[0],
-          phone: m.Member.member_phone_number
-        }))
-      },
-      "member-data-last-year": {
-        total_members: lastYearMembers.length,
-        new_members: lastYearMembers.length,
-        total_active_members: lastYearMembers.filter(m => m.active_member).length,
-        new_active_members: lastYearMembers.filter(m => m.active_member).length
-      },
       "meetings_data_this_year": {
-        number_of_meetings: currentYearEvents.filter(e => e.event_type === 'general_meeting').length,
-        number_of_events: currentYearEvents.filter(e => e.event_type !== 'general_meeting').length,
-        number_of_volunteering: currentYearEvents.filter(e => e.event_type === 'volunteer').length,
-        total_attendance: currentYearEvents.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
-      },
-      "meetings_data_last_year": {
-        number_of_meetings: lastYearEvents.filter(e => e.event_type === 'general_meeting').length,
-        number_of_events: lastYearEvents.filter(e => e.event_type !== 'general_meeting').length,
-        number_of_volunteering: lastYearEvents.filter(e => e.event_type === 'volunteer').length,
-        total_attendance: lastYearEvents.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
+        number_of_meetings: events.filter(e => e.event_type === 'general_meeting').length,
+        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
       }
     };
 
@@ -206,18 +172,8 @@ async function getSemesterOrgReportInDB(orgId) {
         }))
       },
       event_data: {
-        total_events: semesterEvents.length,
-        events_by_type: {
-          general_meetings: semesterEvents.filter(e => e.event_type === 'general_meeting').length,
-          volunteer: semesterEvents.filter(e => e.event_type === 'volunteer').length,
-          social: semesterEvents.filter(e => e.event_type === 'social').length,
-          workshop: semesterEvents.filter(e => e.event_type === 'workshop').length,
-          fundraiser: semesterEvents.filter(e => e.event_type === 'fundraiser').length,
-          committee: semesterEvents.filter(e => e.event_type === 'committee').length
-        },
-        total_attendance: semesterEvents.reduce((sum, event) => 
-          sum + (event.Attendances ? event.Attendances.length : 0), 0
-        )
+        total_events: events.length,
+        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
       }
     };
 
@@ -229,9 +185,9 @@ async function getSemesterOrgReportInDB(orgId) {
 }
 
 /**
- * Generate meeting report for organization
+ * Generate event report for organization
  */
-async function getMeetingOrgReportInDB(orgId, meetingId) {
+async function getEventOrgReportInDB(orgId, eventId) {
   try {
     // Get organization info
     const organization = await getOrganizationById(orgId);
@@ -239,14 +195,14 @@ async function getMeetingOrgReportInDB(orgId, meetingId) {
       return { error: error.organizationNotFound, data: null };
     }
 
-    // Get meeting info
-    const meeting = await getMeetingDetails(orgId, meetingId);
-    if (!meeting) {
+    // Get event info
+    const event = await getEventById(orgId, eventId);
+    if (!event) {
       return { error: error.eventNotFound, data: null };
     }
 
     // Get attendance and member info
-    const attendances = await getMeetingAttendanceWithMembers(meetingId);
+    const attendances = await getEventAttendanceWithMembers(eventId);
     const membershipStatuses = await getMembershipsByAttributes({
         organization_id: orgId,
         member_id: attendances.map(a => a.Member.member_id),
@@ -257,12 +213,12 @@ async function getMeetingOrgReportInDB(orgId, meetingId) {
       organization_id: organization.organization_id,
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
-      meeting_id: meeting.event_id,
-      meeting_type: meeting.event_type,
-      meeting_date: meeting.event_start,
-      meeting_name: meeting.event_name,
-      meeting_location: meeting.event_location,
-      meeting_description: meeting.event_description,
+      event_id: event.event_id,
+      event_type: event.event_type,
+      event_date: event.event_start,
+      event_name: event.event_name,
+      event_location: event.event_location,
+      event_description: event.event_description,
       attendance: {
         total_attendance: attendances.length,
         active_member_attendance: membershipStatuses.filter(m => m.active_member).length,
@@ -283,7 +239,7 @@ async function getMeetingOrgReportInDB(orgId, meetingId) {
 
     return { error: error.noError, data };
   } catch (err) {
-    console.error("Error in getMeetingOrgReportInDB:", err);
+    console.error("Error in getEventOrgReportInDB:", err);
     return { error: error.databaseError, data: null };
   }
 }
@@ -292,5 +248,5 @@ module.exports = {
   getSpecificReportOrgDataInDB,
   getAnnualOrgReportInDB,
   getSemesterOrgReportInDB,
-  getMeetingOrgReportInDB
+  getEventOrgReportInDB
 };

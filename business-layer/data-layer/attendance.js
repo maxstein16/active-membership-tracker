@@ -85,10 +85,10 @@ async function getMemberAttendanceWithEvents(orgId, memberId) {
   }
 }
 
-async function getMeetingAttendanceWithMembers(meetingId) {
+async function getEventAttendanceWithMembers(eventId) {
   try {
     const attendances = await Attendance.findAll({
-      where: { event_id: meetingId },
+      where: { event_id: eventId },
       include: {
         model: Member,
         required: true
@@ -107,5 +107,5 @@ module.exports = {
   getAttendanceByMemberId,
   getAttendanceByMemberAndEvent,
   getMemberAttendanceWithEvents,
-  getMeetingAttendanceWithMembers
+  getEventAttendanceWithMembers
 };
