@@ -79,13 +79,10 @@ class CSVProcessor {
                   attendeeRating: row["Attendee's Rating"] || "N/A",
                 };
 
-                // Skip if email already processed
-                if (processedEmails.has(processedRow.email)) {
-                  console.log(
-                    `Duplicate email found: ${processedRow.email}. Skipping.`
-                  );
-                  return resolve();
-                }
+                            // Skip if email already processed
+                            if (processedEmails.has(processedRow.email)) {
+                                return resolve();
+                            }
 
                 processedEmails.add(processedRow.email);
 
