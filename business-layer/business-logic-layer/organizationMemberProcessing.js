@@ -50,7 +50,7 @@ async function addMemberToAnOrganizationInDB(orgId, memberData) {
         if (isNaN(memberData.member_id)) {
             return { error: error.memberIdMustBeInteger, data: null };
         }
-        if (isNaN(memberData.role)) {
+        if (isNaN(memberData.membership_role)) {
             return { error: error.roleMustBeAnInteger, data: null };
         }
 
