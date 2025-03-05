@@ -99,7 +99,7 @@ export async function getAttendanceMemberData(event) {
       );
       if (memberData && memberData.hasOwnProperty("data")) {
         // console.log(memberData.data)
-        attendeesMemberData.push(memberData.data);
+        attendeesMemberData.push({...memberData.data}); // needs the copy because it causes an error otherwise
       }
       if (index === event.attendances.length - 1) {
         resolve()
