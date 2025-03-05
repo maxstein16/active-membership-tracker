@@ -85,19 +85,27 @@ export function turnEventsToCalendarEvents(events) {
 
 /**
  * Give the event and it will return all the attendees member information
- * @param {*} event 
- * @returns An array of member data 
+ * @param {*} event
+ * @returns An array of member data
  */
 export async function getAttendanceMemberData(event) {
-  let attendeesMemberData = []
-  await event.attendances.forEach(async (attendee) => {
-      const memberData = await getAPIData(`/member/${attendee.member_id}`, API_METHODS.get, {})
-      console.log(memberData)
-      if (memberData && memberData.hasOwnProperty('data')) {
-        console.log(memberData.data)
-        attendeesMemberData.push(memberData.data)
+  let attendeesMemberData = [];
+  await new Promise(( resolve, reject ) => {
+    event.attendances.forEach(async (attendee, index) => {
+      const memberData = await getAPIData(
+        `/member/${attendee.member_id}`,
+        API_METHODS.get,
+        {}
+      );
+      if (memberData && memberData.hasOwnProperty("data")) {
+        // console.log(memberData.data)
+        attendeesMemberData.push(memberData.data);
       }
+      if (index === event.attendances.length - 1) {
+        resolve()
+      }
+    });
   })
-  console.log(attendeesMemberData)
-  return attendeesMemberData
+
+  return attendeesMemberData;
 }

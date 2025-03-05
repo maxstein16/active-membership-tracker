@@ -14,10 +14,9 @@ export default function DisplayEventAttendance({ orgId, color, event }) {
 
   React.useEffect(() => {
     getAttendanceMemberData(event).then((data) => {
-        console.log(data)
         setAttendanceMembers(data)
     })
-  }, []);
+  }, [event]);
 
   return (
     <div style={{marginTop: '2em'}}>
