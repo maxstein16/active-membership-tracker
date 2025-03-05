@@ -188,15 +188,15 @@ router.delete(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let requirementId = req.query.requirementId;
+    let id = req.query.id;
 
     orgId = sanitizer.sanitize(orgId);
-    requirementId = sanitizer.sanitize(requirementId);
+    id = sanitizer.sanitize(id);
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-    if (!requirementId || isNaN(requirementId)) {
+    if (!id || isNaN(id)) {
       return res.status(400).json({ error: error.mustIncludeIdQueryParam });
     }
 
@@ -208,7 +208,7 @@ router.delete(
 
     const response = await business.deleteOrganizationMembershipRequirement(
       parseInt(orgId),
-      parseInt(requirementId)
+      parseInt(id)
     );
 
     if (response.error !== error.noError) {

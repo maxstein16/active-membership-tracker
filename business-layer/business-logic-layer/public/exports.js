@@ -169,8 +169,8 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await updateOrganizationEmailSettingsInDB(orgId, orgData);
     }
 
-    this.deleteOrganizationMembershipRequirement = async (orgId, requirementId) => {
-      return await deleteOrganizationMembershipRequirementInDB(orgId, requirementId);
+    this.deleteOrganizationMembershipRequirement = async (orgId, settingId) => {
+      return await deleteOrganizationMembershipRequirementInDB(orgId, settingId);
     }
 
     this.deleteOrganizationEmailSettings = async (orgId) => {
