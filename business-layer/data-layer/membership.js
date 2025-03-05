@@ -1,4 +1,4 @@
-const { Membership } = require("../db");
+const { Membership, Member } = require('../db');
 
 /**
  * Create a membership record
@@ -109,6 +109,12 @@ const getMembershipByAttributes = async (filters) => {
   }
 };
 
+/**
+ * Get memberships for an organization across multiple semesters
+ * @param {number} orgId - The ID of the organization
+ * @param {number[]} semesterIds - Array of semester IDs to query
+ * @returns {Promise<Object[]>} Memberships for the organization across specified semesters
+ */
 async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   try {
     const memberships = await Membership.findAll({
@@ -129,11 +135,16 @@ async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   }
 }
 
+async function deleteMembershipRequirement(requirementId) {
+  return await Membership.destroy({ where: { requirement_id: requirementId } });
+}
+
 module.exports = { 
   createMembership, 
   editMembership, 
   editMembershipRole,
   getMembershipsByAttributes,
   getMembershipByAttributes,
-  getMembershipsByOrgAndSemester
+  getMembershipsByOrgAndSemester,
+  deleteMembershipRequirement
 };

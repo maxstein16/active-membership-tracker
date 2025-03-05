@@ -1,6 +1,7 @@
 const Error = require("./public/errors.js");
 const { getOrganizationById, getOrganizationMembershipRequirements, editOrganizationMembershipRequirement, createOrganizationMembershipRequirement } = require("../data-layer/organization.js");
 const { getEmailSettings, createEmailSettings, updateEmailSettings, deleteEmailSettings } = require("../data-layer/email-settings.js");
+const { deleteMembershipRequirement } = require("../data-layer/membership.js");
 const error = new Error();
 
 /**
@@ -18,6 +19,9 @@ async function getOrganizationSettingsInDB(orgId) {
 
         // Get associated membership settings
         const membershipSettings = await getOrganizationMembershipRequirements(orgId);
+        if (!membershipSettings) {
+            return { error: error.settingNotFound, data: null };
+        }
 
         // Get email settings
         const emailSettings = await getOrganizationEmailSettingsInDB(orgId)
@@ -40,7 +44,7 @@ async function getOrganizationSettingsInDB(orgId) {
         console.error("Error fetching organization settings:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-};
+}
 
 /**
  * Get organization email settings
@@ -198,6 +202,7 @@ async function deleteOrganizationMembershipRequirementInDB(orgId, requirementId)
         // Verify organization exists
         const organization = await getOrganizationById(orgId);
         if (!organization) {
+            console.error(`Organization not found with ID: ${orgId}`);
             return { error: error.organizationNotFound, data: null };
         }
 
@@ -209,15 +214,18 @@ async function deleteOrganizationMembershipRequirementInDB(orgId, requirementId)
             return { error: error.settingNotFound, data: null };
         }
 
-        // Delete the membership requirement
-        await membership.destroy();
+        const deleted = await deleteMembershipRequirement(requirementId);
+
+        if (!deleted) {
+            return { error: error.settingNotFound, data: null };
+        }
 
         return { error: error.noError, data: { deleted: true } };
     } catch (err) {
         console.error("Error deleting membership requirement:", err);
         return { error: error.somethingWentWrong, data: null };
     }
-};
+}
 
 module.exports = {
     getOrganizationSettingsInDB,
