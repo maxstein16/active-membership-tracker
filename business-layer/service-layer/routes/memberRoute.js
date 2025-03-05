@@ -12,12 +12,15 @@ const sanitizer = new Sanitizer();
 
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
+const { Member } = require("../../db");
+
 // GET /v1/member/:memberId
 router.get(
   "/:memberId",
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     // check if memberId is provided
+   
     if (!req.params.memberId) {
       res.status(400).json({ error: error.mustIncludeMemberId });
       return;
@@ -45,8 +48,18 @@ router.get(
 );
 
 // Handle GET requests without memberId
-router.get("/", (req, res) => {
-  res.status(400).json({ error: error.mustIncludeMemberId });
+router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {  
+  let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
+
+  const memberData = await business.getMemberById(memberId);
+
+  if (memberData.error && memberData.error !== error.noError) {
+    res.status(404).json({ error: error.memberCannotBeFoundInDB });
+    return;
+  }
+
+  res.status(200).json({ data: memberData.data });
+
 });
 
 // PUT /v1/member/:memberId
@@ -97,8 +110,41 @@ router.put(
   }
 );
 
-router.put("/", (req, res) => {
-  res.status(400).json({ error: error.mustIncludeMemberId });
+router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+  let body = req.body;
+  let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
+
+  // check if at least one valid field is provided for update
+  const allowedFields = [
+    "personal_email",
+    "phone_number",
+    "gender",
+    "race",
+    "tshirt_size",
+    "major",
+    "graduation_date",
+  ];
+  const hasValidFields = Object.keys(body).some((key) =>
+    allowedFields.includes(key)
+  );
+
+  if (!hasValidFields) {
+    res.status(400).json({
+      error: error.mustIncludeValidFieldAddMember,
+    });
+    return;
+  }
+
+  // send data to backend for update
+  const updateResult = await business.updateMember(memberId, body);
+
+  if (updateResult.error && updateResult.error !== error.noError) {
+    res.status(404).json({ error: error.memberCannotBeFoundInDB });
+    return;
+  }
+
+  res.status(200).json({ data: updateResult.data });
+
 });
 
 // POST /v1/member
@@ -154,12 +200,11 @@ router.get(
         error: error.mustIncludeOrgId
       });
     }
-
+   
     // Rest of the validation and processing
-    let memberId = sanitizer.sanitize(req.params.memberId);
-    let orgId = sanitizer.sanitize(req.query.orgId);
+   let memberId = sanitizer.sanitize(req.params.memberId);
+    var orgId = sanitizer.sanitize(req.query.orgId);
 
-    // Validate member ID
     if (isNaN(memberId)) {
       return res.status(400).json({
         error: error.mustIncludeValidMemberId
@@ -176,6 +221,7 @@ router.get(
     // Fetch member stats for the organization
     const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
+    console.log(memberStats);
     if (memberStats.error) {
       return res.status(404).json({
         error: memberStats.error
@@ -188,5 +234,6 @@ router.get(
     });
   }
 );
+
 
 module.exports = router;
