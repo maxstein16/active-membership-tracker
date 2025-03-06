@@ -5,6 +5,7 @@ import "../../../assets/css/general.css";
 import "../../../assets/css/memberPages.css";
 import { Paper, Dialog, DialogTitle, DialogContent, CircularProgress } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import MemberTable from "../MemberTable";
 import DownloadReport from "./DownloadReport";
 import { getPastOrganizationEvents, getMeetingReport } from "../../../utils/handleSettingsData";
@@ -54,6 +55,8 @@ export default function EventTable({ orgId, color }) {
           ...prevEvent,
           members: report?.members || [],
           totalAttendance: report?.totalAttendance || 0,
+          activeMemberAttendance: report?.activeMemberAttendance || 0,
+          inactiveMemberAttendance: report?.inactiveMemberAttendance || 0,
           loading: false
         }));
       })
@@ -104,7 +107,7 @@ export default function EventTable({ orgId, color }) {
         <Dialog open={Boolean(selectedEvent)} onClose={() => setSelectedEvent(null)} fullWidth maxWidth="md">
           <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span>Meeting Details</span>
-            <DownloadReport color={color} classToDownload="meeting-details" /> {/* ✅ Moved to the top-right */}
+            <DownloadReport color={color} classToDownload="meeting-details" />
           </DialogTitle>
           <DialogContent>
             <p><strong>Meeting Name:</strong> {selectedEvent.eventName}</p>
@@ -113,17 +116,43 @@ export default function EventTable({ orgId, color }) {
             <p><strong>Location:</strong> {selectedEvent.eventLocation}</p>
             <p><strong>Description:</strong> {selectedEvent.eventDescription}</p>
             <p><strong>Total Attendance:</strong> {selectedEvent.totalAttendance}</p>
-
             {selectedEvent.loading ? (
               <CircularProgress />
-            ) : selectedEvent.members.length > 0 ? (
-              <MemberTable 
-                color={color} 
-                membersList={selectedEvent.members} 
-                orgId={orgId} 
-              />
             ) : (
-              <p>No attendees for this event.</p>
+              <>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                  <ResponsiveContainer width="50%" height={300}>
+                    <PieChart>
+                      <Pie
+                        dataKey="value"
+                        data={[
+                          { name: "Active Members", value: selectedEvent.activeMemberAttendance },
+                          { name: "Inactive Members", value: selectedEvent.inactiveMemberAttendance }
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        label
+                      >
+                        <Cell key="active" fill="#82ca9d" />
+                        <Cell key="inactive" fill="#ff6361" />
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                {selectedEvent.members.length > 0 ? (
+                  <MemberTable 
+                    color={color} 
+                    membersList={selectedEvent.members} 
+                    orgId={orgId} 
+                  />
+                ) : (
+                  <p>No attendees for this event.</p>
+                )}
+              </>
             )}
           </DialogContent>
         </Dialog>

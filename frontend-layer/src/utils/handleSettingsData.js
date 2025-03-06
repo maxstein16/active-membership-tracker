@@ -316,5 +316,7 @@ export async function getMeetingReport(orgId, meetingId) {
   return {
     members: formattedMembers,
     totalAttendance: attendanceData.total_attendance || 0,
+    activeMemberAttendance: attendanceData.active_member_attendance || 0,
+    inactiveMemberAttendance: attendanceData.inactive_member_attendance || 0,
   };
 }
