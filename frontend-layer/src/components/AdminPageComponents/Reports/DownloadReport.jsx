@@ -34,27 +34,31 @@ export default function DownloadReport({ color, orgId, reportType, meetingId }) 
       pdf.text(`Organization: ${reportData.organization_name}`, 10, 20);
       pdf.text(`Abbreviation: ${reportData.organization_abbreviation}`, 10, 30);
 
-      if (reportType === "semester") {
-        pdf.text(`Semester: ${reportData.semester}`, 10, 40);
-        pdf.text(`Academic Year: ${reportData.academic_year}`, 10, 50);
+      if (reportType === "meeting") {
+        pdf.text(`Meeting Name: ${reportData.meeting_name}`, 10, 40);
+        pdf.text(`Type: ${reportData.meeting_type.charAt(0).toUpperCase() + reportData.meeting_type.slice(1)}`, 10, 50);
+        pdf.text(`Date: ${new Date(reportData.meeting_date).toLocaleString()}`, 10, 60);
+        pdf.text(`Location: ${reportData.meeting_location}`, 10, 70);
+        pdf.text(`Description: ${reportData.meeting_description}`, 10, 80);
 
-        const memberData = reportData.member_data || {};
-        pdf.text(`Total Members: ${memberData.total_members || 0}`, 10, 60);
-        pdf.text(`Active Members: ${memberData.active_members || 0}`, 10, 70);
+        const attendanceData = reportData.attendance || {};
+        pdf.text(`Total Attendance: ${attendanceData.total_attendance || 0}`, 10, 90);
+        pdf.text(`Active Members Attended: ${attendanceData.active_member_attendance || 0}`, 10, 100);
+        pdf.text(`Inactive Members Attended: ${attendanceData.inactive_member_attendance || 0}`, 10, 110);
 
-        pdf.text(`Members:`, 10, 80);
-        let yOffset = 90;
-        memberData.members.forEach((member, index) => {
-          pdf.text(`${index + 1}. ${member.firstName} ${member.lastName} - ${member.points} points`, 15, yOffset);
+        pdf.text(`Members Who Attended:`, 10, 120);
+        let yOffset = 130;
+        attendanceData.members_who_attended.forEach((member, index) => {
+          pdf.text(
+            `${index + 1}. ${member.firstName} ${member.lastName} - ${member.rit_username}@rit.edu`,
+            15,
+            yOffset
+          );
           yOffset += 10;
         });
-
-        const eventData = reportData.event_data || {};
-        pdf.text(`Total Events: ${eventData.total_events || 0}`, 10, yOffset + 10);
-        pdf.text(`Total Attendance: ${eventData.total_attendance || 0}`, 10, yOffset + 20);
       }
 
-      pdf.save(`${reportType}_report_${reportData.semester || "N/A"}.pdf`);
+      pdf.save(`${reportType}_report_${reportData.meeting_name || "N/A"}.pdf`);
       alert("Report successfully downloaded!");
     } catch (error) {
       console.error("Error generating PDF:", error);
