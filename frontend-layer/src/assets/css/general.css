@@ -15,6 +15,10 @@ h1 {
     color: var(--red);
 }
 
+.green {
+    color: var(--green);
+}
+
 /* Global Button formatting */
 
 button {
