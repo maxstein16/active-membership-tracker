@@ -10,6 +10,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 
 export default function UploadDataModal({ orgId, open, setOpen }) {
+  const [fileSelected, setFileSelected] = React.useState(false);
+
+  const handleFileChange = (event) => {
+    setFileSelected(event.target.files.length > 0);
+  };
+
   return (
     <Dialog
       onClose={() => {
@@ -24,13 +30,25 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
           own data files. Make sure you follow the same format as campus groups
           :)
         </p>
-        <input type="file" />
+        <input type="file" onChange={handleFileChange} />
       </DialogContent>
       <DialogActions>
         <button autoFocus className="secondary" onClick={() => setOpen(false)}>
           Cancel
         </button>
-        <button onClick={() => setOpen(false)}>Upload</button>
+        <button
+          onClick={() => {
+            if (fileSelected) {
+              console.log("Uploading file...");
+              // Implement actual upload logic here
+            } else {
+              console.log("Upload first!");
+            }
+          }}
+          disabled={!fileSelected} // Disables button until a file is selected
+        >
+          Upload
+        </button>
       </DialogActions>
     </Dialog>
   );
