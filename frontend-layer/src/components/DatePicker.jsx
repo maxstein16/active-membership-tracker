@@ -25,7 +25,8 @@ export default function DatePicker({
         variant="outlined"
         value={value}
         onChange={(event) => {
-          setValue(event.target.value);
+          setValue(event);
+          onLeaveField(event);
         }}
         color="black"
         sx={{
@@ -44,9 +45,6 @@ export default function DatePicker({
               },
             },
           },
-        }}
-        onBlur={(event) => {
-          onLeaveField(event.target.value);
         }}
       />
     </div>

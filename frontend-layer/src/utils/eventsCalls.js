@@ -90,7 +90,7 @@ export function turnEventsToCalendarEvents(events) {
  */
 export async function getAttendanceMemberData(event) {
   let attendeesMemberData = [];
-  await new Promise(( resolve, reject ) => {
+  await new Promise((resolve, reject) => {
     event.attendances.forEach(async (attendee, index) => {
       const memberData = await getAPIData(
         `/member/${attendee.member_id}`,
@@ -99,13 +99,59 @@ export async function getAttendanceMemberData(event) {
       );
       if (memberData && memberData.hasOwnProperty("data")) {
         // console.log(memberData.data)
-        attendeesMemberData.push({...memberData.data}); // needs the copy because it causes an error otherwise
+        try {
+          attendeesMemberData.push({ ...memberData.data }); // needs the copy because it causes an error otherwise
+        } catch (error) {
+          console.log("error: ", error);
+        }
       }
       if (index === event.attendances.length - 1) {
-        resolve()
+        resolve();
       }
     });
-  })
+  });
 
   return attendeesMemberData;
+}
+
+
+/**
+ * Save the specific membership requirement setting to the db on edit
+ * @param {Number} orgId - organization id from the db
+ * @param {Number} requirementId - membership requirement id to edit
+ * @param {String} newValue - new setting
+ * @param {String} settingName - specific setting from the membership requirement to edit (meeting_type, frequency, amount_type, amount, requirement_scope)
+ * @returns true of there was no error, otherwise false
+ */
+export async function updateEventSetting(
+  orgId,
+  eventId,
+  newValue,
+  settingName
+) {
+  let body = {};
+  body[settingName] = newValue;
+
+  if (settingName === 'event_type' && newValue === 'general meeting') {
+    body[settingName] = 'general_meeting';
+  }
+  // console.log(body)
+
+  // call the api
+  const result = await getAPIData(
+    `/organization/${orgId}/events/${eventId}`,
+    API_METHODS.put,
+    body
+  );
+  // console.log(result);
+
+  if (!result) {
+    console.log("must login", result)
+    return false;
+  }
+  // decide return
+  if (result.status && result.status === "success") {
+    return true;
+  }
+  return false;
 }

@@ -13,6 +13,8 @@ import UserInput from "../UserInput.jsx";
 import DatePicker from "../DatePicker.jsx";
 import moment from "moment";
 import AreYouSure from "../AreYouSure.jsx";
+import CustomSelect from "../CustomSelect.jsx";
+import { updateEventSetting } from "../../utils/eventsCalls.js";
 
 export default function EditEventsDialog({ isEdit, orgId, color, event }) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -20,12 +22,28 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
   const [name, setName] = React.useState(event?.event_name || "");
   const [desc, setDesc] = React.useState(event?.event_description || "");
   const [location, setLocation] = React.useState(event?.event_location || "");
+  const [type, setType] = React.useState(
+    event?.event_type || "general meeting"
+  );
   const [start, setStart] = React.useState(
     moment(event?.event_start || moment())
   );
   const [end, setEnd] = React.useState(moment(event?.event_end || moment()));
   const [showAreYouSureDialog, setShowAreYouSureDialog] = React.useState(false);
 
+  const updateInDBifEdit = (newValue, settingName) => {
+    if (isEdit) {
+      // update db
+      setError("")
+      updateEventSetting(orgId, event.event_id, newValue, settingName).then(
+        (isSuccess) => {
+          if (!isSuccess) {
+            setError("Name didn't save properly");
+          }
+        }
+      );
+    }
+  };
   const handleCreateEvent = () => {};
 
   return (
@@ -62,7 +80,7 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
                 return;
               }
               setError("");
-              // TODO save in db
+              updateInDBifEdit(newValue, "event_name");
             }}
           />
           {/* Description */}
@@ -78,7 +96,7 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
                 return;
               }
               setError("");
-              // TODO save in db
+              updateInDBifEdit(newValue, "event_description");
             }}
           />
           {/* Location */}
@@ -94,7 +112,25 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
                 return;
               }
               setError("");
-              // TODO save in db
+              updateInDBifEdit(newValue, "event_location");
+            }}
+          />
+          {/* Meeting Type Select */}
+          <CustomSelect
+            label="Event Type"
+            color={color}
+            options={[
+              "general meeting",
+              "volunteer",
+              "social",
+              "workshop",
+              "fundraiser",
+              "committee",
+            ]}
+            startingValue={event?.event_type || "general meeting"}
+            onSelect={(value) => {
+              updateInDBifEdit(value, "event_type");
+              setType(value);
             }}
           />
           {/* Start Date Time */}
@@ -104,7 +140,7 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             value={start}
             setValue={setStart}
             onLeaveField={(newValue) => {
-              // TODO save in db
+                updateInDBifEdit(newValue, "event_start");
             }}
           />
           {/* Emd Date Time */}
@@ -115,6 +151,7 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             setValue={setEnd}
             onLeaveField={(newValue) => {
               // TODO save in db
+              updateInDBifEdit(newValue, "event_end");
             }}
           />
         </DialogContent>
@@ -133,8 +170,10 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             </div>
           ) : (
             <div>
-                <button
-                onClick={() => {setShowAreYouSureDialog(true)}}
+              <button
+                onClick={() => {
+                  setShowAreYouSureDialog(true);
+                }}
                 className="secondary custom-color-button"
                 style={{ color: color, borderColor: color }}
               >
@@ -147,7 +186,13 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
               >
                 Create
               </button>
-              <AreYouSure open={showAreYouSureDialog} setOpen={setShowAreYouSureDialog} funcInsteadOfNavLink={() => {setIsOpen(false)}}/>
+              <AreYouSure
+                open={showAreYouSureDialog}
+                setOpen={setShowAreYouSureDialog}
+                funcInsteadOfNavLink={() => {
+                  setIsOpen(false);
+                }}
+              />
             </div>
           )}
         </DialogActions>

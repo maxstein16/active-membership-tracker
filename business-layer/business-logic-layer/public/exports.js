@@ -31,12 +31,12 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
     }
   
     // Event Management
-    this.createEvent = async (eventData) => {
-      return await createEventInDB(eventData);
+    this.createEvent = async (eventData, body) => {
+      return await createEventInDB(eventData, body);
     };
   
-    this.updateEvent = async (eventId, updateData) => {
-      return await updateEventInDB(eventId, updateData);
+    this.updateEvent = async (orgId, eventId, updateData) => {
+      return await updateEventInDB(orgId, eventId, updateData);
     };
   
     this.getAllEventsByOrganization = async (orgId) => {
