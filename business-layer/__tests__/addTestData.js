@@ -155,6 +155,8 @@ async function addTestData() {
 
   for (const member of members) {
     let randomNum = Math.floor(Math.random() * 40) + 1;
+    
+    // FALL 2024 MEMBERSHIPS (semester_id = 1123)
     const membership1a = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
@@ -166,11 +168,37 @@ async function addTestData() {
     });
 
     randomNum = Math.floor(Math.random() * 40) + 1;
+    
     const membership1b = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
       organization_id: org2.organization_id,
       semester_id: sem1.semester_id,
+      membership_points: randomNum,
+      active_member: randomNum >= 23,
+      active_semesters: 1,
+    });
+
+    // INSERT SPRING 2025 MEMBERSHIPS (semester_id = 1124) HERE:
+    randomNum = Math.floor(Math.random() * 40) + 1;
+
+    await Membership.create({
+      membership_role: 2,
+      member_id: member.member_id,
+      organization_id: org1.organization_id,
+      semester_id: sem2.semester_id,
+      membership_points: randomNum,
+      active_member: randomNum >= 42,
+      active_semesters: 1,
+    });
+
+    randomNum = Math.floor(Math.random() * 40) + 1;
+
+    await Membership.create({
+      membership_role: 2,
+      member_id: member.member_id,
+      organization_id: org2.organization_id,
+      semester_id: sem2.semester_id,
       membership_points: randomNum,
       active_member: randomNum >= 23,
       active_semesters: 1,

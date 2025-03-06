@@ -320,3 +320,43 @@ export async function getMeetingReport(orgId, meetingId) {
     inactiveMemberAttendance: attendanceData.inactive_member_attendance || 0,
   };
 }
+
+export async function getAnnualReportData(orgId) {
+  const apiUrl = `/organization/${orgId}/reports/annual`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching annual report data.");
+    return null;
+  }
+
+  return response.orgData;
+}
+
+
+export async function getSemesterReportData(orgId) {
+  const apiUrl = `/organization/${orgId}/reports/semesterly`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching semester report data.");
+    return null;
+  }
+
+  return response.orgData;
+}
+
+export async function getMeetingReportData(orgId, meetingId) {
+  const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching meeting report data.");
+    return null;
+  }
+
+  return response.orgData;
+}

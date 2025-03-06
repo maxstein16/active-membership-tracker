@@ -84,7 +84,11 @@ export default function YearlyReport({ orgId, color }) {
                 // get new report data
               }
             />
-            <DownloadReport color={color} classToDownload={"yearly-report"} />
+            <DownloadReport 
+              color={color} 
+              orgId={orgId} 
+              reportType="annual" 
+            />
           </div>
 
           <div className="yearly-report-content">

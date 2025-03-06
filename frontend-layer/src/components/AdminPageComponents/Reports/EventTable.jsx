@@ -107,7 +107,12 @@ export default function EventTable({ orgId, color }) {
         <Dialog open={Boolean(selectedEvent)} onClose={() => setSelectedEvent(null)} fullWidth maxWidth="md">
           <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span>Meeting Details</span>
-            <DownloadReport color={color} classToDownload="meeting-details" />
+            <DownloadReport 
+              color={color} 
+              orgId={orgId} 
+              reportType="meeting"
+              meetingId={selectedEvent.eventId} 
+            />
           </DialogTitle>
           <DialogContent>
             <p><strong>Meeting Name:</strong> {selectedEvent.eventName}</p>

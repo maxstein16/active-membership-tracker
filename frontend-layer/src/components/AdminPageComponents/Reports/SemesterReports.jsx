@@ -87,7 +87,11 @@ export default function SemesterReport({ orgId, color }) {
                 // get new report data
               }
             />
-            <DownloadReport color={color} classToDownload={"semester-report-content"}/>
+            <DownloadReport 
+              color={color} 
+              orgId={orgId} 
+              reportType="semester" 
+            />
           </div>
 
 
