@@ -135,8 +135,8 @@ export default function EventTable({ orgId, color }) {
                         fill="#8884d8"
                         label
                       >
-                        <Cell key="active" fill="#82ca9d" />
-                        <Cell key="inactive" fill="#ff6361" />
+                        <Cell key="active" fill="#009CBD" />
+                        <Cell key="inactive" fill="#D7D2CB" />
                       </Pie>
                       <Tooltip />
                       <Legend />
