@@ -95,7 +95,7 @@ function mapToDbFields(orgData) {
         organization_color: orgData.organization_color,
         organization_abbreviation: orgData.organization_abbreviation,
         organization_description: orgData.org_description,
-        organization_threshold: orgData.active_membership_threshold,
+        organization_threshold: orgData.organization_threshold,
         organization_category: orgData.org_category,
         contact_email: orgData.org_contact_email,
         phone_number: orgData.org_phone_number
