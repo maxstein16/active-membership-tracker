@@ -2,20 +2,34 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs"); // Add this line to require 'fs'
 
 const ErrorMessages = require("../../business-logic-layer/public/errors.js");
 const error = new ErrorMessages();
 
-const BusinessLogic = require("../../business-logic-layer/public/csvUploadProcessing.js");
+const BusinessLogic = require("../../business-logic-layer/csvUploadProcessing.js");
 const business = new BusinessLogic();
 
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
+const { compareSync } = require("bcrypt");
+
+// Define the upload directory
+const uploadDir = path.join(__dirname, "uploads");
+
+// Check if the folder exists, if not, create it
+if (!fs.existsSync(uploadDir)) {
+    console.log("Uploads directory not found. Creating...");
+    fs.mkdirSync(uploadDir);
+    console.log("Uploads directory created:", uploadDir);  // Log the path where the folder was created
+} else {
+    console.log("Uploads directory already exists:", uploadDir);  // Log if it already exists
+}
 
 // Configure Multer for file uploads
 const upload = multer({
-    dest: "uploads/",
+    dest: uploadDir, // Use the correct upload directory here
     limits: { fileSize: 10 * 1024 * 1024 },  // Limit file size to 10MB
     fileFilter: (req, file, cb) => {
         if (path.extname(file.originalname) !== ".csv") {
@@ -26,16 +40,20 @@ const upload = multer({
 });
 
 router.post(
-    "/upload-csv",
+    "/:orgId/upload",
     isAuthorizedHasSessionForAPI,
     upload.single("file"),
     async (req, res) => {
+        console.log("Yippe managed to get to csvUploadRoute!")
+        console.log('Extracted orgId:', req.params.orgId);
         let orgId = req.params.orgId;
         orgId = sanitizer.sanitize(orgId);
 
         // Validate organization ID
         if (isNaN(orgId)) {
             return res.status(400).json({ error: error.organizationIdMustBeInteger });
+        } else {
+            console.log("Your org id is valid")
         }
 
         // Check if file was uploaded

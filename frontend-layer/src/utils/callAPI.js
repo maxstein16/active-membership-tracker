@@ -10,25 +10,48 @@ const connect4server = "http://localhost:8080/v1";
 export async function getAPIData(endpoint, method, payload) {
   let details = {
     method: method,
-    credentials: 'include',
+    credentials: "include",
     headers: {
       Accept: "application/json",
-      "Content-Type": 'application/json',
     },
   };
-  if (method !== API_METHODS.get) {
-    details["body"] = JSON.stringify(payload);
+
+
+  console.log("getAPIData is attempting its thing");
+  // If payload is FormData (for file uploads), do NOT stringify or set Content-Type
+  if (payload instanceof FormData) {
+    details.body = payload;
+    // Remove "Content-Type" header so browser sets it automatically
+  } else if (method !== API_METHODS.get) {
+    details.headers["Content-Type"] = "application/json";
+    details.body = JSON.stringify(payload);
   }
 
   let link = `${connect4server}${endpoint}`;
-  // console.log("LINK", link)
-
   return fetch(link, details)
-    .then((res) => res.json())
+    .then(async (res) => {
+      const contentType = res.headers.get("content-type");
+
+      if (!res.ok) {
+        // If the response is an error (non-2xx status), read it as text to prevent JSON.parse errors
+        const text = await res.text();
+        throw new Error(`API error ${res.status}: ${text}`);
+      }
+
+      // Only parse JSON if the response type is actually JSON
+      if (contentType && contentType.includes("application/json")) {
+        return res.json();
+      } else {
+        return { message: "Response is not JSON", raw: await res.text() };
+      }
+    })
     .catch((err) => {
-      console.log("err:", err);
+      console.error("API error:", err);
+      return { error: err.message }; // Ensure the function always returns an object
     });
+
 }
+
 
 export const API_METHODS = {
   get: "GET",

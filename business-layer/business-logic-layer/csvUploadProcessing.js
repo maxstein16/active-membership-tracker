@@ -1,6 +1,6 @@
 const fs = require("fs");
 const csv = require("fast-csv");
-const ErrorMessages = require("../../business-logic-layer/public/errors.js");
+const ErrorMessages = require("./public/errors.js");
 const error = new ErrorMessages();
 const { createAttendance } = require("../data-layer/attendance.js");
 const { createMembership } = require("../data-layer/membership.js");
