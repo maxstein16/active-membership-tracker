@@ -116,11 +116,11 @@ export async function getAttendanceMemberData(event) {
 
 
 /**
- * Save the specific membership requirement setting to the db on edit
+ * Save the specific event setting to the db on edit
  * @param {Number} orgId - organization id from the db
- * @param {Number} requirementId - membership requirement id to edit
+ * @param {Number} eventId - event id to edit
  * @param {String} newValue - new setting
- * @param {String} settingName - specific setting from the membership requirement to edit (meeting_type, frequency, amount_type, amount, requirement_scope)
+ * @param {String} settingName - specific setting from the event database to edit
  * @returns true of there was no error, otherwise false
  */
 export async function updateEventSetting(
@@ -144,6 +144,42 @@ export async function updateEventSetting(
     body
   );
   // console.log(result);
+
+  if (!result) {
+    console.log("must login", result)
+    return false;
+  }
+  // decide return
+  if (result.status && result.status === "success") {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ * Create a new event in the DB
+ * @param {*} orgId - org the event belongs to 
+ * @param {*} newEventData - all the data required for the API call
+ * @returns true if no errors, false if errors
+ */
+export async function createNewEvent(
+  orgId,
+  newEventData
+) {
+  const body = {...newEventData}
+  if (body.event_type === "general meeting") {
+    body.event_type = "general_meeting";
+  }
+  console.log(body)
+
+  // call the api
+  const result = await getAPIData(
+    `/organization/${orgId}/events/`,
+    API_METHODS.post,
+    body
+  );
+  console.log(result);
 
   if (!result) {
     console.log("must login", result)

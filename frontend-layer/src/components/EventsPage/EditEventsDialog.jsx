@@ -14,7 +14,7 @@ import DatePicker from "../DatePicker.jsx";
 import moment from "moment";
 import AreYouSure from "../AreYouSure.jsx";
 import CustomSelect from "../CustomSelect.jsx";
-import { updateEventSetting } from "../../utils/eventsCalls.js";
+import { createNewEvent, updateEventSetting } from "../../utils/eventsCalls.js";
 
 export default function EditEventsDialog({ isEdit, orgId, color, event }) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -23,7 +23,9 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
   const [desc, setDesc] = React.useState(event?.event_description || "");
   const [location, setLocation] = React.useState(event?.event_location || "");
   const [type, setType] = React.useState(
-    event?.event_type || "general meeting"
+    event && event.event_type !== "general_meeting"
+      ? event.event_type
+      : "general meeting"
   );
   const [start, setStart] = React.useState(
     moment(event?.event_start || moment())
@@ -31,20 +33,41 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
   const [end, setEnd] = React.useState(moment(event?.event_end || moment()));
   const [showAreYouSureDialog, setShowAreYouSureDialog] = React.useState(false);
 
+  
   const updateInDBifEdit = (newValue, settingName) => {
     if (isEdit) {
       // update db
-      setError("")
+      setError("");
       updateEventSetting(orgId, event.event_id, newValue, settingName).then(
         (isSuccess) => {
           if (!isSuccess) {
-            setError("Name didn't save properly");
+            setError("Your data didn't save properly");
           }
         }
       );
     }
   };
-  const handleCreateEvent = () => {};
+  const handleCreateEvent = () => {
+    if (!isEdit) {
+      setError("");
+      const newEvent = {
+        event_name: name,
+        event_start: start,
+        event_end: end,
+        event_location: location,
+        event_description: desc,
+        event_type: type,
+      };
+      // call api then reload
+      createNewEvent(orgId, newEvent).then((isSuccess) => {
+        if (!isSuccess) {
+          setError("Error creating your event, try again");
+          return;
+        }
+        window.location.reload();
+      });
+    }
+  };
 
   return (
     <div>
@@ -127,7 +150,9 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
               "fundraiser",
               "committee",
             ]}
-            startingValue={event?.event_type || "general meeting"}
+            startingValue={event && event.event_type !== "general_meeting"
+                ? event.event_type
+                : "general meeting"}
             onSelect={(value) => {
               updateInDBifEdit(value, "event_type");
               setType(value);
@@ -140,7 +165,7 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             value={start}
             setValue={setStart}
             onLeaveField={(newValue) => {
-                updateInDBifEdit(newValue, "event_start");
+              updateInDBifEdit(newValue, "event_start");
             }}
           />
           {/* Emd Date Time */}
@@ -161,6 +186,7 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
               <button
                 onClick={() => {
                   setIsOpen(false);
+                  window.location.reload();
                 }}
                 className="custom-color-button"
                 style={{ backgroundColor: color, borderColor: color }}
