@@ -34,6 +34,23 @@ export default function DownloadReport({ color, orgId, reportType, meetingId }) 
       pdf.text(`Organization: ${reportData.organization_name}`, 10, 20);
       pdf.text(`Abbreviation: ${reportData.organization_abbreviation}`, 10, 30);
 
+      if (reportType === "annual") {
+        pdf.text(`Year: ${reportData.current_year}`, 10, 40);
+        const meetingsData = reportData.meetings_data_this_year || {};
+        pdf.text(`Total Meetings Held: ${meetingsData.number_of_meetings || 0}`, 10, 50);
+        pdf.text(`Total Attendance: ${meetingsData.total_attendance || 0}`, 10, 60);
+      }
+
+      if (reportType === "semester") {
+        pdf.text(`Semester: ${reportData.semester}`, 10, 40);
+        pdf.text(`Academic Year: ${reportData.academic_year}`, 10, 50);
+        const memberData = reportData.member_data || {};
+        pdf.text(`Total Members: ${memberData.total_members || 0}`, 10, 60);
+        pdf.text(`Active Members: ${memberData.active_members || 0}`, 10, 70);
+        pdf.text(`Total Events: ${reportData.event_data.total_events || 0}`, 10, 80);
+        pdf.text(`Total Attendance: ${reportData.event_data.total_attendance || 0}`, 10, 90);
+      }
+
       if (reportType === "meeting") {
         pdf.text(`Meeting Name: ${reportData.meeting_name}`, 10, 40);
         pdf.text(`Type: ${reportData.meeting_type.charAt(0).toUpperCase() + reportData.meeting_type.slice(1)}`, 10, 50);
@@ -58,7 +75,7 @@ export default function DownloadReport({ color, orgId, reportType, meetingId }) 
         });
       }
 
-      pdf.save(`${reportType}_report_${reportData.meeting_name || "N/A"}.pdf`);
+      pdf.save(`${reportType}_report_${reportData.current_year || reportData.semester || reportData.meeting_name || "N/A"}.pdf`);
       alert("Report successfully downloaded!");
     } catch (error) {
       console.error("Error generating PDF:", error);
