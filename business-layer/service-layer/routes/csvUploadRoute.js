@@ -31,6 +31,7 @@ router.post(
     upload.single("file"),
     async (req, res) => {
         let orgId = req.params.orgId;
+        let eventId = req.params.eventId;
         orgId = sanitizer.sanitize(orgId);
 
         // Validate organization ID
@@ -45,7 +46,7 @@ router.post(
 
         try {
             // Process the uploaded file using business logic
-            const result = await business.processCSV(req.file.path);
+            const result = await business.processCSV(req.file.path, eventId, orgId);
 
             if (result.error) {
                 // Handle the specific error from business logic
