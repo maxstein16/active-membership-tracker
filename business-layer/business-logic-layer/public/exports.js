@@ -3,7 +3,7 @@ const {
   getAttendanceByIdDB,
   getAttendanceByMemberAndEventDB,
   getMemberAttendanceStatsDB,
-  getMemberAttendanceBySemesterDB,
+  getMemberAttendanceBySemesterDB, getAttendeesDetailsByEventIdDB,
 } = require("../attendanceProcessing");
 const {
   createEventInDB,
@@ -80,6 +80,10 @@ module.exports = function () {
   this.getMemberAttendanceBySemester = async (memberId, semesterId) => {
     return await getMemberAttendanceBySemesterDB(memberId, semesterId);
   };
+
+    this.getAttendeesDetailsByEventId = async (eventId) => {
+      return await getAttendeesDetailsByEventIdDB(eventId);
+    }
 
   // Event Management
   this.createEvent = async (eventData) => {

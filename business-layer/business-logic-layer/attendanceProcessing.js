@@ -1,5 +1,6 @@
 const { createAttendance, getAttendanceById, getAttendanceByMemberAndEvent, getAttendanceByMemberId } = require("../data-layer/attendance.js");
-const { getEventsByAttributes } = require("../data-layer/event.js");
+const { getEventsByAttributes, getAttendanceByEventId } = require("../data-layer/event.js");
+const { getMemberById } = require("../data-layer/member.js");
 const { getMembershipByAttributes } = require("../data-layer/membership.js");
 const Error = require("./public/errors.js");
 const error = new Error();
@@ -133,10 +134,58 @@ const getMemberAttendanceBySemesterDB = async (memberId, semesterId) => {
     }
 };
 
+/**
+ * Get attendees details for a specific event
+ * @param {number} eventId - The ID of the event
+ * @returns {Promise<Object>} Object containing error and attendees data
+ */
+const getAttendeesDetailsByEventIdDB = async (eventId) => {
+    try {
+        // Validate event ID
+        if (isNaN(eventId)) {
+            return { error: error.eventIdMustBeInteger, data: null };
+        }
+
+        // Get attendance records for the event
+        const attendanceRecords = await getAttendanceByEventId(eventId);
+        
+        // If no attendance records found
+        if (!attendanceRecords || attendanceRecords.length === 0) {
+            return { error: error.noAttendanceFound, data: [] };
+        }
+
+        // Map attendance records to include member details
+        const attendeesDetails = await Promise.all(
+            attendanceRecords.map(async (record) => {
+                // Fetch member details for each attendance record
+                const memberDetails = await getMemberById(record.member_id);
+                
+                return {
+                    member_id: record.member_id,
+                    member_name: memberDetails.member_name,
+                    member_email: memberDetails.member_email,
+                    checkIn: record.check_in,
+                    volunteerHours: record.volunteer_hours,
+                    pointsEarned: record.points_earned || 0
+                };
+            })
+        );
+
+        return { 
+            error: error.noError, 
+            data: attendeesDetails 
+        };
+    } catch (err) {
+        console.error("Error fetching attendees details by event ID:", err);
+        return { error: error.somethingWentWrong, data: null };
+    }
+};
+
 module.exports = {
     createAttendanceDB,
     getAttendanceByIdDB,
     getMemberAttendanceStatsDB,
     getAttendanceByMemberAndEventDB,
-    getMemberAttendanceBySemesterDB
+    getMemberAttendanceBySemesterDB,
+    getAttendeesDetailsByEventIdDB
 };
