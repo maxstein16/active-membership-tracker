@@ -1,5 +1,54 @@
 const { Semester } = require("../db");
 
+
+/**
+ * Creates a new semester.
+ *
+ * @param {string} semesterName - The name of the semester (e.g., "Spring 2025").
+ * @param {string} academicYear - The academic year (e.g., "2025-2026").
+ * @param {Date} startDate - The start date of the semester.
+ * @param {Date} endDate - The end date of the semester.
+ * @returns {Promise<Object>} The newly created semester.
+ */
+async function createSemester(semesterName, academicYear, startDate, endDate) {
+  try {
+      const newSemester = await Semester.create({
+          semester_name: semesterName,
+          academic_year: academicYear,
+          start_date: startDate,
+          end_date: endDate
+      });
+
+      console.log(`New semester created: ${newSemester.semester_name}`);
+      return newSemester;
+  } catch (error) {
+      console.error("Error creating semester:", error);
+      throw error;
+  }
+}
+
+/**
+ * Finds a semester given a start date and end date.
+ *
+ * @param {Date} date - The date that should fall within the semester.
+ * @returns {Promise<Object|null>} The matching semester or null if not found.
+ */
+async function getSemesterByDate(date) {
+  try {
+      const semester = await Semester.findOne({
+          where: {
+              start_date: { [Op.lte]: date },
+              end_date: { [Op.gte]: date }
+          }
+      });
+
+      return semester;
+  } catch (error) {
+      console.error("Error finding semester by date:", error);
+      throw error;
+  }
+}
+
 async function getCurrentSemesters() {
   const allSemesters = await Semester.findAll();
   const currentSemesters = allSemesters.filter((semester) => {
@@ -49,6 +98,8 @@ async function getSemestersByYear(year = new Date().getFullYear()) {
 }
 
 module.exports = {
+  createSemester,
+  getSemesterByDate,
   getCurrentSemesters,
   getCurrentSemester,
   getSemestersByYear,

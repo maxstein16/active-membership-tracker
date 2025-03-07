@@ -41,7 +41,11 @@ const Organization = sequelize.define(
 const Semester = sequelize.define(
   "Semester",
   {
-    semester_id: { type: DataTypes.INTEGER, primaryKey: true },
+    semester_id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     semester_name: { type: DataTypes.STRING(50), allowNull: false },
     academic_year: { type: DataTypes.STRING(9), allowNull: false },
     start_date: { type: DataTypes.DATE, allowNull: false },
