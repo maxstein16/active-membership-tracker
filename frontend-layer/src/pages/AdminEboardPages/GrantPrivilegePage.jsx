@@ -87,6 +87,7 @@ export default function GrantPrivilegePage() {
         newData.apiData = result;
         newData.possibleOrgs = result.map((org) => org.name)
         setData(newData);
+        console.log(result)
       }
     });
   }, []);

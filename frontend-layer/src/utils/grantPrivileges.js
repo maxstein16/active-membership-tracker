@@ -53,14 +53,20 @@ export async function getOptionsForPrivilege() {
         if (memberData.hasOwnProperty("data")) {
             let members = [];
             memberData.data.forEach((member) => {
+                console.log(member)
                 // check if admin
-                members.push({
-                    name: member.member_name,
-                    id: member.member_id
-                })
+                if (member.membership_role !== ROLE_ADMIN) {
+                    console.log("push member")
+                    members.push({
+                        name: member.member_name,
+                        id: member.member_id
+                    })
+                }
             })
             // sort 
-            data.members = members
+            console.log(members)
+            console.log("sorted", members.sort((a, b) => a.name < b.name))
+            data.members = members.sort((a, b) => a.name < b.name)
         }
 
         returnData.push(data);
