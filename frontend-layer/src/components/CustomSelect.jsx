@@ -9,15 +9,11 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
-export default function CustomSelect({ label, color, options, startingValue, onSelect, value, setValue }) {
+export default function CustomSelect({ label, color, options, startingValue, onSelect }) {
   const [age, setAge] = React.useState(startingValue);
 
   const handleChange = (event) => {
-    if (value) {
-      setValue(event.target.value)
-    } else {
-      setAge(event.target.value);
-    }
+    setAge(event.target.value);
     onSelect(event.target.value);
   };
 
@@ -30,7 +26,7 @@ export default function CustomSelect({ label, color, options, startingValue, onS
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={value ? value: age}
+          value={age}
           label={label}
           onChange={handleChange}
           sx={{
