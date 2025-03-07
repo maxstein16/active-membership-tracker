@@ -101,11 +101,43 @@ async function getEventAttendanceWithMembers(eventId) {
   }
 }
 
+/**
+ * Retrieves a member's attendance records for a specific event type within an organization.
+ *
+ * @param {number} memberId - The ID of the member.
+ * @param {number} orgId - The ID of the organization.
+ * @param {string} eventType - The type of event to filter by (e.g., "General Meeting").
+ * @returns {Promise<object[]>} - A list of attendance records for the specified event type.
+ */
+async function getMemberAttendanceForEventType(memberId, orgId, eventType) {
+  try {
+    const attendanceRecords = await Attendance.findAll({
+      include: [
+        {
+          model: Event,
+          where: {
+            organization_id: orgId,
+            event_type: eventType,
+          },
+          required: true,
+        },
+      ],
+      where: { member_id: memberId },
+    });
+
+    return attendanceRecords;
+  } catch (error) {
+    console.error("Error fetching attendance records for event type:", error);
+    throw error;
+  }
+}
+
 module.exports = {
   createAttendance,
   getAttendanceById,
   getAttendanceByMemberId,
   getAttendanceByMemberAndEvent,
   getMemberAttendanceWithEvents,
-  getEventAttendanceWithMembers
+  getEventAttendanceWithMembers,
+  getMemberAttendanceForEventType,
 };
