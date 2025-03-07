@@ -96,6 +96,7 @@ const Membership = sequelize.define(
     membership_role: { type: DataTypes.INTEGER },
     membership_points: { type: DataTypes.INTEGER, defaultValue: 0 },
     active_member: { type: DataTypes.BOOLEAN, defaultValue: false },
+    received_bonus: { type: DataTypes.JSON, defaultValue: [] },
   },
   {
     timestamps: false,

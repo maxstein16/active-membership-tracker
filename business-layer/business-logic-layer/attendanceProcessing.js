@@ -9,10 +9,6 @@ const error = new Error();
  * - attendance_id
  * - member_id
  * - event_id
- * - check_in
- * - volunteer_hours
- * - semester_id (new field to support semester filtering)
- * - points_earned (new field to track points per event)
  */
 
 /**

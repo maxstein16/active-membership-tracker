@@ -8,6 +8,17 @@ const { createMemberInDB } = require("./memberProcessing");
 const { createAttendanceDB } = require("./attendanceProcessing");
 
 const { getMembersByAttributes } = require("../data-layer/member.js");
+const { getEventById } = require("../data-layer/event.js");
+const { getCurrentSemester } = require("../data-layer/semester.js");
+const { createMembership, getMembershipByAttributes } = require("../data-layer/membership.js");
+const { createAttendance, getMemberAttendanceWithEvents } = require("../data-layer/attendance.js");
+const { getOrganizationById, getOrganizationMembershipRequirements } = require("../data-layer/organization.js");
+const {
+  checkActiveMembership,
+} = require("./organizationMembershipProcessing.js");
+const {
+  editMemberInOrganizationInDB,
+} = require("./organizationMemberProcessing.js");
 
 /**
  * Maps CSV row data to member data format
@@ -21,35 +32,18 @@ function mapToMemberData(row) {
     personal_email: row.email, // Using the same email as both for now
     major: row.degree,
     status: row.accountType === "Student" ? "undergraduate" : "graduate",
-    // Add other relevant mappings as needed
   };
 }
 
 /**
- * Maps CSV row data to attendance data format
- * @param {Object} row Raw CSV row data
- * @param {number} eventId Event ID
- * @param {number} memberId Member ID
- * @returns {Object} Formatted attendance data
+ * Process a CSV file and handle attendance for an event
+ * @param {string} filePath Path to the CSV file
+ * @param {number} eventId Event ID for attendance records
+ * @param {number} orgId Organization ID
+ * @returns {Promise<Object>} Processing results
  */
-function mapToAttendanceData(row, eventId, memberId) {
-  return {
-    event_id: eventId,
-    member_id: memberId,
-    check_in: row.rsvp.toLowerCase() === "yes",
-    notes: row.officersNotes,
-    rating: row.attendeeRating,
-  };
-}
-
 class CSVProcessor {
-  /**
-   * Process a CSV file and handle member and attendance records
-   * @param {string} filePath Path to the CSV file
-   * @param {number} eventId Event ID for attendance records
-   * @returns {Promise<Object>} Processing results
-   */
-  async processCSV(filePath, eventId) {
+  async processCSV(filePath, eventId, orgId) {
     return new Promise((resolve, reject) => {
       const results = [];
       const processedEmails = new Set();
@@ -67,86 +61,132 @@ class CSVProcessor {
           promises.push(
             new Promise(async (resolve) => {
               try {
-                // Normalize row data
-                const processedRow = {
-                  firstName: row["First Name"] || "N/A",
-                  lastName: row["Last Name"] || "N/A",
-                  email: row["Email"] || "N/A",
-                  accountType: row["Account Type"] || "Unknown",
-                  degree: row["Degree"] || "N/A",
-                  rsvp: row["RSVP'ed"] || "No",
-                  officersNotes: row["Officer's Notes"] || "N/A",
-                  attendeeRating: row["Attendee's Rating"] || "N/A",
-                };
+                // Get event details using eventId
+                const event = await getEventById(eventId, orgId);
+                if (!event) {
+                  console.error(`Event not found for eventId: ${eventId}`);
+                  return resolve();
+                }
+                const eventType = event.event_type;
 
-                // Skip if email already processed
-                if (processedEmails.has(processedRow.email)) {
-                  console.log(
-                    `Duplicate email found: ${processedRow.email}. Skipping.`
-                  );
+                // Extract only the necessary data
+                const email = row["Email"]?.trim();
+                if (!email) {
+                  console.error("Missing email in CSV row. Skipping...");
                   return resolve();
                 }
 
-                processedEmails.add(processedRow.email);
+                // Skip if email already processed
+                if (processedEmails.has(email)) {
+                  console.log(`Duplicate email found: ${email}. Skipping.`);
+                  return resolve();
+                }
+                processedEmails.add(email);
 
-                // Check for existing member
+                // Step 1: Get the current semester
+                const currentSemester = await getCurrentSemester();
+                if (!currentSemester) {
+                  console.error("No active semester found.");
+                  return resolve();
+                }
+
+                // Step 2: Check for existing member
                 const existingMemberResult = await getMembersByAttributes({
-                  member_email: processedRow.email,
+                  member_email: email,
                 });
 
                 let memberId;
-
-                if (
-                  existingMemberResult.error ||
-                  !existingMemberResult.data?.length
-                ) {
-                  // Create new member if doesn't exist
-                  const memberData = mapToMemberData(processedRow);
-                  const createResult = await createMemberInDB(memberData);
-
-                  if (createResult.error) {
-                    console.error("Error creating member:", createResult.error);
-                    return resolve();
-                  }
-
-                  memberId = createResult.data.member_id;
+                if (!existingMemberResult || !existingMemberResult.length) {
+                  console.error(
+                    `Member with email ${email} not found. Skipping.`
+                  );
+                  return resolve();
                 } else {
-                  memberId = existingMemberResult.data[0].member_id;
+                  memberId = existingMemberResult[0].member_id;
                 }
 
-                // Add attendance record
-                if (memberId && eventId) {
-                  const attendanceData = mapToAttendanceData(
-                    processedRow,
-                    eventId,
-                    memberId
-                  );
-                  const attendanceResult = await createAttendanceDB(
-                    attendanceData
+                // Step 3: Check if the member has a membership for the current semester
+                let membership = await getMembersByAttributes({
+                  member_id: memberId,
+                  organization_id: orgId,
+                  semester_id: currentSemester.semester_id,
+                });
+
+                if (!membership) {
+                  // Create new membership if none exists
+                  membership = await createMembership({
+                    member_id: memberId,
+                    organization_id: orgId,
+                    semester_id: currentSemester.semester_id,
+                    membership_role: 0, // Default to member
+                    membership_points: 0,
+                    active_member: false,
+                    received_bonus: [],
+                  });
+
+                  if (!membership) {
+                    console.error("Failed to create membership.");
+                    return resolve();
+                  }
+                }
+
+                // Step 4: Record attendance
+                const attendanceData = {
+                  event_id: eventId,
+                  member_id: memberId,
+                };
+                await createAttendance(attendanceData);
+
+                // Step 5: Check if the organization is points-based
+                const organization = await getOrganizationById(orgId);
+                if (!organization) {
+                  console.error("Organization not found.");
+                  return resolve();
+                }
+
+                if (organization.organization_membership_type === "points") {
+                  // Step 6: Fetch base points for this event type
+                  const basePoints = await getBasePointsForEventType(
+                    eventType,
+                    orgId
                   );
 
-                  if (attendanceResult.error) {
-                    console.error(
-                      "Error creating attendance:",
-                      attendanceResult.error
-                    );
-                  }
+                  // Step 7: Check for bonus eligibility
+                  const bonusPoints = await calculateBonusPoints(
+                    memberId,
+                    orgId,
+                    eventType,
+                    membership.membership_id
+                  );
+
+                  // Step 8: Allocate total points
+                  const totalPoints = basePoints + bonusPoints;
+
+                  const memberDataToUpdate = { membership_points: totalPoints };
+
+                  await editMemberInOrganizationInDB(
+                    orgId,
+                    memberId,
+                    memberDataToUpdate
+                  );
+                } else {
+                  // For attendance-based orgs, check active membership status
+                  checkActiveMembership(memberId, organization.organization_id);
                 }
 
                 results.push({
-                  ...processedRow,
+                  email,
                   member_id: memberId,
                   processed: true,
                 });
               } catch (err) {
                 console.error("Error processing row:", err);
                 results.push({
-                  ...processedRow,
+                  email: row["Email"],
                   processed: false,
                   error: err.message,
                 });
               }
-
               resolve();
             })
           );
@@ -179,6 +219,90 @@ class CSVProcessor {
           });
         });
     });
+  }
+
+  /**
+   * Retrieves base points for an event type based on organization's membership requirements
+   * @param {string} eventType - The type of event (e.g., 'General Meeting')
+   * @param {number} orgId - Organization ID
+   * @returns {Promise<number>} Base points for the event type
+   */
+  async getBasePointsForEventType(eventType, orgId) {
+    const membershipRequirements = await getOrganizationMembershipRequirements(
+      orgId
+    );
+
+    const matchingRequirement = membershipRequirements.find(
+      (req) => req.event_type === eventType
+    );
+
+    return matchingRequirement ? matchingRequirement.requirement_value : 0;
+  }
+
+  /**
+   * Calculates bonus points based on attendance percentage using BonusRequirement model
+   * @param {number} memberId - Member ID
+   * @param {number} orgId - Organization ID
+   * @param {string} eventType - Type of event (e.g., "General Meeting")
+   * @param {number} membershipId - The membership ID
+   * @returns {Promise<number>} Bonus points earned
+   */
+  async calculateBonusPoints(memberId, orgId, eventType, membershipId) {
+    // Get the membership record
+    const membership = await getMembershipByAttributes({membership_id: membershipId});
+    if (!membership) return 0;
+
+    // Get membership requirements for the organization
+    const membershipRequirements = await getOrganizationMembershipRequirements(
+      orgId
+    );
+    const requirement = membershipRequirements.find(
+      (req) => req.event_type === eventType
+    );
+
+    if (!requirement) return 0;
+
+    // Fetch all bonus thresholds
+    const bonusRequirements = await getBonusRequirements(
+      requirement.requirement_id
+    );
+
+    // Fetch attendance records for the member
+    const attendanceRecords = await getMemberAttendanceWithEvents(
+      memberId,
+      orgId
+    );
+
+    // Calculate attendance percentage
+    const totalEvents = requirement.total_required; // Total events required for bonuses
+    const attendedEvents = attendanceRecords.length;
+    const attendancePercentage = (attendedEvents / totalEvents) * 100;
+
+    // Get bonuses already received
+    const alreadyReceivedBonuses = membership.received_bonus || [];
+
+    // Determine applicable bonus
+    let applicableBonus = bonusRequirements
+      .filter(
+        (bonus) =>
+          attendancePercentage >= bonus.threshold_percentage &&
+          !alreadyReceivedBonuses.includes(bonus.bonus_id) // Ensure it's not already received
+      )
+      .reduce((max, bonus) => Math.max(max, bonus.bonus_points), 0);
+
+    if (applicableBonus > 0) {
+      // Update membership points and mark the bonus as received
+      membership.membership_points += applicableBonus;
+      membership.received_bonus.push(
+        bonusRequirements.find(
+          (bonus) => bonus.bonus_points === applicableBonus
+        ).bonus_id
+      );
+
+      await membership.save();
+    }
+
+    return applicableBonus;
   }
 }
 

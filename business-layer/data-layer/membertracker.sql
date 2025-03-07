@@ -63,6 +63,7 @@ CREATE TABLE Membership (
   membership_role INT, -- Role within the organization (e.g., 0=Member, 1=E-Board, 2=Admin)
   membership_points INT DEFAULT 0, -- Points earned in the organization
   active_member BOOLEAN DEFAULT FALSE, -- Whether the member is currently active
+  received_bonus JSON DEFAULT '[]', -- Stores received bonuses as an array of bonus IDs
   PRIMARY KEY (membership_id),
   FOREIGN KEY (member_id) REFERENCES Member(member_id),
   FOREIGN KEY (organization_id) REFERENCES Organization(organization_id),

@@ -177,6 +177,24 @@ async function editOrganizationMembershipRequirement(
 }
 
 /**
+ * Get all bonus requirements for a specific membership requirement
+ * @param {number} requirementId - The ID of the membership requirement
+ * @returns {Promise<Array>} List of bonus requirement records
+ */
+async function getBonusRequirements(requirementId) {
+  try {
+    const bonusRequirements = await BonusRequirement.findAll({
+      where: { requirement_id: requirementId },
+    });
+
+    return bonusRequirements;
+  } catch (err) {
+    console.error("Error fetching bonus requirements by requirement ID:", err);
+    throw err;
+  }
+}
+
+/**
  * Create a bonus requirement for a membership requirement
  * @param {number} requirementId - The ID of the membership requirement
  * @param {object} bonusData - Bonus threshold and points
@@ -203,38 +221,38 @@ async function createBonusRequirement(requirementId, bonusData) {
  * @returns {Promise<Object>} Updated bonus requirement
  */
 async function editBonusRequirement(bonusId, updateData) {
-    try {
-      const bonusRequirement = await BonusRequirement.findByPk(bonusId);
-  
-      if (!bonusRequirement) {
-        return null;
-      }
-  
-      await bonusRequirement.update(updateData);
-      return bonusRequirement;
-    } catch (err) {
-      console.error("Error updating bonus requirement:", err);
-      throw err;
+  try {
+    const bonusRequirement = await BonusRequirement.findByPk(bonusId);
+
+    if (!bonusRequirement) {
+      return null;
     }
+
+    await bonusRequirement.update(updateData);
+    return bonusRequirement;
+  } catch (err) {
+    console.error("Error updating bonus requirement:", err);
+    throw err;
   }
-  
-  /**
-   * Delete a bonus requirement
-   * @param {number} bonusId - The ID of the bonus requirement
-   * @returns {Promise<boolean>} Deletion success status
-   */
-  async function deleteBonusRequirement(bonusId) {
-    try {
-      const deleted = await BonusRequirement.destroy({
-        where: { bonus_id: bonusId },
-      });
-  
-      return deleted > 0;
-    } catch (err) {
-      console.error("Error deleting bonus requirement:", err);
-      throw err;
-    }
+}
+
+/**
+ * Delete a bonus requirement
+ * @param {number} bonusId - The ID of the bonus requirement
+ * @returns {Promise<boolean>} Deletion success status
+ */
+async function deleteBonusRequirement(bonusId) {
+  try {
+    const deleted = await BonusRequirement.destroy({
+      where: { bonus_id: bonusId },
+    });
+
+    return deleted > 0;
+  } catch (err) {
+    console.error("Error deleting bonus requirement:", err);
+    throw err;
   }
+}
 
 /**
  * Get organizations that a user is a member of
@@ -297,6 +315,7 @@ module.exports = {
   getOrganizationMembershipRequirements,
   createOrganizationMembershipRequirement,
   editOrganizationMembershipRequirement,
+  getBonusRequirements,
   createBonusRequirement,
   editBonusRequirement,
   deleteBonusRequirement,
