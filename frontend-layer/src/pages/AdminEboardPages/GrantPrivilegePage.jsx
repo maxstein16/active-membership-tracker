@@ -7,7 +7,10 @@ import "../../assets/css/memberPages.css";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import CustomSelect from "../../components/CustomSelect";
-import { getOptionsForPrivilege } from "../../utils/grantPrivileges";
+import {
+  getOptionsForPrivilege,
+  grantPrivilegeInDB,
+} from "../../utils/grantPrivileges";
 
 const defaultData = {
   orgNameSelected: "",
@@ -15,7 +18,7 @@ const defaultData = {
   role: "",
   possibleOrgs: [],
   possibleMembers: [],
-  apiData: []
+  apiData: [],
 };
 
 const defaultMessage = {
@@ -38,8 +41,8 @@ export default function GrantPrivilegePage() {
 
     // set the member options
     if (valueName === "orgNameSelected") {
-        let orgSelected = data.apiData.filter((org) => org.name === newValue)[0]
-        newData.possibleMembers = orgSelected.members.map((mem) => mem.name)
+      let orgSelected = data.apiData.filter((org) => org.name === newValue)[0];
+      newData.possibleMembers = orgSelected.members.map((mem) => mem.name);
     }
 
     setData(newData);
@@ -50,17 +53,20 @@ export default function GrantPrivilegePage() {
     setMessage({ ...defaultMessage });
 
     // grant privilege
-
-    // error case
-    setMessage({
-      isError: true,
-      text: "Privilege could not be granted. If you think this is wrong, please contact support.",
-    });
-
-    // success case
-    setMessage({
-      isError: false,
-      text: "Privilege Granted.",
+    grantPrivilegeInDB(data).then((isSuccess) => {
+      if (isSuccess) {
+        // success case
+        setMessage({
+          isError: false,
+          text: "Privilege Granted.",
+        });
+      } else {
+        // error case
+        setMessage({
+          isError: true,
+          text: "Privilege could not be granted. If you think this is wrong, please contact support.",
+        });
+      }
     });
   };
 
@@ -85,9 +91,8 @@ export default function GrantPrivilegePage() {
       } else {
         let newData = { ...defaultData };
         newData.apiData = result;
-        newData.possibleOrgs = result.map((org) => org.name)
+        newData.possibleOrgs = result.map((org) => org.name);
         setData(newData);
-        console.log(result)
       }
     });
   }, []);

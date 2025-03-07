@@ -75,8 +75,8 @@ const {
       await Membership.create({
         membership_role: randomNum > 20 ? ROLE_EBOARD : ROLE_MEMBER,
         member_id: member.member_id,
-        organization_id: org1.organization_id,
-        semester_id: sem1.semester_id,
+        organization_id: 1,
+        semester_id: 1123,
         membership_points: randomNum,
         active_member: randomNum >= 42,
         active_semesters: 1,
@@ -86,8 +86,8 @@ const {
       await Membership.create({
         membership_role: randomNum > 20 ? ROLE_EBOARD : ROLE_MEMBER,
         member_id: member.member_id,
-        organization_id: org2.organization_id,
-        semester_id: sem1.semester_id,
+        organization_id: 2,
+        semester_id: 1123,
         membership_points: randomNum,
         active_member: randomNum >= 23,
         active_semesters: 1,
