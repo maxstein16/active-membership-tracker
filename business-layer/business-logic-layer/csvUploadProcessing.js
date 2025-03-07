@@ -10,9 +10,18 @@ const { createAttendanceDB } = require("./attendanceProcessing");
 const { getMembersByAttributes } = require("../data-layer/member.js");
 const { getEventById } = require("../data-layer/event.js");
 const { getCurrentSemester } = require("../data-layer/semester.js");
-const { createMembership, getMembershipByAttributes } = require("../data-layer/membership.js");
-const { createAttendance, getMemberAttendanceWithEvents } = require("../data-layer/attendance.js");
-const { getOrganizationById, getOrganizationMembershipRequirements } = require("../data-layer/organization.js");
+const {
+  createMembership,
+  getMembershipByAttributes,
+} = require("../data-layer/membership.js");
+const {
+  createAttendance,
+  getMemberAttendanceWithEvents,
+} = require("../data-layer/attendance.js");
+const {
+  getOrganizationById,
+  getOrganizationMembershipRequirements,
+} = require("../data-layer/organization.js");
 const {
   checkActiveMembership,
 } = require("./organizationMembershipProcessing.js");
@@ -29,9 +38,6 @@ function mapToMemberData(row) {
   return {
     name: `${row.firstName} ${row.lastName}`.trim(),
     email: row.email,
-    personal_email: row.email, // Using the same email as both for now
-    major: row.degree,
-    status: row.accountType === "Student" ? "undergraduate" : "graduate",
   };
 }
 
@@ -46,7 +52,6 @@ class CSVProcessor {
   async processCSV(filePath, eventId, orgId) {
     return new Promise((resolve, reject) => {
       const results = [];
-      const processedEmails = new Set();
       const promises = [];
 
       fs.createReadStream(filePath)
@@ -69,20 +74,6 @@ class CSVProcessor {
                 }
                 const eventType = event.event_type;
 
-                // Extract only the necessary data
-                const email = row["Email"]?.trim();
-                if (!email) {
-                  console.error("Missing email in CSV row. Skipping...");
-                  return resolve();
-                }
-
-                // Skip if email already processed
-                if (processedEmails.has(email)) {
-                  console.log(`Duplicate email found: ${email}. Skipping.`);
-                  return resolve();
-                }
-                processedEmails.add(email);
-
                 // Step 1: Get the current semester
                 const currentSemester = await getCurrentSemester();
                 if (!currentSemester) {
@@ -96,12 +87,28 @@ class CSVProcessor {
                 });
 
                 let memberId;
-                if (!existingMemberResult || !existingMemberResult.length) {
-                  console.error(
-                    `Member with email ${email} not found. Skipping.`
+
+                if (
+                  !existingMemberResult ||
+                  existingMemberResult.length === 0
+                ) {
+                  // Member not found, create a new member
+                  console.log(
+                    `Member with email ${email} not found. Creating new member...`
                   );
-                  return resolve();
+
+                  const newMemberData = mapToMemberData(row);
+
+                  try {
+                    const newMember = await createMemberInDB(newMemberData);
+                    memberId = newMember.member_id;
+                    console.log(`New member created with ID: ${memberId}`);
+                  } catch (error) {
+                    console.error(`Error creating member: ${error.message}`);
+                    return resolve(); // Skip processing for this row
+                  }
                 } else {
+                  // Member already exists
                   memberId = existingMemberResult[0].member_id;
                 }
 
@@ -249,7 +256,9 @@ class CSVProcessor {
    */
   async calculateBonusPoints(memberId, orgId, eventType, membershipId) {
     // Get the membership record
-    const membership = await getMembershipByAttributes({membership_id: membershipId});
+    const membership = await getMembershipByAttributes({
+      membership_id: membershipId,
+    });
     if (!membership) return 0;
 
     // Get membership requirements for the organization
