@@ -6,6 +6,7 @@ const { getMemberById, getMembersByAttributes } = require("../data-layer/member.
 const { getOrganizationById } = require("../data-layer/organization.js");
 const { createMembership, editMembership, getMembershipsByAttributes, getMembershipByAttributes } = require("../data-layer/membership.js");
 const { getCurrentSemesters } = require("../data-layer/semester.js");
+const { checkActiveMembership } = require("./organizationMembershipProcessing.js");
 
 async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
     try {
@@ -130,6 +131,16 @@ async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate)
 
         if (!updated) {
             return { error: error.membershipNotFound, data: null };
+        }
+
+        // **Check active membership status if points were updated**
+        if (memberDataToUpdate.hasOwnProperty("membership_points")) {
+            const organization = await getOrganizationById(orgId);
+            if (!organization) {
+                return { error: error.organizationNotFound, data: null };
+            }
+
+            checkActiveMembership(membership);
         }
 
         return {

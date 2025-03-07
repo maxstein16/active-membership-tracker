@@ -221,4 +221,6 @@ module.exports = {
   getMembershipRoleInfoInOrganizationInDB,
   getAllMembershipsInOrganizationInDB,
   getMembershipsAcrossSemesters,
+  checkActiveMembership,
+  checkAttendanceBasedMembership,
 };
