@@ -153,13 +153,13 @@ class CSVProcessor {
 
                 if (organization.organization_membership_type === "points") {
                   // Step 6: Fetch base points for this event type
-                  const basePoints = await getBasePointsForEventType(
+                  const basePoints = await this.getBasePointsForEventType(
                     eventType,
                     orgId
                   );
 
                   // Step 7: Check for bonus eligibility
-                  const bonusPoints = await calculateBonusPoints(
+                  const bonusPoints = await this.calculateBonusPoints(
                     memberId,
                     orgId,
                     eventType,
