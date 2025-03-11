@@ -4,9 +4,6 @@ const ErrorMessages = require("../../business-logic-layer/public/errors.js");
 const error = new ErrorMessages();
 
 const { createMemberInDB } = require("./memberProcessing");
-
-const { createAttendanceDB } = require("./attendanceProcessing");
-
 const { getMembersByAttributes } = require("../data-layer/member.js");
 const { getEventById } = require("../data-layer/event.js");
 const { getCurrentSemester } = require("../data-layer/semester.js");
@@ -21,6 +18,7 @@ const {
 const {
   getOrganizationById,
   getOrganizationMembershipRequirements,
+  getBonusRequirements,
 } = require("../data-layer/organization.js");
 const {
   checkActiveMembership,
@@ -282,9 +280,14 @@ class CSVProcessor {
       orgId
     );
 
+    // Filter attendance records to count only relevant event types
+    const relevantAttendances = attendanceRecords.filter(
+      (attendance) => attendance.Event.event_type === eventType
+    );
+
     // Calculate attendance percentage
     const totalEvents = requirement.total_required; // Total events required for bonuses
-    const attendedEvents = attendanceRecords.length;
+    const attendedEvents = relevantAttendances.length;
     const attendancePercentage = (attendedEvents / totalEvents) * 100;
 
     // Get bonuses already received
