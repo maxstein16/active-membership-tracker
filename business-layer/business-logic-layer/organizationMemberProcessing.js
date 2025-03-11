@@ -12,7 +12,7 @@ const {
   getMembershipsByAttributes,
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
-const { getCurrentSemesters } = require("../data-layer/semester.js");
+const { getCurrentSemester } = require("../data-layer/semester.js");
 const {
   checkActiveMembership,
 } = require("./organizationMembershipProcessing.js");
@@ -78,15 +78,12 @@ async function addMemberToAnOrganizationInDB(orgId, memberData) {
     }
 
     // Get current semester
-    const currentSemesters = await getCurrentSemesters();
-    if (currentSemesters.length < 1) {
-      return { error: error.noCurrentSemesterFound, data: null };
-    }
+    const currentSemester = await getCurrentSemester();
 
     const membership = await createMembership({
       ...memberData,
       organization_id: orgId,
-      semester_id: currentSemesters[0].semester_id,
+      semester_id: currentSemester.semester_id,
     });
 
     if (!membership) {
@@ -134,10 +131,13 @@ async function editMemberInOrganizationInDB(
       return { error: error.memberPointsNaN, data: null };
     }
 
+    const currentSemester = await getCurrentSemester();
+
     // Get the membership first to ensure it exists
     const memberships = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
+      semester_id: currentSemester.semester_id,
     });
 
     if (!memberships || memberships.length === 0) {
@@ -205,9 +205,12 @@ async function deleteMemberInOrganizationInDB(orgId, memberId) {
       return { error: error.memberIdMustBeInteger, data: null };
     }
 
-    const memberships = await getMembershipsByAttributes({
+    const currentSemester = await getCurrentSemester();
+
+    const memberships = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
+      semester_id: currentSemester.semester_id,
     });
 
     if (!memberships || memberships.length === 0) {
@@ -233,10 +236,13 @@ async function getMembersInOrganizationInDB(orgId) {
       return { error: error.organizationIdMustBeInteger, data: null };
     }
 
+    const currentSemester = await getCurrentSemester();
+
     // Get all members and memberships for this organization
     const members = await getMembersByAttributes({});
     const memberships = await getMembershipsByAttributes({
       organization_id: orgId,
+      semester_id: currentSemester.semester_id,
     });
 
     if (!members || !memberships) {

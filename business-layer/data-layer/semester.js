@@ -50,20 +50,9 @@ async function getSemesterByDate(date) {
   }
 }
 
-async function getCurrentSemesters() {
-  const allSemesters = await Semester.findAll();
-  const currentSemesters = allSemesters.filter((semester) => {
-    let today = new Date();
-    let endDate = new Date(semester.end_date);
-    let startDate = new Date(semester.start_date);
-    return startDate <= today && endDate >= today;
-  });
-  return currentSemesters;
-}
-
 async function getCurrentSemester() {
   try {
-    const currentSemesters = await getCurrentSemesters();
+    const currentSemesters = await getCurrentSemestersInYear();
 
     if (!currentSemesters || currentSemesters.length === 0) {
       throw new Error("No current semesters found");
@@ -101,7 +90,6 @@ async function getSemestersByYear(year = new Date().getFullYear()) {
 module.exports = {
   createSemester,
   getSemesterByDate,
-  getCurrentSemesters,
   getCurrentSemester,
   getSemestersByYear,
 };
