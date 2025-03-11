@@ -7,49 +7,34 @@ const connect4server = "http://localhost:8080/v1";
  * @param {Object} payload - this is the request body, leave it empty for GET
  * @returns {Object} data that the api returns
  */
-export async function getAPIData(endpoint, method, payload) {
+export async function getAPIData(endpoint, method, payload, isFile = false) {
+
+  console.log("getAPIData doing its shit...")
+
   let details = {
     method: method,
     credentials: "include",
-    headers: {
-      Accept: "application/json",
-    },
   };
 
+  // 🔍 If it's NOT a file upload, set JSON headers
+  if (!isFile) {
+    details.headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+  }
 
-  console.log("getAPIData is attempting its thing");
-  // If payload is FormData (for file uploads), do NOT stringify or set Content-Type
-  if (payload instanceof FormData) {
-    details.body = payload;
-    // Remove "Content-Type" header so browser sets it automatically
-  } else if (method !== API_METHODS.get) {
-    details.headers["Content-Type"] = "application/json";
-    details.body = JSON.stringify(payload);
+  // If sending a file, use FormData instead of JSON
+  if (method !== API_METHODS.get) {
+    details.body = isFile ? payload : JSON.stringify(payload);
   }
 
   let link = `${connect4server}${endpoint}`;
   return fetch(link, details)
-    .then(async (res) => {
-      const contentType = res.headers.get("content-type");
-
-      if (!res.ok) {
-        // If the response is an error (non-2xx status), read it as text to prevent JSON.parse errors
-        const text = await res.text();
-        throw new Error(`API error ${res.status}: ${text}`);
-      }
-
-      // Only parse JSON if the response type is actually JSON
-      if (contentType && contentType.includes("application/json")) {
-        return res.json();
-      } else {
-        return { message: "Response is not JSON", raw: await res.text() };
-      }
-    })
+    .then((res) => res.json())
     .catch((err) => {
-      console.error("API error:", err);
-      return { error: err.message }; // Ensure the function always returns an object
+      console.log("err:", err);
     });
-
 }
 
 

@@ -41,6 +41,8 @@ router.get(
       return res.status(404).json({ error: error.organizationNotFound });
     }
 
+
+
     return res.status(200).json({ status: "success", data: response.data });
   }
 );

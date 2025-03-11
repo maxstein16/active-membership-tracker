@@ -41,13 +41,16 @@ const upload = multer({
 
 router.post(
     "/:orgId/upload",
-    isAuthorizedHasSessionForAPI,
     upload.single("file"),
+    isAuthorizedHasSessionForAPI,
     async (req, res) => {
-        console.log("Yippe managed to get to csvUploadRoute!")
-        console.log('Extracted orgId:', req.params.orgId);
+        console.log("🚀 Received request at /:orgId/upload");
+        console.log("🔍 Extracted orgId:", req.params.orgId);
+        console.log("📂 req.file:", req.file); // Check if file is received
+        console.log("📜 req.body:", req.body); // Check if any data is sent
         let orgId = req.params.orgId;
         orgId = sanitizer.sanitize(orgId);
+
 
         // Validate organization ID
         if (isNaN(orgId)) {
@@ -56,12 +59,18 @@ router.post(
             console.log("Your org id is valid")
         }
 
+        console.log("now we check the request file")
+        console.log("these are the params " + req.file)
+
         // Check if file was uploaded
         if (!req.file) {
             return res.status(400).json({ error: "No CSV file uploaded" });
+        } else {
+            console.log("Properly uploaded CSV file")
         }
 
         try {
+            console.log("Trying to await processCSV, the file path is " + req.file.path)
             // Process the uploaded file using business logic
             const result = await business.processCSV(req.file.path);
 

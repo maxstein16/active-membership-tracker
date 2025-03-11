@@ -33,14 +33,28 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
     }
   };
 
-  // Read the content of the file
   const readFileContent = (file) => {
     const reader = new FileReader();
     reader.onload = () => {
-      setFileContent(reader.result); // Set the file content
-      console.log(reader.result);
+      const content = reader.result;
+      setFileContent(content); // Set the file content
+      console.log("File content:", content); // Log the content to console
+
+      // Convert the content to a CSV format and download it
+      const csvData = content; // Assuming the content is already in CSV format
+      downloadCSV(csvData);
+      console.log("downloaded");
     };
     reader.readAsText(file); // Read file as text (CSV content)
+  };
+
+  // Function to trigger download of CSV content as a file
+  const downloadCSV = (csvData) => {
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "fileContent.csv"; // Name of the file to be downloaded
+    link.click(); // Trigger download
   };
 
   const handleUpload = async () => {
@@ -64,11 +78,12 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
     formData.append("file", fileInput.files[0]);
 
     try {
+      //getAPIData(endpoint, method, payload)
       const result = await getAPIData(
         `/organization/${orgId}/upload`,
         API_METHODS.post,
         formData,
-        true // Indicate that this is FormData
+        true // Indicate that this is file/FormData
       );
 
       if (!result) {
@@ -108,7 +123,7 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
       </DialogContent>
       <DialogActions>
         <button autoFocus className="secondary" onClick={() => setOpen(false)}>
-          Cancel
+          Cancel WOOF
         </button>
         <button
           onClick={handleUpload}

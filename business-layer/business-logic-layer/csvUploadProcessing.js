@@ -63,6 +63,8 @@ class CSVProcessor {
      * @returns {Promise<Object>} Processing results
      */
     async processCSV(filePath, eventId, organizationId, semesterId) {
+
+        console.log("csvUploadProcessing is doing processCSV")
         return new Promise((resolve, reject) => {
             const results = [];
             const processedEmails = new Set();
@@ -77,9 +79,11 @@ class CSVProcessor {
                 }))
                 .on("data", async (row) => {
                     promises.push(new Promise(async (resolve) => {
+                        // Define processedRow outside try block
+                        let processedRow = {};
+
                         try {
-                            // Normalize row data
-                            const processedRow = {
+                            processedRow = {
                                 firstName: row["First Name"] || "N/A",
                                 lastName: row["Last Name"] || "N/A",
                                 email: row["Email"] || "N/A",
@@ -89,6 +93,8 @@ class CSVProcessor {
                                 officersNotes: row["Officer's Notes"] || "N/A",
                                 attendeeRating: row["Attendee's Rating"] || "N/A",
                             };
+
+                            console.log("CSVUPLOAD PROCESSING HAS JUST PROCESSED A ROW", processedRow);
 
                             // Skip if email already processed
                             if (processedEmails.has(processedRow.email)) {
@@ -104,6 +110,7 @@ class CSVProcessor {
                             });
 
                             let memberId;
+                            console.log("------- For now member ID is: ")
 
                             // If member does not exist, create new member
                             if (existingMemberResult.error || !existingMemberResult.data?.length) {
@@ -146,14 +153,14 @@ class CSVProcessor {
 
                             results.push({
                                 ...processedRow,
-                                member_id: memberId,
+                                memberId: memberId,
                                 processed: true
-                            });
+                            }); w
 
                         } catch (err) {
                             console.error("Error processing row:", err);
                             results.push({
-                                ...processedRow,
+                                ...processedRow, // Now it always exists
                                 processed: false,
                                 error: err.message
                             });
@@ -162,6 +169,7 @@ class CSVProcessor {
                         resolve();
                     }));
                 })
+
                 .on("end", async () => {
                     try {
                         await Promise.all(promises);
