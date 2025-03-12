@@ -1,4 +1,5 @@
 const { getMemberByUsername } = require("../../data-layer/member");
+const { getCurrentSemester } = require("../../data-layer/semester");
 const { Membership, Member } = require("../../db");
 const { ROLE_EBOARD, ROLE_MEMBER } = require("../constants");
 
@@ -24,8 +25,13 @@ module.exports = new (function () {
       return false;
     }
 
-    const membership = Membership.findOne({
-      where: { organization_id: orgId, member_id: memberInfo.member_id },
+    const currentSemester = getCurrentSemester();
+
+    // Get the membership first to ensure it exists
+    const membership = getMembershipByAttributes({
+      member_id: memberInfo.member_id,
+      organization_id: orgId,
+      semester_id: currentSemester.semester_id,
     });
 
     if (

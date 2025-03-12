@@ -134,17 +134,11 @@ async function editMemberInOrganizationInDB(
     const currentSemester = await getCurrentSemester();
 
     // Get the membership first to ensure it exists
-    const memberships = await getMembershipByAttributes({
+    const membership = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
-
-    if (!memberships || memberships.length === 0) {
-      return { error: error.membershipNotFound, data: null };
-    }
-
-    const membership = memberships[0];
 
     // Check if this is the last admin being removed
     if (memberDataToUpdate.hasOwnProperty("membership_role")) {
