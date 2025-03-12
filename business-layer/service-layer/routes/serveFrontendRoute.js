@@ -1,7 +1,10 @@
 let express = require("express");
 const router = express.Router();
 const path = require("path");
-const { isAuthorizedHasSessionForWebsite, isAdminOrEboardForOrg } = require("../sessionMiddleware");
+const {
+  isAuthorizedHasSessionForWebsite,
+  isAdminOrEboardForOrg,
+} = require("../sessionMiddleware");
 
 /*
 
@@ -71,15 +74,11 @@ router.get("/:orgId/settings", isAdminOrEboardForOrg, (req, res) => {
 });
 
 // GET org reports
-router.get(
-  "/:orgId/reports",
-  isAdminOrEboardForOrg,
-  function (req, res) {
-    res.sendFile(
-      path.join(__dirname, "../../../frontend-layer/build", "index.html")
-    );
-  }
-);
+router.get("/:orgId/reports", isAdminOrEboardForOrg, function (req, res) {
+  res.sendFile(
+    path.join(__dirname, "../../../frontend-layer/build", "index.html")
+  );
+});
 
 // GET create organization
 router.get("/createOrg", isAdminOrEboardForOrg, function (req, res) {

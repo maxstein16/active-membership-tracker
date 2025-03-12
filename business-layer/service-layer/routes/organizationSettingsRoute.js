@@ -10,48 +10,48 @@ const business = new BusinessLogic();
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
-const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const {
+  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
+} = require("../sessionMiddleware");
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 //GET /v1/organization/:orgId/settings
-router.get(
-  "/",
-  isAuthorizedHasSessionForAPI,
-  async function (req, res) {
-    let orgId = req.params.orgId;
+router.get("/", isAdminOrEboardForOrg, async function (req, res) {
+  let orgId = req.params.orgId;
 
-    orgId = sanitizer.sanitize(orgId);
+  orgId = sanitizer.sanitize(orgId);
 
-    if (isNaN(orgId)) {
-      return res.status(400).json({ error: error.organizationIdMustBeInteger });
-    }
-
-    // does the user have privileges?
-    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    //   req.session.user.username,
-    //   orgId
-    // );
-    // if (!hasPrivileges) {
-    //   res.status(401).json({ error: error.youDoNotHavePermission });
-    // }
-
-    const response = await business.getOrganizationSettings(parseInt(orgId));
-
-    if (response.error !== error.noError) {
-      return res.status(404).json({ error: response.error });
-    }
-
-    return res.status(200).json({ status: "success", data: response.data });
+  if (isNaN(orgId)) {
+    return res.status(400).json({ error: error.organizationIdMustBeInteger });
   }
-);
+
+  // does the user have privileges?
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+  //   req.session.user.username,
+  //   orgId
+  // );
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
+
+  const response = await business.getOrganizationSettings(parseInt(orgId));
+
+  if (response.error !== error.noError) {
+    return res.status(404).json({ error: response.error });
+  }
+
+  return res.status(200).json({ status: "success", data: response.data });
+});
 
 //PUT /v1/organization/:orgId/settings/membership-requirements
 router.put(
   "/membership-requirements",
-  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let { requirement_id, meeting_type, frequency, amount_type, amount } = req.body;
+    let { requirement_id, meeting_type, frequency, amount_type, amount } =
+      req.body;
 
     orgId = sanitizer.sanitize(orgId);
     requirement_id = sanitizer.sanitize(requirement_id);
@@ -90,13 +90,11 @@ router.put(
   }
 );
 
-
 //PUT /v1/organization/:orgId/settings/membership-requirements
 router.post(
   "/membership-requirements",
-  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
   async function (req, res) {
-
     let orgId = req.params.orgId;
 
     orgId = sanitizer.sanitize(orgId);
@@ -109,9 +107,7 @@ router.post(
       !req.body.hasOwnProperty("amount_type") ||
       !req.body.hasOwnProperty("amount")
     ) {
-      return res
-        .status(400)
-        .json({ error: error.newReqMustHaveAllParams });
+      return res.status(400).json({ error: error.newReqMustHaveAllParams });
     }
     // does the user have privileges?
     // const hasPrivileges = hasCredentials.isEboardOrAdmin(
@@ -134,67 +130,62 @@ router.post(
   }
 );
 
-
 //PUT /v1/organization/:orgId/settings/email-settings
-router.put(
-  "/email-settings",
-  isAuthorizedHasSessionForAPI,
-  async function (req, res) {
-    let orgId = req.params.orgId;
-    // let {
-    //   current_status,
-    //   annual_report,
-    //   semester_report,
-    //   membership_achieved,
-    // } = req.body;
+router.put("/email-settings", isAdminOrEboardForOrg, async function (req, res) {
+  let orgId = req.params.orgId;
+  // let {
+  //   current_status,
+  //   annual_report,
+  //   semester_report,
+  //   membership_achieved,
+  // } = req.body;
 
-    // console.log(current_status)
-    // console.log(annual_report)
-    // console.log(semester_report)
-    // console.log(membership_achieved)
+  // console.log(current_status)
+  // console.log(annual_report)
+  // console.log(semester_report)
+  // console.log(membership_achieved)
 
-    orgId = sanitizer.sanitize(orgId);
+  orgId = sanitizer.sanitize(orgId);
 
-    if (isNaN(orgId)) {
-      return res.status(400).json({ error: error.organizationIdMustBeInteger });
-    }
-    if (
-      !req.body.hasOwnProperty("current_status") &&
-      !req.body.hasOwnProperty("annual_report") &&
-      !req.body.hasOwnProperty("semester_report") &&
-      !req.body.hasOwnProperty("membership_achieved")
-    ) {
-      return res
-        .status(400)
-        .json({ error: error.mustIncludeAtLeastOneValidFieldToEdit });
-    }
-
-    // does the user have privileges?
-    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    //   req.session.user.username,
-    //   orgId
-    // );
-    // if (!hasPrivileges) {
-    //   res.status(401).json({ error: error.youDoNotHavePermission });
-    // }
-
-    const response = await business.editOrganizationEmailSettings(
-      parseInt(orgId),
-      req.body
-    );
-
-    if (response.error !== error.noError) {
-      return res.status(404).json({ error: error.organizationNotFound });
-    }
-
-    return res.status(200).json({ status: "success", data: response.data });
+  if (isNaN(orgId)) {
+    return res.status(400).json({ error: error.organizationIdMustBeInteger });
   }
-);
+  if (
+    !req.body.hasOwnProperty("current_status") &&
+    !req.body.hasOwnProperty("annual_report") &&
+    !req.body.hasOwnProperty("semester_report") &&
+    !req.body.hasOwnProperty("membership_achieved")
+  ) {
+    return res
+      .status(400)
+      .json({ error: error.mustIncludeAtLeastOneValidFieldToEdit });
+  }
+
+  // does the user have privileges?
+  // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+  //   req.session.user.username,
+  //   orgId
+  // );
+  // if (!hasPrivileges) {
+  //   res.status(401).json({ error: error.youDoNotHavePermission });
+  // }
+
+  const response = await business.editOrganizationEmailSettings(
+    parseInt(orgId),
+    req.body
+  );
+
+  if (response.error !== error.noError) {
+    return res.status(404).json({ error: error.organizationNotFound });
+  }
+
+  return res.status(200).json({ status: "success", data: response.data });
+});
 
 //DELETE /v1/organization/:orgId/settings/membership-requirements
 router.delete(
   "/membership-requirements",
-  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
   async function (req, res) {
     let orgId = req.params.orgId;
     let id = req.query.id;
@@ -214,7 +205,6 @@ router.delete(
     // if (!hasPrivileges) {
     //   res.status(401).json({ error: error.youDoNotHavePermission });
     // }
-
 
     const response = await business.deleteOrganizationMembershipRequirement(
       parseInt(orgId),
