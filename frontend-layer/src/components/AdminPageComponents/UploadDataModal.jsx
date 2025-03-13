@@ -125,7 +125,7 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
       </DialogContent>
       <DialogActions>
         <button autoFocus className="secondary" onClick={() => setOpen(false)}>
-          Cancel WOOF
+          Cancel
         </button>
         <button
           onClick={handleUpload}

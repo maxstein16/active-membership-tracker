@@ -9,9 +9,9 @@ const { configDotenv } = require("dotenv");
 
 function mapToMemberData(row) {
     return {
-        member_name: `${row.firstName} ${row.lastName}`.trim(),
-        member_email: row.email,
-        member_personal_email: row.email,  // Using the same email for now
+        member_name: `${row["First Name"]?.trim() || null} ${row["Last Name"]?.trim() || null}`.trim(),
+        member_email: row["Email"]?.trim().toLowerCase() || null,
+        member_personal_email: row["Email"]?.trim().toLowerCase() || null,  // Using the same email for now
         member_major: row.degree,
         // Add other relevant mappings as needed
     };
@@ -89,15 +89,16 @@ class CSVProcessor {
                             }
 
                             // Check if the member has a membership for the organization
-                            const existingMembership = await getMembershipByAttributes({ member_id: member.member_id });
+                            const existingMembership = await getMembershipByAttributes({ member_id: member.member_id, organization_id: organizationId });
 
                             let membershipData = null; // Initialize membershipData
-                            if (existingMembership.length === 0) {
+
+                            if (!existingMembership || existingMembership.length === 0) {
                                 console.log("No membership exists");
                                 membershipData = mapToMembershipData(member.member_id, organizationId, semesterId);
                                 await createMembership(membershipData); // Create the membership
                             } else {
-                                console.log("csvUploadProcessing - Yippe! Found membership, now we track attendance")
+                                console.log("csvUploadProcessing - Yippe! Found membership, now we track attendance");
                             }
 
                             // Record the attendance
