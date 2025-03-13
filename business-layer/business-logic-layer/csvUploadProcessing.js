@@ -3,14 +3,10 @@ const csv = require("fast-csv");
 const ErrorMessages = require("./public/errors.js");
 const error = new ErrorMessages();
 const { createAttendance } = require("../data-layer/attendance.js");
-const { createMembership } = require("../data-layer/membership.js");
-const { getMembersByAttributes, createMember } = require("../data-layer/member.js");
+const { getMembershipByAttributes, createMembership } = require("../data-layer/membership.js");
+const { getMembersByAttributes, createMember, getMemberFromOrganization } = require("../data-layer/member.js");
+const { configDotenv } = require("dotenv");
 
-/**
- * Maps CSV row data to member data format
- * @param {Object} row Raw CSV row data
- * @returns {Object} Formatted member data
- */
 function mapToMemberData(row) {
     return {
         member_name: `${row.firstName} ${row.lastName}`.trim(),
@@ -21,13 +17,6 @@ function mapToMemberData(row) {
     };
 }
 
-/**
- * Maps CSV row data to membership data format
- * @param {number} memberId Member ID
- * @param {number} organizationId Organization ID
- * @param {string} semesterId Semester ID
- * @returns {Object} Formatted membership data
- */
 function mapToMembershipData(memberId, organizationId, semesterId) {
     return {
         member_id: memberId,
@@ -36,141 +25,95 @@ function mapToMembershipData(memberId, organizationId, semesterId) {
     };
 }
 
-/**
- * Maps CSV row data to attendance data format
- * @param {Object} row Raw CSV row data
- * @param {number} eventId Event ID
- * @param {number} memberId Member ID
- * @returns {Object} Formatted attendance data
- */
 function mapToAttendanceData(row, eventId, memberId) {
+    // Check RSVP status (default to "no" if not provided)
+    const rsvpStatus = row.rsvp ? row.rsvp.toLowerCase() : "no";
+
+    // Set check-in to current timestamp if they attended (since they're in the CSV)
+    const checkInTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
     return {
         event_id: eventId,
         member_id: memberId,
-        check_in: row.rsvp.toLowerCase() === "yes",
-        notes: row.officersNotes,
-        rating: row.attendeeRating
+        check_in: checkInTimestamp,  // Proper DATETIME format
+        notes: row.officersNotes || null,
+        rating: row.attendeeRating || null
     };
 }
 
+
+
 class CSVProcessor {
-    /**
-     * Process a CSV file and handle member and attendance records
-     * @param {string} filePath Path to the CSV file
-     * @param {number} eventId Event ID for attendance records
-     * @param {number} organizationId Organization ID
-     * @param {string} semesterId Semester ID
-     * @returns {Promise<Object>} Processing results
-     */
     async processCSV(filePath, eventId, organizationId, semesterId) {
+        console.log("csvUploadProcessing is doing processCSV");
+        console.log("Here is what is in parameters of the method " + filePath, eventId, organizationId, semesterId)
 
-        console.log("csvUploadProcessing is doing processCSV")
         return new Promise((resolve, reject) => {
-            const results = [];
-            const processedEmails = new Set();
-            const promises = [];
-
-            // Reading from the file path
+            const csvRows = []; // Store all rows
             fs.createReadStream(filePath)
                 .pipe(csv.parse({
                     headers: true,
                     skipEmptyLines: false,
                     trim: true
                 }))
-                .on("data", async (row) => {
-                    const promise = new Promise(async (resolve) => {
-                        let processedRow = {};
-
-                        try {
-                            processedRow = {
-                                firstName: row["First Name"]?.trim() || "N/A",
-                                lastName: row["Last Name"]?.trim() || "N/A",
-                                email: row["Email"]?.trim().toLowerCase() || "N/A", // Ensure lowercase + no whitespace issues
-                                accountType: row["Account Type"]?.trim() || "Unknown",
-                                degree: row["Degree"]?.trim() || "N/A",
-                                rsvp: row["RSVP'ed"]?.trim() || "No",
-                                officersNotes: row["Officer's Notes"]?.trim() || "N/A",
-                                attendeeRating: row["Attendee's Rating"]?.trim() || "N/A",
-                            };
-
-                            // Skip duplicates
-                            if (processedEmails.has(processedRow.email)) {
-                                console.log(`Duplicate email found: ${processedRow.email}. Skipping.`);
-                                return resolve();
-                            }
-
-                            processedEmails.add(processedRow.email);
-                            console.log("Processed email is: " + processedRow.email);
-
-                            console.log("Trying to find member by email attribute...");
-
-                            // 🔹 Fetch member
-                            const existingMemberResult = await getMembersByAttributes({
-                                member_email: processedRow.email
-                            });
-
-                            // 🔹 Debugging: Log the entire response to verify structure
-                            console.log("Existing Member Result:", JSON.stringify(existingMemberResult, null, 2));
-
-                            let memberId = 0; // Default to 0 or null
-
-                            // 🔹 Correctly check `data` array from the response
-                            if (existingMemberResult?.error) {
-                                console.error("Error while fetching member:", existingMemberResult.error);
-                            } else if (existingMemberResult?.data?.length > 0) {
-                                console.log("✅ Member found! ID:", existingMemberResult.data[0].member_id);
-                                memberId = existingMemberResult.data[0].member_id;
-                            } else {
-                                console.log("❌ No member found with the given email:", processedRow.email);
-                            }
-
-                            // 🔹 Store results
-                            results.push({
-                                ...processedRow,
-                                memberId: memberId,
-                                processed: true
-                            });
-
-                        } catch (err) {
-                            console.error("🚨 Error processing row:", err);
-                            results.push({
-                                ...processedRow,
-                                processed: false,
-                                error: err.message
-                            });
-                        }
-
-                        resolve();
-                    });
-
-                    promises.push(promise);
+                .on("data", (row) => {
+                    csvRows.push(row); // Store each row in the array
+                    console.log("Row with info " + row + " just got stored/pushed in the array")
                 })
                 .on("end", async () => {
                     try {
-                        await Promise.all(promises);
-                        await fs.promises.unlink(filePath);
+                        const results = [];
 
-                        resolve({
-                            error: error.noError,
-                            data: {
-                                total: results.length,
-                                processed: results.filter(r => r.processed).length,
-                                failed: results.filter(r => !r.processed).length,
-                                details: results
+                        for (const row of csvRows) {
+                            const email = row["Email"]?.trim().toLowerCase() || "N/A";
+
+                            // Check if member exists in the member table
+                            console.log("HELLO!!!! CSV Upload Processing is trying to get member by email: " + email + " and organization ID: " + organizationId)
+                            const memberResults = await getMembersByAttributes({ member_email: email });
+                            console.log(memberResults);
+
+                            if (memberResults.error) {
+                                console.error("Error fetching member:", memberResults.error);
+                                continue;
                             }
-                        });
+
+                            let member = null; // Initialize member
+
+                            if (memberResults.data.length === 0) {
+                                console.log("No member found, creating a new one...");
+                                const memberData = mapToMemberData(row); // Map row to member data
+                                member = await createMember(memberData); // Create the member
+                            } else {
+                                console.log("Member exists " + memberResults.data[0]);
+                                member = memberResults.data[0];
+                            }
+
+                            // Check if the member has a membership for the organization
+                            const existingMembership = await getMembershipByAttributes({ member_id: member.member_id });
+
+                            let membershipData = null; // Initialize membershipData
+                            if (existingMembership.length === 0) {
+                                console.log("No membership exists");
+                                membershipData = mapToMembershipData(member.member_id, organizationId, semesterId);
+                                await createMembership(membershipData); // Create the membership
+                            } else {
+                                console.log("csvUploadProcessing - Yippe! Found membership, now we track attendance")
+                            }
+
+                            // Record the attendance
+                            //TODO EVENT ID IS HARDCODED FOR NOW
+                            console.log("Okay, now we add them to attendance")
+                            const attendanceData = mapToAttendanceData(row, eventId, member.member_id);
+                            await createAttendance(attendanceData); // Create attendance record
+
+                            results.push({ member, membershipData, attendanceData });
+                        }
+
+                        resolve(results); // Resolve the promise with results after processing all csvRows
                     } catch (err) {
-                        reject({
-                            error: error.fileCleanupFailed,
-                            details: err
-                        });
+                        console.error("Error processing CSV:", err);
+                        reject(err); // Reject the promise if an error occurs
                     }
-                })
-                .on("error", (err) => {
-                    reject({
-                        error: error.csvProcessingFailed,
-                        details: err
-                    });
                 });
         });
     }

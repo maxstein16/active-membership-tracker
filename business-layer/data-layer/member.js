@@ -112,10 +112,13 @@ async function getMembersByAttributes(filters) {
 
     return { error: null, data: members }; // Return the data and no error
   } catch (error) {
-    console.error("Error fetching members by attributes:", error);
+    console.error("member-js says Error fetching members by attributes:", error);
     return { error: error.message, data: [] }; // Return an error message and an empty array
   }
 }
+
+
+
 
 
 

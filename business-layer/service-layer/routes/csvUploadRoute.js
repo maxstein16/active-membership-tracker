@@ -67,7 +67,7 @@ router.post(
         try {
             console.log("Trying to await processCSV, the file path is " + req.file.path)
             // Process the uploaded file using business logic
-            const result = await business.processCSV(req.file.path);
+            const result = await business.processCSV(req.file.path, null, orgId, null);
 
             if (result.error) {
                 // Handle the specific error from business logic
