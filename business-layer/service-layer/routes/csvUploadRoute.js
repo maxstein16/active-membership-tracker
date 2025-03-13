@@ -44,19 +44,14 @@ router.post(
     upload.single("file"),
     isAuthorizedHasSessionForAPI,
     async (req, res) => {
-        console.log("🚀 Received request at /:orgId/upload");
-        console.log("🔍 Extracted orgId:", req.params.orgId);
-        console.log("📂 req.file:", req.file); // Check if file is received
-        console.log("📜 req.body:", req.body); // Check if any data is sent
-        let orgId = req.params.orgId;
-        orgId = sanitizer.sanitize(orgId);
-
+        let orgId = req.params.orgId; // Get orgId from request parameters
+        orgId = sanitizer.sanitize(orgId); // Sanitize it
 
         // Validate organization ID
         if (isNaN(orgId)) {
             return res.status(400).json({ error: error.organizationIdMustBeInteger });
         } else {
-            console.log("Your org id is valid")
+            console.log("Your org id is valid");
         }
 
         console.log("now we check the request file")
