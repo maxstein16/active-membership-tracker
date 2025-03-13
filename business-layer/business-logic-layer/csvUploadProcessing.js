@@ -78,98 +78,73 @@ class CSVProcessor {
                     trim: true
                 }))
                 .on("data", async (row) => {
-                    promises.push(new Promise(async (resolve) => {
-                        // Define processedRow outside try block
+                    const promise = new Promise(async (resolve) => {
                         let processedRow = {};
 
                         try {
                             processedRow = {
-                                firstName: row["First Name"] || "N/A",
-                                lastName: row["Last Name"] || "N/A",
-                                email: row["Email"] || "N/A",
-                                accountType: row["Account Type"] || "Unknown",
-                                degree: row["Degree"] || "N/A",
-                                rsvp: row["RSVP'ed"] || "No",
-                                officersNotes: row["Officer's Notes"] || "N/A",
-                                attendeeRating: row["Attendee's Rating"] || "N/A",
+                                firstName: row["First Name"]?.trim() || "N/A",
+                                lastName: row["Last Name"]?.trim() || "N/A",
+                                email: row["Email"]?.trim().toLowerCase() || "N/A", // Ensure lowercase + no whitespace issues
+                                accountType: row["Account Type"]?.trim() || "Unknown",
+                                degree: row["Degree"]?.trim() || "N/A",
+                                rsvp: row["RSVP'ed"]?.trim() || "No",
+                                officersNotes: row["Officer's Notes"]?.trim() || "N/A",
+                                attendeeRating: row["Attendee's Rating"]?.trim() || "N/A",
                             };
 
-                            console.log("CSVUPLOAD PROCESSING HAS JUST PROCESSED A ROW", processedRow);
-
-                            // Skip if email already processed
+                            // Skip duplicates
                             if (processedEmails.has(processedRow.email)) {
                                 console.log(`Duplicate email found: ${processedRow.email}. Skipping.`);
                                 return resolve();
                             }
 
                             processedEmails.add(processedRow.email);
+                            console.log("Processed email is: " + processedRow.email);
 
-                            // Check for existing member by email
+                            console.log("Trying to find member by email attribute...");
+
+                            // 🔹 Fetch member
                             const existingMemberResult = await getMembersByAttributes({
                                 member_email: processedRow.email
                             });
 
-                            let memberId;
-                            console.log("------- For now member ID is: ")
+                            // 🔹 Debugging: Log the entire response to verify structure
+                            console.log("Existing Member Result:", JSON.stringify(existingMemberResult, null, 2));
 
-                            // If member does not exist, create new member
-                            if (existingMemberResult.error || !existingMemberResult.data?.length) {
-                                const memberData = mapToMemberData(processedRow);
-                                const createResult = await createMember(memberData);
+                            let memberId = 0; // Default to 0 or null
 
-                                if (createResult.error) {
-                                    console.error("Error creating member:", createResult.error);
-                                    return resolve();
-                                }
-
-                                memberId = createResult.data.member_id;
-                            } else {
+                            // 🔹 Correctly check `data` array from the response
+                            if (existingMemberResult?.error) {
+                                console.error("Error while fetching member:", existingMemberResult.error);
+                            } else if (existingMemberResult?.data?.length > 0) {
+                                console.log("✅ Member found! ID:", existingMemberResult.data[0].member_id);
                                 memberId = existingMemberResult.data[0].member_id;
+                            } else {
+                                console.log("❌ No member found with the given email:", processedRow.email);
                             }
 
-                            // Check if the member already has a membership
-                            const existingMembershipResult = await getMembershipsByAttributes(memberId, organizationId, semesterId);
-
-                            // If no membership exists, create a new membership
-                            if (existingMembershipResult.error || !existingMembershipResult.data?.length) {
-                                const membershipData = mapToMembershipData(memberId, organizationId, semesterId);
-                                const createMembershipResult = await createMembership(membershipData);
-
-                                if (createMembershipResult.error) {
-                                    console.error("Error creating membership:", createMembershipResult.error);
-                                    return resolve();
-                                }
-                            }
-
-                            // Now, record attendance
-                            if (memberId && eventId) {
-                                const attendanceData = mapToAttendanceData(processedRow, eventId, memberId);
-                                const attendanceResult = await createAttendance(attendanceData);
-
-                                if (attendanceResult.error) {
-                                    console.error("Error creating attendance:", attendanceResult.error);
-                                }
-                            }
-
+                            // 🔹 Store results
                             results.push({
                                 ...processedRow,
                                 memberId: memberId,
                                 processed: true
-                            }); w
+                            });
 
                         } catch (err) {
-                            console.error("Error processing row:", err);
+                            console.error("🚨 Error processing row:", err);
                             results.push({
-                                ...processedRow, // Now it always exists
+                                ...processedRow,
                                 processed: false,
                                 error: err.message
                             });
                         }
 
                         resolve();
-                    }));
-                })
+                    });
 
+                    promises.push(promise);
+                })
                 .on("end", async () => {
                     try {
                         await Promise.all(promises);

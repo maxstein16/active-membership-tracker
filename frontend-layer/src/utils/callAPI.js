@@ -16,7 +16,7 @@ export async function getAPIData(endpoint, method, payload, isFile = false) {
     credentials: "include",
   };
 
-  // 🔍 If it's NOT a file upload, set JSON headers
+  // If it's NOT a file upload, set JSON headers
   if (!isFile) {
     details.headers = {
       Accept: "application/json",
@@ -29,10 +29,16 @@ export async function getAPIData(endpoint, method, payload, isFile = false) {
     details.body = isFile ? payload : JSON.stringify(payload);
   }
 
+
   let link = `${connect4server}${endpoint}`;
+  console.log("The link attempting to be fetched " + link)
+  console.log("The details body is formdata :D " + details.body)
+  console.log("HELLO!!! ")
+
   return fetch(link, details)
     .then((res) => res.json())
     .catch((err) => {
+      console.log("Oopsie!")
       console.log("err:", err);
     });
 }

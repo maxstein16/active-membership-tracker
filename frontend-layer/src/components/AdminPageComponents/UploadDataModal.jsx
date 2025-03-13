@@ -78,6 +78,8 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
     formData.append("file", fileInput.files[0]);
 
     try {
+      console.log("Now we are trying to get API data...");
+
       //getAPIData(endpoint, method, payload)
       const result = await getAPIData(
         `/organization/${orgId}/upload`,
