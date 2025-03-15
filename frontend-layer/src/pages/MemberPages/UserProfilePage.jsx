@@ -19,6 +19,7 @@ export default function UserProfilePage() {
 
   // Get user data
   React.useEffect(() => {
+    console.log("Navigated to user profile page");
     // TODO
     // get API data
     // set user data
@@ -34,13 +35,13 @@ export default function UserProfilePage() {
       gradYear: "year",
       tshirt: "Medium",
       race: "White",
-      gender: "Woman"
+      gender: "Woman",
     });
   }, []);
 
   return (
     <PageSetup>
-      <BackButton route={"/"}/>
+      <BackButton route={"/"} />
       <BottomCornerButton
         action={() => {
           navigate("/profile/edit");
@@ -49,11 +50,7 @@ export default function UserProfilePage() {
         <EditIcon sx={{ color: "#FFFFFF", fontSize: 30 }} />
       </BottomCornerButton>
 
-      {!userData ? (
-        <CircularProgress/>
-      ) : (
-        <UserProfileData user={userData} />
-      )}
+      {!userData ? <CircularProgress /> : <UserProfileData user={userData} />}
     </PageSetup>
   );
 }

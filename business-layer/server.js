@@ -24,7 +24,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.enable("trust proxy");
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index : false }));
+app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index: false }));
 
 // Session Middleware
 app.use(
@@ -76,6 +76,7 @@ app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/events", eventsRouter);
 app.use("/v1/attendance", attendanceRouter);
+app.use("/v1/member", memberRouter);
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {

@@ -20,7 +20,7 @@ router.get(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     // check if memberId is provided
-   
+
     if (!req.params.memberId) {
       res.status(400).json({ error: error.mustIncludeMemberId });
       return;
@@ -48,10 +48,13 @@ router.get(
 );
 
 // Handle GET requests without memberId
-router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {  
+router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
 
+  console.log("Member ID is " + memberId.member_id)
+
   const memberData = await business.getMemberById(memberId);
+
 
   if (memberData.error && memberData.error !== error.noError) {
     res.status(404).json({ error: error.memberCannotBeFoundInDB });
@@ -200,9 +203,9 @@ router.get(
         error: error.mustIncludeOrgId
       });
     }
-   
+
     // Rest of the validation and processing
-   let memberId = sanitizer.sanitize(req.params.memberId);
+    let memberId = sanitizer.sanitize(req.params.memberId);
     var orgId = sanitizer.sanitize(req.query.orgId);
 
     if (isNaN(memberId)) {
