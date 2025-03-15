@@ -8,6 +8,8 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import { getMemberInfoData } from "../../utils/handleOrganizationMembers";
+import displayErrors from "../../utils/displayErrors";
 
 export default function MemberPopUpInfo({
   color,
@@ -18,12 +20,34 @@ export default function MemberPopUpInfo({
   membershipId,
 }) {
   // store the data here
-  // const [member, setMember] = React.useState(undefined);
+  const [member, setMember] = React.useState(undefined);
+  const [error, setError] = React.useState("");
 
   // GET THE DATA
   React.useEffect(() => {
-    // get the data here with the member id
-  }, []);
+    async function fetchMemberData() {
+      try {
+        const data = await getMemberInfoData(orgId, memberId);
+
+        if (data.session === false) {
+          setError(displayErrors.noSession);
+          return;
+        }
+
+        if (data.error) {
+          setError(data.error);
+          return;
+        }
+
+        setMember(data); // Store member data in state
+      } catch (err) {
+        console.error("Error fetching member data:", err);
+        setError("An unexpected error occurred.");
+      }
+    }
+
+    fetchMemberData();
+  }, [orgId, memberId]);
 
   return (
     <Dialog
