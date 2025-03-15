@@ -6,7 +6,7 @@ const { Member } = require("../db");
  * @param {object} memberData - The attributes of the new member
  * @returns {Promise<object>} The newly created member object.
  */
-async function createMember (memberData) {
+async function createMember(memberData) {
   try {
     const newMember = await Member.create(memberData);
     // console.log("Member created:", newMember.toJSON());
@@ -24,7 +24,7 @@ async function createMember (memberData) {
  * @param {object} updateData - The fields to update
  * @returns {Promise<boolean>} Returns `true` if the member was updated, `false` if no matching member was found.
  */
-async function updateMember (memberId, updateData) {
+async function updateMember(memberId, updateData) {
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },

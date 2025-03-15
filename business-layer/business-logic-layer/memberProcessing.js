@@ -133,18 +133,29 @@ async function createMemberInDB(memberData) {
 }
 
 async function getMemberIDByUsernameInDB(username) {
-    const memberInfo = await Member.findOne({
-        where: { member_email: username },
-    });
+    console.log("memberProcessing is trying to getMemberIDByUsernameInDB by username " + username);
+    try {
+        // Find member by email
+        const memberInfo = await Member.findOne({
+            where: { member_email: username },
+            raw: true,
+        });
 
-    console.log("Member processing says " + memberInfo.member_id)
+        // If no member is found, return an error
+        if (!memberInfo) {
+            console.error("No member found for username:", username);
+            return { error: "Member not found", data: null };
+        }
 
-    if (!memberInfo) {
-        return { error: error.mustIncludeMemberId };
+        // Log member ID for debugging (remove in production)
+        console.log("Found member ID:", memberInfo.member_id);
 
+        // Return member ID
+        return { error: null, data: memberInfo.member_id };
+    } catch (err) {
+        console.error("Error fetching member ID by username:", err);
+        return { error: "Something went wrong", data: null };
     }
-
-    return memberInfo.member_id;
 }
 
 

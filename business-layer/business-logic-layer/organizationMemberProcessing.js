@@ -106,11 +106,11 @@ async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate)
         if (isNaN(memberId)) {
             return { error: error.memberIdMustBeInteger, data: null };
         }
-        if (memberDataToUpdate.hasOwnProperty("membership_role") && 
+        if (memberDataToUpdate.hasOwnProperty("membership_role") &&
             isNaN(memberDataToUpdate.membership_role)) {
             return { error: error.roleMustBeAnInteger, data: null };
         }
-        if (memberDataToUpdate.hasOwnProperty("membership_points") && 
+        if (memberDataToUpdate.hasOwnProperty("membership_points") &&
             isNaN(memberDataToUpdate.membership_points)) {
             return { error: error.memberPointsNaN, data: null };
         }
@@ -218,5 +218,6 @@ module.exports = {
     addMemberToAnOrganizationInDB,
     editMemberInOrganizationInDB,
     deleteMemberInOrganizationInDB,
-    getMembersInOrganizationInDB
+    getMembersInOrganizationInDB,
+    getMembersByAttributes
 };

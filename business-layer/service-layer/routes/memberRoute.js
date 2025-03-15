@@ -47,23 +47,36 @@ router.get(
   }
 );
 
+
 // Handle GET requests without memberId
 router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+
+  // Fetch member ID using the function
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
 
-  console.log("Member ID is " + memberId.member_id)
+  // Check if an error occurred while fetching member ID
+  if (memberId.error) {
+    console.log("Error fetching member ID: " + memberId.error);
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
 
-  const memberData = await business.getMemberById(memberId);
+  console.log("Session user username is " + req.session.user.username);
+  console.log("Member ID is " + memberId.data); // Accessing the member ID from the 'data' field
 
+  // Fetch member data using the ID
+  const memberData = await business.getMemberById(memberId.data);
 
+  // Check if an error occurred while fetching member data
   if (memberData.error && memberData.error !== error.noError) {
     res.status(404).json({ error: error.memberCannotBeFoundInDB });
     return;
   }
 
+  // Return member data
   res.status(200).json({ data: memberData.data });
-
 });
+
 
 // PUT /v1/member/:memberId
 router.put(
