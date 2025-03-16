@@ -39,16 +39,24 @@ export default function EditProfilePage() {
             graduationDate: member.member_graduation_date, // Store full date
             tshirt: member.member_tshirt_size,
             race: member.member_race,
-            gender:
-              member.member_gender === "F"
-                ? "Female"
-                : member.member_gender === "M"
-                ? "Male"
-                : member.member_gender,
+            gender: member.member_gender,
             status: member.member_status,
           };
           setUserData(formattedData);
           setOriginalData(formattedData); // Save original for change tracking
+
+          console.log(
+            "fetched data looks like this" + member.member_name,
+            member.member_email,
+            member.member_personal_email,
+            member.member_phone_number,
+            member.member_major,
+            member.member_graduation_date,
+            member.member_tshirt_size,
+            member.member_race,
+            member.member_gender,
+            member.member_status
+          );
         } else {
           console.error("Error fetching user data:", data.error);
         }
@@ -91,10 +99,10 @@ export default function EditProfilePage() {
     } = userData;
 
     // Regular expressions for validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@g?\.rit\.edu$/; // RIT email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@rit\.edu$/;
     const personalEmailRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; // General email format
-    const phoneRegex = /^\+?\d{10,15}$/; // Supports international phone numbers
+    const phoneRegex = /^\+?(\d[\d-.()\s]*){10,15}$/;
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD format
 
     // Enum options (you can update these as needed)
@@ -128,11 +136,11 @@ export default function EditProfilePage() {
       "Prefer Not to Say",
     ];
     const statusOptions = [
-      "Undergraduate",
-      "Graduate",
-      "Staff",
-      "Faculty",
-      "Alumni",
+      "undergraduate",
+      "graduate",
+      "staff",
+      "faculty",
+      "alumni",
     ];
 
     // Name validation
@@ -141,7 +149,7 @@ export default function EditProfilePage() {
 
     // Email validation (RIT email)
     if (!email || !emailRegex.test(email))
-      return "Invalid email format. It must end with 'rit.edu' or 'g.rit.edu'.";
+      return "Invalid email format. It must end with 'rit.edu'.";
 
     // Personal email validation (if provided)
     if (personalEmail && !personalEmailRegex.test(personalEmail))
@@ -173,6 +181,11 @@ export default function EditProfilePage() {
       return "Status must be one of the following: 'Undergraduate', 'Graduate', 'Staff', 'Faculty', 'Alumni'.";
 
     return null; // No errors
+  };
+
+  // Capitalize the first letter of each word for display
+  const capitalizeFirstLetter = (str) => {
+    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   const handleSave = async () => {
@@ -259,28 +272,46 @@ export default function EditProfilePage() {
         isMultiline={false}
       />
       <UserInput
-        label="T-Shirt Size"
+        label="T-shirt Size"
         value={userData.tshirt}
         setValue={(value) => saveNewAttribute(value, "tshirt")}
-        isMultiline={false}
+        isDropdown={true}
+        options={["XS", "S", "M", "L", "XL", "XXL"]}
       />
+
       <UserInput
         label="Race"
         value={userData.race}
         setValue={(value) => saveNewAttribute(value, "race")}
-        isMultiline={false}
+        isDropdown={true}
+        options={[
+          "Asian",
+          "Black or African American",
+          "Caucasian / White",
+          "Hispanic or Latino",
+          "Native American or Alaska Native",
+          "Native Hawaiian or Other Pacific Islander",
+          "Middle Eastern or North African",
+          "Mixed / Two or More Races",
+          "Other",
+          "Prefer Not to Say",
+        ]}
       />
+
       <UserInput
         label="Gender"
         value={userData.gender}
         setValue={(value) => saveNewAttribute(value, "gender")}
-        isMultiline={false}
+        isDropdown={true}
+        options={["Male", "Female", "Non-binary", "Other", "Prefer not to say"]}
       />
+
       <UserInput
         label="Status"
-        value={userData.status}
-        setValue={(value) => saveNewAttribute(value, "status")}
-        isMultiline={false}
+        value={capitalizeFirstLetter(userData.status)}
+        setValue={(value) => saveNewAttribute(value.toLowerCase(), "status")}
+        isDropdown={true}
+        options={["Undergraduate", "Graduate", "Staff", "Faculty", "Alumni"]}
       />
 
       <button
