@@ -64,7 +64,64 @@ export default function EditProfilePage() {
     setUserData((prev) => ({ ...prev, [field]: newValue }));
   };
 
+  const hasUnsavedChanges =
+    JSON.stringify(userData) !== JSON.stringify(originalData);
+
+  const handleNavigation = (target) => {
+    if ((target === "/profile" || target === "cancel") && hasUnsavedChanges) {
+      setNavTarget(target);
+      setOpenDialog(true);
+    } else {
+      window.location.href = target;
+    }
+  };
+
+  const validateFields = () => {
+    const {
+      name,
+      email,
+      personalEmail,
+      phone,
+      major,
+      graduationDate,
+      race,
+      gender,
+      tshirt,
+      status,
+    } = userData;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?\d{10,15}$/; // Supports international format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const genderOptions = ["F", "M"];
+    const allowedTshirtSizes = ["XS", "S", "M", "L", "XL", "XXL"]; // Adjust if needed
+
+    if (!name || typeof name !== "string")
+      return "Name is required and must be a string.";
+    if (!email || !emailRegex.test(email)) return "Invalid email format.";
+    if (personalEmail && !emailRegex.test(personalEmail))
+      return "Invalid personal email format.";
+    if (phone && !phoneRegex.test(phone)) return "Invalid phone number format.";
+    if (major && typeof major !== "string") return "Major must be a string.";
+    if (graduationDate && !dateRegex.test(graduationDate))
+      return "Graduation date must be in YYYY-MM-DD format.";
+    if (race && typeof race !== "string") return "Race must be a string.";
+    if (gender && !genderOptions.includes(gender))
+      return "Gender must be 'F' or 'M'.";
+    if (tshirt && !allowedTshirtSizes.includes(tshirt))
+      return "Invalid T-shirt size.";
+    if (status && typeof status !== "string") return "Status must be a string.";
+
+    return null; // No errors
+  };
+
   const handleSave = async () => {
+    const validationError = validateFields();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
       const payload = {
         member_name: userData.name,
@@ -75,8 +132,8 @@ export default function EditProfilePage() {
         member_graduation_date: userData.graduationDate,
         member_race: userData.race,
         member_gender: userData.gender,
-        member_tshirt_size: userData.tshirtSize,
-        member_status: userData.status, // For the status field, if applicable
+        member_tshirt_size: userData.tshirt,
+        member_status: userData.status,
       };
 
       const response = await fetch("/v1/member", {
@@ -88,20 +145,9 @@ export default function EditProfilePage() {
       if (!response.ok) throw new Error("Failed to save data");
 
       setOriginalData(userData);
+      setError(""); // Clear any previous error
     } catch (err) {
       setError(err.message);
-    }
-  };
-
-  const hasUnsavedChanges =
-    JSON.stringify(userData) !== JSON.stringify(originalData);
-
-  const handleNavigation = (target) => {
-    if ((target === "/profile" || target === "cancel") && hasUnsavedChanges) {
-      setNavTarget(target);
-      setOpenDialog(true);
-    } else {
-      window.location.href = target;
     }
   };
 
