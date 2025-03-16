@@ -13,6 +13,7 @@ const sanitizer = new Sanitizer();
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
 const { Member } = require("../../db");
+const { log } = require("console");
 
 // GET /v1/member/:memberId
 router.get(
@@ -124,6 +125,7 @@ router.put(
   }
 );
 
+// PUT-UPDATE/v1/member
 router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   let body = req.body;
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
@@ -134,6 +136,8 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
     console.log("Error fetching member ID: " + memberId.error);
     res.status(404).json({ error: memberId.error });
     return;
+  } else {
+    console.log("Successful retrieval of member id by username")
   }
 
   // check if at least one valid field is provided for update
@@ -158,12 +162,15 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
       error: error.mustIncludeValidFieldAddMember,
     });
     return;
+  } else {
+    console.log("your fields are valid, fam")
   }
 
   // send data to backend for update
-  const updateResult = await business.updateMember(memberId, body);
+  const updateResult = await business.updateMember(memberId.data, body);
 
   if (updateResult.error && updateResult.error !== error.noError) {
+    console.log("we frfr struggling to update member")
     res.status(404).json({ error: error.memberCannotBeFoundInDB });
     return;
   }

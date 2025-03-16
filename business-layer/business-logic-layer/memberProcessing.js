@@ -64,6 +64,11 @@ async function updateMemberInDB(memberId, memberData) {
     }
 
     try {
+
+
+        console.log("Lets check fields in member pr")
+
+
         // Map incoming fields to database fields
         const updateFields = {
             member_personal_email: memberData.personal_email,
