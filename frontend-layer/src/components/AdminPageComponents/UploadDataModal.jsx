@@ -115,11 +115,6 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
           :)
         </p>
         <input type="file" onChange={handleFileChange} />
-        {fileName && <p>File selected: {fileName}</p>} {/* Display file name */}
-        {fileContent && (
-          <p>File Content Preview: {fileContent.slice(0, 100)}</p>
-        )}{" "}
-        {/* Display file content preview */}
         {errMsg && <p style={{ color: "red" }}>{errMsg}</p>}{" "}
         {/* Display error message */}
       </DialogContent>

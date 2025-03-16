@@ -36,6 +36,7 @@ function mapToAttendanceData(row, eventId, memberId) {
         event_id: eventId,
         member_id: memberId,
         check_in: checkInTimestamp,  // Proper DATETIME format
+        rsvp: row["RSVP'ed"]?.trim(),
         notes: row.officersNotes || null,
         rating: row.attendeeRating || null
     };
@@ -100,6 +101,9 @@ class CSVProcessor {
                             } else {
                                 console.log("csvUploadProcessing - Yippe! Found membership, now we track attendance");
                             }
+
+                            //TODO Check if we are in the current semester. Cannot do this without other code 
+                            //TODO Where are we going to check officers notes and attendee rating
 
                             // Record the attendance
                             //TODO EVENT ID IS HARDCODED FOR NOW
