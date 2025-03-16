@@ -13,30 +13,66 @@ import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 
 export default function UserProfilePage() {
-  // Define my variables
   const navigate = useNavigate();
   const [userData, setUserData] = React.useState(undefined);
 
-  // Get user data
+  // Fetch user data on component mount
   React.useEffect(() => {
     console.log("Navigated to user profile page");
-    // TODO
-    // get API data
-    // set user data
 
-    // temp data
-    setUserData({
-      name: "Name Here",
-      email: "email@rit.edu",
-      personalEmail: "email@gmail.com",
-      phone: "(111) 111 - 1111",
-      major: "Major, BS",
-      gradMonth: "Month",
-      gradYear: "year",
-      tshirt: "Medium",
-      race: "White",
-      gender: "Woman",
-    });
+    const fetchMemberData = async () => {
+      try {
+        const response = await fetch("/v1/member", {
+          headers: {
+            "Cache-Control": "no-cache", // Prevent caching
+            Pragma: "no-cache", // For older browsers
+          },
+        });
+
+        const data = await response.json();
+
+        // Check if API response is successful
+        if (response.status === 200) {
+          console.log("Member data:", data.data);
+
+          // Map the response data to state
+          const member = data.data;
+          setUserData({
+            name: member.member_name,
+            email: member.member_email,
+            personalEmail: member.member_personal_email,
+            phone: member.member_phone_number,
+            major: member.member_major,
+            gradMonth: new Date(member.member_graduation_date).toLocaleString(
+              "default",
+              { month: "long" }
+            ),
+            gradYear: new Date(member.member_graduation_date).getFullYear(),
+            tshirt: member.member_tshirt_size,
+            race: member.member_race,
+            gender:
+              member.member_gender === "F"
+                ? "Female"
+                : member.member_gender === "M"
+                ? "Male"
+                : member.member_gender,
+            status: member.member_status,
+            memberships: member.memberships.map((membership) => ({
+              organizationName: membership.organization.organization_name,
+              points: membership.membership_points,
+              role: membership.membership_role,
+              activeMember: membership.active_member,
+            })),
+          });
+        } else {
+          console.error("Error fetching member data:", data.error);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchMemberData();
   }, []);
 
   return (
@@ -50,6 +86,7 @@ export default function UserProfilePage() {
         <EditIcon sx={{ color: "#FFFFFF", fontSize: 30 }} />
       </BottomCornerButton>
 
+      {/* Render CircularProgress if data is still loading */}
       {!userData ? <CircularProgress /> : <UserProfileData user={userData} />}
     </PageSetup>
   );
