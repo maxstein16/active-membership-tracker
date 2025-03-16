@@ -40,16 +40,17 @@ CREATE TABLE Member (
   member_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each member
   member_name VARCHAR(255) NOT NULL, -- Full name of the member
   member_email VARCHAR(255) UNIQUE NOT NULL CHECK (member_email REGEXP '^[a-zA-Z0-9._%+-]+@g?\\.rit\\.edu$'), -- Ensures RIT emails only
-  member_personal_email VARCHAR(255) CHECK (member_personal_email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$' OR member_personal_email IS NULL), -- Ensures it's a valid email format
-  member_phone_number VARCHAR(15) CHECK (member_phone_number REGEXP '^[+]?[0-9]{10,15}$' OR member_phone_number IS NULL), -- Allows international phone numbers
-  member_graduation_date DATE CHECK (member_graduation_date >= CURDATE()), -- Ensures date is in the future
-  member_tshirt_size ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL', 'Other', 'Prefer not to say') NOT NULL, -- T-shirt size options
-  member_major VARCHAR(255) NOT NULL, -- Member's academic major
-  member_gender ENUM('Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say') NOT NULL, -- Gender identifier
-  member_race ENUM('Asian', 'Black', 'Caucasian', 'Hispanic/Latino', 'Native American', 'Pacific Islander', 'Middle Eastern', 'Mixed', 'Other') NOT NULL, -- Race/Ethnicity identifier
-  member_race_other VARCHAR(50) NULL, -- If "Other" is selected, allows input
-  member_status ENUM('Undergraduate', 'Graduate', 'Staff', 'Faculty', 'Alumni') NOT NULL -- Membership status
+  member_personal_email VARCHAR(255) CHECK (member_personal_email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$' OR member_personal_email IS NULL), -- Ensures it's a valid email format or null
+  member_phone_number VARCHAR(15) CHECK (member_phone_number REGEXP '^[+]?[0-9]{10,15}$' OR member_phone_number IS NULL), -- Allows international phone numbers or null
+  member_graduation_date DATE CHECK (member_graduation_date >= CURDATE() OR member_graduation_date IS NULL), -- Ensures date is in the future or null
+  member_tshirt_size ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL', 'Other', 'Prefer not to say') NULL, -- T-shirt size options or null
+  member_major VARCHAR(255) NULL, -- Member's academic major or null
+  member_gender ENUM('Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say') NULL, -- Gender identifier or null
+  member_race ENUM('Asian', 'Black or African American', 'Caucasian / White', 'Hispanic or Latino', 'Native American or Alaska Native', 'Native Hawaiian or Other Pacific Islander', 'Middle Eastern or North African', 'Mixed / Two or More Races', 'Other', 'Prefer Not to Say') NULL, -- Race/Ethnicity identifier or null
+  member_race_other VARCHAR(50) NULL, -- If "Other" is selected, allows input or null
+  member_status ENUM('Undergraduate', 'Graduate', 'Staff', 'Faculty', 'Alumni') NULL -- Membership status or null
 );
+
 
 
 

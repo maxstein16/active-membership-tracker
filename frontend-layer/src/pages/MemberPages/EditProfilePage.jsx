@@ -90,27 +90,87 @@ export default function EditProfilePage() {
       status,
     } = userData;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\+?\d{10,15}$/; // Supports international format
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    const genderOptions = ["F", "M"];
-    const allowedTshirtSizes = ["XS", "S", "M", "L", "XL", "XXL"]; // Adjust if needed
+    // Regular expressions for validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@g?\.rit\.edu$/; // RIT email format
+    const personalEmailRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; // General email format
+    const phoneRegex = /^\+?\d{10,15}$/; // Supports international phone numbers
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD format
 
+    // Enum options (you can update these as needed)
+    const genderOptions = [
+      "Male",
+      "Female",
+      "Non-binary",
+      "Other",
+      "Prefer not to say",
+    ];
+    const allowedTshirtSizes = [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL",
+      "Other",
+      "Prefer not to say",
+    ];
+    const raceOptions = [
+      "Asian",
+      "Black or African American",
+      "Caucasian / White",
+      "Hispanic or Latino",
+      "Native American or Alaska Native",
+      "Native Hawaiian or Other Pacific Islander",
+      "Middle Eastern or North African",
+      "Mixed / Two or More Races",
+      "Other",
+      "Prefer Not to Say",
+    ];
+    const statusOptions = [
+      "Undergraduate",
+      "Graduate",
+      "Staff",
+      "Faculty",
+      "Alumni",
+    ];
+
+    // Name validation
     if (!name || typeof name !== "string")
       return "Name is required and must be a string.";
-    if (!email || !emailRegex.test(email)) return "Invalid email format.";
-    if (personalEmail && !emailRegex.test(personalEmail))
+
+    // Email validation (RIT email)
+    if (!email || !emailRegex.test(email))
+      return "Invalid email format. It must end with 'rit.edu' or 'g.rit.edu'.";
+
+    // Personal email validation (if provided)
+    if (personalEmail && !personalEmailRegex.test(personalEmail))
       return "Invalid personal email format.";
+
+    // Phone validation (if provided)
     if (phone && !phoneRegex.test(phone)) return "Invalid phone number format.";
+
+    // Major validation (optional)
     if (major && typeof major !== "string") return "Major must be a string.";
+
+    // Graduation date validation (optional)
     if (graduationDate && !dateRegex.test(graduationDate))
       return "Graduation date must be in YYYY-MM-DD format.";
-    if (race && typeof race !== "string") return "Race must be a string.";
+
+    // Race validation (optional, check if provided value is in the enum)
+    if (race && !raceOptions.includes(race)) return "Invalid race selected.";
+
+    // Gender validation (optional, check if provided value is in the enum)
     if (gender && !genderOptions.includes(gender))
-      return "Gender must be 'F' or 'M'.";
+      return "Gender must be one of the following: 'Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say'.";
+
+    // T-shirt size validation (optional, check if provided value is in the enum)
     if (tshirt && !allowedTshirtSizes.includes(tshirt))
-      return "Invalid T-shirt size.";
-    if (status && typeof status !== "string") return "Status must be a string.";
+      return "Invalid T-shirt size. Please choose from the listed sizes.";
+
+    // Status validation (optional, check if provided value is in the enum)
+    if (status && !statusOptions.includes(status))
+      return "Status must be one of the following: 'Undergraduate', 'Graduate', 'Staff', 'Faculty', 'Alumni'.";
 
     return null; // No errors
   };
