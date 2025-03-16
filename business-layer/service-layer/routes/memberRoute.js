@@ -127,6 +127,14 @@ router.put(
 router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   let body = req.body;
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
+  console.log("Trying to update, member ID is " + memberId.data)
+
+  // Check if an error occurred while fetching member ID
+  if (memberId.error) {
+    console.log("Error fetching member ID: " + memberId.error);
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
 
   // check if at least one valid field is provided for update
   const allowedFields = [
@@ -139,11 +147,13 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
     "graduation_date",
     "status",
   ];
+
   const hasValidFields = Object.keys(body).some((key) =>
     allowedFields.includes(key)
   );
 
   if (!hasValidFields) {
+    console.log("fields are not valid")
     res.status(400).json({
       error: error.mustIncludeValidFieldAddMember,
     });

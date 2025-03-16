@@ -114,8 +114,8 @@ export default function SettingsPage() {
         frequency: success.frequency,
         amountType: success.amountType,
         amount: success.amount,
-        requirementScope: success.requirement_scope
-      })
+        requirementScope: success.requirement_scope,
+      });
       setOrgData(newData);
     });
   };
