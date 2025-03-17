@@ -116,16 +116,15 @@ async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate)
         }
 
         // Get the membership first to ensure it exists
-        const memberships = await getMembershipByAttributes({
+        const membership = await getMembershipByAttributes({
             member_id: memberId,
             organization_id: orgId
         });
 
-        if (!memberships || memberships.length === 0) {
+        if (!membership) {
             return { error: error.membershipNotFound, data: null };
         }
 
-        const membership = memberships[0];
         const updated = await editMembership(membership.membership_id, memberDataToUpdate);
 
         if (!updated) {
