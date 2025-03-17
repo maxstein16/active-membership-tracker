@@ -172,12 +172,6 @@ router.delete("/:memberId", isAdminOrEboardForOrg, async function (req, res) {
     return;
   }
 
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isAdmin(req.session.user.username, orgId)
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
-
   // send off to backend
   const result = await business.deleteMemberInOrganization(orgId, memberId);
 

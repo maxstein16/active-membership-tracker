@@ -100,12 +100,6 @@ router.post("/", isAuthorizedHasSessionForAPI, async (req, res) => {
     return res.status(400).json({ error: error.mustHaveAllFieldsCreateEvent });
   }
 
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
-
   // Send to business layer
   const result = await business.createEvent(orgId, body);
 
@@ -149,12 +143,6 @@ router.put("/:eventId", isAdminOrEboardForOrg, async (req, res) => {
       .status(400)
       .json({ error: error.mustHaveAtLeastOneFieldToUpdateEvent });
   }
-
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
 
   // Send to business layer
   const result = await business.updateEvent(orgId, eventId, body);
