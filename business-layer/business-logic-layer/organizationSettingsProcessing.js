@@ -7,6 +7,7 @@ const {
   createBonusRequirement,
   editBonusRequirement,
   deleteBonusRequirement,
+  getBonusRequirements,
 } = require("../data-layer/organization.js");
 const {
   getEmailSettings,
@@ -15,6 +16,7 @@ const {
   deleteEmailSettings,
 } = require("../data-layer/email-settings.js");
 const { deleteMembershipRequirement } = require("../data-layer/membership.js");
+const { getMemberAttendanceWithEvents } = require("../data-layer/attendance.js");
 const error = new Error();
 
 /**
@@ -292,6 +294,96 @@ async function editBonusRequirementInDB(bonusId, updateData) {
 }
 
 /**
+ * Retrieves base points for an event type based on organization's membership requirements
+ * @param {string} eventType - The type of event (e.g., 'General Meeting')
+ * @param {number} orgId - Organization ID
+ * @returns {Promise<number>} Base points for the event type
+ */
+async function getBasePointsForEventType(eventType, orgId) {
+  try {
+    const membershipRequirements = await getOrganizationMembershipRequirements(
+      orgId
+    );
+    const matchingRequirement = membershipRequirements.find(
+      (req) => req.event_type === eventType
+    );
+    return matchingRequirement ? matchingRequirement.requirement_value : 0;
+  } catch (err) {
+    console.error("Error fetching base points:", err);
+    throw err;
+  }
+}
+
+/**
+ * Calculates bonus points based on attendance percentage using BonusRequirement model
+ * @param {number} memberId - Member ID
+ * @param {number} orgId - Organization ID
+ * @param {string} eventType - Type of event (e.g., "General Meeting")
+ * @param {Object} membership - Membership instance
+ * @param {Array} attendanceRecords - Attendance records (optional, if already fetched)
+ * @returns {Promise<number>} Bonus points earned
+ */
+async function calculateBonusPoints(
+  memberId,
+  orgId,
+  eventType,
+  membership,
+  attendanceRecords = null
+) {
+  try {
+    const membershipRequirements = await getOrganizationMembershipRequirements(
+      orgId
+    );
+    const requirement = membershipRequirements.find(
+      (req) => req.event_type === eventType
+    );
+
+    if (!requirement) return 0;
+
+    const bonusRequirements = await getBonusRequirements(
+      requirement.requirement_id
+    );
+
+    if (!attendanceRecords) {
+      attendanceRecords = await getMemberAttendanceWithEvents(memberId, orgId);
+    }
+
+    const relevantAttendances = attendanceRecords.filter(
+      (attendance) => attendance.Event.event_type === eventType
+    );
+
+    const totalEvents = requirement.total_required;
+    const attendedEvents = relevantAttendances.length;
+    const attendancePercentage = (attendedEvents / totalEvents) * 100;
+
+    const alreadyReceivedBonuses = membership.received_bonus || [];
+
+    let applicableBonus = bonusRequirements
+      .filter(
+        (bonus) =>
+          attendancePercentage >= bonus.threshold_percentage &&
+          !alreadyReceivedBonuses.includes(bonus.bonus_id)
+      )
+      .reduce((max, bonus) => Math.max(max, bonus.bonus_points), 0);
+
+    if (applicableBonus > 0) {
+      membership.membership_points += applicableBonus;
+      membership.received_bonus.push(
+        bonusRequirements.find(
+          (bonus) => bonus.bonus_points === applicableBonus
+        ).bonus_id
+      );
+      await membership.save();
+    }
+
+    return applicableBonus;
+  } catch (err) {
+    console.error("Error calculating bonus points:", err);
+    throw err;
+  }
+}
+
+/**
  * Delete a bonus requirement
  * @param {number} bonusId - The ID of the bonus requirement
  * @returns {Promise<Object>} Deletion status
@@ -320,5 +412,7 @@ module.exports = {
   deleteOrganizationMembershipRequirementInDB,
   createBonusRequirementInDB,
   editBonusRequirementInDB,
+  getBasePointsForEventType,
+  calculateBonusPoints,
   deleteBonusRequirementInDB,
 };
