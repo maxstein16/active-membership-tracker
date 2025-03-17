@@ -20,89 +20,76 @@ function validateOrgFields(fields) {
   }
 
   const {
-    org_name,
-    organization_abbreviation,
+    organization_name,
+    organization_description,
     organization_color,
-    org_description,
+    organization_abbreviation,
+    organization_email,
+    organization_membership_type,
     organization_threshold,
-    org_category,
-    org_contact_email,
-    org_phone_number,
   } = fields;
 
-  // Validate organization name
-  if (org_name && (typeof org_name !== "string" || org_name.trim() === "")) {
+  // Validate organization name (required & non-empty string)
+  if (
+    organization_name !== undefined &&
+    (typeof organization_name !== "string" || organization_name.trim() === "")
+  ) {
     return error.invalidOrgName;
   }
 
-  // Validate organization abbreviation
+  // Validate organization abbreviation (optional, but if provided must be non-empty string)
   if (
-    organization_abbreviation &&
+    organization_abbreviation !== undefined &&
     (typeof organization_abbreviation !== "string" ||
       organization_abbreviation.trim() === "")
   ) {
     return error.invalidOrgShortening;
   }
 
-  // Validate organization description
+  // Validate organization description (optional, if provided must be a string)
   if (
-    org_description &&
-    (typeof org_description !== "string" || org_description.trim() === "")
+    organization_description !== undefined &&
+    (typeof organization_description !== "string" ||
+      organization_description.trim() === "")
   ) {
     return error.invalidOrgDescription;
   }
 
-  // Validate organization name
+  // Validate organization color (optional hex color, format: #FFFFFF)
   if (
-    organization_color &&
-    (typeof organization_color !== "string" || organization_color.trim() === "")
+    organization_color !== undefined &&
+    (typeof organization_color !== "string" ||
+      organization_color.trim() === "" ||
+      !/^#[0-9A-Fa-f]{6}$/.test(organization_color))
   ) {
     return error.invalidOrgColor;
   }
 
-  // Validate organization category
+  // Validate membership type (optional, if provided must be non-empty string)
   if (
-    org_category &&
-    (typeof org_category !== "string" || org_category.trim() === "")
+    organization_membership_type !== undefined &&
+    (typeof organization_membership_type !== "string" ||
+      organization_membership_type.trim() === "")
   ) {
-    return error.invalidOrgCategory;
+    return error.invalidOrgmembership_type;
   }
 
-  // Validate contact email
+  // Validate email (optional, but if provided must be valid email)
   if (
-    org_contact_email &&
-    (typeof org_contact_email !== "string" ||
+    organization_email !== undefined &&
+    (typeof organization_email !== "string" ||
       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
-        org_contact_email
+        organization_email
       ))
   ) {
     return error.invalidOrgEmail;
   }
 
-  // Validate phone number
+  // Validate threshold (optional, if provided must be a number)
   if (
-    org_phone_number &&
-    (typeof org_phone_number !== "string" ||
-      !/^\d{3}-\d{3}-\d{4}$/.test(org_phone_number))
+    organization_threshold !== undefined &&
+    typeof organization_threshold !== "number"
   ) {
-    return error.invalidOrgPhoneNumber;
-  }
-
-  // color
-  if (
-    organization_color &&
-    (typeof organization_color !== "string" ||
-      organization_color.trim() === "" ||
-      organization_color.charAt(0) !== "#" ||
-      organization_color.length !== 7)
-  ) {
-    return error.invalidOrgAbbreviation;
-  }
-
-  console.log();
-
-  // threshold
-  if (organization_threshold && typeof organization_threshold !== "number") {
     return error.invalidOrgThreshold;
   }
 
@@ -116,14 +103,13 @@ function validateOrgFields(fields) {
  */
 function mapToDbFields(orgData) {
   return {
-    organization_name: orgData.org_name,
+    organization_name: orgData.organization_name,
     organization_color: orgData.organization_color,
     organization_abbreviation: orgData.organization_abbreviation,
-    organization_description: orgData.org_description,
+    organization_description: orgData.organization_description,
     organization_threshold: orgData.organization_threshold,
-    organization_category: orgData.org_category,
-    contact_email: orgData.org_contact_email,
-    phone_number: orgData.org_phone_number,
+    organization_membership_type: orgData.organization_membership_type,
+    organization_email: orgData.organization_email,
   };
 }
 
@@ -134,15 +120,14 @@ function mapToDbFields(orgData) {
  */
 function mapToApiFields(dbData) {
   return {
-    org_id: dbData.organization_id,
-    org_name: dbData.organization_name,
+    organization_id: dbData.organization_id,
+    organization_name: dbData.organization_name,
     organization_color: dbData.organization_color,
     organization_abbreviation: dbData.organization_abbreviation,
-    org_description: dbData.organization_description,
+    organization_description: dbData.organization_description,
     organization_threshold: dbData.organization_threshold,
-    org_category: dbData.organization_category,
-    org_contact_email: dbData.contact_email,
-    org_phone_number: dbData.phone_number,
+    organization_membership_type: dbData.organization_membership_type,
+    organization_email: organization_email,
     message: "Organization fetched successfully",
   };
 }
@@ -189,6 +174,8 @@ async function createOrganizationInDB(orgData) {
       organization_color: orgData.organization_color,
       organization_abbreviation: orgData.organization_abbreviation,
       organization_threshold: orgData.organization_threshold,
+      organization_email: orgData.organization_email,
+      organization_membership_type: orgData.organization_membership_type,
     });
 
     // create email settings for the org
@@ -298,14 +285,13 @@ async function getUserOrganizationsInDB(username) {
 
     // Map database fields to API fields
     const formattedOrganizations = organizations.map((org) => ({
-      org_id: org.organization_id,
+      organization_id: org.organization_id,
       organization_name: org.organization_name,
-      organization_desc: org.organization_description,
+      organization_description: org.organization_description,
       organization_color: org.organization_color,
       organization_threshold: org.organization_threshold,
-      org_category: org.organization_category,
-      org_contact_email: org.contact_email,
-      org_phone_number: org.phone_number,
+      organization_membership_type: org.organization_membership_type,
+      organization_email: org.email,
     }));
 
     return { error: null, data: formattedOrganizations };
