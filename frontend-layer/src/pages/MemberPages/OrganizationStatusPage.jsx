@@ -1,8 +1,15 @@
 import * as React from "react";
+import "../../assets/css/constants.css";
+import "../../assets/css/pageSetup.css";
+import "../../assets/css/general.css";
+import "../../assets/css/memberPages.css";
+import  { PureComponent } from 'react';
 import { useParams } from "react-router-dom";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import { API_METHODS, getAPIData } from "../../utils/callAPI";
+import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
+
 
 export default function OrganizationStatusPage() {
   const { orgId } = useParams();
@@ -10,14 +17,10 @@ export default function OrganizationStatusPage() {
   let [loading, setLoading] = React.useState(false);
   let [memberships, setMemberships] = React.useState([]);
   let [orgData, setOrgData] = React.useState([]);
- 
-  var lot = useParams();
-  //var th = getAPIData("/organization", API_METHODS.get);
-  var thing ;
-  async function loadData(){
-    const result = await getAPIData("/organization/1/member/1", API_METHODS.get, {});
-    return {data: result}
-  }
+  let [data, setData] = React.useState([]);
+  let [activeIndex, setActiveIndex] = React.useState(0);
+  let [memberText, setMemberText] = React.useState([]);
+  let [chartText, setChartText] = React.useState([]);
 
 //  let bob = async () => {
     
@@ -32,6 +35,8 @@ export default function OrganizationStatusPage() {
 //       return result;
 //     }
 //   };
+
+let progressToMember = 0;
 
  React.useEffect(() => {
  
@@ -51,14 +56,35 @@ export default function OrganizationStatusPage() {
     let threshold = response.data.active_membership_threshold;
     setOrgData(response.data);
 
-    setLoading(false);
+   
     console.log(result.data);
     console.log("break");
     console.log(response.data);
+
+    let data = [
+      {name: 'completed', value: orgData.active_membership_threshold},
+      {name: 'progress', value: memberships.membership_points}
+
+    ];
+
+    setData(data);
+     if(memberships.membership_points >= orgData.active_membership_threshold){
+    setMemberText(`Your total points this semester are ${memberships.membership_points}! That is ${(memberships.membership_points - orgData.active_membership_threshold)} points above the minimum requirement!`);
+    setChartText("Active Member");
+    
+  } else {
+    setMemberText(`You have ${memberships.membership_points} total points. Earn ${
+        (orgData.active_membership_threshold - memberships.membership_points)
+        } more to become an active member this semester!`);
+        progressToMember = memberships.membership_points/orgData.active_membership_threshold;
+        setChartText(`${progressToMember}% to Active Membership`);
+        console.log(chartText);
+  }
+    setLoading(false);
   };
   loadPost();
 
-
+ 
 //   console.log("Loaded");
 //   const res = await getAPIData("/organization/1/member/1", API_METHODS.get, {});
 // console.log("res done");
@@ -66,21 +92,74 @@ export default function OrganizationStatusPage() {
 //   thing = loadData();
  }, []);
 
-
+ 
   return (
     <PageSetup>
       <BackButton route={"/"} />
-      <h1>Organization Status Page</h1>
-      <h1>Your Membership with WiC</h1>
-      <p>You have been an active member for {memberships.active_semesters} semesters</p>
       
-      <h3>{posts.member_id}</h3>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
 
-      <p>You have earned {memberships.membership_points} total points.</p>
+      <h1>Your Membership with {orgData.org_name}</h1>
+
+      <ResponsiveContainer width="50%" height={200}>
+        <PieChart>
+        
+        	{ memberships.active_semesters < orgData.active_membership_threshold &&
+            <text x='50%' y="50%" textAnchor="middle">
+              % to Membership
+            </text>
+          }
+
+          { memberships.active_semesters >= orgData.active_membership_threshold &&
+            <text x='50%' y="50%" textAnchor="middle">
+             Active Membership
+            </text>
+          }
+        
+        <Pie
+        //  activeIndex={activeIndex}
+        //  activeShape={renderActiveShape}
+         dataKey="value"
+         data={[
+           { name: "Progress", value: memberships.membership_points },
+           { name: "Completed", value: orgData.active_membership_threshold }
+         ]}
+         
+         cx="50%"
+         cy="50%"
+         innerRadius={70}
+         outerRadius={90}
+        label="you're not there"
+        > 
+         <Cell fill="#D7D2CB" />
+          <Cell fill="#009CBD" />
+        
+        </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+
+
+  <p>You have been an active member for <strong>{memberships.active_semesters}</strong> semesters.</p>
+
+  {
+    memberships.active_member == 'false' && 
+    <p>You have ${memberships.membership_points} total points. <br/>Earn <strong>${
+      orgData.active_membership_threshold - memberships.membership_points
+      }</strong> more to become an active member this semester!</p>
+  }
+
+    {
+    memberships.active_member == 'true' && 
+    <p>Your total points this semester are <strong>{memberships.membership_points}</strong>! That is ${(memberships.membership_points - orgData.active_membership_threshold)} points above the minimum requirement!</p>
+  }   
+    
+         {/* {memberText} */}
+      {/* <p>Your total points this semester are {memberships.membership_points}!</p>
       <p>Earn {
         (orgData.active_membership_threshold - memberships.membership_points)
-        } more to become an active member this semester!</p>
+        } more to become an active member this semester!</p> */}
       {/* <p>Org Id: {bob.data.membership.active_semesters}</p> */}
+      </div>
       <br />
       <h2>Computing Organization for Multicultural Students</h2>
       <p>Our mission is to build a supportive community that celebrates the talent of underrepresented students in Computing.
