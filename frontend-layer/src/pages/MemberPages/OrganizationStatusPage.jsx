@@ -19,7 +19,7 @@ export default function OrganizationStatusPage() {
   let [orgData, setOrgData] = React.useState([]);
   let [data, setData] = React.useState([]);
   let [activeIndex, setActiveIndex] = React.useState(0);
-  let [memberText, setMemberText] = React.useState([]);
+  let [progressToMember, setProgressToMember] = React.useState([]);
   let [chartText, setChartText] = React.useState([]);
 
 //  let bob = async () => {
@@ -35,8 +35,6 @@ export default function OrganizationStatusPage() {
 //       return result;
 //     }
 //   };
-
-let progressToMember = 0;
 
  React.useEffect(() => {
  
@@ -68,18 +66,15 @@ let progressToMember = 0;
     ];
 
     setData(data);
-     if(memberships.membership_points >= orgData.active_membership_threshold){
-    setMemberText(`Your total points this semester are ${memberships.membership_points}! That is ${(memberships.membership_points - orgData.active_membership_threshold)} points above the minimum requirement!`);
-    setChartText("Active Member");
-    
-  } else {
-    setMemberText(`You have ${memberships.membership_points} total points. Earn ${
-        (orgData.active_membership_threshold - memberships.membership_points)
-        } more to become an active member this semester!`);
-        progressToMember = memberships.membership_points/orgData.active_membership_threshold;
-        setChartText(`${progressToMember}% to Active Membership`);
-        console.log(chartText);
-  }
+   
+    //setProgressToMember(parseFloat(memberships.membership_points)/parseFloat(orgData.active_membership_threshold));
+   
+      console.log(result.data.memberships.membership_points);
+      console.log(response.data.active_membership_threshold);
+  
+      console.log(memberships);
+      console.log(orgData);
+  
     setLoading(false);
   };
   loadPost();
@@ -91,22 +86,30 @@ let progressToMember = 0;
 // console.log(res);
 //   thing = loadData();
  }, []);
-
+ 
  
   return (
     <PageSetup>
       <BackButton route={"/"} />
       
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-
+      <div style={{
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    width: '100%',
+    gap: '10%',
+    marginLeft: '10%',
+     marginRight: '10%'
+}} >
+<div>
       <h1>Your Membership with {orgData.org_name}</h1>
-
-      <ResponsiveContainer width="50%" height={200}>
+      
+  <p>You have been an active member for <strong>{memberships.active_semesters}</strong> semesters.</p>
+      <ResponsiveContainer width="50%" height={250}>
         <PieChart>
         
         	{ memberships.active_semesters < orgData.active_membership_threshold &&
-            <text x='50%' y="50%" textAnchor="middle">
-              % to Membership
+            <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle">
+             {(parseInt(memberships.active_semesters) / parseInt(orgData.active_membership_threshold) * 100).toFixed(0)} %<br></br> to Active <br></br>Membership
             </text>
           }
 
@@ -127,8 +130,8 @@ let progressToMember = 0;
          
          cx="50%"
          cy="50%"
-         innerRadius={70}
-         outerRadius={90}
+         innerRadius={80}
+         outerRadius={130}
         label="you're not there"
         > 
          <Cell fill="#D7D2CB" />
@@ -137,9 +140,6 @@ let progressToMember = 0;
         </Pie>
         </PieChart>
       </ResponsiveContainer>
-
-
-  <p>You have been an active member for <strong>{memberships.active_semesters}</strong> semesters.</p>
 
   {
     memberships.active_member == 'false' && 
@@ -160,12 +160,17 @@ let progressToMember = 0;
         } more to become an active member this semester!</p> */}
       {/* <p>Org Id: {bob.data.membership.active_semesters}</p> */}
       </div>
-      <br />
-      <h2>Computing Organization for Multicultural Students</h2>
-      <p>Our mission is to build a supportive community that celebrates the talent of underrepresented students in Computing.
-        We work to accomplish our mision by providing mentorship, mental health awareness, and leadership opportunities.
-      </p>
-
+     
+      <div style={{
+      marginTop: '25%',
+     marginBottom: '25%'
+}} >
+       
+          <h2>{orgData.org_name}</h2>
+          <p>{orgData.org_description} </p>
+       
+      </div>
+      </div>
     </PageSetup>
   );
 }
