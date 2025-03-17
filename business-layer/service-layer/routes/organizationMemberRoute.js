@@ -107,7 +107,7 @@ router.put("/:memberId", isAdminOrEboardForOrg, async function (req, res) {
   let memberId = req.params.memberId;
   let body = req.body;
 
-  // sanatize params
+  // sanitize params
   orgId = sanitizer.sanitize(orgId);
   memberId = sanitizer.sanitize(memberId);
 

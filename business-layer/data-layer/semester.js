@@ -1,7 +1,6 @@
 const { Op } = require("sequelize");
 const { Semester } = require("../db");
 
-
 /**
  * Creates a new semester.
  *
@@ -13,18 +12,18 @@ const { Semester } = require("../db");
  */
 async function createSemester(semesterName, academicYear, startDate, endDate) {
   try {
-      const newSemester = await Semester.create({
-          semester_name: semesterName,
-          academic_year: academicYear,
-          start_date: startDate,
-          end_date: endDate
-      });
+    const newSemester = await Semester.create({
+      semester_name: semesterName,
+      academic_year: academicYear,
+      start_date: startDate,
+      end_date: endDate,
+    });
 
-      console.log(`New semester created: ${newSemester.semester_name}`);
-      return newSemester;
+    console.log(`New semester created: ${newSemester.semester_name}`);
+    return newSemester;
   } catch (error) {
-      console.error("Error creating semester:", error);
-      throw error;
+    console.error("Error creating semester:", error);
+    throw error;
   }
 }
 
@@ -36,56 +35,61 @@ async function createSemester(semesterName, academicYear, startDate, endDate) {
  */
 async function getSemesterByDate(date) {
   try {
-      const semester = await Semester.findOne({
-          where: {
-              start_date: { [Op.lte]: date },
-              end_date: { [Op.gte]: date }
-          }
-      });
+    const semester = await Semester.findOne({
+      where: {
+        start_date: { [Op.lte]: date },
+        end_date: { [Op.gte]: date },
+      },
+    });
 
-      return semester;
+    return semester;
   } catch (error) {
-      console.error("Error finding semester by date:", error);
-      throw error;
+    console.error("Error finding semester by date:", error);
+    throw error;
   }
 }
 
 async function getCurrentSemester() {
   try {
-    const currentSemesters = await getCurrentSemestersInYear();
+    const today = new Date();
 
-    if (!currentSemesters || currentSemesters.length === 0) {
-      throw new Error("No current semesters found");
+    // Find semester where today's date is between start_date and end_date
+    const currentSemester = await Semester.findOne({
+      where: {
+        start_date: { [Op.lte]: today },
+        end_date: { [Op.gte]: today },
+      },
+    });
+
+    if (!currentSemester) {
+      throw new Error("No current semester found");
     }
 
-    // If multiple semesters are active, return the one with the latest start_date
-    return currentSemesters.sort(
-      (a, b) => new Date(b.start_date) - new Date(a.start_date)
-    )[0];
+    return currentSemester;
   } catch (err) {
     console.error("Error in getCurrentSemester:", err);
     throw err;
   }
 }
 
-  async function getSemestersByYear(year = new Date().getFullYear()) {
-    try {
-      if (!year) return [];
-      
-      const allSemesters = await Semester.findAll();
-      if (!allSemesters || allSemesters.length === 0) return [];
-      
-      // For a given year (e.g., 2024), match academic years like "2024-2025" or "2023-2024"
-      return allSemesters.filter(semester => {
-        if (!semester.academic_year) return false;
-        const [startYear, endYear] = semester.academic_year.split('-');
-        return startYear === year.toString() || endYear === year.toString();
-      });
-    } catch (err) {
-      console.error("Error in getSemestersByYear:", err);
-      throw err;
-    }
+async function getSemestersByYear(year = new Date().getFullYear()) {
+  try {
+    if (!year) return [];
+
+    const allSemesters = await Semester.findAll();
+    if (!allSemesters || allSemesters.length === 0) return [];
+
+    // For a given year (e.g., 2024), match academic years like "2024-2025" or "2023-2024"
+    return allSemesters.filter((semester) => {
+      if (!semester.academic_year) return false;
+      const [startYear, endYear] = semester.academic_year.split("-");
+      return startYear === year.toString() || endYear === year.toString();
+    });
+  } catch (err) {
+    console.error("Error in getSemestersByYear:", err);
+    throw err;
   }
+}
 
 module.exports = {
   createSemester,
