@@ -98,12 +98,12 @@ router.post(
     
     // Validate required fields
     if (
-      !body.event_name ||
-      !body.event_start ||
-      !body.event_end ||
-      !body.event_location ||
-      !body.event_description ||
-      !body.event_type
+      !req.body.hasOwnProperty("event_name") ||
+      !req.body.hasOwnProperty("event_start") ||
+      !req.body.hasOwnProperty("event_end") ||
+      !req.body.hasOwnProperty("event_location") ||
+      !req.body.hasOwnProperty("event_description") ||
+      !req.body.hasOwnProperty("event_type")
     ) {
       return res
         .status(400)
@@ -117,7 +117,7 @@ router.post(
     // }
 
     // Send to business layer
-    const result = await business.createEvent(orgId, body);
+    const result = await business.createEvent(orgId, req.body);
 
     // Handle errors
     if (result.error && result.error !== error.noError) {
@@ -152,12 +152,12 @@ router.put(
 
     // Validate required fields
     if (
-      !body.event_name &&
-      !body.event_start &&
-      !body.event_end &&
-      !body.event_location &&
-      !body.event_description &&
-      !body.event_type
+      !req.body.hasOwnProperty("event_name") &&
+      !req.body.hasOwnProperty("event_start") &&
+      !req.body.hasOwnProperty("event_end") &&
+      !req.body.hasOwnProperty("event_location") &&
+      !req.body.hasOwnProperty("event_description") &&
+      !req.body.hasOwnProperty("event_type")
     ) {
       return res
         .status(400)
@@ -171,7 +171,7 @@ router.put(
     // }
 
     // Send to business layer
-    const result = await business.updateEvent(orgId, eventId, body);
+    const result = await business.updateEvent(orgId, eventId, req.body);
 
     // Handle errors
     if (result.error && result.error !== error.noError) {
