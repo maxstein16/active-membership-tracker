@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import { API_METHODS, getAPIData } from "../../utils/callAPI";
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 
 export default function OrganizationStatusPage() {
@@ -18,23 +18,7 @@ export default function OrganizationStatusPage() {
   let [memberships, setMemberships] = React.useState([]);
   let [orgData, setOrgData] = React.useState([]);
   let [data, setData] = React.useState([]);
-  let [activeIndex, setActiveIndex] = React.useState(0);
-  let [progressToMember, setProgressToMember] = React.useState([]);
-  let [chartText, setChartText] = React.useState([]);
-
-//  let bob = async () => {
-    
-//     const result = await getAPIData("/organization/1/member/1", API_METHODS.get, {});
-//   console.log(result);
-//     if (!result) {
-//       return;
-//     }
-
-//     if (result.status == "success") {
-//       console.log(result);
-//       return result;
-//     }
-//   };
+ 
 
  React.useEffect(() => {
  
@@ -67,9 +51,7 @@ export default function OrganizationStatusPage() {
 
     setData(data);
    
-    //setProgressToMember(parseFloat(memberships.membership_points)/parseFloat(orgData.active_membership_threshold));
-   
-      console.log(result.data.memberships.membership_points);
+      console.log(result.data.membership.membership_points);
       console.log(response.data.active_membership_threshold);
   
       console.log(memberships);
@@ -79,12 +61,6 @@ export default function OrganizationStatusPage() {
   };
   loadPost();
 
- 
-//   console.log("Loaded");
-//   const res = await getAPIData("/organization/1/member/1", API_METHODS.get, {});
-// console.log("res done");
-// console.log(res);
-//   thing = loadData();
  }, []);
  
  
@@ -93,78 +69,75 @@ export default function OrganizationStatusPage() {
       <BackButton route={"/"} />
       
       <div style={{
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    width: '100%',
-    gap: '10%',
-    marginLeft: '10%',
-     marginRight: '10%'
-}} >
-<div>
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        width: '100%',
+        gap: '10%',
+        marginLeft: '10%',
+        marginRight: '10%'
+      }} >
+      <div>
       <h1>Your Membership with {orgData.org_name}</h1>
       
-  <p>You have been an active member for <strong>{memberships.active_semesters}</strong> semesters.</p>
-      <ResponsiveContainer width="50%" height={250}>
+      <p>You have been an active member for <strong>{memberships.active_semesters}</strong> semesters.</p>
+      <ResponsiveContainer width="50%" height={270}>
         <PieChart>
         
         	{ memberships.active_semesters < orgData.active_membership_threshold &&
-            <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle">
-             {(parseInt(memberships.active_semesters) / parseInt(orgData.active_membership_threshold) * 100).toFixed(0)} %<br></br> to Active <br></br>Membership
+            <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
+            <tspan x="50%" dy=".6em">  {(parseInt(memberships.active_semesters) / parseInt(orgData.active_membership_threshold) * 100).toFixed(0)} %</tspan>
+          <tspan x="50%" dy="1.2em">to Active</tspan>
+          <tspan x="50%" dy="1.2em">Membership</tspan>
             </text>
           }
 
           { memberships.active_semesters >= orgData.active_membership_threshold &&
-            <text x='50%' y="50%" textAnchor="middle">
-             Active Membership
+            <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
+               <tspan x="50%" dy=".6em">Active</tspan>
+               <tspan x="50%" dy="1.2em">Membership</tspan>
             </text>
           }
         
         <Pie
-        //  activeIndex={activeIndex}
-        //  activeShape={renderActiveShape}
-         dataKey="value"
-         data={[
-           { name: "Progress", value: memberships.membership_points },
-           { name: "Completed", value: orgData.active_membership_threshold }
-         ]}
-         
-         cx="50%"
-         cy="50%"
-         innerRadius={80}
-         outerRadius={130}
-        label="you're not there"
+          dataKey="value"
+          data={[
+            { name: "Progress", value: memberships.membership_points },
+            { name: "Completed", value: orgData.active_membership_threshold }
+          ]}
+          
+          cx="50%"
+          cy="50%"
+          innerRadius={90}
+          outerRadius={120}
+          label
         > 
-         <Cell fill="#D7D2CB" />
-          <Cell fill="#009CBD" />
-        
+        {
+           orgId == 1 &&
+          <><Cell fill="#d6d2dd" /><Cell fill="#482659"  /></>
+        }
+         
+         {
+           orgId == 2 &&
+          <><Cell fill= "#d6d2dd" /><Cell fill= "#5ebbdf" /></>
+        }
+
         </Pie>
         </PieChart>
       </ResponsiveContainer>
 
-  {
-    memberships.active_member == 'false' && 
-    <p>You have ${memberships.membership_points} total points. <br/>Earn <strong>${
-      orgData.active_membership_threshold - memberships.membership_points
-      }</strong> more to become an active member this semester!</p>
-  }
+      {
+        memberships.active_member ?  <p>Your total points this semester are <strong>{memberships.membership_points}</strong>! That is ${(memberships.membership_points - orgData.active_membership_threshold)} points above the minimum requirement!</p>:
+        <p>You have {memberships.membership_points} total points. <br/>Earn <strong>{
+          orgData.active_membership_threshold - memberships.membership_points
+          }</strong> more to become an active member this semester!</p> 
+    }
 
-    {
-    memberships.active_member == 'true' && 
-    <p>Your total points this semester are <strong>{memberships.membership_points}</strong>! That is ${(memberships.membership_points - orgData.active_membership_threshold)} points above the minimum requirement!</p>
-  }   
-    
-         {/* {memberText} */}
-      {/* <p>Your total points this semester are {memberships.membership_points}!</p>
-      <p>Earn {
-        (orgData.active_membership_threshold - memberships.membership_points)
-        } more to become an active member this semester!</p> */}
-      {/* <p>Org Id: {bob.data.membership.active_semesters}</p> */}
       </div>
      
       <div style={{
       marginTop: '25%',
      marginBottom: '25%'
-}} >
+      }} >
        
           <h2>{orgData.org_name}</h2>
           <p>{orgData.org_description} </p>
