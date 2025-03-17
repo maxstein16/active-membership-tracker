@@ -21,11 +21,19 @@ const { processAttendance } = require("./attendanceProcessing.js");
  */
 function mapToMemberData(row) {
   return {
-    name: `${row.firstName} ${row.lastName}`.trim(),
-    email: row.email,
+    member_name: `${row.firstName} ${row.lastName}`.trim(),
+    member_email: row.email,
   };
 }
 
+/**
+ * Maps member, organization, and semester IDs to membership data format.
+ * 
+ * @param {number} memberId - The ID of the member.
+ * @param {number} organizationId - The ID of the organization.
+ * @param {number} semesterId - The ID of the semester.
+ * @returns {Object} Formatted membership data object
+ */
 function mapToMembershipData(memberId, organizationId, semesterId) {
   return {
     member_id: memberId,
@@ -34,6 +42,13 @@ function mapToMembershipData(memberId, organizationId, semesterId) {
   };
 }
 
+/**
+ * Maps event and member IDs to attendance data format.
+ * 
+ * @param {number} eventId - The ID of the event.
+ * @param {number} memberId - The ID of the member.
+ * @returns {Object} Formatted attendance data object
+ */
 function mapToAttendanceData(eventId, memberId) {
   return {
     event_id: eventId,
