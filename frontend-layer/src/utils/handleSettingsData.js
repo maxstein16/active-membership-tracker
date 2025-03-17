@@ -266,3 +266,57 @@ export async function getOrganizationMembers(orgId) {
   }
   return result.data;
 }
+
+export async function getPastOrganizationEvents(orgId) {
+  const result = await getAPIData(
+    `/organization/${orgId}/events`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  if (result.hasOwnProperty("error")) {
+    return [];
+  }
+
+  const currentDate = new Date().toISOString().split("T")[0];
+
+  const pastEvents = result.data.filter(event => {
+    return event.event_end && event.event_end < currentDate;
+  });
+
+  return pastEvents;
+}
+
+export async function getMeetingReport(orgId, meetingId) {
+  const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
+
+  const result = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!result || !result.orgData) {
+    return { members: [], totalAttendance: 0 };
+  }
+
+  const attendanceData = result.orgData.attendance;
+
+  if (!attendanceData || !attendanceData.members_who_attended) {
+    return { members: [], totalAttendance: 0 };
+  }
+
+  const formattedMembers = attendanceData.members_who_attended.map(member => ({
+    id: member.member_id,
+    member_name: `${member.firstName} ${member.lastName}`,
+    member_email: `${member.rit_username}@rit.edu`,
+    role: member.role_num
+  }));
+
+  return {
+    members: formattedMembers,
+    totalAttendance: attendanceData.total_attendance || 0,
+    activeMemberAttendance: attendanceData.active_member_attendance || 0,
+    inactiveMemberAttendance: attendanceData.inactive_member_attendance || 0,
+  };
+}

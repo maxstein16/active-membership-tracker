@@ -153,15 +153,15 @@ router.delete(
   isAdminOrEboardForOrg,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let id = req.query.id;
+    let requirementId = req.query.requirementId;
 
     orgId = sanitizer.sanitize(orgId);
-    id = sanitizer.sanitize(id);
+    requirementId = sanitizer.sanitize(requirementId);
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-    if (!id || isNaN(id)) {
+    if (!requirementId || isNaN(requirementId)) {
       return res.status(400).json({ error: error.mustIncludeIdQueryParam });
     }
 
@@ -173,7 +173,7 @@ router.delete(
 
     const response = await business.deleteOrganizationMembershipRequirement(
       parseInt(orgId),
-      parseInt(id)
+      parseInt(requirementId)
     );
 
     if (response.error !== error.noError) {

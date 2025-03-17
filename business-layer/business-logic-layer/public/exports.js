@@ -1,6 +1,6 @@
-const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB } = require("../attendanceProcessing");
+const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB, getAttendeesDetailsByEventIdDB } = require("../attendanceProcessing");
 const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEventByIDInDB, getAttendanceByEventIdDB, getAllEventsByOrgAndSemesterDB } = require("../eventsProcessing");
-const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
+const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getMemberIDByUsernameInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
 const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB, getUserOrganizationsInDB } = require("../organizationProcessing");
@@ -28,6 +28,10 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
 
     this.getMemberAttendanceBySemester = async (memberId, semesterId) => {
       return await getMemberAttendanceBySemesterDB(memberId, semesterId);
+    }
+
+    this.getAttendeesDetailsByEventId = async (eventId) => {
+      return await getAttendeesDetailsByEventIdDB(eventId);
     }
   
     // Event Management
@@ -68,8 +72,12 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await getMemberByIdInDB(memberId);
     };
   
-    this.getSpecificMemberOrgStats = async (filters) => {
-      return await getSpecificMemberOrgStatsInDB(filters);
+    this.getMemberIDByUsernameInDB = async ( username ) => {
+      return await getMemberIDByUsernameInDB(username);
+    }
+
+    this.getSpecificMemberOrgStats = async (memberId, orgId) => {
+      return await getSpecificMemberOrgStatsInDB(memberId, orgId);
     };
   
     // Organization Member Management
@@ -165,8 +173,8 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await updateOrganizationEmailSettingsInDB(orgId, orgData);
     }
 
-    this.deleteOrganizationMembershipRequirement = async (orgId, settingId) => {
-      return await deleteOrganizationMembershipRequirementInDB(orgId, settingId);
+    this.deleteOrganizationMembershipRequirement = async (orgId, requirementId) => {
+      return await deleteOrganizationMembershipRequirementInDB(orgId, requirementId);
     }
 
     this.deleteOrganizationEmailSettings = async (orgId) => {

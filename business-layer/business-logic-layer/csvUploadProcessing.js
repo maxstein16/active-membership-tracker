@@ -78,7 +78,6 @@ class CSVProcessor {
 
                             // Skip if email already processed
                             if (processedEmails.has(processedRow.email)) {
-                                console.log(`Duplicate email found: ${processedRow.email}. Skipping.`);
                                 return resolve();
                             }
 
