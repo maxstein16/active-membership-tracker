@@ -9,6 +9,7 @@ export default function OrganizationStatusPage() {
   let [posts, setPosts] = React.useState([]);
   let [loading, setLoading] = React.useState(false);
   let [memberships, setMemberships] = React.useState([]);
+  let [orgData, setOrgData] = React.useState([]);
  
   var lot = useParams();
   //var th = getAPIData("/organization", API_METHODS.get);
@@ -36,23 +37,24 @@ export default function OrganizationStatusPage() {
  
   let loadPost = async () => {
     setLoading(true);
-    const result = await getAPIData(`/organization/1/member/1`, API_METHODS.get, {});
+    const result = await getAPIData(`/organization/${orgId}/member/1`, API_METHODS.get, {});
     setPosts(result.data);
 
     setMemberships(result.data.membership);
     console.log("org id: " + orgId);
 
     const response = await getAPIData(
-      `/organization/${orgId}/settings`,
+      `/organization/${orgId}`,
       API_METHODS.get,
       {}
     );
-    let threshold = response.data.organization_threshold;
+    let threshold = response.data.active_membership_threshold;
+    setOrgData(response.data);
 
     setLoading(false);
     console.log(result.data);
     console.log("break");
-    console.log(threshold);
+    console.log(response.data);
   };
   loadPost();
 
@@ -68,8 +70,6 @@ export default function OrganizationStatusPage() {
   return (
     <PageSetup>
       <BackButton route={"/"} />
-      {console.log(lot.orgId)}
-      {/* <button onClick={bob}>Ln</button> */}
       <h1>Organization Status Page</h1>
       <h1>Your Membership with WiC</h1>
       <p>You have been an active member for {memberships.active_semesters} semesters</p>
@@ -77,7 +77,9 @@ export default function OrganizationStatusPage() {
       <h3>{posts.member_id}</h3>
 
       <p>You have earned {memberships.membership_points} total points.</p>
-      <p>Earn # more to become an active member this semester!</p>
+      <p>Earn {
+        (orgData.active_membership_threshold - memberships.membership_points)
+        } more to become an active member this semester!</p>
       {/* <p>Org Id: {bob.data.membership.active_semesters}</p> */}
       <br />
       <h2>Computing Organization for Multicultural Students</h2>
