@@ -1,7 +1,6 @@
 const { getMemberByUsername } = require("../../data-layer/member");
 const { getCurrentSemester } = require("../../data-layer/semester");
-const { Membership, Member } = require("../../db");
-const { ROLE_EBOARD, ROLE_MEMBER } = require("../../constants")
+const { ROLE_EBOARD, ROLE_MEMBER } = require("../../constants");
 
 /**
  * HOW TO USE:
@@ -16,29 +15,33 @@ module.exports = new (function () {
     checkRole(username, orgId, false);
   };
 
-  checkRole = (username, orgId, isEboardEnough) => {
-    // find the member info to get member id
-    const memberInfo = getMemberByUsername(username);
+  checkRole = async (username, orgId, allowEboard) => {
+    // Get member info
+    const memberResult = await getMemberByUsername(username);
 
-    // if none exists, they do not have privileges
-    if (!memberInfo) {
-      return false;
+    if (!memberResult) {
+      return false; // No member found
     }
 
-    const currentSemester = getCurrentSemester();
+    const memberId = memberResult.member_id;
 
-    // Get the membership first to ensure it exists
-    const membership = getMembershipByAttributes({
-      member_id: memberInfo.member_id,
+    // Get current semester
+    const currentSemester = await getCurrentSemester();
+    if (!currentSemester) return false;
+
+    // Get membership
+    const membership = await getMembershipByAttributes({
+      member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    if (
-      !membership ||
-      membership.membership_role == ROLE_MEMBER ||
-      (!isEboardEnough && membership.membership_role == ROLE_EBOARD)
-    ) {
+    if (!membership || membership.membership_role === ROLE_MEMBER) {
+      return false;
+    }
+
+    // If only admin is allowed
+    if (!allowEboard && membership.membership_role === ROLE_EBOARD) {
       return false;
     }
 

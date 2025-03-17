@@ -82,12 +82,6 @@ router.post("/", isAdminOrEboardForOrg, async function (req, res) {
     return;
   }
 
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
-
   // send off to backend
   const result = await business.addMemberToAnOrganization(orgId, body);
 
@@ -131,12 +125,6 @@ router.put("/:memberId", isAdminOrEboardForOrg, async function (req, res) {
       .json({ error: error.mustHaveAtLeastOneFieldsAddMemberInOrg });
     return;
   }
-
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isEboardOrAdmin(req.session.user.username, orgId)
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
 
   // send off to backend
   const result = await business.editMemberInOrganization(orgId, memberId, body);

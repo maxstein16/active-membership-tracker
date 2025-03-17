@@ -1,4 +1,4 @@
-const Error = require("../business-logic-layer/public/errors")
+const Error = require("../business-logic-layer/public/errors");
 const error = new Error();
 
 const {
@@ -36,7 +36,6 @@ async function isAdminOrEboardForOrg(req, res, next) {
   const hasPrivilege = isEboardOrAdmin(user.username, orgId);
   if (!hasPrivilege) {
     res.status(401).json({ error: error.youDoNotHavePermission });
-    return res.redirect("/"); // Redirect unauthorized users to homepage
   }
 
   next();

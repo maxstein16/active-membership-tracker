@@ -26,15 +26,6 @@ router.get("/", isAdminOrEboardForOrg, async function (req, res) {
     return res.status(400).json({ error: error.organizationIdMustBeInteger });
   }
 
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isEboardOrAdmin(
-  //   req.session.user.username,
-  //   orgId
-  // );
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
-
   const response = await business.getOrganizationSettings(parseInt(orgId));
 
   if (response.error !== error.noError) {
@@ -68,15 +59,6 @@ router.put(
         .json({ error: error.mustHaveAtLeastOneFieldToUpdate });
     }
 
-    // does the user have privileges?
-    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    //   req.session.user.username,
-    //   orgId
-    // );
-    // if (!hasPrivileges) {
-    //   res.status(401).json({ error: error.youDoNotHavePermission });
-    // }
-
     const response = await business.editOrganizationMembershipRequirement(
       parseInt(orgId),
       req.body
@@ -109,14 +91,6 @@ router.post(
     ) {
       return res.status(400).json({ error: error.newReqMustHaveAllParams });
     }
-    // does the user have privileges?
-    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
-    //   req.session.user.username,
-    //   orgId
-    // );
-    // if (!hasPrivileges) {
-    //   res.status(401).json({ error: error.youDoNotHavePermission });
-    // }
 
     const response = await business.createOrganizationMembershipRequirements(
       parseInt(orgId),
@@ -160,16 +134,7 @@ router.put("/email-settings", isAdminOrEboardForOrg, async function (req, res) {
       .status(400)
       .json({ error: error.mustIncludeAtLeastOneValidFieldToEdit });
   }
-
-  // does the user have privileges?
-  // const hasPrivileges = hasCredentials.isEboardOrAdmin(
-  //   req.session.user.username,
-  //   orgId
-  // );
-  // if (!hasPrivileges) {
-  //   res.status(401).json({ error: error.youDoNotHavePermission });
-  // }
-
+  
   const response = await business.editOrganizationEmailSettings(
     parseInt(orgId),
     req.body
