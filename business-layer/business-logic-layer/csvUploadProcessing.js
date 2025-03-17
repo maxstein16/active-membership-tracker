@@ -65,9 +65,7 @@ class CSVProcessor {
         .on("data", async (row) => {
           promises.push(
             new Promise(async (resolve) => {
-              let member = null;
-              let membership = null;
-              let attendance = null;
+              let member, membership, attendance;
 
               try {
                 // Step 1: Get the current semester
@@ -86,7 +84,6 @@ class CSVProcessor {
                 const eventType = event.event_type;
 
                 const email = row["Email"];
-                let memberId;
 
                 // Step 3: Check for existing member
                 const existingMemberResult = await getMembersByAttributes({
@@ -100,23 +97,21 @@ class CSVProcessor {
                   // Create new member
                   const newMemberData = mapToMemberData(row);
                   const newMember = await createMember(newMemberData);
-                  memberId = newMember.member_id;
                   member = newMember;
                 } else {
                   member = existingMemberResult[0];
-                  memberId = member.member_id;
                 }
 
                 // Step 4: Check for existing membership
                 let existingMembership = await getMembershipByAttributes({
-                  member_id: memberId,
+                  member_id: member.member_id,
                   organization_id: orgId,
                   semester_id: currentSemester.semester_id,
                 });
 
                 if (!existingMembership) {
                   const newMembershipData = mapToMembershipData(
-                    memberId,
+                    member.member_id,
                     orgId,
                     currentSemester.semester_id
                   );
@@ -128,7 +123,7 @@ class CSVProcessor {
                 membership = existingMembership;
 
                 // Step 5: Create attendance + process points/bonus/active checks
-                const attendanceData = mapToAttendanceData(eventId, memberId);
+                const attendanceData = mapToAttendanceData(eventId, member.member_id);
                 attendance = await processAttendance(
                   attendanceData,
                   eventType,
@@ -186,7 +181,5 @@ class CSVProcessor {
     });
   }
 }
-
-module.exports = CSVProcessor;
 
 module.exports = CSVProcessor;
