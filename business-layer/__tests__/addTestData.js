@@ -216,7 +216,7 @@ async function addTestData() {
       semester_id: sem2.semester_id,
       membership_points: randomNum,
       active_member: randomNum >= 23,
-      active_semesters: 1,
+      received_bonus: selectedBonuses,
     });
   }
 
