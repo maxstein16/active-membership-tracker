@@ -77,7 +77,7 @@ export default function OrganizationStatusPage() {
         marginRight: '10%'
       }} >
       <div>
-      <h1>Your Membership with {orgData.org_name}</h1>
+      <h1>Your Membership with <span style={{color: "#d6d2dd"}}>{orgData.org_name}</span></h1>
       
       <p>You have been an active member for <strong>{memberships.active_semesters}</strong> semesters.</p>
       <ResponsiveContainer width="50%" height={270}>
@@ -85,7 +85,7 @@ export default function OrganizationStatusPage() {
         
         	{ memberships.active_semesters < orgData.active_membership_threshold &&
             <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
-            <tspan x="50%" dy=".6em">  {(parseInt(memberships.active_semesters) / parseInt(orgData.active_membership_threshold) * 100).toFixed(0)} %</tspan>
+            <tspan x="50%" dy=".6em">  {(parseInt(memberships.membership_points) / parseInt(orgData.active_membership_threshold) * 100).toFixed(0)} %</tspan>
           <tspan x="50%" dy="1.2em">to Active</tspan>
           <tspan x="50%" dy="1.2em">Membership</tspan>
             </text>
@@ -112,12 +112,12 @@ export default function OrganizationStatusPage() {
           label
         > 
         {
-           orgId == 1 &&
+           orgId === 1 &&
           <><Cell fill="#d6d2dd" /><Cell fill="#482659"  /></>
         }
          
          {
-           orgId == 2 &&
+           orgId === 2 &&
           <><Cell fill= "#d6d2dd" /><Cell fill= "#5ebbdf" /></>
         }
 
