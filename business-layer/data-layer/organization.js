@@ -125,7 +125,7 @@ async function getOrganizationMembershipRequirements(orgId) {
         },
       ],
     });
-
+    
     return membershipRequirements;
   } catch (err) {
     console.error("Error fetching membership requirements:", err);
