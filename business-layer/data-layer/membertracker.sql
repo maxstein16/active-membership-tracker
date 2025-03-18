@@ -14,6 +14,8 @@ CREATE TABLE Organization (
   organization_description TEXT, -- Description of the organization
   organization_color VARCHAR(255), -- Primary color theme
   organization_abbreviation VARCHAR(10), -- Shortened name or acronym
+  organization_email VARCHAR (50) -- Email for automated notifications
+  organization_membership_type ENUM('points', 'attendance') -- Primary way of achieving membership
   organization_threshold INT DEFAULT 0, -- Minimum threshold for active membership
   organization_email VARCHAR(255), -- Contact email for the organization
   PRIMARY KEY (organization_id)
@@ -53,14 +55,14 @@ CREATE TABLE Member (
 -- Membership Table
 -- ==============================
 CREATE TABLE Membership (
-  membership_id INT AUTO_INCREMENT,
-  member_id INT,
-  organization_id INT,
-  semester_id VARCHAR(6),
-  membership_role INT,
-  membership_points INT DEFAULT 0,
-  active_member BOOLEAN DEFAULT FALSE,
-  active_semesters INT DEFAULT 0,
+  membership_id INT AUTO_INCREMENT, -- Unique ID for each membership record
+  member_id INT, -- Member associated with this membership
+  organization_id INT, -- Organization the member belongs to
+  semester_id INT, -- Semester in which this membership is valid
+  membership_role INT, -- Role within the organization (e.g., 0=Member, 1=E-Board, 2=Admin)
+  membership_points INT DEFAULT 0, -- Points earned in the organization
+  active_member BOOLEAN DEFAULT FALSE, -- Whether the member is currently active
+  received_bonus JSON DEFAULT '[]', -- Stores received bonuses as an array of bonus IDs
   PRIMARY KEY (membership_id),
   FOREIGN KEY (member_id) REFERENCES Member(member_id) ON DELETE CASCADE,
   FOREIGN KEY (organization_id) REFERENCES Organization(organization_id) ON DELETE CASCADE,
@@ -94,8 +96,6 @@ CREATE TABLE Attendance (
   attendance_id INT AUTO_INCREMENT, -- Unique ID for each attendance record
   member_id INT, -- Member who attended
   event_id INT, -- Event attended
-  check_in DATETIME NOT NULL, -- Date and time of attendance
-  volunteer_hours FLOAT DEFAULT 0, -- Number of volunteer hours contributed
   PRIMARY KEY (attendance_id),
   FOREIGN KEY (member_id) REFERENCES Member(member_id),
   FOREIGN KEY (event_id) REFERENCES Event(event_id)
@@ -107,13 +107,23 @@ CREATE TABLE Attendance (
 CREATE TABLE MembershipRequirement (
   requirement_id INT AUTO_INCREMENT, -- Unique ID for each requirement setting
   organization_id INT, -- Organization this requirement applies to
-  meeting_type VARCHAR(255) NOT NULL, -- Type of meeting (e.g., general meeting, social)
-  frequency VARCHAR(255) NOT NULL, -- Frequency of the requirement (e.g., weekly, monthly)
-  amount_type ENUM('points', 'percentage') NOT NULL, -- Whether the requirement is measured in points or percentage
-  amount FLOAT NOT NULL, -- Required points or percentage
-  requirement_scope ENUM('semesterly', 'annually') NOT NULL, -- Whether the requirement applies per semester or annually
+  event_type VARCHAR(255) NOT NULL, -- Type of meeting (e.g., general meeting, social)
+  requirement_type ENUM('points', 'percentage', 'attendance_count') NOT NULL, -- What the requirement is measured in
+  requirement_value FLOAT NOT NULL, -- Required points or percentage
   PRIMARY KEY (requirement_id),
   FOREIGN KEY (organization_id) REFERENCES Organization(organization_id)
+);
+
+-- ==============================
+-- Bonus Requirement Table
+-- ==============================
+CREATE TABLE BonusRequirement (
+  bonus_id INT AUTO_INCREMENT PRIMARY KEY,
+  requirement_id INT NOT NULL,  -- Links to the relevant membership requirement
+  threshold_percentage FLOAT NOT NULL,  -- Attendance percentage needed
+  bonus_points FLOAT NOT NULL,  -- Points awarded at this threshold
+  PRIMARY KEY (bonus_id),
+  FOREIGN KEY (requirement_id) REFERENCES MembershipRequirement(requirement_id)
 );
 
 -- ==============================

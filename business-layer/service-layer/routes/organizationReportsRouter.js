@@ -77,34 +77,34 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
   }
 });
 
-// GET /v1/organization/{orgId}/reports/meeting/:meetingId
-router.get("/meeting/:meetingId", isAuthorizedHasSessionForAPI, async function (req, res) {
+// GET /v1/organization/{orgId}/reports/event/:eventId
+router.get("/event/:eventId", isAuthorizedHasSessionForAPI, async function (req, res) {
   try {
     let orgId = req.params.orgId;
-    let meetingId = req.params.meetingId;
+    let eventId = req.params.eventId;
 
     // Sanitize inputs
     orgId = sanitizer.sanitize(orgId);
-    meetingId = sanitizer.sanitize(meetingId);
+    eventId = sanitizer.sanitize(eventId);
 
     // Validate parameters
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
 
-    if (isNaN(meetingId)) {
-      return res.status(400).json({ error: error.meetingIdMustBeInteger });
+    if (isNaN(eventId)) {
+      return res.status(400).json({ error: error.eventIdMustBeInteger });
     }
 
     // Get report data
-    const orgData = await business.getMeetingOrgReport(orgId, meetingId);
+    const orgData = await business.getEventOrgReport(orgId, eventId);
 
     // Handle errors
     if (orgData.error && orgData.error !== error.noError) {
       return res.status(404).json({ 
         error: orgData.error, 
         orgId: orgId, 
-        meetingId: meetingId 
+        eventId: eventId 
       });
     }
 
@@ -114,7 +114,7 @@ router.get("/meeting/:meetingId", isAuthorizedHasSessionForAPI, async function (
     });
 
   } catch (err) {
-    console.error("Error in meeting report route:", err);
+    console.error("Error in event report route:", err);
     res.status(500).json({ error: error.internalServerError });
   }
 });

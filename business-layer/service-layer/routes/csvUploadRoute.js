@@ -45,6 +45,7 @@ router.post(
     isAuthorizedHasSessionForAPI,
     async (req, res) => {
         let orgId = req.params.orgId; // Get orgId from request parameters
+        let eventId = req.params.eventId;
         orgId = sanitizer.sanitize(orgId); // Sanitize it
 
         // Validate organization ID
@@ -67,7 +68,7 @@ router.post(
         try {
             console.log("Trying to await processCSV, the file path is " + req.file.path)
             // Process the uploaded file using business logic
-            const result = await business.processCSV(req.file.path, null, orgId, null);
+            const result = await business.processCSV(req.file.path, eventId, orgId, null, orgId, null);
 
             if (result.error) {
                 // Handle the specific error from business logic
