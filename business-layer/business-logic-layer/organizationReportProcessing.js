@@ -68,42 +68,69 @@ async function getAnnualOrgReportInDB(orgId) {
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
 
-    const currentYearSemesters = await getSemestersByYear(currentYear);
-    const lastYearSemesters = await getSemestersByYear(lastYear);
-
-    if (!currentYearSemesters || !lastYearSemesters) {
-      return { error: error.databaseError, data: null };
-    }
-
-    const currentYearSemesterIds = currentYearSemesters.map(s => s.semester_id);
-    const lastYearSemesterIds = lastYearSemesters.map(s => s.semester_id);
-
-    const currentYearMembers = await getMembershipsByOrgAndSemester(orgId, currentYearSemesterIds);
-    const lastYearMembers = await getMembershipsByOrgAndSemester(orgId, lastYearSemesterIds);
-
-    if (!currentYearMembers || !lastYearMembers) {
-      return { error: error.databaseError, data: null };
-    }
-
+    // Get all events with attendance
     const events = await getEventsWithAttendance(orgId);
-
-    if (!events) {
+    if (!events || events.length === 0) {
       return { error: error.databaseError, data: null };
     }
 
+    console.log("All Events Retrieved:", events.map(e => e.event_name)); // Debugging
+
+    // Separate events by year
+    const currentYearEvents = events.filter(e => 
+      new Date(e.event_start).getFullYear() === currentYear
+    );
+
+    const lastYearEvents = events.filter(e => 
+      new Date(e.event_start).getFullYear() === lastYear
+    );
+
+    console.log("Current Year Events:", currentYearEvents.map(e => e.event_name)); // Debugging
+
+    // Process all events as meetings
+    const processMeetings = (eventsList) => {
+      return eventsList.map(event => ({
+        event_id: event.event_id,
+        event_name: event.event_name,
+        event_date: event.event_start,
+        total_attendance: event.Attendances ? event.Attendances.length : 0,
+        attendees: event.Attendances ? event.Attendances.map(a => ({
+          member_id: a.member_id,
+          firstName: a.Member?.member_name?.split(' ')[0] || "Unknown",
+          lastName: a.Member?.member_name?.split(' ')[1] || "Unknown",
+          rit_username: a.Member?.member_email?.split('@')[0] || "Unknown"
+        })) : []
+      }));
+    };
+
+    const currentYearMeetings = processMeetings(currentYearEvents);
+    const lastYearMeetings = processMeetings(lastYearEvents);
+
+    console.log("Processed Meetings (Current Year):", currentYearMeetings); // Debugging
+
+    // Return formatted data
     const data = {
       organization_id: organization.organization_id,
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
       current_year: currentYear,
-      "meetings_data_this_year": {
-        number_of_meetings: events.filter(e => e.event_type === 'general_meeting').length,
-        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
+
+      meetingsDataThisYear: {
+        number_of_meetings: currentYearMeetings.length,
+        total_attendance: currentYearMeetings.reduce((sum, m) => sum + m.total_attendance, 0),
+        meetings: currentYearMeetings
+      },
+
+      meetingsDataLastYear: {
+        number_of_meetings: lastYearMeetings.length,
+        total_attendance: lastYearMeetings.reduce((sum, m) => sum + m.total_attendance, 0),
+        meetings: lastYearMeetings
       }
     };
 
     return { error: error.noError, data };
   } catch (err) {
+    console.error("Error in getAnnualOrgReportInDB:", err);
     return { error: error.databaseError, data: null };
   }
 }
