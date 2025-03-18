@@ -18,7 +18,19 @@ export default function SemesterReport({ orgId, color }) {
   const [yearList, setYearList] = React.useState([]);
   const [selectedYear, setSelectedYear] = React.useState(undefined);
 
-  const fetchSemesterReport = async () => {
+  const generateYearList = (currentAcademicYear) => {
+    const currentYear = new Date().getFullYear();
+    const earliestYear = 2018;
+    
+    let possibleYears = [];
+    for (let i = currentYear; i >= earliestYear; i--) {
+      possibleYears.push(`${i} Spring`);
+      possibleYears.push(`${i} Fall`);
+    }
+    setYearList(possibleYears);
+  };
+
+  const fetchSemesterReport = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await getSemesterReportData(orgId);
@@ -70,19 +82,7 @@ export default function SemesterReport({ orgId, color }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const generateYearList = (currentAcademicYear) => {
-    const currentYear = new Date().getFullYear();
-    const earliestYear = 2018;
-    
-    let possibleYears = [];
-    for (let i = currentYear; i >= earliestYear; i--) {
-      possibleYears.push(`${i} Spring`);
-      possibleYears.push(`${i} Fall`);
-    }
-    setYearList(possibleYears);
-  };
+  }, [orgId]); // Add orgId as a dependency
 
   const handleSemesterChange = (value) => {
     setSelectedYear(value);
@@ -94,7 +94,7 @@ export default function SemesterReport({ orgId, color }) {
   // Load initial data on component mount
   React.useEffect(() => {
     fetchSemesterReport();
-  }, [orgId]);
+  }, [fetchSemesterReport]);
 
   if (isLoading) {
     return (
