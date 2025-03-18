@@ -1,5 +1,3 @@
--- Drop the database if it exists (use with caution)
--- DROP DATABASE membertracker;
 
 -- Create the database
 CREATE DATABASE membertracker;
@@ -19,6 +17,7 @@ CREATE TABLE Organization (
   organization_email VARCHAR (50) -- Email for automated notifications
   organization_membership_type ENUM('points', 'attendance') -- Primary way of achieving membership
   organization_threshold INT DEFAULT 0, -- Minimum threshold for active membership
+  organization_email VARCHAR(255), -- Contact email for the organization
   PRIMARY KEY (organization_id)
 );
 
@@ -65,10 +64,12 @@ CREATE TABLE Membership (
   active_member BOOLEAN DEFAULT FALSE, -- Whether the member is currently active
   received_bonus JSON DEFAULT '[]', -- Stores received bonuses as an array of bonus IDs
   PRIMARY KEY (membership_id),
-  FOREIGN KEY (member_id) REFERENCES Member(member_id),
-  FOREIGN KEY (organization_id) REFERENCES Organization(organization_id),
-  FOREIGN KEY (semester_id) REFERENCES Semester(semester_id)
+  FOREIGN KEY (member_id) REFERENCES Member(member_id) ON DELETE CASCADE,
+  FOREIGN KEY (organization_id) REFERENCES Organization(organization_id) ON DELETE CASCADE,
+  FOREIGN KEY (semester_id) REFERENCES Semester(semester_id) ON DELETE CASCADE,
+  UNIQUE (member_id, organization_id, semester_id) -- Ensures no duplicate memberships
 );
+
 
 -- ==============================
 -- Event Table

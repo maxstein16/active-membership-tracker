@@ -8,6 +8,7 @@ const { Attendance } = require("../db")
 async function createAttendance(attendanceData) {
   try {
     const attendance = await Attendance.create(attendanceData);
+    console.log("Attendance created successfully")
     return attendance;
   } catch (err) {
     console.error("Error creating attendance:", err);

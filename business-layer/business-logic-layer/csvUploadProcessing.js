@@ -56,6 +56,8 @@ function mapToAttendanceData(eventId, memberId) {
   };
 }
 
+
+
 /**
  * Process a CSV file and handle attendance for an event
  * @param {string} filePath Path to the CSV file
