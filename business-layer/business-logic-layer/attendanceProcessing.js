@@ -3,7 +3,6 @@ const {
   getAttendanceById,
   getAttendanceByMemberAndEvent,
   getAttendanceByMemberId,
-  getMemberAttendanceWithEvents,
 } = require("../data-layer/attendance.js");
 const {
   getEventsByAttributes,
@@ -13,8 +12,6 @@ const { getMemberById } = require("../data-layer/member.js");
 const { getMembershipByAttributes } = require("../data-layer/membership.js");
 const {
   getOrganizationById,
-  getOrganizationMembershipRequirements,
-  getBonusRequirements,
 } = require("../data-layer/organization.js");
 const {
   editMemberInOrganizationInDB,
