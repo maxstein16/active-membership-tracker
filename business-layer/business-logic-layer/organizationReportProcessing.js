@@ -7,6 +7,7 @@ const { getMembershipsByAttributes, getMembershipsByOrgAndSemester } = require("
 const { getMemberAttendanceWithEvents, getMeetingAttendanceWithMembers } = require("../data-layer/attendance.js");
 const { getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
 const { getEventsWithAttendance } = require("../data-layer/event.js");
+const { Semester } = require("../db.js");
 
 /**
  * Get specific report data for a member in an organization
@@ -237,17 +238,93 @@ async function getSemesterOrgReportInDB(orgId) {
       return { error: error.semesterNotFound, data: null };
     }
 
-    const semesterMembers = await getMembershipsByOrgAndSemester(orgId, [currentSemester.semester_id]);
+    const allSemesters = await Semester.findAll({
+      order: [['start_date', 'DESC']]
+    });
+    
+    const currentSemesterIndex = allSemesters.findIndex(sem => 
+      sem.semester_id === currentSemester.semester_id
+    );
+    
+    const previousSemester = currentSemesterIndex >= 0 && currentSemesterIndex < allSemesters.length - 1 
+      ? allSemesters[currentSemesterIndex + 1] 
+      : null;
 
-    if (!semesterMembers || semesterMembers.length === 0) {
+    const currentSemesterMembers = await getMembershipsByOrgAndSemester(orgId, [currentSemester.semester_id]);
+    if (!currentSemesterMembers) {
       return { error: error.databaseError, data: null };
     }
 
-    const events = await getEventsWithAttendance(orgId);
+    let previousSemesterMembers = [];
+    if (previousSemester) {
+      previousSemesterMembers = await getMembershipsByOrgAndSemester(orgId, [previousSemester.semester_id]) || [];
+    }
 
-    if (!events || events.length === 0) {
+    const allEvents = await getEventsWithAttendance(orgId);
+    if (!allEvents) {
       return { error: error.databaseError, data: null };
     }
+
+    const currentSemesterStartDate = new Date(currentSemester.start_date);
+    const currentSemesterEndDate = new Date(currentSemester.end_date);
+    
+    let previousSemesterStartDate, previousSemesterEndDate;
+    if (previousSemester) {
+      previousSemesterStartDate = new Date(previousSemester.start_date);
+      previousSemesterEndDate = new Date(previousSemester.end_date);
+    }
+
+    const currentSemesterEvents = allEvents.filter(event => {
+      const eventDate = new Date(event.event_start);
+      return eventDate >= currentSemesterStartDate && eventDate <= currentSemesterEndDate;
+    });
+
+    const previousSemesterEvents = previousSemester ? allEvents.filter(event => {
+      const eventDate = new Date(event.event_start);
+      return eventDate >= previousSemesterStartDate && eventDate <= previousSemesterEndDate;
+    }) : [];
+
+    const currentActiveMemberIds = new Set(currentSemesterMembers
+      .filter(m => m.active_member)
+      .map(m => m.member_id)
+    );
+
+    const previousMemberIds = new Set(previousSemesterMembers.map(m => m.member_id));
+    const previousActiveMemberIds = new Set(previousSemesterMembers
+      .filter(m => m.active_member)
+      .map(m => m.member_id)
+    );
+
+    const newMemberIds = currentSemesterMembers
+      .filter(m => !previousMemberIds.has(m.member_id))
+      .map(m => m.member_id);
+
+    const newActiveMembers = [...currentActiveMemberIds]
+      .filter(id => !previousActiveMemberIds.has(id));
+
+    const currentSemesterEventCounts = {
+      generalMeetings: currentSemesterEvents.filter(e => e.event_type === 'general meeting').length,
+      volunteeringEvents: currentSemesterEvents.filter(e => e.event_type === 'volunteering').length,
+      otherEvents: currentSemesterEvents.filter(e => 
+        e.event_type !== 'general meeting' && e.event_type !== 'volunteering'
+      ).length
+    };
+
+    const previousSemesterEventCounts = {
+      generalMeetings: previousSemesterEvents.filter(e => e.event_type === 'general meeting').length,
+      volunteeringEvents: previousSemesterEvents.filter(e => e.event_type === 'volunteering').length,
+      otherEvents: previousSemesterEvents.filter(e => 
+        e.event_type !== 'general meeting' && e.event_type !== 'volunteering'
+      ).length
+    };
+
+    const currentSemesterTotalAttendance = currentSemesterEvents.reduce((sum, event) => 
+      sum + (event.Attendances ? event.Attendances.length : 0), 0
+    );
+
+    const previousSemesterTotalAttendance = previousSemesterEvents.reduce((sum, event) => 
+      sum + (event.Attendances ? event.Attendances.length : 0), 0
+    );
 
     const data = {
       organization_id: organization.organization_id,
@@ -255,10 +332,15 @@ async function getSemesterOrgReportInDB(orgId) {
       organization_abbreviation: organization.organization_abbreviation,
       semester: currentSemester.semester_name,
       academic_year: currentSemester.academic_year,
+      semester_start_date: currentSemester.start_date,
+      semester_end_date: currentSemester.end_date,
+      
       member_data: {
-        total_members: semesterMembers.length,
-        active_members: semesterMembers.filter(m => m.active_member).length,
-        members: semesterMembers.map(member => ({
+        total_members: currentSemesterMembers.length,
+        active_members: currentSemesterMembers.filter(m => m.active_member).length,
+        new_members: newMemberIds.length,
+        new_active_members: newActiveMembers.length,
+        members: currentSemesterMembers.map(member => ({
           member_id: member?.Member?.member_id || null,
           role_num: member?.membership_role || 0,
           firstName: member?.Member?.member_name?.split(' ')[0] || "",
@@ -268,9 +350,26 @@ async function getSemesterOrgReportInDB(orgId) {
           points: member?.membership_points || 0
         }))
       },
+      
+      previous_semester: previousSemester ? {
+        semester_name: previousSemester.semester_name,
+        academic_year: previousSemester.academic_year,
+        total_members: previousSemesterMembers.length,
+        active_members: previousSemesterMembers.filter(m => m.active_member).length,
+        new_members: 0, // Would need additional historical data to calculate accurately
+        new_active_members: 0, // Would need additional historical data to calculate accurately
+        general_meetings: previousSemesterEventCounts.generalMeetings,
+        events: previousSemesterEventCounts.otherEvents,
+        volunteering_events: previousSemesterEventCounts.volunteeringEvents,
+        total_attendance: previousSemesterTotalAttendance
+      } : null,
+      
       event_data: {
-        total_events: events.length,
-        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
+        total_events: currentSemesterEvents.length,
+        general_meetings: currentSemesterEventCounts.generalMeetings,
+        events: currentSemesterEventCounts.otherEvents,
+        volunteering_events: currentSemesterEventCounts.volunteeringEvents, 
+        total_attendance: currentSemesterTotalAttendance
       }
     };
 
