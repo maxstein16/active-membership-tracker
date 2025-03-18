@@ -24,10 +24,14 @@ export default function OrganizationStatusPage() {
  
   let loadPost = async () => {
     setLoading(true);
-    const result = await getAPIData(`/organization/${orgId}/member/1`, API_METHODS.get, {});
+    //get member to get member id who is logged in (did that)
+    const currentUserMemberID = await getAPIData(`/member`, API_METHODS.get, {});
+
+    //slide that into the below call
+    const result = await getAPIData(`/organization/${orgId}/member/${currentUserMemberID.data.member_id}`, API_METHODS.get, {});
     setPosts(result.data);
 
-    setMemberships(result.data.membership);
+   setMemberships(result.data.membership);
 
     const response = await getAPIData(
       `/organization/${orgId}`,
@@ -36,11 +40,11 @@ export default function OrganizationStatusPage() {
     );
     
       setOrgData(response.data);
-     console.log(result.data);
+    console.log(result.data);
        console.log(response.data);
   
       let data = [
-        {name: 'completed', value: orgData.active_organization_threshold},
+        {name: 'completed', value: orgData.organization_threshold},
         {name: 'progress', value: memberships.membership_points}
   
       ];
@@ -68,15 +72,15 @@ export default function OrganizationStatusPage() {
           <ResponsiveContainer width="100%" height="50%">
             <PieChart>
             
-              { memberships.active_semesters < orgData.active_organization_threshold &&
+              { memberships.active_semesters < orgData.organization_threshold &&
                 <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
-                <tspan x="50%" fill={orgData.organization_color} dy=".6em">  {(parseInt(memberships.membership_points) / parseInt(orgData.active_organization_threshold) * 100).toFixed(0)} %</tspan>
+                <tspan x="50%" fill={orgData.organization_color} dy=".6em">  {(parseInt(memberships.membership_points) / parseInt(orgData.organization_threshold) * 100).toFixed(0)} %</tspan>
                 <tspan x="50%" dy="1.2em">to Active</tspan>
               < tspan x="50%" dy="1.2em">Membership</tspan>
                 </text>
               }
 
-              { memberships.active_semesters >= orgData.active_organization_threshold &&
+              { memberships.active_semesters >= orgData.organization_threshold &&
                 <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
                   <tspan x="50%" dy=".6em">Active</tspan>
                   <tspan x="50%" dy="1.2em">Membership</tspan>
@@ -87,7 +91,7 @@ export default function OrganizationStatusPage() {
                 dataKey="value"
                 data={[
                   { name: "Progress", value: memberships.membership_points },
-                  { name: "Completed", value: orgData.active_organization_threshold }
+                  { name: "Completed", value: orgData.organization_threshold }
                 ]}
                 
                 cx="50%"
@@ -111,9 +115,9 @@ export default function OrganizationStatusPage() {
 
           {
             memberships.active_member ?  <p>Your total points this semester are <strong>{memberships.membership_points}</strong>! 
-            That is ${(memberships.membership_points - orgData.active_organization_threshold)} points above the minimum requirement!</p>:
+            That is ${(memberships.membership_points - orgData.organization_threshold)} points above the minimum requirement!</p>:
             <p>You have {memberships.membership_points} total points. <br/>Earn <strong>{
-              orgData.active_organization_threshold - memberships.membership_points
+              orgData.organization_threshold - memberships.membership_points
               }</strong> more to become an active member this semester!</p> 
           }
 
