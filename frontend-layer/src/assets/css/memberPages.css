@@ -104,3 +104,23 @@
     color: var(--dark-grey);
     font-style: italic;
 }
+    
+
+
+.member-progress-chart-page{ 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: '100%';
+    gap: '10%';
+    margin-left: '10%';
+    margin-right: '10%';
+}
+
+@media screen and (max-width: 600px) {
+    .member-progress-chart-page {
+        display: grid;
+        gap: '6%';
+         grid-template-columns: 1fr;
+         width: 100%;
+     }
+}
