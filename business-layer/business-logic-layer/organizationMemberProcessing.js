@@ -61,7 +61,7 @@ async function addMemberToAnOrganizationInDB(orgId, memberData) {
     if (isNaN(memberData.member_id)) {
       return { error: error.memberIdMustBeInteger, data: null };
     }
-    if (isNaN(memberData.role)) {
+    if (isNaN(memberData.membership_role)) {
       return { error: error.roleMustBeAnInteger, data: null };
     }
 
@@ -157,6 +157,26 @@ async function editMemberInOrganizationInDB(
         if (adminMembers.length === 1) {
           return { error: error.cannotRemoveLastAdmin, data: null };
         }
+
+    const membership = memberships[0];
+
+    // Check if this is the last admin being removed
+    if (memberDataToUpdate.hasOwnProperty("membership_role")) {
+      const currentRole = membership.membership_role;
+      const newRole = memberDataToUpdate.membership_role;
+
+      // If changing from admin role to something else
+      if (currentRole === ROLE_ADMIN && newRole !== ROLE_ADMIN) {
+        // Get all admins in the organization
+        const adminMembers = await getMembershipsByAttributes({
+          organization_id: orgId,
+          membership_role: ROLE_ADMIN,
+        });
+
+        // If there's only one admin, prevent the change
+        if (adminMembers.length === 1) {
+          return { error: error.cannotRemoveLastAdmin, data: null };
+        }
       }
     }
 
@@ -188,6 +208,14 @@ async function editMemberInOrganizationInDB(
     console.error("Error editing membership:", err);
     return { error: error.somethingWentWrong, data: null };
   }
+    return {
+      error: error.noError,
+      data: { update: "success" },
+    };
+  } catch (err) {
+    console.error("Error editing membership:", err);
+    return { error: error.somethingWentWrong, data: null };
+  }
 }
 
 async function deleteMemberInOrganizationInDB(orgId, memberId) {
@@ -206,7 +234,17 @@ async function deleteMemberInOrganizationInDB(orgId, memberId) {
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
+    const currentSemester = await getCurrentSemester();
 
+    const memberships = await getMembershipByAttributes({
+      member_id: memberId,
+      organization_id: orgId,
+      semester_id: currentSemester.semester_id,
+    });
+
+    if (!memberships || memberships.length === 0) {
+      return { error: error.membershipNotFound, data: null };
+    }
     if (!memberships || memberships.length === 0) {
       return { error: error.membershipNotFound, data: null };
     }

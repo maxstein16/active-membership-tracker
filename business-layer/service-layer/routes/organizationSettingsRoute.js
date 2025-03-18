@@ -71,8 +71,7 @@ router.put(
     return res.status(200).json({ status: "success", data: response.data });
   }
 );
-
-//PUT /v1/organization/:orgId/settings/membership-requirements
+//POST /v1/organization/:orgId/settings/membership-requirements
 router.post(
   "/membership-requirements",
   isAdminOrEboardForOrg,
@@ -84,10 +83,9 @@ router.post(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (
-      !req.body.hasOwnProperty("meeting_type") ||
-      !req.body.hasOwnProperty("frequency") ||
-      !req.body.hasOwnProperty("amount_type") ||
-      !req.body.hasOwnProperty("amount")
+      !req.body.hasOwnProperty("event_type") ||
+      !req.body.hasOwnProperty("requirement_type") ||
+      !req.body.hasOwnProperty("requirement_value")
     ) {
       return res.status(400).json({ error: error.newReqMustHaveAllParams });
     }
@@ -153,15 +151,15 @@ router.delete(
   isAdminOrEboardForOrg,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let requirementId = req.query.requirementId;
+    let id = req.query.id;
 
     orgId = sanitizer.sanitize(orgId);
-    requirementId = sanitizer.sanitize(requirementId);
+    id = sanitizer.sanitize(id);
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-    if (!requirementId || isNaN(requirementId)) {
+    if (!id || isNaN(id)) {
       return res.status(400).json({ error: error.mustIncludeIdQueryParam });
     }
 
@@ -173,7 +171,7 @@ router.delete(
 
     const response = await business.deleteOrganizationMembershipRequirement(
       parseInt(orgId),
-      parseInt(requirementId)
+      parseInt(id)
     );
 
     if (response.error !== error.noError) {
@@ -187,6 +185,107 @@ router.delete(
     }
 
     return res.status(200).json({ status: "success", data: response.data });
+  }
+);
+
+//POST /v1/organization/:orgId/settings/membership-requirements/bonuses
+router.post(
+  "/membership-requirements/bonuses",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    let orgId = req.params.orgId;
+    let { requirement_id, threshold_percentage, bonus_points } = req.body;
+
+    orgId = sanitizer.sanitize(orgId);
+    requirement_id = sanitizer.sanitize(requirement_id);
+
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+    if (isNaN(requirement_id)) {
+      return res.status(400).json({ error: error.settingNotFound });
+    }
+    if (!threshold_percentage || isNaN(threshold_percentage)) {
+      return res.status(400).json({ error: error.somethingWentWrong });
+    }
+    if (!bonus_points || isNaN(bonus_points)) {
+      return res.status(400).json({ error: error.somethingWentWrong });
+    }
+
+    const response = await business.createBonusRequirement(requirement_id, {
+      threshold_percentage,
+      bonus_points,
+    });
+
+    if (response.error !== error.noError) {
+      return res.status(400).json({ error: response.error });
+    }
+
+    return res.status(200).json({ status: "success", data: response.data });
+  }
+);
+
+//PUT /v1/organization/:orgId/settings/membership-requirements/bonuses
+router.put(
+  "/membership-requirements/bonuses",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    let orgId = req.params.orgId;
+    let { bonus_id, threshold_percentage, bonus_points } = req.body;
+
+    orgId = sanitizer.sanitize(orgId);
+    bonus_id = sanitizer.sanitize(bonus_id);
+
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+    if (isNaN(bonus_id)) {
+      return res.status(400).json({ error: error.settingNotFound });
+    }
+    if (!threshold_percentage && !bonus_points) {
+      return res
+        .status(400)
+        .json({ error: error.mustHaveAtLeastOneFieldToUpdate });
+    }
+
+    const response = await business.editBonusRequirement(bonus_id, {
+      threshold_percentage,
+      bonus_points,
+    });
+
+    if (response.error !== error.noError) {
+      return res.status(400).json({ error: response.error });
+    }
+
+    return res.status(200).json({ status: "success", data: response.data });
+  }
+);
+
+//DELETE /v1/organization/:orgId/settings/membership-requirements/bonuses
+router.delete(
+  "/membership-requirements/bonuses",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    let orgId = req.params.orgId;
+    let bonusId = req.query.bonus_id;
+
+    orgId = sanitizer.sanitize(orgId);
+    bonusId = sanitizer.sanitize(bonusId);
+
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+    if (!bonusId || isNaN(bonusId)) {
+      return res.status(400).json({ error: error.settingNotFound });
+    }
+
+    const response = await business.deleteBonusRequirement(parseInt(bonusId));
+
+    if (response.error !== error.noError) {
+      return res.status(400).json({ error: response.error });
+    }
+
+    return res.status(200).json({ status: "success", data: { deleted: true } });
   }
 );
 

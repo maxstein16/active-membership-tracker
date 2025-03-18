@@ -1,6 +1,6 @@
 const { getMemberByUsername } = require("../../data-layer/member");
 const { getCurrentSemester } = require("../../data-layer/semester");
-const { ROLE_EBOARD, ROLE_MEMBER } = require("../../constants");
+const { ROLE_EBOARD, ROLE_MEMBER } = require("../../../constants");
 
 /**
  * HOW TO USE:

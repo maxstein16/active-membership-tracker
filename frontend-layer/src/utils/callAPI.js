@@ -8,28 +8,42 @@ const connect4server = "http://localhost:8080/v1";
  * @param {Object} payload - this is the request body, leave it an empty obj for GET
  * @returns {Object} data that the api returns
  */
-export async function getAPIData(endpoint, method, payload) {
+export async function getAPIData(endpoint, method, payload, isFile = false) {
+
+  console.log("getAPIData doing its shit...")
+
   let details = {
     method: method,
-    credentials: 'include',
-    headers: {
-      Accept: "application/json",
-      "Content-Type": 'application/json',
-    },
+    credentials: "include",
   };
-  if (method !== API_METHODS.get) {
-    details["body"] = JSON.stringify(payload);
+
+  // If it's NOT a file upload, set JSON headers
+  if (!isFile) {
+    details.headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
   }
 
+  // If sending a file, use FormData instead of JSON
+  if (method !== API_METHODS.get) {
+    details.body = isFile ? payload : JSON.stringify(payload);
+  }
+
+
   let link = `${connect4server}${endpoint}`;
-  // console.log("LINK", link)
+  console.log("The link attempting to be fetched " + link)
+  console.log("The details body is formdata :D " + details.body)
+  console.log("HELLO!!! ")
 
   return fetch(link, details)
     .then((res) => res.json())
     .catch((err) => {
+      console.log("Oopsie!")
       console.log("err:", err);
     });
 }
+
 
 export const API_METHODS = {
   get: "GET",
