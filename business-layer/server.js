@@ -24,7 +24,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.enable("trust proxy");
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index : false }));
+app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index: false }));
 
 // Session Middleware
 app.use(
@@ -62,6 +62,8 @@ let organizationReportsRouter = require("./service-layer/routes/organizationRepo
 let organizationSettingsRouter = require("./service-layer/routes/organizationSettingsRoute.js");
 let eventsRouter = require("./service-layer/routes/eventsRoute.js");
 let attendanceRouter = require("./service-layer/routes/attendanceRoute.js");
+let csvUploadRouter = require("./service-layer/routes/csvUploadRoute.js");
+
 
 // use the routes
 app.use("/", serveFrontendRouter);
@@ -76,6 +78,8 @@ app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/events", eventsRouter);
 app.use("/v1/attendance", attendanceRouter);
+app.use("/v1/organization", csvUploadRouter);
+
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {
