@@ -263,6 +263,16 @@ BonusRequirement.belongsTo(MembershipRequirement, {
   onDelete: "CASCADE",
 });
 
+MembershipRequirement.hasMany(BonusRequirement, {
+  foreignKey: "requirement_id",
+  as: "bonusRequirements", // Ensure this alias matches your query
+});
+
+BonusRequirement.belongsTo(MembershipRequirement, {
+  foreignKey: "requirement_id",
+  as: "membershipRequirement", // Ensure this alias matches your query
+});
+
 // sequelize.sync({ alter: true })
 //   .then(() => console.log('Database & tables created!'))
 //   .catch(err => console.error('Error syncing database:', err));

@@ -120,6 +120,7 @@ async function getOrganizationMembershipRequirements(orgId) {
       include: [
         {
           model: BonusRequirement,
+          as: "bonusRequirements",
           required: false, // Include bonus requirements if they exist
         },
       ],
