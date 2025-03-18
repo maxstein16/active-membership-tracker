@@ -124,7 +124,7 @@ export default function SettingsPage() {
     <PageSetup>
       <BackButton route={"/"} />
       {error !== "" ? (
-        <p>{error}</p>
+        <p className="error">{error}</p>
       ) : !orgData ? (
         <CircularProgress />
       ) : (
