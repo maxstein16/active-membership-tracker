@@ -10,6 +10,7 @@ import BottomCornerButton from "../../components/BottomCornerButton";
 import EditIcon from "@mui/icons-material/Edit";
 import UserProfileData from "../../components/MemberPageComponents/UserProfileData";
 import { useNavigate } from "react-router-dom";
+import { API_METHODS, getAPIData } from "../../utils/callAPI";
 import { CircularProgress } from "@mui/material";
 
 export default function UserProfilePage() {
@@ -22,17 +23,12 @@ export default function UserProfilePage() {
 
     const fetchMemberData = async () => {
       try {
-        const response = await fetch("/v1/member", {
-          headers: {
-            "Cache-Control": "no-cache", // Prevent caching
-            Pragma: "no-cache", // For older browsers
-          },
-        });
+        console.log("Fetching member data...");
 
-        const data = await response.json();
+        const data = await getAPIData("/member", API_METHODS.GET);
 
         // Check if API response is successful
-        if (response.status === 200) {
+        if (data && data.data) {
           console.log("Member data:", data.data);
 
           // Map the response data to state
@@ -65,7 +61,10 @@ export default function UserProfilePage() {
             })),
           });
         } else {
-          console.error("Error fetching member data:", data.error);
+          console.error(
+            "Error fetching member data:",
+            data?.error || "Unknown error"
+          );
         }
       } catch (error) {
         console.error("Error:", error);
