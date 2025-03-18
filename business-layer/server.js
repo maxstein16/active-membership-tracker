@@ -76,7 +76,6 @@ app.use("/v1/organization/:orgId/reports", organizationReportsRouter);
 app.use("/v1/organization/:orgId/settings", organizationSettingsRouter);
 app.use("/v1/organization/:orgId/events", eventsRouter);
 app.use("/v1/attendance", attendanceRouter);
-app.use("/v1/member", memberRouter);
 
 // Handle routes that do not exist
 app.get("*", (req, res) => {
