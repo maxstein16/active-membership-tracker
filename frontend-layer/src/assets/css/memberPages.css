@@ -105,8 +105,7 @@
     font-style: italic;
 }
     
-
-
+/**used for Organization Status Page **/
 .member-progress-chart-page{ 
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -116,11 +115,10 @@
     margin-right: '10%';
 }
 
-@media screen and (max-width: 600px) {
-    .member-progress-chart-page {
-        display: grid;
-        gap: '6%';
-         grid-template-columns: 1fr;
-         width: 100%;
+/**used for Organization Status Page (mobile edition)**/
+.member-progress-chart-page-mobile {
+    display: grid;
+    gap: '6%';
+    grid-template-columns: 1fr;
+    width: 100%;
      }
-}

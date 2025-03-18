@@ -9,6 +9,7 @@ import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import { API_METHODS, getAPIData } from "../../utils/callAPI";
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import useWindowWidth from "../../utils/useWindowWidth";
 
 
 export default function OrganizationStatusPage() {
@@ -18,7 +19,6 @@ export default function OrganizationStatusPage() {
   let [memberships, setMemberships] = React.useState([]);
   let [orgData, setOrgData] = React.useState([]);
   let [data, setData] = React.useState([]);
- 
 
  React.useEffect(() => {
  
@@ -28,7 +28,6 @@ export default function OrganizationStatusPage() {
     setPosts(result.data);
 
     setMemberships(result.data.membership);
-    console.log("org id: " + orgId);
 
     const response = await getAPIData(
       `/organization/${orgId}`,
@@ -36,39 +35,32 @@ export default function OrganizationStatusPage() {
       {}
     );
     
-    setOrgData(response.data);
-
-   
-    console.log(result.data);
-    console.log("break");
-    console.log(response.data);
-
-    let data = [
-      {name: 'completed', value: orgData.active_membership_threshold},
-      {name: 'progress', value: memberships.membership_points}
-
-    ];
-
-    setData(data);
-   
-      console.log(result.data.membership.membership_points);
-      console.log(response.data.active_membership_threshold);
+      setOrgData(response.data);
+      // console.log(result.data);
+       console.log(response.data);
   
-      console.log(memberships);
-      console.log(orgData);
+      let data = [
+        {name: 'completed', value: orgData.active_membership_threshold},
+        {name: 'progress', value: memberships.membership_points}
   
-    setLoading(false);
+      ];
+  
+      setData(data);
+    
+      setLoading(false);
+    
+
   };
   loadPost();
 
  }, []);
- 
+  const windowWidth = useWindowWidth();
  
   return (
     <PageSetup>
       <BackButton route={"/"} />
-      
-      <div className="member-progress-chart-page">
+
+      <div className={ windowWidth > 499 ? "member-progress-chart-page" : "member-progress-chart-page-mobile"}>
         <div>
           <h1>Your Membership with <span style={{color: orgData.org_color}}>{orgData.org_abbreviation}</span></h1>
           
@@ -79,8 +71,8 @@ export default function OrganizationStatusPage() {
               { memberships.active_semesters < orgData.active_membership_threshold &&
                 <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
                 <tspan x="50%" fill={orgData.org_color} dy=".6em">  {(parseInt(memberships.membership_points) / parseInt(orgData.active_membership_threshold) * 100).toFixed(0)} %</tspan>
-              <tspan x="50%" dy="1.2em">to Active</tspan>
-              <tspan x="50%" dy="1.2em">Membership</tspan>
+                <tspan x="50%" dy="1.2em">to Active</tspan>
+              < tspan x="50%" dy="1.2em">Membership</tspan>
                 </text>
               }
 
@@ -102,16 +94,16 @@ export default function OrganizationStatusPage() {
                 cy="50%"
                 innerRadius="50%"
                 outerRadius="80%"
-                label
+              
               > 
               {
                 orgId === 1 &&
-                <><Cell fill="#d6d2dd" /><Cell fill={orgData.org_color}  /></>
+                <><Cell fill='#7747a6' /><Cell fill='#7747a6' /></>
               }
               
               {
                 orgId === 2 &&
-                <><Cell fill= "#d6d2dd" /><Cell fill={orgData.org_color} /></>
+                <><Cell fill="#476da6" /><Cell fill="#476da6" /></>
               }
 
             </Pie>
