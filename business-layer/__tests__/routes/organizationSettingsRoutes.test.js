@@ -29,10 +29,9 @@ describe("Organization Settings Module", () => {
             getOrganizationMembershipRequirements.mockResolvedValue([
                 {
                     requirement_id: 10,
-                    meeting_type: "Weekly",
-                    frequency: "Every Monday",
-                    amount_type: "Hours",
-                    amount: 2
+                    event_type: "Weekly",
+                    requirement_type: "Hours",
+                    requirement_value: 2
                 }
             ]);
 
@@ -57,7 +56,7 @@ describe("Organization Settings Module", () => {
     describe("getOrganizationEmailSettingsInDB", () => {
         it("should return email settings for an organization", async () => {
             getEmailSettings.mockResolvedValue({
-                org_id: 1,
+                organization_id: 1,
                 notification_email: "test@org.com",
                 email_frequency: "Weekly"
             });
@@ -82,7 +81,7 @@ describe("Organization Settings Module", () => {
         it("should create email settings successfully", async () => {
             getEmailSettings.mockResolvedValue(null);
             createEmailSettings.mockResolvedValue({
-                org_id: 1,
+                organization_id: 1,
                 notification_email: "admin@org.com",
                 email_frequency: "Daily"
             });
@@ -97,7 +96,7 @@ describe("Organization Settings Module", () => {
         });
 
         it("should return an error if email settings already exist", async () => {
-            getEmailSettings.mockResolvedValue({ org_id: 1 });
+            getEmailSettings.mockResolvedValue({ organization_id: 1 });
 
             const result = await createOrganizationEmailSettingsInDB(1, {
                 notification_email: "admin@org.com",
@@ -112,7 +111,7 @@ describe("Organization Settings Module", () => {
     describe("updateOrganizationEmailSettingsInDB", () => {
         it("should update email settings successfully", async () => {
             updateEmailSettings.mockResolvedValue({
-                org_id: 1,
+                organization_id: 1,
                 notification_email: "updated@org.com",
                 email_frequency: "Monthly"
             });
@@ -166,15 +165,14 @@ describe("Organization Settings Module", () => {
 
             const result = await editOrganizationMembershipRequirementsInDB(1, {
                 requirement_id: 10,
-                meeting_type: "Bi-Weekly",
-                frequency: "Every Friday",
-                amount_type: "Hours",
-                amount: 3
+                event_type: "Bi-Weekly",
+                requirement_type: "Hours",
+                requirement_value: 3
             });
 
             expect(result.error).toBe("No error.");
             expect(result.data.requirement_id).toBe(10);
-            expect(result.data.meeting_type).toBe("Bi-Weekly");
+            expect(result.data.event_type).toBe("Bi-Weekly");
         });
 
         it("should return an error if organization is not found", async () => {
@@ -182,10 +180,9 @@ describe("Organization Settings Module", () => {
 
             const result = await editOrganizationMembershipRequirementsInDB(1, {
                 requirement_id: 10,
-                meeting_type: "Bi-Weekly",
-                frequency: "Every Friday",
-                amount_type: "Hours",
-                amount: 3
+                event_type: "Bi-Weekly",
+                requirement_type: "Hours",
+                requirement_value: 3
             });
 
             expect(result.error).toBe(error.organizationNotFound);

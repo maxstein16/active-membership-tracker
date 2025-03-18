@@ -6,20 +6,10 @@
   "scripts": {
     "start": "node ./service-layer/server.js",
     "dev": "nodemon ./service-layer/server.js",
-    "test": "jest",
-    "test:routes": "jest --testPathPattern=__tests__/routes"
+    "test": "jest"
   },
   "author": "The 7 Musketeers",
   "license": "ISC",
-  "jest": {
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/__tests__/**/*.js",
-      "**/*.test.js",
-      "**/*.spec.js"
-    ],
-    "verbose": true
-  },
   "dependencies": {
     "@sequelize/mariadb": "^7.0.0-alpha.43",
     "bcrypt": "^5.1.1",
@@ -33,15 +23,13 @@
     "jsdom": "^26.0.0",
     "mariadb": "^3.4.0",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
     "node-schedule": "^2.1.1",
     "nodemailer": "^6.10.0",
+    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.7",
-    "sequelize": "^6.37.5",
-    "sequelize-mock": "^0.10.2"
+    "sequelize": "^6.37.5"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "supertest": "^7.0.0"
   }
 }

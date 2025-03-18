@@ -10,13 +10,14 @@ const transporter = nodemailer.createTransport({
 
 /**
  * Send an email
+ * @param {string} from - Organization email
  * @param {string} to - Recipient email address
  * @param {string} subject - Email subject
  * @param {string} body - Email content
  */
-async function sendEmail(to, subject, body) {
+async function sendEmail(from, to, subject, body) {
   const mailOptions = {
-    from: process.env.DB_USERNAME,
+    from,
     to,
     subject,
     html: body,
