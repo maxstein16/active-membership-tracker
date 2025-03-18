@@ -8,15 +8,27 @@ import CheckroomIcon from "@mui/icons-material/Checkroom";
 import PersonIcon from "@mui/icons-material/Person";
 import FaceIcon from "@mui/icons-material/Face";
 
-export default function UserProfileData({ user }) {
+export default function UserProfileData({ user, hideName = false }) {
+  // Month number to name mapping
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  let monthIndex = parseInt(user.gradMonth, 10) - 1;
+  let monthName = !isNaN(monthIndex) && monthIndex >= 0 && monthIndex < 12
+    ? monthNames[monthIndex]
+    : "Unknown";
+
   return (
     <div className="member-profile-wrapper">
-      <h1>{user.name}</h1>
+      {!hideName && <h1>{user.name}</h1>}
+
       <p>
         <b>{user.major}</b>
       </p>
       <p>
-        Graduation Expected {user.gradMonth}, {user.gradYear}
+        Graduation Expected {monthName} {user.gradYear || "Unknown"}
       </p>
 
       <div className="icon-data">

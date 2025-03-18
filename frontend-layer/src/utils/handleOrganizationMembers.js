@@ -32,7 +32,7 @@ import { API_METHODS, getAPIData } from "./callAPI";
 export async function getMemberInfoData(orgId, memberId) {
   // Fetch data from the API
   const memberData = await getAPIData(
-    `organization/${orgId}/member/${memberId}`,
+    `/organization/${orgId}/member/${memberId}`,
     API_METHODS.get,
     {}
   );
