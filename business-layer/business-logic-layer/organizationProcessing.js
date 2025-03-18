@@ -88,7 +88,9 @@ function mapToDbFields(orgData) {
     organization_category: orgData.org_category,
     contact_email: orgData.org_contact_email,
     phone_number: orgData.org_phone_number,
-    organization_threshold: orgData.active_membership_threshold
+    organization_threshold: orgData.active_membership_threshold,
+    organization_color: orgData.org_color,
+    organization_abbreviation: orgData.org_abbreviation
   };
 }
 
@@ -106,6 +108,8 @@ function mapToApiFields(dbData) {
     org_contact_email: dbData.contact_email,
     org_phone_number: dbData.phone_number,
     active_membership_threshold: dbData.organization_threshold,
+    org_color: dbData.organization_color,
+    org_abbreviation: dbData.organization_abbreviation,
     message: "Organization fetched successfully",
   };
 }
@@ -267,6 +271,8 @@ async function getUserOrganizationsInDB(username) {
       org_category: org.organization_category,
       org_contact_email: org.contact_email,
       org_phone_number: org.phone_number,
+      org_abbreviation: org.organization_abbreviation,
+      org_color: org.organization_color,
       active_membership_threshold: org.organization_threshold
     }));
 
