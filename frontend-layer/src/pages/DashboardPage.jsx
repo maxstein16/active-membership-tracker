@@ -52,6 +52,7 @@ export default function DashboardPage() {
           <h1>Welcome, {userData.name}</h1>{" "}
           <div className="org-boxes">
             {userData.organizations.map((organization, key) => {
+              // In here there is a check for role
               return <OrgBoxWithAdminLinks organization={organization} key={key}/>
             })}
           </div>
