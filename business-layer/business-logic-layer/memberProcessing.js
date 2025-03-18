@@ -64,12 +64,6 @@ async function updateMemberInDB(memberId, memberData) {
     }
 
     try {
-
-
-        console.log("member processing is checking fields ")
-        console.log("Personal email: " + memberData.member_personal_email + "\nPhone number: " + memberData.member_phone_number + "\nGender: " + memberData.member_gender + "\nRace: " + memberData.member_race + "\nTshirt: " + memberData.member_tshirt_size + "\nMajor: " + memberData.member_major + "\nGraduation date: " + memberData.member_graduation_date + "\nMember status: " + memberData.member_status)
-
-
         // Map incoming fields to database fields
         const updateFields = {
             member_personal_email: memberData.personal_email,
