@@ -87,6 +87,7 @@ async function createEventInDB(orgId, eventData) {
     }
 
     // Create the event with the found/created semester
+    console.log(eventData)
     const newEvent = await createEvent({
       organization_id: orgId,
       semester_id: semester.semester_id,  // Assign the semester
@@ -151,10 +152,10 @@ async function updateEventInDB(orgId, eventId, updateData) {
   try {
     // First verify the event belongs to the organization
     const existingEvent = await getEventById(eventId, orgId);
-    if (!existingEvent || existingEvent.organization_id !== orgId) {
+    if (!existingEvent) {
       return { error: error.eventNotFound, data: null };
     }
-
+   
     const updated = await updateEvent(eventId, updateData);
     if (!updated) {
       return { error: error.eventNotFound, data: null };

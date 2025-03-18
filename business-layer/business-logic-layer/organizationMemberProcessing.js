@@ -140,9 +140,9 @@ async function editMemberInOrganizationInDB(
       semester_id: currentSemester.semester_id,
     });
 
-    if (!memberships || memberships.length === 0) {
-      return { error: error.membershipNotFound, data: null };
-    }
+        if (!memberships || memberships.length === 0) {
+            return { error: error.membershipNotFound, data: null };
+        }
 
     const membership = memberships[0];
 
