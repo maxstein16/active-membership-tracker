@@ -25,13 +25,13 @@ export default function DashboardPage() {
       name: "Name Here",
       organizations: [
         {
-          id: 0,
+          id: 1,
           abbreviation: "WiC",
           color: "#381A58",
           role: 0,
         },
         {
-          id: 1,
+          id: 2,
           abbreviation: "COMS",
           color: "#20BDE4",
           role: 2,
@@ -52,6 +52,7 @@ export default function DashboardPage() {
           <h1>Welcome, {userData.name}</h1>{" "}
           <div className="org-boxes">
             {userData.organizations.map((organization, key) => {
+              // In here there is a check for role
               return <OrgBoxWithAdminLinks organization={organization} key={key}/>
             })}
           </div>

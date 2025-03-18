@@ -9,7 +9,7 @@ const { Member } = require("../db");
 async function createMember(memberData) {
   try {
     const newMember = await Member.create(memberData);
-    console.log("Member created:", newMember.toJSON());
+    // console.log("Member created:", newMember.toJSON());
     return newMember;
   } catch (error) {
     console.error("Error creating member:", error);
@@ -55,10 +55,10 @@ async function getAllMembers() {
       console.log("No members found in the database.");
       return [];
     }
-    console.log(
-      "Members found:",
-      members.map((m) => m.toJSON())
-    );
+    // console.log(
+    //   "Members found:",
+    //   members.map((m) => m.toJSON())
+    // );
     return members;
   } catch (error) {
     console.error("Error fetching members:", error);
@@ -81,7 +81,7 @@ async function getMemberById(memberId) {
       return null;
     }
 
-    console.log("Member found:", member.toJSON());
+    // console.log("Member found:", member.toJSON());
     return member;
   } catch (error) {
     console.error("Error fetching member by ID:", error);
@@ -106,8 +106,8 @@ async function getMembersByAttributes(filters) {
     }
 
     // Log the JSON representation of members (to make it readable)
-    console.log("Members found:", members.map((m) => m.toJSON()));
-    console.log("Trying to get member(s) by attribute(s): " + JSON.stringify(filters));
+    // console.log("Members found:", members.map((m) => m.toJSON()));
+    // console.log("Trying to get member(s) by attribute(s): " + JSON.stringify(filters));
 
 
     return { error: null, data: members }; // Return the data and no error

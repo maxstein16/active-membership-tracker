@@ -1,11 +1,11 @@
-const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB } = require("../attendanceProcessing");
+const { createAttendanceDB, getAttendanceByIdDB, getAttendanceByMemberAndEventDB, getMemberAttendanceStatsDB, getMemberAttendanceBySemesterDB, getAttendeesDetailsByEventIdDB } = require("../attendanceProcessing");
 const { createEventInDB, updateEventInDB, getAllEventsByOrganizationInDB, getEventByIDInDB, getAttendanceByEventIdDB, getAllEventsByOrgAndSemesterDB } = require("../eventsProcessing");
-const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
+const { createMemberInDB, updateMemberInDB, getMemberByIdInDB, getMemberIDByUsernameInDB, getSpecificMemberOrgStatsInDB } = require("../memberProcessing");
 const { getSpecificMemberWithOrgDataInDB, addMemberToAnOrganizationInDB, editMemberInOrganizationInDB, deleteMemberInOrganizationInDB, getMembersInOrganizationInDB } = require("../organizationMemberProcessing");
 const { getMembershipRoleInfoInOrganizationInDB, getAllMembershipsInOrganizationInDB } = require("../organizationMembershipProcessing");
-const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB } = require("../organizationProcessing");
+const { createOrganizationInDB, getSpecificOrgDataInDB, getAllOrganizationDataInDB, updateOrganizationInDB, getUserOrganizationsInDB } = require("../organizationProcessing");
 const { getSpecificReportOrgDataInDB, getAnnualOrgReportInDB, getSemesterOrgReportInDB, getMeetingOrgReportInDB } = require("../organizationReportProcessing");
-const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB } = require("../organizationSettingsProcessing");
+const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB, updateOrganizationEmailSettingsInDB, deleteOrganizationMembershipRequirementInDB, deleteOrganizationEmailSettingsInDB, createOrganizationEmailSettingsInDB, getOrganizationEmailSettingsInDB, createOrganizationMembershipRequirementsInDB } = require("../organizationSettingsProcessing");
   
   // export to api calls
   module.exports = function() {
@@ -29,14 +29,18 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
     this.getMemberAttendanceBySemester = async (memberId, semesterId) => {
       return await getMemberAttendanceBySemesterDB(memberId, semesterId);
     }
+
+    this.getAttendeesDetailsByEventId = async (eventId) => {
+      return await getAttendeesDetailsByEventIdDB(eventId);
+    }
   
     // Event Management
-    this.createEvent = async (eventData) => {
-      return await createEventInDB(eventData);
+    this.createEvent = async (eventData, body) => {
+      return await createEventInDB(eventData, body);
     };
   
-    this.updateEvent = async (eventId, updateData) => {
-      return await updateEventInDB(eventId, updateData);
+    this.updateEvent = async (orgId, eventId, updateData) => {
+      return await updateEventInDB(orgId, eventId, updateData);
     };
   
     this.getAllEventsByOrganization = async (orgId) => {
@@ -68,8 +72,12 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await getMemberByIdInDB(memberId);
     };
   
-    this.getSpecificMemberOrgStats = async (filters) => {
-      return await getSpecificMemberOrgStatsInDB(filters);
+    this.getMemberIDByUsernameInDB = async ( username ) => {
+      return await getMemberIDByUsernameInDB(username);
+    }
+
+    this.getSpecificMemberOrgStats = async (memberId, orgId) => {
+      return await getSpecificMemberOrgStatsInDB(memberId, orgId);
     };
   
     // Organization Member Management
@@ -118,6 +126,10 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
     this.updateOrganization = async (organizationId, updatedOrgInfo) => {
       return await updateOrganizationInDB(organizationId, updatedOrgInfo);
     };
+
+    this.getUserOrganizations = async (username) => {
+      return await getUserOrganizationsInDB(username);
+  }
   
     // Organization Report Management
     this.getSpecificReportOrgData = async (orgId) => {
@@ -153,12 +165,16 @@ const { editOrganizationMembershipRequirementsInDB, getOrganizationSettingsInDB,
       return await editOrganizationMembershipRequirementsInDB(orgId, orgData);
     }
 
+    this.createOrganizationMembershipRequirements = async (orgId, data) => {
+      return await createOrganizationMembershipRequirementsInDB(orgId, data)
+    }
+
     this.editOrganizationEmailSettings = async (orgId, orgData) => {
       return await updateOrganizationEmailSettingsInDB(orgId, orgData);
     }
 
-    this.deleteOrganizationMembershipRequirement = async (orgId, settingId) => {
-      return await deleteOrganizationMembershipRequirementInDB(orgId, settingId);
+    this.deleteOrganizationMembershipRequirement = async (orgId, requirementId) => {
+      return await deleteOrganizationMembershipRequirementInDB(orgId, requirementId);
     }
 
     this.deleteOrganizationEmailSettings = async (orgId) => {

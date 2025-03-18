@@ -38,7 +38,7 @@ router.get(
     const response = await business.getOrganizationSettings(parseInt(orgId));
 
     if (response.error !== error.noError) {
-      return res.status(404).json({ error: error.organizationNotFound });
+      return res.status(404).json({ error: response.error });
     }
 
 
@@ -85,18 +85,57 @@ router.put(
     );
 
     if (response.error !== error.noError) {
-      if (response.error === error.organizationNotFound) {
-        return res.status(404).json({ error: error.organizationNotFound });
-      }
-      if (response.error === error.settingNotFound) {
-        return res.status(404).json({ error: error.settingNotFound });
-      }
-      return res.status(400).json({ error: error.somethingWentWrong });
+      return res.status(400).json({ error: response.error });
     }
 
     return res.status(200).json({ status: "success", data: response.data });
   }
 );
+
+
+//PUT /v1/organization/:orgId/settings/membership-requirements
+router.post(
+  "/membership-requirements",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+
+    let orgId = req.params.orgId;
+
+    orgId = sanitizer.sanitize(orgId);
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+    if (
+      !req.body.hasOwnProperty("meeting_type") ||
+      !req.body.hasOwnProperty("frequency") ||
+      !req.body.hasOwnProperty("amount_type") ||
+      !req.body.hasOwnProperty("amount")
+    ) {
+      return res
+        .status(400)
+        .json({ error: error.newReqMustHaveAllParams });
+    }
+    // does the user have privileges?
+    // const hasPrivileges = hasCredentials.isEboardOrAdmin(
+    //   req.session.user.username,
+    //   orgId
+    // );
+    // if (!hasPrivileges) {
+    //   res.status(401).json({ error: error.youDoNotHavePermission });
+    // }
+
+    const response = await business.createOrganizationMembershipRequirements(
+      parseInt(orgId),
+      req.body
+    );
+
+    if (response.error !== error.noError) {
+      return res.status(400).json({ error: response.error });
+    }
+    return res.status(200).json({ status: "success", data: response.data });
+  }
+);
+
 
 //PUT /v1/organization/:orgId/settings/email-settings
 router.put(
@@ -104,12 +143,17 @@ router.put(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let {
-      current_status,
-      annual_report,
-      semester_report,
-      membership_achieved,
-    } = req.body;
+    // let {
+    //   current_status,
+    //   annual_report,
+    //   semester_report,
+    //   membership_achieved,
+    // } = req.body;
+
+    // console.log(current_status)
+    // console.log(annual_report)
+    // console.log(semester_report)
+    // console.log(membership_achieved)
 
     orgId = sanitizer.sanitize(orgId);
 
@@ -117,10 +161,10 @@ router.put(
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
     if (
-      !current_status &&
-      !annual_report &&
-      !semester_report &&
-      !membership_achieved
+      !req.body.hasOwnProperty("current_status") &&
+      !req.body.hasOwnProperty("annual_report") &&
+      !req.body.hasOwnProperty("semester_report") &&
+      !req.body.hasOwnProperty("membership_achieved")
     ) {
       return res
         .status(400)
@@ -155,15 +199,15 @@ router.delete(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let id = req.query.id;
+    let requirementId = req.query.requirementId;
 
     orgId = sanitizer.sanitize(orgId);
-    id = sanitizer.sanitize(id);
+    requirementId = sanitizer.sanitize(requirementId);
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-    if (!id || isNaN(id)) {
+    if (!requirementId || isNaN(requirementId)) {
       return res.status(400).json({ error: error.mustIncludeIdQueryParam });
     }
 
@@ -176,7 +220,7 @@ router.delete(
 
     const response = await business.deleteOrganizationMembershipRequirement(
       parseInt(orgId),
-      parseInt(id)
+      parseInt(requirementId)
     );
 
     if (response.error !== error.noError) {

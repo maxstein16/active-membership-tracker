@@ -1,11 +1,11 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/adminPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/adminPages.css";
 
-import UserInput from "../UserInput";
-import CustomSelect from "../CustomSelect";
+import UserInput from "../../UserInput";
+import CustomSelect from "../../CustomSelect";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { IconButton } from "@mui/material";
 
@@ -16,20 +16,31 @@ export default function MembershipRequirementLine({
   updateValueWhenDone,
   deleteRequirement,
 }) {
+
+  const [error, setError] = React.useState("");
+
   return (
     <div className="requirement-wrapper">
+      { error !== "" ? <p className="error">{error}</p> : <></>}
       <div className="percent-or-amount">
         <p>A member must participate in</p>
         {/* Amount */}
         <UserInput
-          label={requirement.amountType}
+          label={"amount"}
           color={color}
           value={requirement.amount}
-          setValue={(newValue) =>
-            updateValueAsTyping(newValue, requirement.id, "amount")
-          }
+          setValue={(newValue) => updateValueAsTyping(newValue, requirement.id, "amount")}
           isMultiline={false}
           onLeaveField={(newValue) => {
+            if (newValue.trim() === "") {
+              setError("Amount must have a value")
+              return;
+            }
+            if (isNaN(newValue)) {
+              setError("Amount must be a number")
+              return
+            }
+            setError("")
             updateValueWhenDone(newValue, requirement.id, "amount");
           }}
         />
@@ -45,7 +56,7 @@ export default function MembershipRequirementLine({
         <CustomSelect
           label="Meeting Type"
           color={color}
-          options={["Meeting", "Event", "Volunteer"]}
+          options={["general meeting", "volunteer", "social", "workshop", "fundraiser", "committee"]}
           startingValue={requirement.meetingType}
           onSelect={(value) => updateValueWhenDone(value, requirement.id, "meetingType")}
         />
@@ -54,7 +65,7 @@ export default function MembershipRequirementLine({
         <CustomSelect
           label="Frequency"
           color={color}
-          options={["Monthly", "Semesterly", "Yearly"]}
+          options={["semesterly", "annually"]}
           startingValue={requirement.frequency}
           onSelect={(value) => updateValueWhenDone(value, requirement.id, "frequency")}
         />

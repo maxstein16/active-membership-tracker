@@ -11,11 +11,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import { API_METHODS, getAPIData } from "../../utils/callAPI";
 
-export default function UploadDataModal({ orgId, open, setOpen }) {
-  console.log(
-    `UploadDataModal says: orgId - ${orgId}, open - ${open}, setOpen - ${setOpen}`
-  );
-
+export default function UploadDataModal({ orgId }) {
+  const [open, setOpen] = React.useState(false);
   const [fileSelected, setFileSelected] = React.useState(false);
   const [fileName, setFileName] = React.useState(""); // State for file name
   const [fileContent, setFileContent] = React.useState(""); // State for file content
@@ -104,9 +101,22 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
       setErrMsg("An error occurred while uploading the file.");
     }
   };
-
   return (
-    <Dialog onClose={() => setOpen(false)} open={open}>
+    <div>
+    {/* Upload Data Link + Popup */}
+    <button
+    onClick={() => setOpen(true)}
+    style={{ color: color, borderColor: color }}
+    className="secondary custom-color-button"
+  >
+    Upload Attendance Data
+  </button>
+    <Dialog
+      onClose={() => {
+        setOpen(false);
+      }}
+      open={open}
+    >
       <DialogTitle>Upload CSV Data File</DialogTitle>
       <DialogContent>
         <p>
@@ -130,5 +140,6 @@ export default function UploadDataModal({ orgId, open, setOpen }) {
         </button>
       </DialogActions>
     </Dialog>
+    </div>
   );
 }

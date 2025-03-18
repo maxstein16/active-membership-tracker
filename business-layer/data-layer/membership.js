@@ -1,4 +1,4 @@
-const { Membership } = require("../db");
+const { Membership, Member } = require('../db');
 
 /**
  * Create a membership record
@@ -75,10 +75,10 @@ const getMembershipsByAttributes = async (filters) => {
       return [];
     }
 
-    console.log(
-      "Memberships found:",
-      memberships.map(m => m.toJSON())
-    );
+    // console.log(
+    //   "Memberships found:",
+    //   memberships.map(m => m.toJSON())
+    // );
     return memberships;
   } catch (err) {
     console.error("Error fetching memberships by attributes:", err);
@@ -102,7 +102,7 @@ const getMembershipByAttributes = async (filters) => {
       return null;
     }
 
-    console.log("Membership found:", membership.toJSON());
+    // console.log("Membership found:", membership.toJSON());
     return membership;
   } catch (err) {
     console.error("Error fetching membership by attributes:", err);
@@ -110,6 +110,12 @@ const getMembershipByAttributes = async (filters) => {
   }
 };
 
+/**
+ * Get memberships for an organization across multiple semesters
+ * @param {number} orgId - The ID of the organization
+ * @param {number[]} semesterIds - Array of semester IDs to query
+ * @returns {Promise<Object[]>} Memberships for the organization across specified semesters
+ */
 async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   try {
     const memberships = await Membership.findAll({
@@ -130,11 +136,16 @@ async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   }
 }
 
+async function deleteMembershipRequirement(requirementId) {
+  return await Membership.destroy({ where: { requirement_id: requirementId } });
+}
+
 module.exports = {
   createMembership,
   editMembership,
   editMembershipRole,
   getMembershipsByAttributes,
   getMembershipByAttributes,
-  getMembershipsByOrgAndSemester
+  getMembershipsByOrgAndSemester,
+  deleteMembershipRequirement
 };

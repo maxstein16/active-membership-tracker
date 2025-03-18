@@ -1,4 +1,4 @@
-const { Attendance } = require("../db")
+const { Attendance, Member } = require("../db")
 
 /**
  * Create an attendance record

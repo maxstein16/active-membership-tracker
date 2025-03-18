@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 
@@ -13,6 +13,7 @@ export default function OrganizationStatusPage() {
       <h1>Organization Status Page</h1>
       <p>Org Id: {orgId}</p>
       <br />
+      <Link to={`/${orgId}/events`}>View Events</Link>
     </PageSetup>
   );
 }

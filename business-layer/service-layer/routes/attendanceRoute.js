@@ -48,7 +48,7 @@ router.get("/:attendanceId", isAuthorizedHasSessionForAPI, async (req, res) => {
 });
 
 // GET /attendance/member/:memberId (Retrieve attendance by Member ID)
-router.get("/attendance/member/:memberId", isAuthorizedHasSessionForAPI, async (req, res) => {
+router.get("/member/:memberId", isAuthorizedHasSessionForAPI, async (req, res) => {
     let { memberId } = req.params;
     memberId = sanitizer.sanitize(memberId);
 
@@ -65,7 +65,7 @@ router.get("/attendance/member/:memberId", isAuthorizedHasSessionForAPI, async (
 });
 
 // GET /attendance/event/:eventId (Retrieve attendance by Event ID)
-router.get("/attendance/event/:eventId", isAuthorizedHasSessionForAPI, async (req, res) => {
+router.get("/event/:eventId", isAuthorizedHasSessionForAPI, async (req, res) => {
     let { eventId } = req.params;
     eventId = sanitizer.sanitize(eventId);
 
@@ -82,7 +82,7 @@ router.get("/attendance/event/:eventId", isAuthorizedHasSessionForAPI, async (re
 });
 
 // GET /attendance/member/:memberId/event/:eventId (Retrieve attendance by Member & Event ID)
-router.get("/attendance/member/:memberId/event/:eventId", isAuthorizedHasSessionForAPI, async (req, res) => {
+router.get("/member/:memberId/event/:eventId", isAuthorizedHasSessionForAPI, async (req, res) => {
     let { memberId, eventId } = req.params;
     memberId = sanitizer.sanitize(memberId);
     eventId = sanitizer.sanitize(eventId);
@@ -102,4 +102,20 @@ router.get("/attendance/member/:memberId/event/:eventId", isAuthorizedHasSession
     return res.status(200).json({ status: "success", data: attendance.data });
 });
 
+// GET /attendance/event/:eventId/attendees (Retrieve attendees details for a specific event)
+router.get("/event/:eventId/attendees", isAuthorizedHasSessionForAPI, async (req, res) => {
+    let { eventId } = req.params;
+    eventId = sanitizer.sanitize(eventId);
+
+    if (isNaN(eventId)) {
+        return res.status(400).json({ error: error.eventIdMustBeInteger });
+    }
+
+    const attendees = await business.getAttendeesDetailsByEventId(eventId);
+    if (attendees.error && attendees.error !== error.noError) {
+        return res.status(404).json({ error: attendees.error, eventId });
+    }
+
+    return res.status(200).json({ status: "success", data: attendees.data });
+});
 module.exports = router;

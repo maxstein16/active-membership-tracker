@@ -1,10 +1,10 @@
 import * as React from "react";
-import "../../assets/css/constants.css";
-import "../../assets/css/pageSetup.css";
-import "../../assets/css/general.css";
-import "../../assets/css/memberPages.css";
+import "../../../assets/css/constants.css";
+import "../../../assets/css/pageSetup.css";
+import "../../../assets/css/general.css";
+import "../../../assets/css/memberPages.css";
 
-import CustomSelect from "../../components/CustomSelect";
+import CustomSelect from "../../CustomSelect";
 import DownloadReport from "./DownloadReport";
 import { CircularProgress } from "@mui/material";
 import BarGraphForYearSemReports from "./BarGraphForYearSemReports";
@@ -59,7 +59,7 @@ export default function YearlyReport({ orgId, color }) {
     // set the array of possible years to get reports from
     let possibleYears = [];
     for (let i = currentYear; i >= earliestEventYear; i--) {
-      console.log(i);
+      // console.log(i);
       possibleYears.push(i);
     }
     setYearList(possibleYears);

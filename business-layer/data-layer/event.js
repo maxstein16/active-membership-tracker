@@ -9,13 +9,13 @@ const { Event, Attendance } = require("../db");
 async function createEvent(eventData) {
   try {
     const newEvent = await Event.create(eventData);
-    console.log("Event created:", newEvent.toJSON());
+    // console.log("Event created:", newEvent.toJSON());
     return newEvent;
   } catch (error) {
     console.error("Error creating event:", error);
     throw error;
   }
-};
+}
 
 /**
  * Updates an existing event by its ID.
@@ -30,18 +30,16 @@ async function updateEvent(eventId, updateData) {
       where: { event_id: eventId },
     });
 
-    if (updatedRows > 0) {
-      console.log(`Event with ID ${eventId} updated successfully.`);
-      return true;
-    } else {
-      console.log(`No event found with ID ${eventId}.`);
-      return false;
-    }
+    // if (updatedRows > 0) {
+    //   console.log(`Event with ID ${eventId} updated successfully.`);
+    //   return true;
+    // } 
+    return true; // it still is fine if nothing is updated bc there was nothing tooo update
   } catch (error) {
     console.error("Error updating event:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves all events from the database.
@@ -55,16 +53,16 @@ async function getAllEvents() {
       console.log("No events found in the database.");
       return [];
     }
-    console.log(
-      "Events found:",
-      events.map((e) => e.toJSON())
-    );
+    // console.log(
+    //   "Events found:",
+    //   events.map((e) => e.toJSON())
+    // );
     return events;
   } catch (error) {
     console.error("Error fetching events:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves a specific event by its ID.
@@ -75,23 +73,20 @@ async function getAllEvents() {
  */
 async function getEventById(eventId, orgId) {
   try {
-      const where = { event_id: eventId };
-      if (orgId !== undefined) {
-          where.organization_id = orgId;
-      }
-      
-      const event = await Event.findOne({ where });
+    const event = await Event.findOne({
+      where: { event_id: eventId, organization_id: orgId },
+    });
+    // console.log(event);
+    if (!event) {
+      console.log(`No event found with ID ${eventId}`);
+      return null;
+    }
 
-      if (!event) {
-          console.log(`No event found with ID ${eventId}`);
-          return null;
-      }
-
-      console.log("Event found:", event.toJSON());
-      return event;
+    // console.log("Event found:", event.toJSON());
+    return event;
   } catch (error) {
-      console.error("Error fetching event by ID:", error);
-      throw error;
+    console.error("Error fetching event by ID:", error);
+    throw error;
   }
 }
 
@@ -110,7 +105,7 @@ async function getAttendanceByEventId(eventId) {
     console.error("Error fetching attendance by event ID:", err);
     throw err;
   }
-};
+}
 
 /**
  * Retrieves events based on provided filters.
@@ -127,10 +122,10 @@ async function getEventsByAttributes(filters) {
       return [];
     }
 
-    console.log(
-      "Events found:",
-      events.map((e) => e.toJSON())
-    );
+    // console.log(
+    //   "Events found:",
+    //   events.map((e) => e.toJSON())
+    // );
     return events;
   } catch (error) {
     console.error("Error fetching events by attributes:", error);
@@ -144,8 +139,8 @@ async function getEventsWithAttendance(orgId) {
       where: { organization_id: orgId },
       include: {
         model: Attendance,
-        as: 'Attendances'
-      }
+        as: "Attendances",
+      },
     });
     return events;
   } catch (err) {
@@ -162,5 +157,5 @@ module.exports = {
   getEventById,
   getAttendanceByEventId,
   getEventsByAttributes,
-  getEventsWithAttendance
+  getEventsWithAttendance,
 };
