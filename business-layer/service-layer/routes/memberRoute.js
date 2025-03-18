@@ -13,7 +13,6 @@ const sanitizer = new Sanitizer();
 const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
 const { Member } = require("../../db");
-const { log } = require("console");
 
 // GET /v1/member/:memberId
 router.get(
