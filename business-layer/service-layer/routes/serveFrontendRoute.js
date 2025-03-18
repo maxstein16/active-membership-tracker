@@ -66,6 +66,13 @@ router.get(
   }
 );
 
+// GET org events
+router.get("/:orgId/events", isAuthorizedHasSessionForWebsite, function (req, res) {
+  res.sendFile(
+    path.join(__dirname, "../../../frontend-layer/build", "index.html")
+  );
+});
+
 // GET org settings
 router.get("/:orgId/settings", isAdminOrEboardForOrg, (req, res) => {
   res.sendFile(

@@ -26,7 +26,7 @@ export default function MembershipRequirementLine({
         <p>A member must participate in</p>
         {/* Amount */}
         <UserInput
-          label={requirement.amountType}
+          label={"amount"}
           color={color}
           value={requirement.amount}
           setValue={(newValue) => updateValueAsTyping(newValue, requirement.id, "amount")}
