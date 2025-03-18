@@ -21,6 +21,7 @@ const {
   Membership,
   EmailSettings,
   MembershipRequirement,
+  BonusRequirement,
   Attendance,
   Event,
 } = require("../db");
@@ -42,7 +43,9 @@ async function addTestData() {
     organization_description: "This is a test for WiC Settings",
     organization_color: "#381A58",
     organization_abbreviation: "WiC TEST",
-    organization_threshold: 42,
+    organization_email: "wic@rit.edu",
+    organization_membership_type: "attendance",
+    organization_threshold: 0,
   });
 
   const org2 = await Organization.create({
@@ -50,6 +53,8 @@ async function addTestData() {
     organization_description: "This is a test for COMS Settings",
     organization_color: "#20BDE4",
     organization_abbreviation: "COMS TEST",
+    organization_email: "coms@rit.edu",
+    organization_membership_type: "points",
     organization_threshold: 23,
   });
 
@@ -82,7 +87,7 @@ async function addTestData() {
     member_graduation_date: "2025-05-10",
     member_tshirt_size: "S",
     member_major: "Web and Mobile Computing",
-    member_gender: "F",
+    member_gender: "Female",
     member_race: "White",
   });
 
@@ -93,7 +98,7 @@ async function addTestData() {
     member_graduation_date: "2025-05-10",
     member_tshirt_size: "M",
     member_major: "Web and Mobile Computing",
-    member_gender: "M",
+    member_gender: "Male",
     member_race: "White",
   });
 
@@ -104,7 +109,7 @@ async function addTestData() {
     member_graduation_date: "2025-05-10",
     member_tshirt_size: "S",
     member_major: "Web and Mobile Computing",
-    member_gender: "F",
+    member_gender: "Female",
     member_race: "White",
   });
 
@@ -114,6 +119,8 @@ async function addTestData() {
     member_personal_email: "kasim.omeally@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Web and Mobile Computing",
+    member_gender: "Male",
+    member_race: "Black",
   });
 
   const member5 = await Member.create({
@@ -122,6 +129,8 @@ async function addTestData() {
     member_personal_email: "joseph.henry@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Web and Mobile Computing",
+    member_gender: "Male",
+    member_race: "White",
   });
 
   const member6 = await Member.create({
@@ -130,6 +139,8 @@ async function addTestData() {
     member_personal_email: "alexandria.eddings@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Web and Mobile Computing",
+    member_gender: "Female",
+    member_race: "Black",
   });
 
   const member7 = await Member.create({
@@ -138,6 +149,8 @@ async function addTestData() {
     member_personal_email: "Gabriella.alvarez-mcleod@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Human Computer Interaction",
+    member_gender: "Non-Binary",
+    member_race: "Hispanic",
   });
 
   // Memberships
@@ -154,21 +167,23 @@ async function addTestData() {
   ];
 
   for (const member of members) {
-    let randomNum = Math.floor(Math.random() * 40) + 1;
-    
-    // FALL 2024 MEMBERSHIPS (semester_id = 1123)
+    let randomBoolean = Math.random() >= 0.5;
     const membership1a = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
       organization_id: org1.organization_id,
       semester_id: sem1.semester_id,
-      membership_points: randomNum,
-      active_member: randomNum >= 42,
-      active_semesters: 1,
+      membership_points: 0,
+      active_member: randomBoolean,
+      received_bonus: [],
     });
 
+    const allPossibleBonusIds = [1, 2, 3, 4, 5];
+    const numBonuses = Math.floor(Math.random() * 4);
+    const shuffled = allPossibleBonusIds.sort(() => 0.5 - Math.random());
+    const selectedBonuses = shuffled.slice(0, numBonuses);
+
     randomNum = Math.floor(Math.random() * 40) + 1;
-    
     const membership1b = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
@@ -176,7 +191,7 @@ async function addTestData() {
       semester_id: sem1.semester_id,
       membership_points: randomNum,
       active_member: randomNum >= 23,
-      active_semesters: 1,
+      received_bonus: selectedBonuses,
     });
 
     // INSERT SPRING 2025 MEMBERSHIPS (semester_id = 1124) HERE:
@@ -229,56 +244,74 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "general meeting",
-    frequency: "semesterly",
-    amount_type: "points",
-    amount: 4,
-    requirement_scope: "semesterly",
+    event_type: "general meeting",
+    requirement_type: "attendance_count",
+    requirement_value: 8,
   });
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "social",
-    frequency: "annually",
-    amount_type: "points",
-    amount: 2,
-    requirement_scope: "annually",
+    event_type: "social",
+    requirement_type: "attendance_count",
+    requirement_value: 3,
   });
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    meeting_type: "volunteer",
-    frequency: "semesterly",
-    amount_type: "percentage",
-    amount: 50,
-    requirement_scope: "semesterly",
+    event_type: "volunteer",
+    requirement_type: "percentage",
+    requirement_value: 60,
   });
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "general meeting",
-    frequency: "annually",
-    amount_type: "points",
-    amount: 1,
-    requirement_scope: "annually",
+    event_type: "general meeting",
+    requirement_type: "points",
+    requirement_value: 10,
+  });
+
+  await BonusRequirement.create({
+    requirement_id: 4,
+    threshold_percentage: 25,
+    bonus_points: 1,
+  });
+
+  await BonusRequirement.create({
+    requirement_id: 4,
+    threshold_percentage: 50,
+    bonus_points: 3,
+  });
+
+  await BonusRequirement.create({
+    requirement_id: 4,
+    threshold_percentage: 100,
+    bonus_points: 5,
   });
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "fundraiser",
-    frequency: "semesterly",
-    amount_type: "percentage",
-    amount: 25,
-    requirement_scope: "semesterly",
+    event_type: "committee",
+    requirement_type: "points",
+    requirement_value: 5,
+  });
+
+  await BonusRequirement.create({
+    requirement_id: 5,
+    threshold_percentage: 50,
+    bonus_points: 1,
+  });
+
+  await BonusRequirement.create({
+    requirement_id: 5,
+    threshold_percentage: 100,
+    bonus_points: 3,
   });
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    meeting_type: "volunteer",
-    frequency: "semesterly",
-    amount_type: "percentage",
-    amount: 50,
-    requirement_scope: "semesterly",
+    event_type: "volunteer",
+    requirement_type: "points",
+    requirement_value: 1,
   });
 
   // Events
@@ -508,7 +541,7 @@ EMAIL SETTINGS
 
 MEMBERSHIP REQUIREMENTS
 +----------------+--------------+------------+-------------+--------+-------------------+---------------------+---------------------+-----------------+
-| requirement_id | meeting_type | frequency  | amount_type | amount | requirement_scope | createdAt           | updatedAt           | organization_id |
+| requirement_id | event_type | frequency  | requirement_type | requirement_value | requirement_scope | createdAt           | updatedAt           | organization_id |
 +----------------+--------------+------------+-------------+--------+-------------------+---------------------+---------------------+-----------------+
 |             14 | Meeting      | Semesterly | points      |      4 | semesterly        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |
 |             15 | Event        | Yearly     | points      |      2 | annually          | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |

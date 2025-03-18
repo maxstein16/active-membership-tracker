@@ -86,6 +86,7 @@ router.put(
       "tshirt_size",
       "major",
       "graduation_date",
+      "status",
     ];
     const hasValidFields = Object.keys(body).some((key) =>
       allowedFields.includes(key)
@@ -123,6 +124,7 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
     "tshirt_size",
     "major",
     "graduation_date",
+    "status",
   ];
   const hasValidFields = Object.keys(body).some((key) =>
     allowedFields.includes(key)
@@ -162,6 +164,7 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     "major",
     "gender",
     "race",
+    "status",
   ];
 
   const missingFields = requiredFields.filter(
