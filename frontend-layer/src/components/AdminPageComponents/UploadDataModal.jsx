@@ -11,7 +11,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import { API_METHODS, getAPIData } from "../../utils/callAPI";
 
-export default function UploadDataModal({ orgId }) {
+export default function UploadDataModal({ orgId, color }) {
   const [open, setOpen] = React.useState(false);
   const [fileSelected, setFileSelected] = React.useState(false);
   const [fileName, setFileName] = React.useState(""); // State for file name
