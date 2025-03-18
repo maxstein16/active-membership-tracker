@@ -1,5 +1,5 @@
 const { Membership, Member } = require("../../db");
-const { ROLE_EBOARD, ROLE_MEMBER } = require("../constants");
+const { ROLE_EBOARD, ROLE_MEMBER } = require("../../constants");
 
 /**
  * HOW TO USE:
