@@ -158,6 +158,12 @@ module.exports = function () {
     return await getMembersInOrganizationInDB(orgId);
   };
 
+  this.deleteOrganizationEmailSettings = async (orgId) => {
+    return await deleteOrganizationEmailSettingsInDB(orgId);
+    }
+  };
+
+
   // Organization Membership Management
   this.getMembershipRoleInfoInOrganization = async (
     organizationId,
@@ -262,19 +268,18 @@ module.exports = function () {
   };
 
   // Semester Management
-this.createSemester = async (semesterData) => {
-  return await createSemesterDB(semesterData);
-};
+  this.createSemester = async (semesterData) => {
+    return await createSemesterDB(semesterData);
+  };
 
-this.getSemesterByDate = async (date) => {
-  return await getSemesterByDateDB(date);
-};
+  this.getSemesterByDate = async (date) => {
+    return await getSemesterByDateDB(date);
+  };
 
-this.getCurrentSemester = async () => {
-  return await getCurrentSemesterDB();
-};
+  this.getCurrentSemester = async () => {
+    return await getCurrentSemesterDB();
+  };
 
-this.getSemestersByYear = async (year) => {
-  return await getSemestersByYearDB(year);
-};
-};
+  this.getSemestersByYear = async (year) => {
+    return await getSemestersByYearDB(year);
+  };
