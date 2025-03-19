@@ -11,6 +11,12 @@ import UserInput from "../../components/UserInput";
 import { CircularProgress } from "@mui/material";
 import CustomSelect from "../../components/CustomSelect";
 import { API_METHODS, getAPIData } from "../../utils/callAPI"; // Import getAPIData
+import {
+  genderOptions,
+  allowedTshirtSizes,
+  raceOptions,
+  statusOptions,
+} from "../../utils/allowedUserAttribues";
 
 export default function EditProfilePage() {
   const [userData, setUserData] = React.useState(null);
@@ -20,6 +26,7 @@ export default function EditProfilePage() {
   const [unchangedMessage, setUnchangedMessage] = React.useState("");
   const [error, setError] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
+  const [userIsAdmin] = React.useState(false);
 
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -78,38 +85,6 @@ export default function EditProfilePage() {
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; // General email format
     const phoneRegex = /^\+?(\d[\d-.()\s]*){10,15}$/;
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD format
-
-    // Enum options (you can update these as needed)
-    const genderOptions = [
-      "male",
-      "female",
-      "non-binary",
-      "other",
-      "prefer not to say",
-      null,
-    ];
-    const allowedTshirtSizes = ["XS", "S", "M", "L", "XL", "XXL"];
-    const raceOptions = [
-      "asian",
-      "black",
-      "white",
-      "hispanic",
-      "indigenous",
-      "pacific islander",
-      "middle eastern / north african",
-      "multiracial",
-      "other",
-      "prefer not to say",
-      null,
-    ];
-    const statusOptions = [
-      "undergraduate",
-      "graduate",
-      "staff",
-      "faculty",
-      "alumni",
-      null,
-    ];
 
     // Name validation
     if (!name) {
