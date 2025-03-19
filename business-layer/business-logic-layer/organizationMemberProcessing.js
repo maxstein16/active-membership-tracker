@@ -111,7 +111,6 @@ async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate)
       memberDataToUpdate.membership_role = memberDataToUpdate.role;
       delete memberDataToUpdate.role;
     }
-
     if (isNaN(orgId)) return { error: error.organizationIdMustBeInteger, data: null };
     if (isNaN(memberId)) return { error: error.memberIdMustBeInteger, data: null };
     if (memberDataToUpdate.membership_role !== undefined &&
@@ -122,7 +121,6 @@ async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate)
         isNaN(memberDataToUpdate.membership_points)) {
       return { error: error.memberPointsNaN, data: null };
     }
-
     const currentSemester = await getCurrentSemester();
     const memberships = await getMembershipsByAttributes({
       member_id: memberId,
@@ -253,9 +251,11 @@ async function getMembersInOrganizationInDB(orgId) {
 }
 
 module.exports = {
-  getSpecificMemberWithOrgDataInDB,
-  addMemberToAnOrganizationInDB,
-  editMemberInOrganizationInDB,
-  deleteMemberInOrganizationInDB,
-  getMembersInOrganizationInDB,
+    getSpecificMemberWithOrgDataInDB,
+    addMemberToAnOrganizationInDB,
+    editMemberInOrganizationInDB,
+    deleteMemberInOrganizationInDB,
+    getMembersInOrganizationInDB,
+    getMembersByAttributes
 };
+

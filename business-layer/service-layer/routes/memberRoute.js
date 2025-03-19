@@ -23,7 +23,7 @@ router.get(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     // check if memberId is provided
-   
+
     if (!req.params.memberId) {
       res.status(400).json({ error: error.mustIncludeMemberId });
       return;
@@ -50,20 +50,33 @@ router.get(
   }
 );
 
+
 // Handle GET requests without memberId
-router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {  
+router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+
+  // Fetch member ID using the function
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
 
-  const memberData = await business.getMemberById(memberId);
+  // Check if an error occurred while fetching member ID
+  if (memberId.error) {
+    console.log("Error fetching member ID: " + memberId.error);
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
+  
+  // Fetch member data using the ID
+  const memberData = await business.getMemberById(memberId.data);
 
+  // Check if an error occurred while fetching member data
   if (memberData.error && memberData.error !== error.noError) {
     res.status(404).json({ error: error.memberCannotBeFoundInDB });
     return;
   }
 
+  // Return member data
   res.status(200).json({ data: memberData.data });
-
 });
+
 
 // PUT /v1/member/:memberId
 router.put(
@@ -206,9 +219,9 @@ router.get(
         error: error.mustIncludeOrgId,
       });
     }
-   
+
     // Rest of the validation and processing
-   let memberId = sanitizer.sanitize(req.params.memberId);
+    let memberId = sanitizer.sanitize(req.params.memberId);
     var orgId = sanitizer.sanitize(req.query.orgId);
 
     if (isNaN(memberId)) {
