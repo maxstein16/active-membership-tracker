@@ -50,36 +50,27 @@ async function getSemesterByDate(date) {
   }
 }
 
-  async function getCurrentSemester() {
-    try {
-      const allSemesters = await Semester.findAll({
-        order: [['semester_id', 'DESC']]
-      });
-
-      if (!allSemesters || allSemesters.length === 0) {
-        throw new Error("No semesters found");
+async function getCurrentSemester() {
+  try {
+    const today = new Date();
+    
+    const currentSemester = await Semester.findOne({
+      where: {
+        start_date: { [Op.lte]: today },
+        end_date: { [Op.gte]: today }
       }
-
-      const now = new Date();
-      const currentSemester = allSemesters.find(semester => {
-        const startDate = new Date(semester.start_date);
-        const endDate = new Date(semester.end_date);
-        return now >= startDate && now <= endDate;
-      });
-
-      if (!currentSemester) {
-        console.warn("No active semester found, returning most recent");
-        return allSemesters[0];
-      }
-
-      console.log(`Current Semester: ${currentSemester.semester_name} (${currentSemester.semester_id})`);
-      return currentSemester;
-    } catch (err) {
-      console.error("Error in getCurrentSemester:", err);
-      throw err;
+    });
+    
+    if (!currentSemester) {
+      return null;
     }
+    
+    return currentSemester;
+  } catch (err) {
+    console.error("Error in getCurrentSemester:", err);
+    throw err;
   }
-
+}
 
 async function getSemestersByYear(year = new Date().getFullYear()) {
   try {
