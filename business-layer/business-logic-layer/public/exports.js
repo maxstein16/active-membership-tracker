@@ -260,4 +260,4 @@ module.exports = function () {
   this.deleteBonusRequirement = async (bonusId) => {
     return await deleteBonusRequirementInDB(bonusId);
   };
-};
+
