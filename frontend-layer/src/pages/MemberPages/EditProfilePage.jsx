@@ -9,26 +9,24 @@ import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import UserInput from "../../components/UserInput";
 import { CircularProgress } from "@mui/material";
+import CustomSelect from "../../components/CustomSelect";
+import { API_METHODS, getAPIData } from "../../utils/callAPI"; // Import getAPIData
 
 export default function EditProfilePage() {
   const [userData, setUserData] = React.useState(null);
   const [originalData, setOriginalData] = React.useState(null);
   const [navTarget, setNavTarget] = React.useState("");
+  const [successMessage, setSuccessMessage] = React.useState("");
+  const [unchangedMessage, setUnchangedMessage] = React.useState("");
   const [error, setError] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
 
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("/v1/member", {
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-        });
+        const data = await getAPIData("/member", API_METHODS.GET); // Use getAPIData instead of fetch
 
-        const data = await response.json();
-        if (response.status === 200) {
+        if (data && data.data) {
           const member = data.data;
           const formattedData = {
             name: member.member_name,
@@ -36,29 +34,21 @@ export default function EditProfilePage() {
             personalEmail: member.member_personal_email,
             phone: member.member_phone_number,
             major: member.member_major,
-            graduationDate: member.member_graduation_date, // Store full date
-            tshirt: member.member_tshirt_size,
+            graduationDate: new Date(member.member_graduation_date)
+              .toISOString()
+              .split("T")[0],
             race: member.member_race,
+            tshirt: member.member_tshirt_size,
             gender: member.member_gender,
             status: member.member_status,
           };
           setUserData(formattedData);
           setOriginalData(formattedData); // Save original for change tracking
-
-          console.log(
-            "fetched data looks like this" + member.member_name,
-            member.member_email,
-            member.member_personal_email,
-            member.member_phone_number,
-            member.member_major,
-            member.member_graduation_date,
-            member.member_tshirt_size,
-            member.member_race,
-            member.member_gender,
-            member.member_status
-          );
         } else {
-          console.error("Error fetching user data:", data.error);
+          console.error(
+            "Error fetching user data:",
+            data?.error || "Unknown error"
+          );
         }
       } catch (error) {
         console.error("Error:", error);
@@ -67,22 +57,6 @@ export default function EditProfilePage() {
 
     fetchUserData();
   }, []);
-
-  const saveNewAttribute = (newValue, field) => {
-    setUserData((prev) => ({ ...prev, [field]: newValue }));
-  };
-
-  const hasUnsavedChanges =
-    JSON.stringify(userData) !== JSON.stringify(originalData);
-
-  const handleNavigation = (target) => {
-    if ((target === "/profile" || target === "cancel") && hasUnsavedChanges) {
-      setNavTarget(target);
-      setOpenDialog(true);
-    } else {
-      window.location.href = target;
-    }
-  };
 
   const validateFields = () => {
     const {
@@ -107,33 +81,26 @@ export default function EditProfilePage() {
 
     // Enum options (you can update these as needed)
     const genderOptions = [
-      "Male",
-      "Female",
-      "Non-binary",
-      "Other",
-      "Prefer not to say",
+      "male",
+      "female",
+      "non-binary",
+      "other",
+      "prefer not to say",
+      null,
     ];
-    const allowedTshirtSizes = [
-      "XS",
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL",
-      "Other",
-      "Prefer not to say",
-    ];
+    const allowedTshirtSizes = ["XS", "S", "M", "L", "XL", "XXL"];
     const raceOptions = [
-      "Asian",
-      "Black or African American",
-      "Caucasian / White",
-      "Hispanic or Latino",
-      "Native American or Alaska Native",
-      "Native Hawaiian or Other Pacific Islander",
-      "Middle Eastern or North African",
-      "Mixed / Two or More Races",
-      "Other",
-      "Prefer Not to Say",
+      "asian",
+      "black",
+      "white",
+      "hispanic",
+      "indigenous",
+      "pacific islander",
+      "middle eastern / north african",
+      "multiracial",
+      "other",
+      "prefer not to say",
+      null,
     ];
     const statusOptions = [
       "undergraduate",
@@ -141,15 +108,22 @@ export default function EditProfilePage() {
       "staff",
       "faculty",
       "alumni",
+      null,
     ];
 
     // Name validation
-    if (!name || typeof name !== "string")
-      return "Name is required and must be a string.";
+    if (!name) {
+      return "Name is required!";
+    } else if (typeof name !== "string") {
+      return "Name must be a string.";
+    }
 
     // Email validation (RIT email)
-    if (!email || !emailRegex.test(email))
+    if (!email) {
+      return "Email is required!";
+    } else if (!emailRegex.test(email)) {
       return "Invalid email format. It must end with 'rit.edu'.";
+    }
 
     // Personal email validation (if provided)
     if (personalEmail && !personalEmailRegex.test(personalEmail))
@@ -183,15 +157,36 @@ export default function EditProfilePage() {
     return null; // No errors
   };
 
-  // Capitalize the first letter of each word for display
-  const capitalizeFirstLetter = (str) => {
-    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  const saveNewAttribute = (newValue, field) => {
+    setUserData((prev) => ({ ...prev, [field]: newValue }));
+  };
+
+  const hasUnsavedChanges =
+    JSON.stringify(userData) !== JSON.stringify(originalData);
+
+  const handleNavigation = (target) => {
+    if ((target === "/profile" || target === "cancel") && hasUnsavedChanges) {
+      setNavTarget(target);
+      setOpenDialog(true);
+    } else {
+      window.location.href = target;
+    }
   };
 
   const handleSave = async () => {
+    if (!hasUnsavedChanges) {
+      setUnchangedMessage("Nothing to update.");
+      setError("");
+      setSuccessMessage("");
+      return;
+    }
+
     const validationError = validateFields();
+
     if (validationError) {
       setError(validationError);
+      setUnchangedMessage("");
+      setSuccessMessage("");
       return;
     }
 
@@ -209,16 +204,18 @@ export default function EditProfilePage() {
         member_status: userData.status,
       };
 
-      const response = await fetch("/v1/member", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error("Failed to save data");
+      const response = await getAPIData(`/member`, API_METHODS.put, payload);
+      if (!response || response.error)
+        throw new Error(response?.error || "Failed to save data");
+      else {
+        setSuccessMessage("Data saved successfully!");
+        setError(""); // Clear any previous errors
+        setUnchangedMessage("");
+      }
 
       setOriginalData(userData);
       setError(""); // Clear any previous error
+      setUnchangedMessage("");
     } catch (err) {
       setError(err.message);
     }
@@ -233,7 +230,12 @@ export default function EditProfilePage() {
         onClick={() => handleNavigation("/profile")}
       />
       <h1>Edit Profile</h1>
-      {error && <p className="error">{error}</p>}
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+      {unchangedMessage && (
+        <p style={{ color: "orange" }}>{unchangedMessage}</p>
+      )}
 
       <UserInput
         label="Name"
@@ -271,47 +273,44 @@ export default function EditProfilePage() {
         setValue={(value) => saveNewAttribute(value, "graduationDate")}
         isMultiline={false}
       />
-      <UserInput
+
+      <CustomSelect
         label="T-shirt Size"
-        value={userData.tshirt}
-        setValue={(value) => saveNewAttribute(value, "tshirt")}
-        isDropdown={true}
         options={["XS", "S", "M", "L", "XL", "XXL"]}
+        startingValue={userData.tshirt}
+        onSelect={(value) => saveNewAttribute(value, "tshirt")}
       />
 
-      <UserInput
+      <CustomSelect
         label="Race"
-        value={userData.race}
-        setValue={(value) => saveNewAttribute(value, "race")}
-        isDropdown={true}
         options={[
-          "Asian",
-          "Black or African American",
-          "Caucasian / White",
-          "Hispanic or Latino",
-          "Native American or Alaska Native",
-          "Native Hawaiian or Other Pacific Islander",
-          "Middle Eastern or North African",
-          "Mixed / Two or More Races",
-          "Other",
-          "Prefer Not to Say",
+          "asian",
+          "black",
+          "white",
+          "hispanic",
+          "indigenous",
+          "pacific islander",
+          "middle eastern / north african",
+          "multiracial",
+          "other",
+          "prefer not to say",
         ]}
+        startingValue={userData.race}
+        onSelect={(value) => saveNewAttribute(value, "race")}
       />
 
-      <UserInput
+      <CustomSelect
         label="Gender"
-        value={userData.gender}
-        setValue={(value) => saveNewAttribute(value, "gender")}
-        isDropdown={true}
-        options={["Male", "Female", "Non-binary", "Other", "Prefer not to say"]}
+        options={["male", "female", "non-binary", "other", "prefer not to say"]}
+        startingValue={userData.gender}
+        onSelect={(value) => saveNewAttribute(value, "gender")}
       />
 
-      <UserInput
+      <CustomSelect
         label="Status"
-        value={capitalizeFirstLetter(userData.status)}
-        setValue={(value) => saveNewAttribute(value.toLowerCase(), "status")}
-        isDropdown={true}
-        options={["Undergraduate", "Graduate", "Staff", "Faculty", "Alumni"]}
+        options={["undergraduate", "graduate", "staff", "faculty", "alumni"]}
+        startingValue={userData.status}
+        onSelect={(value) => saveNewAttribute(value, "status")}
       />
 
       <button

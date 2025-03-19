@@ -56,11 +56,13 @@ router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 
   // Check if an error occurred while fetching member ID
   if (memberId.error) {
-    console.log("Error fetching member ID: " + memberId.error);
     res.status(404).json({ error: memberId.error });
     return;
   }
-  
+
+  console.log("Session user username is " + req.session.user.username);
+  console.log("Member ID is " + memberId.data); // Accessing the member ID from the 'data' field
+
   // Fetch member data using the ID
   const memberData = await business.getMemberById(memberId.data);
 
@@ -92,6 +94,7 @@ router.put(
 
     // check if at least one valid field is provided for update
     const allowedFields = [
+      "email",
       "personal_email",
       "phone_number",
       "gender",
@@ -128,17 +131,12 @@ router.put(
 router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   let body = req.body;
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
-  console.log("Trying to update, member ID is " + memberId.data)
 
   // Check if an error occurred while fetching member ID
   if (memberId.error) {
-    console.log("Error fetching member ID: " + memberId.error);
     res.status(404).json({ error: memberId.error });
     return;
-  } else {
-    console.log("Successful retrieval of member id by username")
   }
-
   // check if at least one valid field is provided for update
   const allowedFields = [
     "personal_email",
@@ -156,20 +154,15 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   );
 
   if (!hasValidFields) {
-    console.log("fields are not valid")
     res.status(400).json({
       error: error.mustIncludeValidFieldAddMember,
     });
     return;
-  } else {
-    console.log("your fields are valid, fam")
   }
-
   // send data to backend for update
   const updateResult = await business.updateMember(memberId.data, body);
 
   if (updateResult.error && updateResult.error !== error.noError) {
-    console.log("we frfr struggling to update member")
     res.status(404).json({ error: error.memberCannotBeFoundInDB });
     return;
   }
@@ -253,7 +246,6 @@ router.get(
     // Fetch member stats for the organization
     const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
 
-    console.log(memberStats);
     if (memberStats.error) {
       return res.status(404).json({
         error: memberStats.error

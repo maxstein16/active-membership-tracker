@@ -90,7 +90,6 @@ async function updateMemberInDB(memberId, memberData) {
         const updatedMember = await getMemberById(memberId);
         return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
-        console.error("Error updating member:", err);
         return { error: error.somethingWentWrong, data: null };
     }
 }
@@ -128,7 +127,6 @@ async function createMemberInDB(memberData) {
         const newMember = await createMember(mappedFields);
         return { error: null, data: newMember.toJSON() };
     } catch (err) {
-        console.error("Error creating member:", err);
         return { error: error.memberCanNotBeAddedToOrg, data: null };
     }
 }
@@ -143,13 +141,11 @@ async function getMemberIDByUsernameInDB(username) {
 
         // If no member is found, return an error
         if (!memberInfo) {
-            console.error("No member found for username:", username);
             return { error: "Member not found", data: null };
         }
         // Return member ID
         return { error: null, data: memberInfo.member_id };
     } catch (err) {
-        console.error("Error fetching member ID by username:", err);
         return { error: "Something went wrong", data: null };
     }
 }
