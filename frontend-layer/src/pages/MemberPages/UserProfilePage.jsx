@@ -23,8 +23,6 @@ export default function UserProfilePage() {
 
     const fetchMemberData = async () => {
       try {
-        console.log("Fetching member data...");
-
         const data = await getAPIData("/member", API_METHODS.GET);
 
         // Check if API response is successful
