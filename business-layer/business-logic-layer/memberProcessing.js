@@ -147,10 +147,6 @@ async function getMemberIDByUsernameInDB(username) {
             console.error("No member found for username:", username);
             return { error: "Member not found", data: null };
         }
-
-        // Log member ID for debugging (remove in production)
-        console.log("Found member ID:", memberInfo.member_id);
-
         // Return member ID
         return { error: null, data: memberInfo.member_id };
     } catch (err) {
