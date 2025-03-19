@@ -158,7 +158,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
           saveSetting(!isPoints, "isPointsBased");
         }}
       />
-      <p><i>Turn this off for percentage based</i></p>
+      <p><i>Turn this off for attendance percentage based</i></p>
     </div>
   );
 }

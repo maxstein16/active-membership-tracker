@@ -141,7 +141,7 @@ export default function SettingsPage() {
             orgData={orgData}
             saveSetting={saveEmailSetting}
           />
-          <DisplayMembershipRequirements
+          {/* <DisplayMembershipRequirements
             color={orgData.color}
             orgData={orgData}
             setOrgData={setOrgData}
@@ -151,9 +151,9 @@ export default function SettingsPage() {
           <CreateNewRequirement
             color={orgData.color}
             createNewRequirement={createNewRequirement}
-          />
+          /> */}
 
-          <MemberTable color={orgData.color} orgId={orgId} />
+          {/* <MemberTable color={orgData.color} orgId={orgId} /> */}
         </>
       )}
     </PageSetup>

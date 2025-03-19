@@ -113,8 +113,8 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
 
   let body = {};
 
-  if (settingName === "isPointBased") {
-    body[`organization_membership_type`] = newValue ? "points" : "percentage";
+  if (settingName === "isPointsBased") {
+    body[`organization_membership_type`] = newValue ? "points" : "attendance";
   } else {
     body[`organization_${settingName}`] = newValue;
   }
