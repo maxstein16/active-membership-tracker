@@ -134,7 +134,6 @@ async function createMemberInDB(memberData) {
 }
 
 async function getMemberIDByUsernameInDB(username) {
-    console.log("memberProcessing is trying to getMemberIDByUsernameInDB by username " + username);
     try {
         // Find member by email
         const memberInfo = await Member.findOne({
