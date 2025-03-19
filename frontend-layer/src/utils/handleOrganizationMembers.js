@@ -19,6 +19,7 @@ import { API_METHODS, getAPIData } from "./callAPI";
  *   gender: String,          // Gender
  *   race: String,            // Race
  *   status: String,          // Membership status (undergraduate, graduate, etc.)
+ *   activePercentage: Number,// Percentage to active membership
  *   membership: {
  *     id: Number,            // Membership ID
  *     role: Number,          // Membership role (0=Member, 1=E-Board, 2=Admin)
@@ -36,6 +37,9 @@ export async function getMemberInfoData(orgId, memberId) {
     API_METHODS.get,
     {}
   );
+
+  console.log(memberData);
+  
 
   if (!memberData) {
     console.log("Must login", memberData);
@@ -61,6 +65,7 @@ export async function getMemberInfoData(orgId, memberId) {
     gender: memberData.data.member_gender || "Unknown",
     race: memberData.data.member_race || "Unknown",
     status: memberData.data.member_status,
+    activePercentage: memberData.data.active_percentage,
     membership: {
       id: memberData.data.membership.membership_id,
       role: memberData.data.membership.membership_role,
@@ -71,4 +76,49 @@ export async function getMemberInfoData(orgId, memberId) {
   };
 
   return memberInfo;
+}
+
+/**
+ * Fetch organization information from the API and format it for use in the frontend.
+ * @param {Number} orgId - Organization ID from the database
+ * @returns Formatted organization data or an error/session object
+ *
+ * Format:
+ * {
+ *   id: Number,              // Organization ID
+ *   name: String,            // Full name of the organization
+ *   abbreviation: String,    // Abbreviation of the organization
+ *   membershipType: String,  // Type of membership that the organization is based (points, attendance)
+ *   threshold: Number,       // Points needed to reach active membership
+ * }
+ */
+export async function getOrgInfoData(orgId) {
+  // Fetch data from the API
+  const orgData = await getAPIData(
+    `/organization/${orgId}`,
+    API_METHODS.get,
+    {}
+  );
+
+  console.log(orgData);
+
+  if (!orgData) {
+    console.log("Must login", orgData);
+    return { session: false };
+  }
+
+  if (!orgData || orgData.data == null) {
+    return { error: true };
+  }
+
+  // Format the data
+  const orgInfo = {
+    id: orgData.data.organization_id,
+    name: orgData.data.organization_name,
+    abbreviation: orgData.data.organization_abbreviation,
+    membershipType: orgData.data.organization_membership_type,
+    threshold: orgData.data.organization_threshold,
+  };
+
+  return orgInfo;
 }

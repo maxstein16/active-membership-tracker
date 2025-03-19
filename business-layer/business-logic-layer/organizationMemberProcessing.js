@@ -15,6 +15,7 @@ const {
 const { getCurrentSemester } = require("../data-layer/semester.js");
 const {
   checkActiveMembership,
+  calculateActivePercentage,
 } = require("./organizationMembershipProcessing.js");
 const { ROLE_ADMIN } = require("../constants"); // Import the constant
 
@@ -43,9 +44,15 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
       return { error: error.memberNotFoundInOrg, data: null };
     }
 
+    const percentageResult = await calculateActivePercentage(memberships[0]);
+
     return {
       error: error.noError,
-      data: { ...member.toJSON(), membership: memberships[0] },
+      data: {
+        ...member.toJSON(),
+        membership: memberships[0],
+        active_percentage: percentageResult.percentage,
+      },
     };
   } catch (err) {
     console.error("Error fetching specific member + membership:", err);
@@ -106,90 +113,75 @@ async function editMemberInOrganizationInDB(
   memberDataToUpdate
 ) {
   try {
-    // Map role to membership_role
-    if (memberDataToUpdate.hasOwnProperty("role")) {
+    // Normalize role field early if present
+    if (memberDataToUpdate.role !== undefined) {
       memberDataToUpdate.membership_role = memberDataToUpdate.role;
       delete memberDataToUpdate.role;
     }
 
-    if (isNaN(orgId)) {
+    // ID & input validation
+    if (isNaN(orgId))
       return { error: error.organizationIdMustBeInteger, data: null };
-    }
-    if (isNaN(memberId)) {
+    if (isNaN(memberId))
       return { error: error.memberIdMustBeInteger, data: null };
-    }
     if (
-      memberDataToUpdate.hasOwnProperty("membership_role") &&
+      memberDataToUpdate.membership_role !== undefined &&
       isNaN(memberDataToUpdate.membership_role)
     ) {
       return { error: error.roleMustBeAnInteger, data: null };
     }
     if (
-      memberDataToUpdate.hasOwnProperty("membership_points") &&
+      memberDataToUpdate.membership_points !== undefined &&
       isNaN(memberDataToUpdate.membership_points)
     ) {
       return { error: error.memberPointsNaN, data: null };
     }
 
+    // Get current semester & membership
     const currentSemester = await getCurrentSemester();
-
-    // Get the membership first to ensure it exists
-    const memberships = await getMembershipByAttributes({
+    const memberships = await getMembershipsByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-        if (!memberships || memberships.length === 0) {
-            return { error: error.membershipNotFound, data: null };
-        }
-
+    if (!memberships || memberships.length === 0) {
+      return { error: error.membershipNotFound, data: null };
+    }
     const membership = memberships[0];
 
-    // Check if this is the last admin being removed
-    if (memberDataToUpdate.hasOwnProperty("membership_role")) {
-      const currentRole = membership.membership_role;
-      const newRole = memberDataToUpdate.membership_role;
-
-      // If changing from admin role to something else
-      if (currentRole === ROLE_ADMIN && newRole !== ROLE_ADMIN) {
-        // Get all admins in the organization
+    // Admin removal check
+    if (memberDataToUpdate.membership_role !== undefined) {
+      if (
+        membership.membership_role === ROLE_ADMIN &&
+        memberDataToUpdate.membership_role !== ROLE_ADMIN
+      ) {
         const adminMembers = await getMembershipsByAttributes({
           organization_id: orgId,
           membership_role: ROLE_ADMIN,
         });
-
-        // If there's only one admin, prevent the change
         if (adminMembers.length === 1) {
           return { error: error.cannotRemoveLastAdmin, data: null };
         }
       }
     }
 
-    // Perform the update
+    // Update membership
     const updated = await editMembership(
       membership.membership_id,
       memberDataToUpdate
     );
+    if (!updated) return { error: error.membershipNotFound, data: null };
 
-    if (!updated) {
-      return { error: error.membershipNotFound, data: null };
-    }
-
-    // **Check active membership status if points were updated**
-    if (memberDataToUpdate.hasOwnProperty("membership_points")) {
+    // Active membership check (if points updated)
+    if (memberDataToUpdate.membership_points !== undefined) {
       const organization = await getOrganizationById(orgId);
-      if (!organization) {
+      if (!organization)
         return { error: error.organizationNotFound, data: null };
-      }
-
       checkActiveMembership(membership);
     }
 
-    return {
-      error: error.noError,
-      data: { update: "success" },
-    };
+    return { error: error.noError, data: { update: "success" } };
   } catch (err) {
     console.error("Error editing membership:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -239,7 +231,9 @@ async function getMembersInOrganizationInDB(orgId) {
     const currentSemester = await getCurrentSemester();
 
     // Get all members and memberships for this organization
-    const members = await getMembersByAttributes({});
+    const membersResult = await getMembersByAttributes({});
+    const members = membersResult.data || [];
+
     const memberships = await getMembershipsByAttributes({
       organization_id: orgId,
       semester_id: currentSemester.semester_id,

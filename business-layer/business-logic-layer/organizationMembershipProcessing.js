@@ -127,47 +127,70 @@ async function getMembershipsAcrossSemesters(organizationId, semesterIds) {
   }
 }
 
-/**
- * Check and update active membership status for a member.
- * @param {Object} membership - The membership object (includes member_id, organization_id, points, etc.).
- * @returns {boolean} - Returns `true` if the member became active, `false` otherwise.
- */
-async function checkActiveMembership(membership) {
+async function calculateActivePercentage(membership) {
   try {
     const { organization_id, membership_points, member_id } = membership;
 
-    // Retrieve organization and membership requirements
-    const organization = getOrganizationById(organization_id);
-    const membershipRequirements =
-      getOrganizationMembershipRequirements(organization_id);
+    const organization = await getOrganizationById(organization_id);
+    const membershipRequirements = await getOrganizationMembershipRequirements(organization_id);
 
     if (!organization || !membershipRequirements.length) {
       console.error("Organization or membership requirements not found.");
+      return { percentage: 0, success: false };
+    }
+
+    let percentage = 0;
+
+    // Points-based calculation
+    if (organization.organization_membership_type === "points") {
+      const requiredPoints = organization.organization_threshold;
+      percentage = (membership_points / requiredPoints) * 100;
+      percentage = Math.min(percentage, 100); // Cap at 100%
+    } 
+    // Attendance-based calculation
+    else if (organization.organization_membership_type === "attendance") {
+      let totalRequirements = membershipRequirements.length;
+      let fulfilledRequirements = 0;
+
+      for (const requirement of membershipRequirements) {
+        const { event_type, requirement_type, requirement_value } = requirement;
+
+        const attendanceCount = await getMemberAttendanceForEventType(
+          member_id,
+          organization_id,
+          event_type
+        );
+
+        if (requirement_type === "attendance_count") {
+          if (attendanceCount >= requirement_value) {
+            fulfilledRequirements++;
+          }
+        }
+      }
+
+      percentage = (fulfilledRequirements / totalRequirements) * 100;
+    }
+
+    return { percentage: Math.round(percentage), success: true };
+  } catch (error) {
+    console.error("Error calculating active percentage:", error);
+    return { percentage: 0, success: false };
+  }
+}
+
+async function checkActiveMembership(membership) {
+  try {
+    const { percentage, success } = await calculateActivePercentage(membership);
+
+    if (!success) {
       return false;
     }
 
-    let isActive = false;
-
-    // Check if the organization is **points-based**
-    if (organization.organization_membership_type === "points") {
-      const requiredPoints = organization.organization_threshold;
-      if (membership_points >= requiredPoints) {
-        isActive = true;
-      }
-    }
-    // Check if the organization is **attendance-based**
-    else if (organization.organization_membership_type === "attendance") {
-      isActive = checkAttendanceBasedMembership(
-        member_id,
-        organization_id,
-        membershipRequirements
-      );
-    }
-
-    if (isActive) {
+    if (percentage >= 100) {
       membership.active_member = true; // Mark as active
-      await membership.save(); // Save changes to DB
-      await sendActiveMembershipEmail(membership, organization); // Notify member via email
+      await membership.save();
+      const organization = await getOrganizationById(membership.organization_id);
+      await sendActiveMembershipEmail(membership, organization);
       return true;
     }
 
@@ -178,49 +201,10 @@ async function checkActiveMembership(membership) {
   }
 }
 
-/**
- * Check if a member has met attendance-based membership requirements.
- * @param {number} member_id - The member's ID.
- * @param {number} organization_id - The organization's ID.
- * @param {Array} membershipRequirements - The organization's membership requirements.
- * @returns {boolean} - Returns `true` if all requirements are met, otherwise `false`.
- */
-async function checkAttendanceBasedMembership(
-  member_id,
-  organization_id,
-  membershipRequirements
-) {
-  try {
-    for (const requirement of membershipRequirements) {
-      const { event_type, requirement_type, requirement_value } = requirement;
-
-      // Get the number of attended events for this event type
-      const attendanceCount = await getMemberAttendanceForEventType(
-        member_id,
-        organization_id,
-        event_type
-      );
-
-      // Check if the member has met the requirement
-      if (
-        requirement_type === "attendance_count" &&
-        attendanceCount < requirement_value
-      ) {
-        return false; // If any requirement isn't met, member isn't active
-      }
-    }
-
-    return true; // If all requirements are met, member is active
-  } catch (error) {
-    console.error("Error in checkAttendanceBasedMembership:", error);
-    return false;
-  }
-}
-
 module.exports = {
   getMembershipRoleInfoInOrganizationInDB,
   getAllMembershipsInOrganizationInDB,
   getMembershipsAcrossSemesters,
   checkActiveMembership,
-  checkAttendanceBasedMembership,
+  calculateActivePercentage,
 };

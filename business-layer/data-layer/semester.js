@@ -52,7 +52,7 @@ async function getSemesterByDate(date) {
 
 async function getCurrentSemester() {
   try {
-    const currentSemesters = await getCurrentSemestersInYear();
+    const currentSemesters = await getSemestersByYear();
 
     if (!currentSemesters || currentSemesters.length === 0) {
       throw new Error("No current semesters found");
