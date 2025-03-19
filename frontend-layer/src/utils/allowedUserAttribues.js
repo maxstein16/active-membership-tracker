@@ -31,6 +31,5 @@ export const statusOptions = [
     "faculty",
     "alumni",
     null,
-
 ];
 
