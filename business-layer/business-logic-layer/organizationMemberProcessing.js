@@ -34,10 +34,13 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
       return { error: error.memberNotFound, data: null };
     }
 
+    const currentSemester = await getCurrentSemester();
+
     // Get membership data
     const memberships = await getMembershipsByAttributes({
       member_id: memberId,
       organization_id: orgId,
+      semester_id: currentSemester.semester_id,
     });
 
     if (!memberships || memberships.length === 0) {
@@ -171,6 +174,7 @@ async function editMemberInOrganizationInDB(
       membership.membership_id,
       memberDataToUpdate
     );
+
     if (!updated) return { error: error.membershipNotFound, data: null };
 
     // Active membership check (if points updated)
@@ -178,6 +182,8 @@ async function editMemberInOrganizationInDB(
       const organization = await getOrganizationById(orgId);
       if (!organization)
         return { error: error.organizationNotFound, data: null };
+      
+      await membership.reload();
       checkActiveMembership(membership);
     }
 

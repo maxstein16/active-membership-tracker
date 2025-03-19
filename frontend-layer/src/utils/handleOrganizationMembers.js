@@ -40,7 +40,6 @@ export async function getMemberInfoData(orgId, memberId) {
 
   console.log(memberData);
   
-
   if (!memberData) {
     console.log("Must login", memberData);
     return { session: false };
@@ -100,8 +99,6 @@ export async function getOrgInfoData(orgId) {
     {}
   );
 
-  console.log(orgData);
-
   if (!orgData) {
     console.log("Must login", orgData);
     return { session: false };
@@ -121,4 +118,30 @@ export async function getOrgInfoData(orgId) {
   };
 
   return orgInfo;
+}
+
+/**
+ * Save the membership to the database
+ * @param {Number} orgId - organization id from the db
+ * @param {Number} memberId - member id from the db
+ * @param {String} membershipData - appropriate membershipData (membership_role, membership_points, active_member, received_bonus)
+ * @returns true if no errors, false if error :(
+ */
+export async function updateMembershipData(orgId, memberId, membershipData) {
+  console.log("Membership data to update:" + membershipData);
+
+  const result = await getAPIData(
+    `/organization/${orgId}/member/${memberId}`,
+    API_METHODS.put,
+    membershipData
+  );
+  console.log("Result:" + result);
+
+  if (!result) {
+    return false;
+  }
+  if (result.status && result.status === "success") {
+    return true;
+  }
+  return false;
 }

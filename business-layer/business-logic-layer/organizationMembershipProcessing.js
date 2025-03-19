@@ -193,6 +193,10 @@ async function checkActiveMembership(membership) {
       await sendActiveMembershipEmail(membership, organization);
       return true;
     }
+    else {
+      membership.active_member = false; // Mark as active
+      await membership.save();
+    }
 
     return false;
   } catch (error) {
