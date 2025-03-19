@@ -29,8 +29,6 @@ export default function UserProfilePage() {
 
         // Check if API response is successful
         if (data && data.data) {
-          console.log("Member data:", data.data);
-
           // Map the response data to state
           const member = data.data;
           setUserData({
