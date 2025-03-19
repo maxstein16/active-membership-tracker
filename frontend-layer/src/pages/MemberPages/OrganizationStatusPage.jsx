@@ -28,10 +28,12 @@ export default function OrganizationStatusPage() {
     const currentUserMemberID = await getAPIData(`/member`, API_METHODS.get, {});
 
     //slide that into the below call
-    const result = await getAPIData(`/organization/${orgId}/member/${currentUserMemberID.data.member_id}`, API_METHODS.get, {});
-    setPosts(result.data);
+   // const result = await getAPIData(`/organization/${orgId}/member/${currentUserMemberID.data.member_id}`, API_METHODS.get, {});
+   const result = await getAPIData(`/organization/${orgId}/member/1`, API_METHODS.get, {}); 
+   setPosts(result.data);
 
    setMemberships(result.data.membership);
+   console.log(result.data);
 
     const response = await getAPIData(
       `/organization/${orgId}`,
@@ -40,9 +42,11 @@ export default function OrganizationStatusPage() {
     );
     
       setOrgData(response.data);
-    console.log(result.data);
+
+    console.log(result.data.membership);
+    console.log(result.data.membership.membership_points);
        console.log(response.data);
-  
+  console.log(response.data.organization_color);
       let data = [
         {name: 'completed', value: orgData.organization_threshold},
         {name: 'progress', value: memberships.membership_points}
@@ -72,20 +76,18 @@ export default function OrganizationStatusPage() {
           <ResponsiveContainer width="100%" height="50%">
             <PieChart>
             
-              { memberships.active_semesters < orgData.organization_threshold &&
                 <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
                 <tspan x="50%" fill={orgData.organization_color} dy=".6em">  {(parseInt(memberships.membership_points) / parseInt(orgData.organization_threshold) * 100).toFixed(0)} %</tspan>
                 <tspan x="50%" dy="1.2em">to Active</tspan>
-              < tspan x="50%" dy="1.2em">Membership</tspan>
+                <tspan x="50%" dy="1.2em">Membership</tspan>
                 </text>
-              }
-
-              { memberships.active_semesters >= orgData.organization_threshold &&
-                <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
+              
+           
+                {/* <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
                   <tspan x="50%" dy=".6em">Active</tspan>
                   <tspan x="50%" dy="1.2em">Membership</tspan>
-                </text>
-              }
+                </text> */}
+              
             
               <Pie
                 dataKey="value"
@@ -98,15 +100,17 @@ export default function OrganizationStatusPage() {
                 cy="50%"
                 innerRadius="50%"
                 outerRadius="80%"
+                fill="#8884d8"
+                label
               > 
               {
                 orgId === 1 &&
-                <><Cell fill='#7747a6' stroke={orgData.organization_color} /><Cell fill='#7747a6' stroke={orgData.organization_color} /></>
+                <><Cell key="data" fill={orgData.organization_color} /><Cell fill='#7747a6' /></>
               }
               
               {
                 orgId === 2 &&
-                <><Cell fill="#476da6" stroke={orgData.organization_color} /><Cell fill="#476da6" /></>
+                <><Cell key="active" fill="#476da6" /><Cell fill={orgData.organization_color} /></>
               }
 
             </Pie>
