@@ -1,4 +1,4 @@
-const { Membership } = require("../db");
+const { Membership, MembershipRequirement } = require("../db");
 
 /**
  * Create a membership record
@@ -130,11 +130,27 @@ async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   }
 }
 
+async function deleteMembershipRequirement(requirementId) {
+  try {
+    const results = await MembershipRequirement.destroy({
+      where: {
+        requirement_id: requirementId
+      }
+    });
+
+    return results;
+  } catch (err) {
+    console.error("Error in getMembershipsByOrgAndSemester:", err);
+    throw err;
+  }
+}
+
 module.exports = {
   createMembership,
   editMembership,
   editMembershipRole,
   getMembershipsByAttributes,
   getMembershipByAttributes,
-  getMembershipsByOrgAndSemester
+  getMembershipsByOrgAndSemester,
+  deleteMembershipRequirement
 };

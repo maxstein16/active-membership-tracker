@@ -10,23 +10,26 @@ export default function DisplayMembershipRequirements({
   color,
   orgData,
   setOrgData,
-  updateValueInDB, 
-  deleteRequirementInDB
+  updateValueInDB,
+  deleteRequirementInDB,
+  createNewRequirement,
+  createNewBonus,
 }) {
-  const updateValueAsTyping = (newValue, reqId, valueName) => {
+  // TODO CHANGE FOR REQS
+  const updateValueAsTyping = (newValue, reqId, valueName, isBonus = false) => {
     let newData = { ...orgData };
     newData.membershipRequirements.forEach((requirement) => {
       if (requirement.id === reqId) {
         requirement[valueName] = newValue;
       }
-    })
+    });
     // console.log(newData)
     setOrgData(newData);
   };
 
   const deleteRequirement = (id) => {
     // delete the requirement in the api
-    deleteRequirementInDB(id)
+    deleteRequirementInDB(id);
 
     // remove the requirement from the orgData
     let newData = { ...orgData };
@@ -36,6 +39,10 @@ export default function DisplayMembershipRequirements({
     setOrgData(newData);
     // console.log(newData);
   };
+
+  const deleteBonus = (id) => {
+    console.log("TODO")
+  }
 
   return (
     <div className="org-email-settings">
@@ -47,18 +54,31 @@ export default function DisplayMembershipRequirements({
         <>
           {orgData.membershipRequirements.map((requirement, key) => {
             return (
-              <MembershipRequirementLine
-                requirement={requirement}
-                color={color}
-                updateValueAsTyping={updateValueAsTyping}
-                updateValueWhenDone={updateValueInDB}
-                deleteRequirement={deleteRequirement}
-                key={key}
-              />
+              <div key={key}>
+                <MembershipRequirementLine
+                  requirement={requirement}
+                  isPoints={orgData.isPointBased}
+                  color={color}
+                  updateValueAsTyping={updateValueAsTyping}
+                  updateValueWhenDone={updateValueInDB}
+                  deleteRequirement={deleteRequirement}
+                  deleteBonus={deleteBonus}
+                  createBonus={createNewBonus}
+                />
+                <hr />
+              </div>
             );
           })}
         </>
       )}
+
+      <button
+        className="custom-color-button"
+        style={{ backgroundColor: color, borderColor: color }}
+        onClick={createNewRequirement}
+      >
+        Add New Requirement
+      </button>
     </div>
   );
 }

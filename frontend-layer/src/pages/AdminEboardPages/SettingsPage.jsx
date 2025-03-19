@@ -9,7 +9,6 @@ import BackButton from "../../components/BackButton";
 import OrgSettingsBasicInfo from "../../components/AdminPageComponents/Settings/OrgSettingsBasicInfo";
 import DisplayEmailSettings from "../../components/AdminPageComponents/Settings/DisplayEmailSettings";
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/Settings/DisplayMembershipRequirements";
-import CreateNewRequirement from "../../components/AdminPageComponents/Settings/CreateNewRequirement";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
 import { CircularProgress } from "@mui/material";
 import {
@@ -76,7 +75,8 @@ export default function SettingsPage() {
     // console.log(newData);
   };
 
-  const updateValueInDB = (newValue, reqId, valueName) => {
+  // TODO FIX THIS FOR BONUS
+  const updateValueInDB = (newValue, reqId, valueName, isBonus = false) => {
     // update a value for a membership requirement in the db
     // example param values: '3' '39' 'amount'
     saveMembershipRequirementDetail(orgId, reqId, newValue, valueName).then(
@@ -120,6 +120,11 @@ export default function SettingsPage() {
     });
   };
 
+  const createNewBonus = () => {
+    console.log("TODO")
+  }
+  
+
   return (
     <PageSetup>
       <BackButton route={"/"} />
@@ -141,17 +146,14 @@ export default function SettingsPage() {
             orgData={orgData}
             saveSetting={saveEmailSetting}
           />
-          {/* <DisplayMembershipRequirements
+          <DisplayMembershipRequirements
             color={orgData.color}
             orgData={orgData}
             setOrgData={setOrgData}
             updateValueInDB={updateValueInDB}
             deleteRequirementInDB={deleteRequirementInDB}
-          />
-          <CreateNewRequirement
-            color={orgData.color}
             createNewRequirement={createNewRequirement}
-          /> */}
+          />
 
           {/* <MemberTable color={orgData.color} orgId={orgId} /> */}
         </>

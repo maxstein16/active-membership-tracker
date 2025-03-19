@@ -80,7 +80,7 @@ export async function getOrganizationSettingsData(orgId) {
       id: requirement.requirementId,
       eventType: requirement.event_type,
       type: requirement.requirement_type,
-      value: requirement.amount,
+      value: requirement.requirement_value,
       bonuses: requirement.bonuses.map((bonus) => {
         return {
           id: bonus.bonus_id,
@@ -132,9 +132,48 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
     return false;
   }
   if (result.status && result.status === "success") {
+    if (settingName === "isPointsBased") {
+      return await deleteAllRequirements(orgId);
+    }
     return true;
   }
   return false;
+}
+
+async function deleteAllRequirements(orgId) {
+  // get all org requirements
+  const settings = await getAPIData(
+    `/organization/${orgId}/settings`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!settings || settings.data == null) {
+    console.log("must login", settings);
+    return false;
+  }
+
+  let numReqs = settings.data.membership_requirements.length;
+
+  // delete all of them
+  await new Promise((resolve, reject) => {
+    settings.data.membership_requirements.forEach(async (requirement, index) => {
+      const isSuccess = await getAPIData(
+        `/organization/${orgId}/settings/membership-requirements?id=${requirement.requirementId}`,
+        API_METHODS.delete,
+        {}
+      );
+
+      if (!isSuccess || isSuccess.hasOwnProperty("error")) {
+        console.log(`Error deleting requirement ${requirement.requirementId} from org ${orgId}: `, isSuccess)
+      }
+
+      if (index === numReqs - 1) {
+        resolve();
+      }
+    });
+  });
+  return true;
 }
 
 /**

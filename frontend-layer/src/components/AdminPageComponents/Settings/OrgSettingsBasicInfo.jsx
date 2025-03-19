@@ -164,7 +164,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
       <AreYouSureDeleteReqs
         color={orgData.color}
         open={isAreYouSureOpen}
-        setOpen={setAbbreviation}
+        setOpen={setIsAreYouSureOpen}
         isPoints={isPoints}
         setIsPoints={setIsPoints}
         saveSetting={saveSetting}

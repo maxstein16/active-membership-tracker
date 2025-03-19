@@ -9,7 +9,6 @@ import BackButton from "../../components/BackButton";
 import OrgSettingsBasicInfo from "../../components/AdminPageComponents/Settings/OrgSettingsBasicInfo";
 import DisplayEmailSettings from "../../components/AdminPageComponents/Settings/DisplayEmailSettings";
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/Settings/DisplayMembershipRequirements";
-import CreateNewRequirement from "../../components/AdminPageComponents/Settings/CreateNewRequirement";
 import { createNewOrgInDB } from "../../utils/createNewOrg";
 import SuccessDialog from "../../components/SuccessDialog";
 import AreYouSure from "../../components/AreYouSure";
@@ -120,10 +119,7 @@ export default function CreateOrganizationPage() {
         deleteRequirementInDB={() => {
           /* Don't need to do anything here */
         }}
-      />
-      <CreateNewRequirement
-        color={orgData.color}
-        createNewRequirement={createNewRequirementLocally}
+        CreateNewRequirement={createNewRequirementLocally}
       />
 
       {error !== "" ? <p className="error" style={{marginTop: '40px'}}>{error}</p> : <></>}

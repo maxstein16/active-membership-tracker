@@ -184,7 +184,7 @@ router.put(
   }
 );
 
-//DELETE /v1/organization/:orgId/settings/membership-requirements
+//DELETE /v1/organization/:orgId/settings/membership-requirements/:id
 router.delete(
   "/membership-requirements",
   isAuthorizedHasSessionForAPI,
