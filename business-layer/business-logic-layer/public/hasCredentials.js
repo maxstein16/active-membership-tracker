@@ -1,50 +1,43 @@
 const { getMemberByUsername } = require("../../data-layer/member");
 const { getCurrentSemester } = require("../../data-layer/semester");
-const { ROLE_EBOARD, ROLE_MEMBER } = require("../../../constants");
+const { ROLE_EBOARD, ROLE_MEMBER } = require("../../constants");
+const { getMembershipByAttributes } = require("../../data-layer/membership");
 
-/**
- * HOW TO USE:
- * req.session.user.username needs to be passed into these functions
- */
-module.exports = new (function () {
-  this.isEboardOrAdmin = (username, orgId) => {
-    checkRole(username, orgId, true);
-  };
-
-  this.isAdmin = (username, orgId) => {
-    checkRole(username, orgId, false);
-  };
-
-  checkRole = async (username, orgId, allowEboard) => {
-    // Get member info
+async function checkRole(username, orgId, allowEboard) {
+  try {
     const memberResult = await getMemberByUsername(username);
-
-    if (!memberResult) {
-      return false; // No member found
-    }
+    if (!memberResult) return false;
 
     const memberId = memberResult.member_id;
-
-    // Get current semester
     const currentSemester = await getCurrentSemester();
     if (!currentSemester) return false;
 
-    // Get membership
     const membership = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    if (!membership || membership.membership_role === ROLE_MEMBER) {
+    if (!membership || membership.membership_role === ROLE_MEMBER) return false;
+    if (!allowEboard && membership.membership_role === ROLE_EBOARD)
       return false;
-    }
-
-    // If only admin is allowed
-    if (!allowEboard && membership.membership_role === ROLE_EBOARD) {
-      return false;
-    }
 
     return true;
-  };
-})();
+  } catch (err) {
+    console.error("Error checking role:", err);
+    return false;
+  }
+}
+
+async function isEboardOrAdmin(username, orgId) {
+  return checkRole(username, orgId, true);
+}
+
+async function isAdmin(username, orgId) {
+  return checkRole(username, orgId, false);
+}
+
+module.exports = {
+  isEboardOrAdmin,
+  isAdmin,
+};

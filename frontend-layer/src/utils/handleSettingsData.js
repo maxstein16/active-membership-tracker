@@ -11,7 +11,9 @@ import { API_METHODS, getAPIData } from "./callAPI";
       abbreviation: 
       color: 
       description: 
+      email:
       threshold: 
+      isPointBased: 
       emailSettings: {
         id
         monthlyStatus
@@ -22,11 +24,14 @@ import { API_METHODS, getAPIData } from "./callAPI";
       membershipRequirements: [
         {
           id
-          meetingType
-          frequency
-          amountType
-          amount
-          requirementScope
+          eventType
+          type
+          value
+          bonuses: [
+            id:
+            threshold: 
+            points:  
+          ]
         },
         ...
       ],
@@ -41,7 +46,7 @@ export async function getOrganizationSettingsData(orgId) {
   );
 
   if (!detailSettings) {
-    console.log("must login", detailSettings)
+    console.log("must login", detailSettings);
     return { session: false };
   }
   if (!detailSettings || detailSettings.data == null) {
@@ -54,7 +59,9 @@ export async function getOrganizationSettingsData(orgId) {
     abbreviation: detailSettings.data.organization_abbreviation,
     color: detailSettings.data.organization_color,
     description: detailSettings.data.organization_description,
+    email: detailSettings.data.organization_email,
     threshold: detailSettings.data.organization_threshold,
+    isPointBased: detailSettings.data.organization_membership_type === "points",
     emailSettings: {
       id: detailSettings.data.email_settings.email_setting_id,
       monthlyStatus: detailSettings.data.email_settings.current_status,
@@ -67,13 +74,20 @@ export async function getOrganizationSettingsData(orgId) {
   };
 
   // fill in membership requirements
+  // need to get these specifically
   detailSettings.data.membership_requirements.forEach((requirement) => {
     orgData.membershipRequirements.push({
       id: requirement.requirementId,
-      meetingType: requirement.meeting_type,
-      frequency: requirement.frequency,
-      amountType: requirement.amount_type,
-      amount: requirement.amount,
+      eventType: requirement.event_type,
+      type: requirement.requirement_type,
+      value: requirement.amount,
+      bonuses: requirement.bonuses.map((bonus) => {
+        return {
+          id: bonus.bonus_id,
+          threshold: bonus.threshold_percentage,
+          points: bonus.bonus_points,
+        };
+      }),
     });
   });
 
@@ -87,18 +101,24 @@ export async function getOrganizationSettingsData(orgId) {
  * @param {String} settingName - appropriate settingName (name, abbreviation, description, color, threshold)
  * @returns true if no errors, false if error :(
  */
-export async function saveInfoSetting(orgId, newValue, settingName) {  
-  if (settingName === 'threshold') {
-      try {
-        newValue = parseInt(newValue)
-      } catch (error) {
-        console.log("Threshold must be a number")
-        return false
-      }
+export async function saveInfoSetting(orgId, newValue, settingName) {
+  if (settingName === "threshold") {
+    try {
+      newValue = parseInt(newValue);
+    } catch (error) {
+      console.log("Threshold must be a number");
+      return false;
+    }
   }
-  
+
   let body = {};
-  body[`organization_${settingName}`] = newValue;
+
+  if (settingName === "isPointBased") {
+    body[`organization_membership_type`] = newValue ? "points" : "percentage";
+  } else {
+    body[`organization_${settingName}`] = newValue;
+  }
+
   console.log(body);
   const result = await getAPIData(
     `/organization/${orgId}`,
@@ -108,7 +128,7 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
   console.log(result);
 
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return false;
   }
   if (result.status && result.status === "success") {
@@ -145,7 +165,7 @@ export async function saveEmailSettingInDB(orgId, newValue, settingName) {
   //   console.log(result);
 
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return false;
   }
   // decide return
@@ -189,7 +209,7 @@ export async function saveMembershipRequirementDetail(
   console.log(result);
 
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return false;
   }
   // decide return
@@ -218,9 +238,9 @@ export async function createNewMembershipRequirementInDB(orgId, isPoints) {
   );
 
   if (!newMembership) {
-      console.log("must login", newMembership)
-      return { session: false };
-    }
+    console.log("must login", newMembership);
+    return { session: false };
+  }
   if (newMembership.hasOwnProperty("error")) {
     return { error: true };
   }
@@ -258,7 +278,7 @@ export async function getOrganizationMembers(orgId) {
     {}
   );
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return { session: false };
   }
   if (result.hasOwnProperty("error")) {
@@ -284,7 +304,7 @@ export async function getPastOrganizationEvents(orgId) {
 
   const currentDate = new Date().toISOString().split("T")[0];
 
-  const pastEvents = result.data.filter(event => {
+  const pastEvents = result.data.filter((event) => {
     return event.event_end && event.event_end < currentDate;
   });
 
@@ -306,12 +326,14 @@ export async function getMeetingReport(orgId, meetingId) {
     return { members: [], totalAttendance: 0 };
   }
 
-  const formattedMembers = attendanceData.members_who_attended.map(member => ({
-    id: member.member_id,
-    member_name: `${member.firstName} ${member.lastName}`,
-    member_email: `${member.rit_username}@rit.edu`,
-    role: member.role_num
-  }));
+  const formattedMembers = attendanceData.members_who_attended.map(
+    (member) => ({
+      id: member.member_id,
+      member_name: `${member.firstName} ${member.lastName}`,
+      member_email: `${member.rit_username}@rit.edu`,
+      role: member.role_num,
+    })
+  );
 
   return {
     members: formattedMembers,

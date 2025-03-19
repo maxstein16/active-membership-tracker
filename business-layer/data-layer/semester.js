@@ -53,19 +53,38 @@ async function getCurrentSemester() {
   try {
     const today = new Date();
 
-    // Find semester where today's date is between start_date and end_date
-    const currentSemester = await Semester.findOne({
+    // First, try using getSemestersByYear (if it internally filters current year semesters)
+    const currentSemesters = await getSemestersByYear();
+
+    if (currentSemesters && currentSemesters.length > 0) {
+      // Filter semesters where today falls within range
+      const validSemesters = currentSemesters.filter(
+        (sem) =>
+          new Date(sem.start_date) <= today &&
+          new Date(sem.end_date) >= today
+      );
+
+      if (validSemesters.length > 0) {
+        // Return the one with the latest start date
+        return validSemesters.sort(
+          (a, b) => new Date(b.start_date) - new Date(a.start_date)
+        )[0];
+      }
+    }
+
+    // Fallback: Direct DB query (safe option)
+    const fallbackSemester = await Semester.findOne({
       where: {
         start_date: { [Op.lte]: today },
         end_date: { [Op.gte]: today },
       },
     });
 
-    if (!currentSemester) {
+    if (!fallbackSemester) {
       throw new Error("No current semester found");
     }
 
-    return currentSemester;
+    return fallbackSemester;
   } catch (err) {
     console.error("Error in getCurrentSemester:", err);
     throw err;

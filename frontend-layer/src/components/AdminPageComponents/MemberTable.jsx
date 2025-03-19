@@ -41,7 +41,7 @@ export default function MemberTable({ color, orgId, membersList }) {
   const [memberShipId, setMemberShipId] = React.useState(undefined);
 
   // GET THE DATA (if needed)
-  React.useEffect(() => {
+  const fetchMembers = React.useCallback(async () => {
     // if given members list, display it
     if (membersList) {
       membersList.forEach((member, key) => {
@@ -50,21 +50,19 @@ export default function MemberTable({ color, orgId, membersList }) {
       setMembers(membersList);
     } else if (orgId) {
       // else if given org id, get all the members
-      getOrganizationMembers(orgId).then((result) => {
-        // console.log(result);
-        if (result.hasOwnProperty("session")) {
-          setError(displayErrors.noSession);
-        } else if (!result.hasOwnProperty("error")) {
-          setError("");
-          result.forEach((member, key) => {
-            member.id = key + 1;
-          });
-          console.log(result);
-          setMembers(result);
-        } else {
-          setError(displayErrors.errorFetchingContactSupport);
-        }
-      });
+      const result = await getOrganizationMembers(orgId);
+      // console.log(result);
+      if (result.hasOwnProperty("session")) {
+        setError(displayErrors.noSession);
+      } else if (!result.hasOwnProperty("error")) {
+        setError("");
+        result.forEach((member, key) => {
+          member.id = key + 1;
+        });
+        setMembers(result);
+      } else {
+        setError(displayErrors.errorFetchingContactSupport);
+      }
     } else {
       // given nothing is not acceptable
       setError(
@@ -72,6 +70,10 @@ export default function MemberTable({ color, orgId, membersList }) {
       );
     }
   }, [orgId, membersList]);
+
+  React.useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   // TABLE INFO
   const columns = [
@@ -143,6 +145,7 @@ export default function MemberTable({ color, orgId, membersList }) {
             orgId={orgId}
             memberId={memberId}
             membershipId={memberShipId}
+            refreshMembers={fetchMembers}
           />
         </>
       )}

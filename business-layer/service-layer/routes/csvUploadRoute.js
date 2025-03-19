@@ -50,6 +50,9 @@ router.post(
     let orgId = req.params.orgId;
     orgId = sanitizer.sanitize(orgId);
 
+    let eventId = req.params.eventId;
+    eventId = sanitizer.sanitize(eventId)
+    
     // Validate organization ID
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
@@ -70,7 +73,7 @@ router.post(
     try {
             console.log("Trying to await processCSV, the file path is " + req.file.path)
       // Process the uploaded file using business logic
-      const result = await business.processCSV(req.file.path, eventId, orgId, null, orgId, null);
+      const result = await business.processCSV(req.file.path, eventId, orgId);
 
       if (result.error) {
         // Handle the specific error from business logic

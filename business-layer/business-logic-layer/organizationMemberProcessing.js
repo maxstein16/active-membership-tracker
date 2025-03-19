@@ -15,8 +15,9 @@ const {
 const { getCurrentSemester } = require("../data-layer/semester.js");
 const {
   checkActiveMembership,
+  calculateActivePercentage,
 } = require("./organizationMembershipProcessing.js");
-const { ROLE_ADMIN } = require("../constants"); // Import the constant
+const { ROLE_ADMIN } = require("../constants");
 
 async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
   try {
@@ -27,25 +28,32 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
       return { error: error.memberIdMustBeInteger, data: null };
     }
 
-    // Get member data
     const member = await getMemberById(memberId);
     if (!member) {
       return { error: error.memberNotFound, data: null };
     }
 
-    // Get membership data
+    const currentSemester = await getCurrentSemester();
+
     const memberships = await getMembershipsByAttributes({
       member_id: memberId,
       organization_id: orgId,
+      semester_id: currentSemester.semester_id,
     });
 
     if (!memberships || memberships.length === 0) {
       return { error: error.memberNotFoundInOrg, data: null };
     }
 
+    const percentageResult = await calculateActivePercentage(memberships[0]);
+
     return {
       error: error.noError,
-      data: { ...member.toJSON(), membership: memberships[0] },
+      data: {
+        ...member.toJSON(),
+        membership: memberships[0],
+        active_percentage: percentageResult.percentage,
+      },
     };
   } catch (err) {
     console.error("Error fetching specific member + membership:", err);
@@ -65,19 +73,16 @@ async function addMemberToAnOrganizationInDB(orgId, memberData) {
       return { error: error.roleMustBeAnInteger, data: null };
     }
 
-    // Verify organization exists
     const organization = await getOrganizationById(orgId);
     if (!organization) {
       return { error: error.orgNotFound, data: null };
     }
 
-    // Verify member exists
     const member = await getMemberById(memberData.member_id);
     if (!member) {
       return { error: error.memberNotFound, data: null };
     }
 
-    // Get current semester
     const currentSemester = await getCurrentSemester();
 
     const membership = await createMembership({
@@ -100,118 +105,68 @@ async function addMemberToAnOrganizationInDB(orgId, memberData) {
   }
 }
 
-async function editMemberInOrganizationInDB(
-  orgId,
-  memberId,
-  memberDataToUpdate
-) {
+async function editMemberInOrganizationInDB(orgId, memberId, memberDataToUpdate) {
   try {
-    // Map role to membership_role
-    if (memberDataToUpdate.hasOwnProperty("role")) {
+    if (memberDataToUpdate.role !== undefined) {
       memberDataToUpdate.membership_role = memberDataToUpdate.role;
       delete memberDataToUpdate.role;
     }
 
-    if (isNaN(orgId)) {
-      return { error: error.organizationIdMustBeInteger, data: null };
-    }
-    if (isNaN(memberId)) {
-      return { error: error.memberIdMustBeInteger, data: null };
-    }
-    if (
-      memberDataToUpdate.hasOwnProperty("membership_role") &&
-      isNaN(memberDataToUpdate.membership_role)
-    ) {
+    if (isNaN(orgId)) return { error: error.organizationIdMustBeInteger, data: null };
+    if (isNaN(memberId)) return { error: error.memberIdMustBeInteger, data: null };
+    if (memberDataToUpdate.membership_role !== undefined &&
+        isNaN(memberDataToUpdate.membership_role)) {
       return { error: error.roleMustBeAnInteger, data: null };
     }
-    if (
-      memberDataToUpdate.hasOwnProperty("membership_points") &&
-      isNaN(memberDataToUpdate.membership_points)
-    ) {
+    if (memberDataToUpdate.membership_points !== undefined &&
+        isNaN(memberDataToUpdate.membership_points)) {
       return { error: error.memberPointsNaN, data: null };
     }
 
     const currentSemester = await getCurrentSemester();
-
-    // Get the membership first to ensure it exists
-    const membership = await getMembershipByAttributes({
+    const memberships = await getMembershipsByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    // Check if this is the last admin being removed
-    if (memberDataToUpdate.hasOwnProperty("membership_role")) {
-      const currentRole = membership.membership_role;
-      const newRole = memberDataToUpdate.membership_role;
-
-      // If changing from admin role to something else
-      if (currentRole === ROLE_ADMIN && newRole !== ROLE_ADMIN) {
-        // Get all admins in the organization
-        const adminMembers = await getMembershipsByAttributes({
-          organization_id: orgId,
-          membership_role: ROLE_ADMIN,
-        });
-
-        // If there's only one admin, prevent the change
-        if (adminMembers.length === 1) {
-          return { error: error.cannotRemoveLastAdmin, data: null };
-        }
+    if (!memberships || memberships.length === 0) {
+      return { error: error.membershipNotFound, data: null };
+    }
 
     const membership = memberships[0];
 
-    // Check if this is the last admin being removed
-    if (memberDataToUpdate.hasOwnProperty("membership_role")) {
+    if (memberDataToUpdate.membership_role !== undefined) {
       const currentRole = membership.membership_role;
       const newRole = memberDataToUpdate.membership_role;
 
-      // If changing from admin role to something else
       if (currentRole === ROLE_ADMIN && newRole !== ROLE_ADMIN) {
-        // Get all admins in the organization
         const adminMembers = await getMembershipsByAttributes({
           organization_id: orgId,
           membership_role: ROLE_ADMIN,
         });
 
-        // If there's only one admin, prevent the change
         if (adminMembers.length === 1) {
           return { error: error.cannotRemoveLastAdmin, data: null };
         }
       }
     }
 
-    // Perform the update
     const updated = await editMembership(
       membership.membership_id,
       memberDataToUpdate
     );
 
-    if (!updated) {
-      return { error: error.membershipNotFound, data: null };
-    }
+    if (!updated) return { error: error.membershipNotFound, data: null };
 
-    // **Check active membership status if points were updated**
-    if (memberDataToUpdate.hasOwnProperty("membership_points")) {
+    if (memberDataToUpdate.membership_points !== undefined) {
       const organization = await getOrganizationById(orgId);
-      if (!organization) {
-        return { error: error.organizationNotFound, data: null };
-      }
-
-      checkActiveMembership(membership);
+      if (!organization) return { error: error.organizationNotFound, data: null };
+      await membership.reload();
+      await checkActiveMembership(membership);
     }
 
-    return {
-      error: error.noError,
-      data: { update: "success" },
-    };
-  } catch (err) {
-    console.error("Error editing membership:", err);
-    return { error: error.somethingWentWrong, data: null };
-  }
-    return {
-      error: error.noError,
-      data: { update: "success" },
-    };
+    return { error: error.noError, data: { update: "success" } };
   } catch (err) {
     console.error("Error editing membership:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -228,23 +183,12 @@ async function deleteMemberInOrganizationInDB(orgId, memberId) {
     }
 
     const currentSemester = await getCurrentSemester();
-
-    const memberships = await getMembershipByAttributes({
-      member_id: memberId,
-      organization_id: orgId,
-      semester_id: currentSemester.semester_id,
-    });
-    const currentSemester = await getCurrentSemester();
-
     const memberships = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    if (!memberships || memberships.length === 0) {
-      return { error: error.membershipNotFound, data: null };
-    }
     if (!memberships || memberships.length === 0) {
       return { error: error.membershipNotFound, data: null };
     }
@@ -269,9 +213,9 @@ async function getMembersInOrganizationInDB(orgId) {
     }
 
     const currentSemester = await getCurrentSemester();
+    const membersResult = await getMembersByAttributes({});
+    const members = membersResult.data || [];
 
-    // Get all members and memberships for this organization
-    const members = await getMembersByAttributes({});
     const memberships = await getMembershipsByAttributes({
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
@@ -281,7 +225,6 @@ async function getMembersInOrganizationInDB(orgId) {
       return { error: error.membershipNotFound, data: null };
     }
 
-    // Combine member and membership data
     const resultData = memberships
       .map((membership) => {
         const memberData = members.find(

@@ -16,7 +16,9 @@ const {
   deleteEmailSettings,
 } = require("../data-layer/email-settings.js");
 const { deleteMembershipRequirement } = require("../data-layer/membership.js");
-const { getMemberAttendanceWithEvents } = require("../data-layer/attendance.js");
+const {
+  getMemberAttendanceWithEvents,
+} = require("../data-layer/attendance.js");
 const error = new Error();
 
 /**
@@ -47,20 +49,23 @@ async function getOrganizationSettingsInDB(orgId) {
     const formattedData = {
       ...organization.toJSON(),
       email_settings: emailSettings.data.dataValues,
-      membership_requirements: membershipSettings.map((membership) => ({
-        requirementId: membership.requirement_id,
-        meeting_type: membership.meeting_type,
-        frequency: membership.frequency,
-        amount_type: membership.amount_type,
-        amount: membership.amount,
-        bonuses: membership.BonusRequirements
-          ? membership.BonusRequirements.map((bonus) => ({
-              bonus_id: bonus.bonus_id,
-              threshold_percentage: bonus.threshold_percentage,
-              bonus_points: bonus.bonus_points,
-            }))
-          : [],
-      })),
+      membership_requirements: membershipSettings.map((membership) => {
+        return {
+          requirementId: membership.requirement_id,
+          event_type: membership.event_type,
+          requirement_type: membership.requirement_type,
+          requirement_value: membership.requirement_value,
+          bonuses: membership.bonusRequirements
+            ? membership.bonusRequirements.map((bonus) => {
+                return {
+                  bonus_id: bonus.bonus_id,
+                  threshold_percentage: bonus.threshold_percentage,
+                  bonus_points: bonus.bonus_points,
+                };
+              })
+            : [],
+        };
+      }),
     };
 
     return { error: error.noError, data: formattedData };
