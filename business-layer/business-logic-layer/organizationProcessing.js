@@ -209,9 +209,8 @@ async function createOrganizationInDB(orgData) {
  * @returns {Promise<Object>} - Returns error and success message.
  */
 async function updateOrganizationInDB(orgId, orgDataToUpdate) {
-  console.log("[MEP] [BUSINESS LOGIC] here 0", orgDataToUpdate)
 
-  if (!Number.isInteger(orgId) || orgId <= 0) {
+  if (isNaN(orgId) || orgId <= 0) {
     return { error: error.invalidOrganizationId, data: null };
   }
 
@@ -219,12 +218,9 @@ async function updateOrganizationInDB(orgId, orgDataToUpdate) {
     return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
   }
 
-  console.log("[MEP] [BUSINESS LOGIC] here 1", orgDataToUpdate)
   try {
-    console.log("[MEP] [BUSINESS LOGIC] here 2", orgDataToUpdate)
     const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
     
-    console.log("[MEP] [BUSINESS LOGIC] here 3", updateSuccess)
     if (updateSuccess) {
       return {
         error: null,
