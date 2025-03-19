@@ -96,24 +96,31 @@ async function getMemberById(memberId) {
  * @returns {Promise<object[]>} An array of matching member objects (empty if no matches found).
  */
 async function getMembersByAttributes(filters) {
+
   try {
     const members = await Member.findAll({ where: filters });
 
     if (members.length === 0) {
       console.log("No members found matching the given criteria.");
-      return [];
+      return { error: null, data: [] }; // Return an object with `data` property
     }
 
-    // console.log(
-    //   "Members found:",
-    //   members.map((m) => m.toJSON())
-    // );
-    return members;
+    // Log the JSON representation of members (to make it readable)
+    // console.log("Members found:", members.map((m) => m.toJSON()));
+    // console.log("Trying to get member(s) by attribute(s): " + JSON.stringify(filters));
+
+
+    return { error: null, data: members }; // Return the data and no error
   } catch (error) {
-    console.error("Error fetching members by attributes:", error);
-    throw error;
+    console.error("member-js says Error fetching members by attributes:", error);
+    return { error: error.message, data: [] }; // Return an error message and an empty array
   }
-};
+}
+
+
+
+
+
 
 // Export all functions for external use
 module.exports = {
