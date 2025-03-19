@@ -29,8 +29,10 @@ const Organization = sequelize.define(
     organization_description: { type: DataTypes.TEXT },
     organization_color: { type: DataTypes.STRING },
     organization_abbreviation: { type: DataTypes.STRING(10) },
-    organization_email: { type: DataTypes.STRING },
-    organization_membership_type: { type: DataTypes.STRING },
+    organization_email: { type: DataTypes.STRING(255) },
+    organization_membership_type: {
+      type: DataTypes.ENUM("points", "attendance"),
+    },
     organization_threshold: { type: DataTypes.INTEGER, defaultValue: 0 },
   },
   {
@@ -122,13 +124,12 @@ const Event = sequelize.define(
     event_description: { type: DataTypes.TEXT },
     event_type: {
       type: DataTypes.ENUM(
-        "General Meeting",
-        "Volunteer",
-        "Social",
-        "Workshop",
-        "Fundraiser",
-        "Hackathon",
-        "Committee"
+        "general_meeting",
+        "volunteer",
+        "social",
+        "workshop",
+        "fundraiser",
+        "committee"
       ),
       allowNull: false,
     },
