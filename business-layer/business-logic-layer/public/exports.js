@@ -152,6 +152,12 @@ module.exports = function () {
     return await getMembersInOrganizationInDB(orgId);
   };
 
+  this.deleteOrganizationEmailSettings = async (orgId) => {
+    return await deleteOrganizationEmailSettingsInDB(orgId);
+    }
+  };
+
+
   // Organization Membership Management
   this.getMembershipRoleInfoInOrganization = async (
     organizationId,
@@ -254,4 +260,4 @@ module.exports = function () {
   this.deleteBonusRequirement = async (bonusId) => {
     return await deleteBonusRequirementInDB(bonusId);
   };
-};
+
