@@ -19,8 +19,6 @@ export default function UserProfilePage() {
 
   // Fetch user data on component mount
   React.useEffect(() => {
-    console.log("Navigated to user profile page");
-
     const fetchMemberData = async () => {
       try {
         const data = await getAPIData("/member", API_METHODS.GET);
