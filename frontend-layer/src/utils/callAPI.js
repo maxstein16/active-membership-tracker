@@ -10,8 +10,6 @@ const connect4server = "http://localhost:8080/v1";
  */
 export async function getAPIData(endpoint, method, payload, isFile = false) {
 
-  console.log("getAPIData doing its shit...")
-
   let details = {
     method: method,
     credentials: "include",
@@ -32,9 +30,6 @@ export async function getAPIData(endpoint, method, payload, isFile = false) {
 
 
   let link = `${connect4server}${endpoint}`;
-  console.log("The link attempting to be fetched " + link)
-  console.log("The details body is formdata :D " + details.body)
-  console.log("HELLO!!! ")
 
   return fetch(link, details)
     .then((res) => res.json())
