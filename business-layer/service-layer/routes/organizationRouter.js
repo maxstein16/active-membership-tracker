@@ -116,9 +116,11 @@ async function handlePostOrganization(req, res) {
     if (
       !req.body.hasOwnProperty("organization_name") ||
       !req.body.hasOwnProperty("organization_abbreviation") ||
-      !req.body.hasOwnProperty("organization_desc") ||
+      !req.body.hasOwnProperty("organization_description") ||
       !req.body.hasOwnProperty("organization_color") ||
-      !req.body.hasOwnProperty("active_membership_threshold")
+      !req.body.hasOwnProperty("organization_threshold") ||
+      !req.body.hasOwnProperty("organization_email") ||
+      !req.body.hasOwnProperty("organization_membership_type")
     ) {
       return res.status(400).json({
         status: "error",

@@ -135,7 +135,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
         value={threshold}
         setValue={setThreshold}
         isMultiline={false}
-        onLeaveField={(newValue) => {
+        onLeaveField={(newValue) => { 
           if (newValue.trim() === "") {
             setError("Threshold must have a value");
             return;
