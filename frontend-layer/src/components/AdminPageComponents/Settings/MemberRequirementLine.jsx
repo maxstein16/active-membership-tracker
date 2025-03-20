@@ -141,7 +141,7 @@ export default function MembershipRequirementLine({
           {/* Delete Requirement Button */}
           <IconButton
             className="delete-requirement"
-            onClick={() => deleteBonus(bonus.id)}
+            onClick={() => deleteBonus(requirement.id, bonus.id)}
           >
             <DeleteForeverIcon />
           </IconButton>
@@ -150,7 +150,7 @@ export default function MembershipRequirementLine({
       <button
         className="secondary custom-color-btn"
         style={{ color: color, borderColor: color }}
-        onClick={createBonus}
+        onClick={() => {createBonus(requirement.id)}}
       >
         Add Bonus
       </button>

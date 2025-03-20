@@ -12,18 +12,31 @@ export default function DisplayMembershipRequirements({
   setOrgData,
   updateValueInDB,
   deleteRequirementInDB,
+  deleteBonusRequirementInDb,
   createNewRequirement,
   createNewBonus,
 }) {
   // TODO CHANGE FOR REQS
-  const updateValueAsTyping = (newValue, reqId, valueName, isBonus = false) => {
+  const updateValueAsTyping = (newValue, id, valueName, isBonus = false) => {
+
     let newData = { ...orgData };
-    newData.membershipRequirements.forEach((requirement) => {
-      if (requirement.id === reqId) {
-        requirement[valueName] = newValue;
-      }
-    });
-    // console.log(newData)
+
+    if (isBonus) {
+      newData.membershipRequirements.forEach((requirement) => {
+        requirement.bonuses.forEach((bonus) => {
+          if (bonus.id === id ){
+            bonus[valueName] = newValue
+          }
+        })
+      });
+    } else {
+      newData.membershipRequirements.forEach((requirement) => {
+        if (requirement.id === id) {
+          requirement[valueName] = newValue;
+        }
+      });
+    }
+  
     setOrgData(newData);
   };
 
@@ -40,8 +53,20 @@ export default function DisplayMembershipRequirements({
     // console.log(newData);
   };
 
-  const deleteBonus = (id) => {
-    console.log("TODO")
+  const deleteBonus = (reqId, bonusId) => {
+    deleteBonusRequirementInDb(bonusId)
+
+    console.log(reqId, bonusId)
+    // remove the requirement from the orgData
+    let newData = { ...orgData };
+
+    newData.membershipRequirements.forEach((requirement, index) => {
+      if (requirement.id === reqId) {
+        newData.membershipRequirements[index].bonuses = requirement.bonuses.filter((bonus) => bonus.id !== bonusId);
+      }
+    });
+
+    setOrgData(newData);
   }
 
   return (
