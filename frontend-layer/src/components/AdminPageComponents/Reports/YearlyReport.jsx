@@ -8,7 +8,11 @@ import CustomSelect from "../../CustomSelect";
 import DownloadReport from "./DownloadReport";
 import { CircularProgress } from "@mui/material";
 import BarGraphForYearSemReports from "./BarGraphForYearSemReports";
-import { getAnnualReportData } from "../../../utils/handleSettingsData";
+import { 
+  getAnnualReportData, 
+  getAnnualReportDataByYear,
+  getAllAcademicYears 
+} from "../../../utils/handleSettingsData";
 
 const ensureNumber = (value) => {
   return typeof value === 'number' && !isNaN(value) ? value : 0;
@@ -56,10 +60,36 @@ export default function YearlyReport({ orgId, color }) {
   const [selectedYear, setSelectedYear] = React.useState(undefined);
   const [error, setError] = React.useState(null);
 
-  const fetchAnnualReport = React.useCallback(async (year = null) => {
+  // Fetch all available years from the database
+  const fetchAcademicYears = React.useCallback(async () => {
+    try {
+      const years = await getAllAcademicYears();
+      
+      if (years.session === false) {
+        // Handle session timeout
+        setError("Your session has expired. Please log in again.");
+        return;
+      }
+      
+      if (Array.isArray(years) && years.length > 0) {
+        setYearList(years);
+      } else {
+        // Fallback to current year if no years found in DB
+        const currentYear = new Date().getFullYear();
+        setYearList([currentYear]);
+      }
+    } catch (err) {
+      console.error("Error fetching academic years:", err);
+      // Fallback to current year
+      const currentYear = new Date().getFullYear();
+      setYearList([currentYear]);
+    }
+  }, []);
+
+  const fetchAnnualReport = React.useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getAnnualReportData(orgId, year);
+      const data = await getAnnualReportData(orgId);
       
       if (!data) {
         setError("Error loading annual report data");
@@ -78,15 +108,6 @@ export default function YearlyReport({ orgId, color }) {
       setReportData(sanitizedData);
       setSelectedYear(sanitizedData.currentYear);
       setLoading(false);
-      
-      const currentYear = sanitizedData.currentYear;
-      const earliestYear = Math.max(currentYear - 5, 2018);
-      
-      let possibleYears = [];
-      for (let i = currentYear; i >= earliestYear; i--) {
-        possibleYears.push(i);
-      }
-      setYearList(possibleYears);
     } catch (err) {
       console.error("Error fetching annual report:", err);
       setError("Failed to load annual report data");
@@ -94,11 +115,45 @@ export default function YearlyReport({ orgId, color }) {
     }
   }, [orgId]);
 
+  const fetchAnnualReportByYear = React.useCallback(async (year) => {
+    try {
+      setLoading(true);
+      const data = await getAnnualReportDataByYear(orgId, year);
+      
+      if (!data) {
+        setError(`Error loading annual report data for ${year}`);
+        setLoading(false);
+        return;
+      }
+
+      const sanitizedData = sanitizeReportData(data);
+      
+      if (!sanitizedData) {
+        setError("Invalid data format received from server");
+        setLoading(false);
+        return;
+      }
+
+      setReportData(sanitizedData);
+      setLoading(false);
+    } catch (err) {
+      console.error(`Error fetching annual report for year ${year}:`, err);
+      setError(`Failed to load annual report data for ${year}`);
+      setLoading(false);
+    }
+  }, [orgId]);
+
   React.useEffect(() => {
     if (orgId) {
-      fetchAnnualReport();
+      // Fetch both the years list and the current annual report
+      Promise.all([fetchAcademicYears(), fetchAnnualReport()])
+        .catch(err => {
+          console.error("Error during initial data loading:", err);
+          setError("Failed to initialize annual report. Please try again later.");
+          setLoading(false);
+        });
     }
-  }, [fetchAnnualReport, orgId]);
+  }, [fetchAcademicYears, fetchAnnualReport, orgId]);
 
   const handleYearChange = async (year) => {
     if (!year || isNaN(parseInt(year))) {
@@ -106,15 +161,16 @@ export default function YearlyReport({ orgId, color }) {
       return;
     }
     
-    setSelectedYear(parseInt(year));
-    try {
-      setLoading(true);
-      await fetchAnnualReport(year);
-    } catch (err) {
-      console.error(`Error fetching data for year ${year}:`, err);
-      setError(`Failed to load annual report data for ${year}`);
-      setLoading(false);
+    const yearNum = parseInt(year);
+    setSelectedYear(yearNum);
+    
+    if (yearNum === reportData?.currentYear) {
+      // If selecting the current year, use the data we already have
+      return;
     }
+    
+    // Otherwise fetch the data for the selected year
+    await fetchAnnualReportByYear(yearNum);
   };
 
   const isDataValid = reportData && 

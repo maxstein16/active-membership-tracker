@@ -45,6 +45,47 @@ router.get("/annual", isAuthorizedHasSessionForAPI, async function (req, res) {
   }
 });
 
+router.get("/annual/:year", isAuthorizedHasSessionForAPI, async function (req, res) {
+  try {
+    let orgId = req.params.orgId;
+    let year = req.params.year;
+
+    // Sanitize inputs
+    orgId = sanitizer.sanitize(orgId);
+    year = sanitizer.sanitize(year);
+
+    // Validate parameters
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+
+    if (isNaN(year)) {
+      return res.status(400).json({ error: error.yearMustBeInteger });
+    }
+
+    // Get report data for specific year
+    const orgData = await business.getAnnualOrgReportByYear(orgId, parseInt(year, 10));
+
+    // Handle errors
+    if (orgData.error && orgData.error !== error.noError) {
+      return res.status(404).json({ 
+        error: orgData.error, 
+        orgId: orgId, 
+        year: year 
+      });
+    }
+
+    // Return successful response
+    res.status(200).json({
+      orgData: orgData.data
+    });
+
+  } catch (err) {
+    console.error("Error in annual report by year route:", err);
+    res.status(500).json({ error: error.internalServerError });
+  }
+});
+
 // GET /v1/organization/{orgId}/reports/semesterly
 router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res) {
   try {
@@ -73,6 +114,48 @@ router.get("/semesterly", isAuthorizedHasSessionForAPI, async function (req, res
 
   } catch (err) {
     console.error("Error in semester report route:", err);
+    res.status(500).json({ error: error.internalServerError });
+  }
+});
+
+// GET /v1/organization/{orgId}/reports/semesterly/:semesterId
+router.get("/semesterly/:semesterId", isAuthorizedHasSessionForAPI, async function (req, res) {
+  try {
+    let orgId = req.params.orgId;
+    let semesterId = req.params.semesterId;
+
+    // Sanitize inputs
+    orgId = sanitizer.sanitize(orgId);
+    semesterId = sanitizer.sanitize(semesterId);
+
+    // Validate parameters
+    if (isNaN(orgId)) {
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    }
+
+    if (isNaN(semesterId)) {
+      return res.status(400).json({ error: error.semesterIdMustBeInteger });
+    }
+
+    // Get report data for specific semester
+    const orgData = await business.getSemesterOrgReportBySemesterId(orgId, semesterId);
+
+    // Handle errors
+    if (orgData.error && orgData.error !== error.noError) {
+      return res.status(404).json({ 
+        error: orgData.error, 
+        orgId: orgId, 
+        semesterId: semesterId 
+      });
+    }
+
+    // Return successful response
+    res.status(200).json({
+      orgData: orgData.data
+    });
+
+  } catch (err) {
+    console.error("Error in semester report by ID route:", err);
     res.status(500).json({ error: error.internalServerError });
   }
 });
