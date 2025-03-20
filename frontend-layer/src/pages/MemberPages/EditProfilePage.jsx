@@ -26,6 +26,8 @@ export default function EditProfilePage() {
   const [unchangedMessage, setUnchangedMessage] = React.useState("");
   const [error, setError] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
+  const [memberName, setMemberName] = React.useState("");
+  const [memberEmail, setMemberEmail] = React.useState("");
 
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -48,6 +50,8 @@ export default function EditProfilePage() {
           };
           setUserData(formattedData);
           setOriginalData(formattedData); // Save original for change tracking
+          setMemberName(member.member_name);
+          setMemberEmail(member.member_email);
         } else {
           console.error(
             "Error fetching user data:",
@@ -183,9 +187,7 @@ export default function EditProfilePage() {
         onClick={() => handleNavigation("/profile")}
       />
       <h1>Edit Profile</h1>
-      <h1>
-        for {userData.name}, {userData.email}
-      </h1>
+      <h2>{`${memberName}, ${memberEmail}`}</h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}

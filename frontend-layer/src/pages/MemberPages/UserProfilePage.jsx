@@ -21,8 +21,9 @@ export default function UserProfilePage() {
   React.useEffect(() => {
     const fetchMemberData = async () => {
       try {
-        const data = await getAPIData("/member", API_METHODS.GET);
-        console.log("UserProfilePage got: " + data.data);
+        const data = await getAPIData("/member", API_METHODS.get);
+
+        console.log("UserProfilePage got: " + data.data + JSON.stringify(data));
 
         // Check if API response is successful
         if (data) {

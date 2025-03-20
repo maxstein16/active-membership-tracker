@@ -62,6 +62,7 @@ router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 
   console.log("Session user username is " + req.session.user.username);
   console.log("Member ID is " + memberId.data); // Accessing the member ID from the 'data' field
+  console.log("Member ID w no .data is " + memberId); // Accessing the member ID from the 'data' field
 
   // Fetch member data using the ID
   const memberData = await business.getMemberById(memberId.data);

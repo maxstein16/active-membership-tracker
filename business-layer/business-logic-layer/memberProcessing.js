@@ -14,7 +14,13 @@ const { Member } = require("../db");
  * @returns {Promise<object>} The member object if found, otherwise an error.
  */
 async function getMemberByIdInDB(memberId) {
+
+    console.log("memberProcessing says getMemberByIdInDB memberID w .data is: " + memberId.data)
+    console.log("memberProcessing says getMemberByIdInDB memberID WOUT .data is: " + memberId)
+
+
     if (isNaN(memberId)) {
+        console.log("memberId is not a number man")
         return { error: error.memberIdMustBeInteger, data: null };
     }
 
@@ -26,7 +32,7 @@ async function getMemberByIdInDB(memberId) {
         }
 
         // Get all memberships for this member
-        const memberships = await getMembershipsByAttributes({ member_id: memberId });
+        const memberships = await getMembershipsByAttributes({ member_id: memberId.data });
 
         // Get organization details for each membership
         const membershipDetails = await Promise.all(

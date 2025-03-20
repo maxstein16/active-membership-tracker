@@ -69,6 +69,8 @@ async function getAllMembers() {
  */
 async function getMemberById(memberId) {
 
+  console.log("member.js says getMemberById by memberID w .data: " + memberId.data)
+
   try {
     const member = await Member.findByPk(memberId);
 
