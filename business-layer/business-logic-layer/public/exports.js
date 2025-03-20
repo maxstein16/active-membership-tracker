@@ -162,7 +162,7 @@ module.exports = function () {
 
   this.deleteOrganizationEmailSettings = async (orgId) => {
     return await deleteOrganizationEmailSettingsInDB(orgId);
-  };
+    }
 
   // Organization Membership Management
   this.getMembershipRoleInfoInOrganization = async (
