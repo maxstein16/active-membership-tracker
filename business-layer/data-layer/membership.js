@@ -1,4 +1,4 @@
-const { Membership, MembershipRequirement } = require("../db");
+const { Membership, Member, MembershipRequirement } = require("../db");
 
 /**
  * Create a membership record

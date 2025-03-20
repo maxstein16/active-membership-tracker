@@ -3,13 +3,11 @@ import "../../assets/css/constants.css";
 import "../../assets/css/pageSetup.css";
 import "../../assets/css/general.css";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import MenuIcon from '@mui/icons-material/Menu';
+import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-
 export default function NavigationBar({ toggleDropdown }) {
-
   const navigate = useNavigate();
 
   return (
@@ -21,11 +19,14 @@ export default function NavigationBar({ toggleDropdown }) {
         onClick={() => navigate("/")}
       />
       <div>
-        <IconButton onClick={() => navigate("/profile")} className="nav-bar-button">
-          <AccountCircleIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
+        <IconButton
+          onClick={() => navigate("/profile")}
+          className="nav-bar-button"
+        >
+          <AccountCircleIcon sx={{ fontSize: 28, color: "#FFFFFF" }} />
         </IconButton>
         <IconButton onClick={() => toggleDropdown()}>
-          <MenuIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
+          <MenuIcon sx={{ fontSize: 28, color: "#FFFFFF" }} />
         </IconButton>
       </div>
     </div>

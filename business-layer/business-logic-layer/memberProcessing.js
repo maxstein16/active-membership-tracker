@@ -20,14 +20,14 @@ async function getMemberByIdInDB(memberId) {
 
     try {
         const member = await getMemberById(memberId);
-        
+
         if (!member) {
             return { error: error.memberNotFound, data: null };
         }
 
         // Get all memberships for this member
         const memberships = await getMembershipsByAttributes({ member_id: memberId });
-        
+
         // Get organization details for each membership
         const membershipDetails = await Promise.all(
             memberships.map(async (membership) => {
@@ -133,17 +133,25 @@ async function createMemberInDB(memberData) {
     }
 }
 
-async function getMemberIDByUsernameInDB(username){
-    const memberInfo = await Member.findOne({
-        where: { member_email: username },
-      });
+async function getMemberIDByUsernameInDB(username) {
+    try {
+        // Find member by email
+        const memberInfo = await Member.findOne({
+            where: { member_email: username },
+            raw: true,
+        });
 
-      if(!memberInfo){
-        return { error: error.mustIncludeMemberId };
-       
-      }
-
-      return memberInfo.member_id;
+        // If no member is found, return an error
+        if (!memberInfo) {
+            console.error("No member found for username:", username);
+            return { error: "Member not found", data: null };
+        }
+        // Return member ID
+        return { error: null, data: memberInfo.member_id };
+    } catch (err) {
+        console.error("Error fetching member ID by username:", err);
+        return { error: "Something went wrong", data: null };
+    }
 }
 
 
@@ -154,20 +162,20 @@ async function getMemberIDByUsernameInDB(username){
  * @returns {Promise<object>} Member's organizational stats or an error.
  */
 async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
-   
+
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger };
     }
     if (isNaN(orgId)) {
         return { error: error.organizationIdMustBeInteger };
     }
-   
+
     try {
         const memberships = await getMembershipsByAttributes({
             member_id: memberId,
             organization_id: orgId
         });
-        
+
 
         if (!memberships || memberships.length === 0) {
             return { error: error.membershipNotFound };
