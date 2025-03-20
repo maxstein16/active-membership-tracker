@@ -135,19 +135,20 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 
   // Check if an error occurred while fetching member ID
   if (memberId.error) {
+    console.log("memberRoute says an error occurred while fetching member ID")
     res.status(404).json({ error: memberId.error });
     return;
   }
   // check if at least one valid field is provided for update
   const allowedFields = [
-    "personal_email",
-    "phone_number",
-    "gender",
-    "race",
-    "tshirt_size",
-    "major",
-    "graduation_date",
-    "status",
+    "member_personal_email",
+    "member_phone_number",
+    "member_major",
+    "member_graduation_date",
+    "member_race",
+    "member_gender",
+    "member_tshirt_size",
+    "member_status"
   ];
 
   const hasValidFields = Object.keys(body).some((key) =>
@@ -155,6 +156,7 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   );
 
   if (!hasValidFields) {
+    console.log("memberRoute says you dont have valid fields")
     res.status(400).json({
       error: error.mustIncludeValidFieldAddMember,
     });

@@ -15,7 +15,6 @@ const { Member } = require("../db");
  */
 async function getMemberByIdInDB(memberId) {
 
-    console.log("memberProcessing says getMemberByIdInDB memberID w .data is: " + memberId.data)
     console.log("memberProcessing says getMemberByIdInDB memberID WOUT .data is: " + memberId)
 
 
@@ -32,7 +31,7 @@ async function getMemberByIdInDB(memberId) {
         }
 
         // Get all memberships for this member
-        const memberships = await getMembershipsByAttributes({ member_id: memberId.data });
+        const memberships = await getMembershipsByAttributes({ member_id: memberId });
 
         // Get organization details for each membership
         const membershipDetails = await Promise.all(
