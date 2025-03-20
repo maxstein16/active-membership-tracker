@@ -183,8 +183,8 @@ module.exports = function () {
   };
 
   // Organization Management
-  this.createOrganization = async (organizationData) => {
-    return await createOrganizationInDB(organizationData);
+  this.createOrganization = async (organizationData, memberId) => {
+    return await createOrganizationInDB(organizationData, memberId);
   };
 
   this.getSpecificOrgData = async (organizationId) => {

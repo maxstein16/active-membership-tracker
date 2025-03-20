@@ -35,40 +35,40 @@ router.all("/", isAuthorizedHasSessionForAPI, (req, res) => {
  * Retrieves organizations that the logged-in user is a member of
  */
 router.get("/my", isAuthorizedHasSessionForAPI, async (req, res) => {
-    try {
-        // Check if user is logged in with valid session
-        if (!req.session || !req.session.user || !req.session.user.username) {
-            return res.status(401).json({
-                status: "error",
-                error: error.notAuthorized || { message: "User must be logged in" }
-            });
-        }
-
-        // Get username from session exactly as it appears
-        const username = sanitizer.sanitize(req.session.user.username);
-        console.log(`Fetching organizations for user: ${username}`);
-        
-        // Call business logic to get user's organizations
-        const result = await business.getUserOrganizations(username);
-        
-        if (result.error) {
-            return res.status(400).json({
-                status: "error",
-                error: result.error
-            });
-        }
-
-        return res.status(200).json({
-            status: "success",
-            data: result.data
-        });
-    } catch (err) {
-        console.error("Error in GET /organization/my:", err);
-        return res.status(500).json({
-            status: "error",
-            error: error.somethingWentWrong
-        });
+  try {
+    // Check if user is logged in with valid session
+    if (!req.session || !req.session.user || !req.session.user.username) {
+      return res.status(401).json({
+        status: "error",
+        error: error.notAuthorized || { message: "User must be logged in" },
+      });
     }
+
+    // Get username from session exactly as it appears
+    const username = sanitizer.sanitize(req.session.user.username);
+    console.log(`Fetching organizations for user: ${username}`);
+
+    // Call business logic to get user's organizations
+    const result = await business.getUserOrganizations(username);
+
+    if (result.error) {
+      return res.status(400).json({
+        status: "error",
+        error: result.error,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("Error in GET /organization/my:", err);
+    return res.status(500).json({
+      status: "error",
+      error: error.somethingWentWrong,
+    });
+  }
 });
 
 /**
@@ -113,22 +113,34 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
  */
 async function handlePostOrganization(req, res) {
   try {
-    
-
     if (
       !req.body.hasOwnProperty("organization_name") ||
       !req.body.hasOwnProperty("organization_abbreviation") ||
       !req.body.hasOwnProperty("organization_desc") ||
       !req.body.hasOwnProperty("organization_color") ||
-      !req.body.hasOwnProperty("active_membership_threshold") 
+      !req.body.hasOwnProperty("active_membership_threshold")
     ) {
-        return res.status(400).json({
-            status: "error",
-            error: error.mustHaveAllFieldsAddOrg,
-          });
+      return res.status(400).json({
+        status: "error",
+        error: error.mustHaveAllFieldsAddOrg,
+      });
     }
 
-    const result = await business.createOrganization(req.body);
+    // Fetch member ID using the function
+    let memberId = await business.getMemberIDByUsernameInDB(
+      req.session.user.username
+    );
+
+    // Check if an error occurred while fetching member ID
+    if (memberId.error) {
+      console.log("Error fetching member ID: " + memberId.error + " in order to add them to admin");
+      res.status(404).json({ error: memberId.error });
+      return;
+    }
+
+    console.log('[MEP] memberid here ', memberId.data)
+
+    const result = await business.createOrganization(req.body, memberId.data);
 
     if (result.error) {
       return res.status(400).json({
@@ -187,7 +199,7 @@ router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
         error: error.mustHaveAtLeastOneFieldToEditOrg,
       });
     }
-    
+
     const result = await business.updateOrganization(parseInt(orgId), orgData);
 
     if (result.error) {

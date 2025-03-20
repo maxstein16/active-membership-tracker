@@ -1,4 +1,6 @@
+const { ROLE_ADMIN } = require("../constants.js");
 const { createEmailSettings } = require("../data-layer/email-settings.js");
+const { createMembership } = require("../data-layer/membership.js");
 const {
   getOrganizationById,
   createOrganization,
@@ -6,6 +8,7 @@ const {
   getOrganizations,
   getUserOrganizations,
 } = require("../data-layer/organization.js");
+const { getCurrentSemester } = require("../data-layer/semester.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -160,14 +163,14 @@ async function getSpecificOrgDataInDB(orgId) {
  * @param {Object} orgData - Organization data.
  * @returns {Promise<Object>} - Returns error and new organization data.
  */
-async function createOrganizationInDB(orgData) {
+async function createOrganizationInDB(orgData, memberId) {
+  console.log('[MEP] memberid, ', memberId)
   const validationError = validateOrgFields(orgData);
   if (validationError) {
     return { error: validationError, data: null };
   }
 
   try {
-    console.log(orgData);
     const newOrganization = await createOrganization({
       organization_name: orgData.organization_name,
       organization_description: orgData.organization_desc,
@@ -177,6 +180,24 @@ async function createOrganizationInDB(orgData) {
       organization_email: orgData.organization_email,
       organization_membership_type: orgData.organization_membership_type,
     });
+
+    // add the current user as admin 
+    const currentSemester = await getCurrentSemester();
+
+    console.log('[MEP] memberid, ', memberId)
+    const membership = await createMembership({
+      membership_role: ROLE_ADMIN,
+      member_id: memberId,
+      membership_points: 0,
+      active_member: false,
+      organization_id: newOrganization.organization_id,
+      semester_id: currentSemester.semester_id,
+    });
+    console.log(membership.dataValues)
+
+    if (!membership) {
+      return { error: error.couldNotCreateMembership, data: null };
+    }
 
     // create email settings for the org
     const newEmailSettings = await createEmailSettings(
