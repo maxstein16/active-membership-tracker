@@ -125,7 +125,6 @@ async function editMemberInOrganizationInDB(
       memberDataToUpdate.membership_role = memberDataToUpdate.role;
       delete memberDataToUpdate.role;
     }
-
     if (isNaN(orgId)) {
       return { error: error.organizationIdMustBeInteger, data: null };
     }
@@ -144,7 +143,6 @@ async function editMemberInOrganizationInDB(
     ) {
       return { error: error.memberPointsNaN, data: null };
     }
-
     const currentSemester = await getCurrentSemester();
 
     // Get the membership first to ensure it exists
@@ -292,9 +290,11 @@ async function getMembersInOrganizationInDB(orgId) {
 }
 
 module.exports = {
-  getSpecificMemberWithOrgDataInDB,
-  addMemberToAnOrganizationInDB,
-  editMemberInOrganizationInDB,
-  deleteMemberInOrganizationInDB,
-  getMembersInOrganizationInDB,
+    getSpecificMemberWithOrgDataInDB,
+    addMemberToAnOrganizationInDB,
+    editMemberInOrganizationInDB,
+    deleteMemberInOrganizationInDB,
+    getMembersInOrganizationInDB,
+    getMembersByAttributes
 };
+
