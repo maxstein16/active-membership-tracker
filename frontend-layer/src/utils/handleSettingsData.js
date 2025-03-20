@@ -113,7 +113,7 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
 
   let body = {};
 
-  if (settingName === "isPointsBased") {
+  if (settingName === "isPointBased") {
     body[`organization_membership_type`] = newValue ? "points" : "attendance";
   } else {
     body[`organization_${settingName}`] = newValue;
@@ -130,7 +130,7 @@ export async function saveInfoSetting(orgId, newValue, settingName) {
     return false;
   }
   if (result.status && result.status === "success") {
-    if (settingName === "isPointsBased") {
+    if (settingName === "isPointBased") {
       return await deleteAllRequirements(orgId);
     }
     return true;

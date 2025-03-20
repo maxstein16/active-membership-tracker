@@ -8,7 +8,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import { useNavigate } from "react-router";
 
 export default function AreYouSureDeleteReqs({
   color, 
@@ -18,8 +17,6 @@ export default function AreYouSureDeleteReqs({
   setIsPoints,
   saveSetting,
 }) {
-  // Define my variables
-  const navigate = useNavigate();
 
   return (
     <Dialog
@@ -48,7 +45,7 @@ export default function AreYouSureDeleteReqs({
           onClick={() => {
             setOpen(false);
             setIsPoints(!isPoints);
-            saveSetting(!isPoints, "isPointsBased");
+            saveSetting(!isPoints, "isPointBased");
           }}
           className="custom-color-button"
           style={{ backgroundColor: color, borderColor: color }}

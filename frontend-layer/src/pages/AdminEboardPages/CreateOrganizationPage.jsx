@@ -47,9 +47,11 @@ export default function CreateOrganizationPage() {
       newData.membershipRequirements[valueName] = newValue;
     } else {
       newData[valueName] = newValue;
+      if (valueName === "isPointBased") {
+        newData.membershipRequirements = []
+      }
     }
     setOrgData(newData);
-    console.log(newData);
   };
 
   const createNewRequirementLocally = () => {
