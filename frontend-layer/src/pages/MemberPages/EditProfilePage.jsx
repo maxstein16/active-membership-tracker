@@ -151,14 +151,14 @@ export default function EditProfilePage() {
 
     try {
       const payload = {
-        member_personal_email: userData.personalEmail,
-        member_phone_number: userData.phone,
-        member_major: userData.major,
-        member_graduation_date: userData.graduationDate,
-        member_race: userData.race,
-        member_gender: userData.gender,
-        member_tshirt_size: userData.tshirt,
-        member_status: userData.status,
+        personal_email: userData.personalEmail, // Remove "member_" prefix
+        phone_number: userData.phone, // Remove "member_" prefix
+        major: userData.major, // Remove "member_" prefix
+        graduation_date: userData.graduationDate, // Remove "member_" prefix
+        race: userData.race,
+        gender: userData.gender,
+        tshirt_size: userData.tshirt, // Remove "member_" prefix
+        status: userData.status,
       };
 
       const response = await getAPIData(`/member`, API_METHODS.put, payload);

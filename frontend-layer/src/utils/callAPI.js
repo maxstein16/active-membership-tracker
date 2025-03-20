@@ -34,7 +34,6 @@ export async function getAPIData(endpoint, method, payload, isFile = false) {
   let link = `${connect4server}${endpoint}`;
   console.log("The link attempting to be fetched " + link)
   console.log("The details body is formdata :D " + JSON.stringify(payload))
-  console.log("HELLO!!! ")
 
   return fetch(link, details)
     .then((res) => res.json())

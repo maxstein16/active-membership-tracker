@@ -61,7 +61,14 @@ async function getMemberByIdInDB(memberId) {
  * @returns {Promise<object>} The updated member object or an error.
  */
 async function updateMemberInDB(memberId, memberData) {
-    if (isNaN(memberId)) {
+
+    console.log("memberProcessing  updateMemberInDB says memberId is " + memberId)
+    console.log("memberProcessing  updateMemberInDB says memberId is W DATA " + memberId.data)
+    console.log("memberProcessing member data is  " + JSON.stringify(memberData))
+
+
+    if (isNaN(memberId.data)) {
+        console.log("memberID is NAN")
         return { error: error.memberIdMustBeInteger, data: null };
     }
     if (!memberData || typeof memberData !== "object" || Object.keys(memberData).length === 0) {
@@ -86,13 +93,13 @@ async function updateMemberInDB(memberId, memberData) {
             (key) => updateFields[key] === undefined && delete updateFields[key]
         );
 
-        const updated = await updateMember(memberId, updateFields);
+        const updated = await updateMember(memberId.data, updateFields);
         if (!updated) {
             return { error: error.memberNotFound, data: null };
         }
 
         // Fetch updated member data
-        const updatedMember = await getMemberById(memberId);
+        const updatedMember = await getMemberById(memberId.data);
         return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
         return { error: error.somethingWentWrong, data: null };
@@ -146,7 +153,7 @@ async function getMemberIDByUsernameInDB(username) {
 
         // If no member is found, return an error
         if (!memberInfo) {
-            return { error: "Member not found", data: null };
+            return { error: "Member by username not found", data: null };
         }
         // Return member ID
         return { error: null, data: memberInfo.member_id };

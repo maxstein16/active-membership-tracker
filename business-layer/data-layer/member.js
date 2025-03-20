@@ -24,6 +24,13 @@ async function createMember(memberData) {
  * @returns {Promise<boolean>} Returns `true` if the member was updated, `false` if no matching member was found.
  */
 async function updateMember(memberId, updateData) {
+
+  console.log("member.js made it to updateMember")
+  console.log("member.js NO .data is " + memberId)
+  console.log("member.js with .data is " + memberId.data)
+
+  var realID = memberId
+
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },

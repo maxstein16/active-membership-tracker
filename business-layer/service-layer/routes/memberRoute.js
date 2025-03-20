@@ -130,8 +130,14 @@ router.put(
 
 // PUT-UPDATE/v1/member
 router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+
+  console.log("you made it to put member!")
   let body = req.body;
   let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
+
+
+  console.log("memberRoute says memberID is (non .data) " + memberId)
+  console.log("memberRoute says memberID is (w .data) " + memberId.data)
 
   // Check if an error occurred while fetching member ID
   if (memberId.error) {
@@ -141,14 +147,14 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   }
   // check if at least one valid field is provided for update
   const allowedFields = [
-    "member_personal_email",
-    "member_phone_number",
-    "member_major",
-    "member_graduation_date",
-    "member_race",
-    "member_gender",
-    "member_tshirt_size",
-    "member_status"
+    "personal_email",
+    "phone_number",
+    "major",
+    "graduation_date",
+    "race",
+    "gender",
+    "tshirt_size",
+    "status",
   ];
 
   const hasValidFields = Object.keys(body).some((key) =>
@@ -163,7 +169,8 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
     return;
   }
   // send data to backend for update
-  const updateResult = await business.updateMember(memberId.data, body);
+  const updateResult = await business.updateMember(memberId, body);
+
 
   if (updateResult.error && updateResult.error !== error.noError) {
     res.status(404).json({ error: error.memberCannotBeFoundInDB });
