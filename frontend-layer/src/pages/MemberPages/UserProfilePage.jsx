@@ -22,9 +22,10 @@ export default function UserProfilePage() {
     const fetchMemberData = async () => {
       try {
         const data = await getAPIData("/member", API_METHODS.GET);
+        console.log("UserProfilePage got: " + data.data);
 
         // Check if API response is successful
-        if (data && data.data) {
+        if (data) {
           // Map the response data to state
           const member = data.data;
           setUserData({
@@ -40,12 +41,7 @@ export default function UserProfilePage() {
             gradYear: new Date(member.member_graduation_date).getFullYear(),
             tshirt: member.member_tshirt_size,
             race: member.member_race,
-            gender:
-              member.member_gender === "F"
-                ? "Female"
-                : member.member_gender === "M"
-                ? "Male"
-                : member.member_gender,
+            gender: member.member_gender,
             status: member.member_status,
             memberships: member.memberships.map((membership) => ({
               organizationName: membership.organization.organization_name,

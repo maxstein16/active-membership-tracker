@@ -26,7 +26,6 @@ export default function EditProfilePage() {
   const [unchangedMessage, setUnchangedMessage] = React.useState("");
   const [error, setError] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
-  const [userIsAdmin] = React.useState(false);
 
   React.useEffect(() => {
     const fetchUserData = async () => {

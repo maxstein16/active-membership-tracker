@@ -14,8 +14,8 @@ import { API_METHODS, getAPIData } from "../../utils/callAPI";
 export default function UploadDataModal({ orgId, color }) {
   const [open, setOpen] = React.useState(false);
   const [fileSelected, setFileSelected] = React.useState(false);
-  const [fileName, setFileName] = React.useState(""); // State for file name
-  const [fileContent, setFileContent] = React.useState(""); // State for file content
+  const [setFileName] = React.useState(""); // State for file name
+  const [setFileContent] = React.useState(""); // State for file content
   const [errMsg, setErrMsg] = React.useState(""); // State for error message
   const navigate = useNavigate(); // React Router navigate function
 
@@ -103,43 +103,47 @@ export default function UploadDataModal({ orgId, color }) {
   };
   return (
     <div>
-    {/* Upload Data Link + Popup */}
-    <button
-    onClick={() => setOpen(true)}
-    style={{ color: color, borderColor: color }}
-    className="secondary custom-color-button"
-  >
-    Upload Attendance Data
-  </button>
-    <Dialog
-      onClose={() => {
-        setOpen(false);
-      }}
-      open={open}
-    >
-      <DialogTitle>Upload CSV Data File</DialogTitle>
-      <DialogContent>
-        <p>
-          You can find CSV data files on campus groups, or you can upload your
-          own data files. Make sure you follow the same format as campus groups
-          :)
-        </p>
-        <input type="file" onChange={handleFileChange} />
-        {errMsg && <p style={{ color: "red" }}>{errMsg}</p>}{" "}
-        {/* Display error message */}
-      </DialogContent>
-      <DialogActions>
-        <button autoFocus className="secondary" onClick={() => setOpen(false)}>
-          Cancel
-        </button>
-        <button
-          onClick={handleUpload}
-          disabled={!fileSelected} // Disables button until a file is selected
-        >
-          Upload
-        </button>
-      </DialogActions>
-    </Dialog>
+      {/* Upload Data Link + Popup */}
+      <button
+        onClick={() => setOpen(true)}
+        style={{ color: color, borderColor: color }}
+        className="secondary custom-color-button"
+      >
+        Upload Attendance Data
+      </button>
+      <Dialog
+        onClose={() => {
+          setOpen(false);
+        }}
+        open={open}
+      >
+        <DialogTitle>Upload CSV Data File</DialogTitle>
+        <DialogContent>
+          <p>
+            You can find CSV data files on campus groups, or you can upload your
+            own data files. Make sure you follow the same format as campus
+            groups :)
+          </p>
+          <input type="file" onChange={handleFileChange} />
+          {errMsg && <p style={{ color: "red" }}>{errMsg}</p>}{" "}
+          {/* Display error message */}
+        </DialogContent>
+        <DialogActions>
+          <button
+            autoFocus
+            className="secondary"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpload}
+            disabled={!fileSelected} // Disables button until a file is selected
+          >
+            Upload
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
