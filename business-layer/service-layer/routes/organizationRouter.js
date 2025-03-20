@@ -35,42 +35,18 @@ router.all("/", isAuthorizedHasSessionForAPI, (req, res) => {
  * Retrieves organizations that the logged-in user is a member of
  */
 router.get("/my", isAuthorizedHasSessionForAPI, async (req, res) => {
-  try {
-    // Check if user is logged in with valid session
-    if (!req.session || !req.session.user || !req.session.user.username) {
-      return res.status(401).json({
-        status: "error",
-        error: error.notAuthorized || { message: "User must be logged in" },
-      });
-    }
-  try {
-    // Check if user is logged in with valid session
-    if (!req.session || !req.session.user || !req.session.user.username) {
-      return res.status(401).json({
-        status: "error",
-        error: error.notAuthorized || { message: "User must be logged in" },
-      });
-    }
+    // Fetch member ID using the function
+  let memberId = await business.getMemberIDByUsername(req.session.user.username);
 
-    // Get username from session exactly as it appears
-    const username = sanitizer.sanitize(req.session.user.username);
-    console.log(`Fetching organizations for user: ${username}`);
+  // Check if an error occurred while fetching member ID
+  if (memberId.error) {
+    console.log("Error fetching member ID: " + memberId.error);
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
 
     // Call business logic to get user's organizations
-    const result = await business.getUserOrganizations(username);
-
-    if (result.error) {
-      return res.status(400).json({
-        status: "error",
-        error: result.error,
-      });
-    }
-    // Get username from session exactly as it appears
-    const username = sanitizer.sanitize(req.session.user.username);
-    console.log(`Fetching organizations for user: ${username}`);
-
-    // Call business logic to get user's organizations
-    const result = await business.getUserOrganizations(username);
+    const result = await business.getUserOrganizations(memberId.data);
 
     if (result.error) {
       return res.status(400).json({
@@ -83,24 +59,6 @@ router.get("/my", isAuthorizedHasSessionForAPI, async (req, res) => {
       status: "success",
       data: result.data,
     });
-  } catch (err) {
-    console.error("Error in GET /organization/my:", err);
-    return res.status(500).json({
-      status: "error",
-      error: error.somethingWentWrong,
-    });
-  }
-    return res.status(200).json({
-      status: "success",
-      data: result.data,
-    });
-  } catch (err) {
-    console.error("Error in GET /organization/my:", err);
-    return res.status(500).json({
-      status: "error",
-      error: error.somethingWentWrong,
-    });
-  }
 });
 
 /**
