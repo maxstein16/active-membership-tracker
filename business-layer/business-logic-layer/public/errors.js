@@ -11,6 +11,7 @@ module.exports = function () {
   this.membershipNotFound = "Membership Not Found"
   this.youDoNotHavePermission = "You do not have permissions for this action"
   this.roleMustBeAnInteger = "Organization Role must be an integer"
+  this.noValidFieldsForUpdate = "No valid fields provided for update"
 
   // Member In Org Management
 

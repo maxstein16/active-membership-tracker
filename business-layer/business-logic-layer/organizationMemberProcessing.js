@@ -278,9 +278,11 @@ async function getMembersInOrganizationInDB(orgId) {
 }
 
 module.exports = {
-  getSpecificMemberWithOrgDataInDB,
-  addMemberToAnOrganizationInDB,
-  editMemberInOrganizationInDB,
-  deleteMemberInOrganizationInDB,
-  getMembersInOrganizationInDB,
+    getSpecificMemberWithOrgDataInDB,
+    addMemberToAnOrganizationInDB,
+    editMemberInOrganizationInDB,
+    deleteMemberInOrganizationInDB,
+    getMembersInOrganizationInDB,
+    getMembersByAttributes
 };
+
