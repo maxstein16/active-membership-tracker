@@ -14,10 +14,10 @@ import useWindowWidth from "../../utils/useWindowWidth";
 
 export default function OrganizationStatusPage() {
   const { orgId } = useParams();
-  var memberInfo;
   let [loading, setLoading] = React.useState(false);
   let [posts, setPosts] = React.useState([]);
   var [membershipInfo, setMemberships] = React.useState([]);
+  var [memberInfo, setMemberInfo] = React.useState([]);
   var [orgData, setOrgData] = React.useState([]);
   let [graphData, setGraphData] = React.useState([]);
 
@@ -40,9 +40,9 @@ export default function OrganizationStatusPage() {
       setMemberships(result.data.membership);
       setOrgData(response.data);
       
-    memberInfo = result;
+    setMemberInfo(result.data);
      
-        console.log(result.data.membership.membership_points);
+        console.log(result.data);
         console.log(response.data.organization_threshold);
       
     
@@ -64,7 +64,7 @@ export default function OrganizationStatusPage() {
         <div>
           <h1>Your Membership with <span style={{color: orgData.organization_color}}>{orgData.organization_abbreviation}</span></h1>
           
-          <p>You have been an active member for <strong></strong> semesters.</p>
+          <p>You have been an active member for <strong>{memberInfo.activeSemesters} </strong> semesters.</p>
           <ResponsiveContainer width="100%" height="50%">
             <PieChart>
             

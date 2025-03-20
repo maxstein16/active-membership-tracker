@@ -48,7 +48,7 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
     (m) => m.active_member
   ).length;
 
-  console.log(activeSemestersCount);
+  console.log("Semesters active: " + activeSemestersCount);
   // Get current semester membership if exists
   const currentSemester = await getSemestersByYear();
   const currentMembership = memberships.find(
