@@ -12,7 +12,7 @@ const {
   getMembershipsByAttributes,
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
-const { getCurrentSemester } = require("../data-layer/semester.js");
+const { getCurrentSemester, getSemestersByYear } = require("../data-layer/semester.js");
 const {
   checkActiveMembership,
 } = require("./organizationMembershipProcessing.js");
@@ -48,8 +48,9 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
     (m) => m.active_member
   ).length;
 
+  console.log(activeSemestersCount);
   // Get current semester membership if exists
-  const currentSemester = await getCurrentSemester();
+  const currentSemester = await getSemestersByYear();
   const currentMembership = memberships.find(
     (m) => m.semester_id === currentSemester.semester_id
   );
