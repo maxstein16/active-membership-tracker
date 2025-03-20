@@ -4,10 +4,31 @@ import html2canvas from "html2canvas";
 import { getAnnualReportData, getSemesterReportData, getMeetingReportData } from "../../../utils/handleSettingsData";
 import { PieChart, Pie, Cell } from "recharts";
 import { createRoot } from "react-dom/client";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import "../../../assets/css/downloadReport.css";
 
 const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
   const [isDownloading, setIsDownloading] = React.useState(false);
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: "",
+    severity: "info" // 'success', 'error', 'warning', 'info'
+  });
+
+  // Function to show notification
+  const showNotification = (message, severity = "info") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  // Function to close notification
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
 
   // Function to create comparison chart for member or event data
   const createComparisonChart = (data, timeframeName, color, chartTitle, dataItems) => {
@@ -400,19 +421,19 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
         reportData = await getSemesterReportData(orgId);
       } else if (reportType === "meeting") {
         if (!meetingId) {
-          alert("Missing meeting ID for meeting report.");
+          showNotification("Missing meeting ID for meeting report.", "error");
           setIsDownloading(false);
           return;
         }
         reportData = await getMeetingReportData(orgId, meetingId);
       } else {
-        alert("Invalid report type.");
+        showNotification("Invalid report type.", "error");
         setIsDownloading(false);
         return;
       }
 
       if (!reportData) {
-        alert("Error fetching report data.");
+        showNotification("Error fetching report data.", "error");
         setIsDownloading(false);
         return;
       }
@@ -456,7 +477,7 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
         const filename = generateReportFilename(reportData, reportType);
         pdf.save(filename);
         
-        alert("Report successfully downloaded!");
+        showNotification("Report successfully downloaded!", "success");
       } finally {
         // Clean up temporary DOM elements
         if (container && container.parentNode) {
@@ -466,25 +487,43 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
       }
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Failed to generate the report.");
+      showNotification("Failed to generate the report.", "error");
       setIsDownloading(false);
     }
   };
 
   return (
-    <button
-      className="custom-color-button download-button"
-      style={{ 
-        backgroundColor: color, 
-        borderColor: color,
-        opacity: isDownloading ? 0.7 : 1,
-        cursor: isDownloading ? 'wait' : 'pointer'
-      }}
-      onClick={downloadReport}
-      disabled={isDownloading}
-    >
-      {isDownloading ? "Generating PDF..." : "Download Report"}
-    </button>
+    <>
+      <button
+        className="custom-color-button download-button"
+        style={{ 
+          backgroundColor: color, 
+          borderColor: color,
+          opacity: isDownloading ? 0.7 : 1,
+          cursor: isDownloading ? 'wait' : 'pointer'
+        }}
+        onClick={downloadReport}
+        disabled={isDownloading}
+      >
+        {isDownloading ? "Generating PDF..." : "Download Report"}
+      </button>
+      
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
