@@ -205,7 +205,7 @@ export default function SettingsPage() {
             createNewBonus={createNewBonus}
           />
 
-          {/* <MemberTable color={orgData.color} orgId={orgId} /> */}
+          <MemberTable color={orgData.color} orgId={orgId} />
         </>
       )}
     </PageSetup>

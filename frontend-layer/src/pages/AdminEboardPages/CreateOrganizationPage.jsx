@@ -23,8 +23,10 @@ export default function CreateOrganizationPage() {
     name: "",
     abbreviation: "",
     description: "",
+    email: "",
     color: "#F76902", // default value, don't remove
     threshold: "",
+    isPointBased: true,
     emailSettings: {
       id: 0,
       monthlyStatus: true,
@@ -47,43 +49,66 @@ export default function CreateOrganizationPage() {
       newData[valueName] = newValue;
     }
     setOrgData(newData);
-    // console.log(newData);
+    console.log(newData);
   };
 
-  const createNewRequirementLocally = (isPoints) => {
+  const createNewRequirementLocally = () => {
     // get the last requirement's id so we can increment
     let lastId = 0;
     let len = orgData.membershipRequirements.length;
-    if (len > 1) {
+    if (len >= 1) {
       lastId = orgData.membershipRequirements[len - 1].id;
     }
-
     let newData = { ...orgData };
     newData.membershipRequirements.push({
       id: lastId + 1, // create a FRONTEND ONLY id
-      meetingType: "general meeting",
-      frequency: "semesterly",
-      amountType: isPoints ? "points" : "percentage",
-      amount: 1,
-      requirementScope: "semesterly",
+      eventType: "general meeting",
+      type: orgData.isPointBased ? "points" : "attendance_count",
+      value: 1,
+      bonuses: [],
     });
+
+    setOrgData(newData);
+  };
+
+  const createNewBonusLocally = (reqId) => {
+
+    // get the last requirement's id so we can increment
+    let lastId = 0;
+    let requirement = orgData.membershipRequirements.filter((req) => req.id === reqId)
+    let len = requirement[0].bonuses.length;
+    if (len >= 1) {
+      lastId = requirement[0].bonuses[len - 1].id;
+    }
+
+    let newData = { ...orgData };
+    newData.membershipRequirements.forEach((requirement, index) => {
+      if (requirement.id === reqId) {
+        newData.membershipRequirements[index].bonuses.push({
+          id: lastId + 1, // create a FRONTEND ONLY id
+          threshold: 50,
+          points: 1,
+        });
+      }
+    })
+
     setOrgData(newData);
   };
 
   const cancel = () => {
-    setShowAreYouSureDialog(true)
+    setShowAreYouSureDialog(true);
   };
 
   const createOrg = () => {
     createNewOrgInDB(orgData).then((error) => {
       if (!error) {
         // success!
-        setShowSuccessDialog(true)
+        setShowSuccessDialog(true);
         return;
       }
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-      setError(error)
-    })
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      setError(error);
+    });
   };
 
   return (
@@ -119,10 +144,20 @@ export default function CreateOrganizationPage() {
         deleteRequirementInDB={() => {
           /* Don't need to do anything here */
         }}
-        CreateNewRequirement={createNewRequirementLocally}
+        deleteBonusRequirementInDb={() => {
+          /* Don't need to do anything here */
+        }}
+        createNewRequirement={createNewRequirementLocally}
+        createNewBonus={createNewBonusLocally}
       />
 
-      {error !== "" ? <p className="error" style={{marginTop: '40px'}}>{error}</p> : <></>}
+      {error !== "" ? (
+        <p className="error" style={{ marginTop: "40px" }}>
+          {error}
+        </p>
+      ) : (
+        <></>
+      )}
       {/* When clicked: cancel needs to have an are you sure popup,  */}
       <div className="create-org-buttons">
         <button className="secondary" onClick={cancel}>
@@ -130,8 +165,12 @@ export default function CreateOrganizationPage() {
         </button>
         <button onClick={createOrg}>Create Organization</button>
       </div>
-      <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog}/>
-      <AreYouSure open={showAreYouSureDialog} setOpen={setShowAreYouSureDialog} navLink={"/"}/>
+      <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog} />
+      <AreYouSure
+        open={showAreYouSureDialog}
+        setOpen={setShowAreYouSureDialog}
+        navLink={"/"}
+      />
     </PageSetup>
   );
 }
