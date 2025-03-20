@@ -43,12 +43,6 @@ export default function UserProfilePage() {
             race: member.member_race,
             gender: member.member_gender,
             status: member.member_status,
-            memberships: member.memberships.map((membership) => ({
-              organizationName: membership.organization.organization_name,
-              points: membership.membership_points,
-              role: membership.membership_role,
-              activeMember: membership.active_member,
-            })),
           });
         } else {
           console.error(

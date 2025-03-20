@@ -16,7 +16,7 @@ import {
   allowedTshirtSizes,
   raceOptions,
   statusOptions,
-} from "../../utils/allowedUserAttribues";
+} from "../../utils/allowedUserAttributes";
 
 export default function EditProfilePage() {
   const [userData, setUserData] = React.useState(null);
@@ -35,8 +35,6 @@ export default function EditProfilePage() {
         if (data && data.data) {
           const member = data.data;
           const formattedData = {
-            name: member.member_name,
-            email: member.member_email,
             personalEmail: member.member_personal_email,
             phone: member.member_phone_number,
             major: member.member_major,
@@ -66,8 +64,6 @@ export default function EditProfilePage() {
 
   const validateFields = () => {
     const {
-      name,
-      email,
       personalEmail,
       phone,
       major,
@@ -79,25 +75,10 @@ export default function EditProfilePage() {
     } = userData;
 
     // Regular expressions for validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@rit\.edu$/;
     const personalEmailRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; // General email format
     const phoneRegex = /^\+?(\d[\d-.()\s]*){10,15}$/;
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD format
-
-    // Name validation
-    if (!name) {
-      return "Name is required!";
-    } else if (typeof name !== "string") {
-      return "Name must be a string.";
-    }
-
-    // Email validation (RIT email)
-    if (!email) {
-      return "Email is required!";
-    } else if (!emailRegex.test(email)) {
-      return "Invalid email format. It must end with 'rit.edu'.";
-    }
 
     // Personal email validation (if provided)
     if (personalEmail && !personalEmailRegex.test(personalEmail))
@@ -166,8 +147,6 @@ export default function EditProfilePage() {
 
     try {
       const payload = {
-        member_name: userData.name,
-        member_email: userData.email,
         member_personal_email: userData.personalEmail,
         member_phone_number: userData.phone,
         member_major: userData.major,
@@ -204,25 +183,15 @@ export default function EditProfilePage() {
         onClick={() => handleNavigation("/profile")}
       />
       <h1>Edit Profile</h1>
+      <h1>
+        for {userData.name}, {userData.email}
+      </h1>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
       {unchangedMessage && (
         <p style={{ color: "orange" }}>{unchangedMessage}</p>
       )}
-
-      <UserInput
-        label="Name"
-        value={userData.name}
-        setValue={(value) => saveNewAttribute(value, "name")}
-        isMultiline={false}
-      />
-      <UserInput
-        label="Email"
-        value={userData.email}
-        setValue={(value) => saveNewAttribute(value, "email")}
-        isMultiline={false}
-      />
       <UserInput
         label="Personal Email"
         value={userData.personalEmail}
