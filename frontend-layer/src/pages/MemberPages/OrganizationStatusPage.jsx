@@ -62,8 +62,14 @@ export default function OrganizationStatusPage() {
 
       <div className={ windowWidth > 499 ? "member-progress-chart-page" : "member-progress-chart-page-mobile"}>
         <div>
-          <h1>Your Membership with <span style={{color: orgData.organization_color}}>{orgData.organization_abbreviation}</span></h1>
-          
+          <h1>Your Membership with {orgData.organization_abbreviation}</h1>
+          {
+            console.log(orgData)
+          }
+          {console.log(membershipInfo)
+          }
+
+          {console.log(memberInfo)}
           <p>You have been an active member for <strong>{memberInfo.activeSemesters} </strong> semesters.</p>
           <ResponsiveContainer width="100%" height="50%">
             <PieChart>
@@ -79,7 +85,7 @@ export default function OrganizationStatusPage() {
             {
                membershipInfo.membership_points < orgData.organization_threshold &&
                <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
-               <tspan x="50%" fill={orgData.organization_color} dy=".6em">  {(parseInt(membershipInfo.membership_points) / parseInt(orgData.organization_threshold) * 100).toFixed(0)} %</tspan>
+               <tspan x="50%" dy=".6em">  {(parseInt(membershipInfo.membership_points) / parseInt(orgData.organization_threshold) * 100).toFixed(0)} %</tspan>
                <tspan x="50%" dy="1.2em">to Active</tspan>
                <tspan x="50%" dy="1.2em">Membership</tspan>
                </text>
