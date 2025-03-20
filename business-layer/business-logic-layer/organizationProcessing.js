@@ -209,28 +209,18 @@ async function createOrganizationInDB(orgData) {
  * @returns {Promise<Object>} - Returns error and success message.
  */
 async function updateOrganizationInDB(orgId, orgDataToUpdate) {
-  if (!Number.isInteger(orgId) || orgId <= 0) {
+
+  if (isNaN(orgId) || orgId <= 0) {
     return { error: error.invalidOrganizationId, data: null };
   }
 
-  if (Object.keys(orgDataToUpdate).length === 0) {
+  if (orgDataToUpdate.length === 0) {
     return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
   }
 
-  const validationError = validateOrgFields(orgDataToUpdate);
-  if (validationError) {
-    return { error: validationError, data: null };
-  }
-
   try {
-    const mappedData = mapToDbFields(orgDataToUpdate);
-
-    // Remove undefined fields
-    Object.keys(mappedData).forEach(
-      (key) => mappedData[key] === undefined && delete mappedData[key]
-    );
-
-    const updateSuccess = await updateOrganizationByID(orgId, mappedData);
+    const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
+    
     if (updateSuccess) {
       return {
         error: null,

@@ -114,10 +114,50 @@ const {
       return { error: error.somethingWentWrong, data: null };
     }
   };
+
+  /**
+   * Get all unique academic years from semesters in the database
+   * @returns {Object} Error and data object with array of years
+   */
+  async function getAllAcademicYearsInDB() {
+    try {
+      const currentYear = new Date().getFullYear();
+      const startYear = 2018;
+      const years = new Set();
+      
+      for (let year = currentYear; year >= startYear; year--) {
+        const semesters = await getSemestersByYear(year);
+        
+        if (semesters && semesters.length > 0) {
+          years.add(year);
+          
+          semesters.forEach(semester => {
+            if (semester.academic_year) {
+              const yearParts = semester.academic_year.split('-');
+              yearParts.forEach(yearPart => {
+                const parsedYear = parseInt(yearPart, 10);
+                if (!isNaN(parsedYear)) {
+                  years.add(parsedYear);
+                }
+              });
+            }
+          });
+        }
+      }
+      
+      const yearsArray = [...years].sort((a, b) => b - a);
+      
+      return { error: error.noError, data: yearsArray };
+    } catch (err) {
+      console.error("Error in getAllAcademicYearsInDB:", err);
+      return { error: error.databaseError, data: null };
+    }
+  }
   
   module.exports = {
     createSemesterDB,
     getSemesterByDateDB,
     getCurrentSemesterDB,
     getSemestersByYearDB,
+    getAllAcademicYearsInDB
   };

@@ -179,7 +179,7 @@ async function createOrganizationMembershipRequirementsInDB(orgId, data) {
       requirement_scope: data.frequency,
     });
 
-    console.log(created);
+    // console.log(created);
     if (!created) {
       return { error: error.settingNotFound, data: null };
     }

@@ -1,7 +1,5 @@
-// import { API_METHODS, getAPIData } from "./callAPI";
-// import { ROLE_ADMIN, ROLE_MEMBER } from "./constants";
-
-import { ROLE_ADMIN } from "./constants";
+import { API_METHODS, getAPIData } from "./callAPI";
+import { ROLE_MEMBER } from "./constants";
 
 /**
  * 
@@ -9,19 +7,20 @@ import { ROLE_ADMIN } from "./constants";
  * @returns {String} ROLE_MEMBER, ROLE_EBOARD, or ROLE_ADMIN
  */
 export async function whatRoleAmI(orgId) {
-    // const memberInfo = await getAPIData("/member", API_METHODS.get, {})
+    const memberInfo = await getAPIData("/member", API_METHODS.get, {})
     
-    // let role = ROLE_MEMBER;
+    let role = ROLE_MEMBER;
 
-    // if (!memberInfo.memberships) {
-    //     return role;
-    // }
+    if (!memberInfo.data.memberships) {
+        console.log('do here')
+        return role;
+    }
 
-    // memberInfo.memberships.forEach(membership => {
-    //     if (membership.organization_id === orgId) {
-    //         role = membership.membership_role
-    //     }
-    // });
-    // return role
-    return ROLE_ADMIN
+    memberInfo.data.memberships.forEach(membership => {
+        if (`${membership.organization_id}` === orgId) {
+            role = membership.membership_role
+        }
+    });
+
+    return role
 }

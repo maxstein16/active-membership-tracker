@@ -38,8 +38,6 @@ router.get("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     return res.status(404).json({ error: response.error });
   }
 
-
-
   return res.status(200).json({ status: "success", data: response.data });
 });
 
@@ -49,19 +47,22 @@ router.put(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     let orgId = req.params.orgId;
-    let { requirement_id, meeting_type, frequency, amount_type, amount } =
-      req.body;
+    let reqId = req.body.requirement_id;
 
     orgId = sanitizer.sanitize(orgId);
-    requirement_id = sanitizer.sanitize(requirement_id);
+    reqId = sanitizer.sanitize(reqId);
 
     if (isNaN(orgId)) {
       return res.status(400).json({ error: error.organizationIdMustBeInteger });
     }
-    if (isNaN(requirement_id)) {
+    if (!reqId || isNaN(reqId)) {
       return res.status(400).json({ error: error.settingIdMustBeInteger });
     }
-    if (!meeting_type && !frequency && !amount_type && !amount) {
+    if (
+      !req.body.hasOwnProperty("event_type") &&
+      !req.body.hasOwnProperty("requirement_type") &&
+      !req.body.hasOwnProperty("requirement_value")
+    ) {
       return res
         .status(400)
         .json({ error: error.mustHaveAtLeastOneFieldToUpdate });
@@ -184,7 +185,7 @@ router.put(
   }
 );
 
-//DELETE /v1/organization/:orgId/settings/membership-requirements
+//DELETE /v1/organization/:orgId/settings/membership-requirements/:id
 router.delete(
   "/membership-requirements",
   isAuthorizedHasSessionForAPI,

@@ -65,15 +65,7 @@ async function updateOrganizationByID(organizationId, updatedOrgInfo) {
             logging: true,
     });
 
-    if (updatedOrgRows > 0) {
-      console.log(
-        `Organization with ID ${organizationId} updated successfully.`
-      );
-      return true;
-    } else {
-      console.log(`No organization found with ID ${organizationId}`);
-      return false;
-    }
+    return true;
   } catch (err) {
     console.error("Error updating organization:", err);
     throw err;

@@ -6,6 +6,7 @@ import "../../../assets/css/adminPages.css";
 
 import UserInput from "../../UserInput";
 import CustomColorToggle from "../../CustomColorToggle";
+import AreYouSureDeleteReqs from "./AreYouSureDeleteReqs";
 
 export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
   // define my variables
@@ -16,7 +17,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
   const [color, setColor] = React.useState(orgData.color);
   const [threshold, setThreshold] = React.useState(orgData.threshold);
   const [isPoints, setIsPoints] = React.useState(orgData.isPointBased);
-
+  const [isAreYouSureOpen, setIsAreYouSureOpen] = React.useState(false);
 
   const [error, setError] = React.useState("");
 
@@ -134,7 +135,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
         value={threshold}
         setValue={setThreshold}
         isMultiline={false}
-        onLeaveField={(newValue) => {
+        onLeaveField={(newValue) => { 
           if (newValue.trim() === "") {
             setError("Threshold must have a value");
             return;
@@ -154,11 +155,20 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
         isChecked={isPoints}
         color={orgData.color}
         onChange={() => {
-          setIsPoints(!isPoints);
-          saveSetting(!isPoints, "isPointsBased");
+          setIsAreYouSureOpen(true);
         }}
       />
-      <p><i>Turn this off for percentage based</i></p>
+      <p>
+        <i>Turn this off for attendance percentage based</i>
+      </p>
+      <AreYouSureDeleteReqs
+        color={orgData.color}
+        open={isAreYouSureOpen}
+        setOpen={setIsAreYouSureOpen}
+        isPoints={isPoints}
+        setIsPoints={setIsPoints}
+        saveSetting={saveSetting}
+      />
     </div>
   );
 }
