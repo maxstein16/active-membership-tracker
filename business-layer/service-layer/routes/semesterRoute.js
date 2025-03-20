@@ -42,6 +42,16 @@ router.get("/current", isAuthorizedHasSessionForAPI, async (req, res) => {
     return res.status(200).json({ status: "success", data: semester.data });
 });
 
+// GET /semester/academic-years (Get all academic years)
+router.get("/academic-years", isAuthorizedHasSessionForAPI, async (req, res) => {
+    const years = await business.getAllAcademicYears();
+    if (years.error && years.error !== error.noError) {
+        return res.status(404).json({ error: years.error });
+    }
+    
+    return res.status(200).json({ status: "success", data: years.data });
+});
+
 // GET /semester/year/:year (Get semesters by year)
 router.get("/year/:year", isAuthorizedHasSessionForAPI, async (req, res) => {
     let { year } = req.params;

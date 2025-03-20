@@ -1,4 +1,4 @@
-const { Event, Attendance } = require("../db");
+const { Event, Attendance, Member } = require("../db");
 
 /**
  * Creates a new event in the database.
@@ -137,10 +137,16 @@ async function getEventsWithAttendance(orgId) {
   try {
     const events = await Event.findAll({
       where: { organization_id: orgId },
-      include: {
-        model: Attendance,
-        as: "Attendances",
-      },
+      include: [
+        {
+          model: Attendance,
+          as: "Attendances",
+          include: {
+            model: Member,
+            required: true
+          }
+        }
+      ]
     });
     return events;
   } catch (err) {

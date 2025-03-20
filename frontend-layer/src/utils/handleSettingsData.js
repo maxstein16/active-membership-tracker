@@ -453,3 +453,113 @@ export async function getMeetingReport(orgId, meetingId) {
     inactiveMemberAttendance: attendanceData.inactive_member_attendance || 0,
   };
 }
+
+export async function getAnnualReportData(orgId) {
+  const apiUrl = `/organization/${orgId}/reports/annual`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching annual report data.");
+    return null;
+  }
+
+  return response.orgData;
+}
+
+
+export async function getSemesterReportData(orgId) {
+  const apiUrl = `/organization/${orgId}/reports/semesterly`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching semester report data.");
+    return null;
+  }
+
+  return response.orgData;
+}
+
+export async function getMeetingReportData(orgId, meetingId) {
+  const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching meeting report data.");
+    return null;
+  }
+
+  return response.orgData;
+}
+
+export async function getAllSemesters() {
+  const result = await getAPIData(
+    `/semester`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  
+  if (!result.data || result.error) {
+    console.error("Error fetching semesters:", result.error);
+    return [];
+  }
+  
+  return result.data;
+}
+
+export async function getSemesterReportDataById(orgId, semesterId) {
+  const apiUrl = `/organization/${orgId}/reports/semesterly/${semesterId}`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching semester report data for semester ID:", semesterId);
+    return null;
+  }
+
+  return response.orgData;
+}
+
+export async function getAnnualReportDataByYear(orgId, year) {
+  const apiUrl = `/organization/${orgId}/reports/annual/${year}`;
+
+  const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+  if (!response || !response.orgData) {
+    console.error("Error fetching annual report data for year:", year);
+    return null;
+  }
+
+  return response.orgData;
+}
+
+/**
+ * Get all academic years available in the database
+ * @returns {Array} List of years
+ */
+export async function getAllAcademicYears() {
+  const result = await getAPIData(
+    `/semester/academic-years`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  
+  if (!result.data || result.error) {
+    console.error("Error fetching academic years:", result.error);
+    return [];
+  }
+  
+  return result.data;
+}
