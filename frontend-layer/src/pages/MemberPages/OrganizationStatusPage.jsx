@@ -40,10 +40,10 @@ export default function OrganizationStatusPage() {
       setMemberships(result.data.membership);
       setOrgData(response.data);
       
-    setMemberInfo(result.data);
+      setMemberInfo(result.data);
      
-        console.log(result.data);
-        console.log(response.data.organization_threshold);
+        // console.log(result.data);
+        // console.log(response.data.organization_threshold);
       
     
       setLoading(false);
@@ -68,19 +68,25 @@ export default function OrganizationStatusPage() {
           <ResponsiveContainer width="100%" height="50%">
             <PieChart>
             
-                <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
-                <tspan x="50%" fill={orgData.organization_color} dy=".6em">  {(parseInt(membershipInfo.membership_points) / parseInt(orgData.organization_threshold) * 100).toFixed(0)} %</tspan>
-                <tspan x="50%" dy="1.2em">to Active</tspan>
-                <tspan x="50%" dy="1.2em">Membership</tspan>
-                </text>
-              
-           
-                {/* <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
+            {
+              membershipInfo.membership_points >= orgData.organization_threshold &&
+
+                <text x='50%' y="50%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
                   <tspan x="50%" dy=".6em">Active</tspan>
                   <tspan x="50%" dy="1.2em">Membership</tspan>
-                </text> */}
+                </text> 
+            }
+            {
+               membershipInfo.membership_points < orgData.organization_threshold &&
+               <text x='50%' y="40%" scaleToFit="true" textAnchor="middle" verticalAnchor="middle" textLength={160}>
+               <tspan x="50%" fill={orgData.organization_color} dy=".6em">  {(parseInt(membershipInfo.membership_points) / parseInt(orgData.organization_threshold) * 100).toFixed(0)} %</tspan>
+               <tspan x="50%" dy="1.2em">to Active</tspan>
+               <tspan x="50%" dy="1.2em">Membership</tspan>
+               </text>
+
+            }
+               
               
-            
               <Pie
                 data={[
                   { name: "PointsEarned", value: membershipInfo.membership_points },
@@ -93,26 +99,11 @@ export default function OrganizationStatusPage() {
                 cy="50%"
                 innerRadius="50%"
                 outerRadius="80%"
-                
+                //fill="#d6d2dd"
               > 
-              {
-            //  console.log(membershipInfo.membership_points)
-              
-              }
-
-              {
-                //  console.log(orgData)
-              }
-               {
-                orgId === 1 &&
-                <><Cell fill={orgData.organization_color} /><Cell fill={orgData.organization_color} /></>
-              }
-              
-              {
-                orgId === 2 &&
-                <><Cell fill={orgData.organization_color} /><Cell fill={orgData.organization_color} /></>
-              } 
-              
+             
+                {/* <Cell fill={orgData.organization_color} /><Cell/>  <- this uses the organization's color on the pie chart but it looks weird with certain values*/}
+              <Cell></Cell>
             </Pie>
             </PieChart>
           </ResponsiveContainer>
