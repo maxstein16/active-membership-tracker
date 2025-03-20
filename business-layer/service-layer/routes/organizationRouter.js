@@ -130,8 +130,6 @@ async function handlePostOrganization(req, res) {
       return;
     }
 
-    console.log('[MEP] memberid here ', memberId.data)
-
     const result = await business.createOrganization(req.body, memberId.data);
 
     if (result.error) {

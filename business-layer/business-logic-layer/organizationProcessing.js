@@ -168,7 +168,6 @@ async function getSpecificOrgDataInDB(orgId) {
  * @returns {Promise<Object>} - Returns error and new organization data.
  */
 async function createOrganizationInDB(orgData, memberId) {
-  console.log("[MEP] memberid, ", memberId);
   const validationError = validateOrgFields(orgData);
   if (validationError) {
     return { error: validationError, data: null };
@@ -188,7 +187,6 @@ async function createOrganizationInDB(orgData, memberId) {
     // add the current user as admin
     const currentSemester = await getCurrentSemester();
 
-    console.log("[MEP] memberid, ", memberId);
     const membership = await createMembership({
       membership_role: ROLE_ADMIN,
       member_id: memberId,
