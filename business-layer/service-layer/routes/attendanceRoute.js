@@ -118,4 +118,43 @@ router.get("/event/:eventId/attendees", isAuthorizedHasSessionForAPI, async (req
 
     return res.status(200).json({ status: "success", data: attendees.data });
 });
+
+// POST /attendance
+router.post("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+    const { member_id, event_id, check_in, volunteer_hours } = req.body;
+    
+    // Sanitize inputs
+    const sanitizedMemberId = sanitizer.sanitize(member_id);
+    const sanitizedEventId = sanitizer.sanitize(event_id);
+    const sanitizedCheckIn = check_in ? sanitizer.sanitize(check_in) : new Date();
+    const sanitizedVolunteerHours = volunteer_hours ? sanitizer.sanitize(volunteer_hours) : 0;
+    
+    // Validate required fields
+    if (!sanitizedMemberId || isNaN(sanitizedMemberId)) {
+        return res.status(400).json({ error: error.memberIdMustBeInteger });
+    }
+    
+    if (!sanitizedEventId || isNaN(sanitizedEventId)) {
+        return res.status(400).json({ error: error.eventIdMustBeInteger });
+    }
+    
+    // Prepare attendance data
+    const attendanceData = {
+        member_id: sanitizedMemberId,
+        event_id: sanitizedEventId,
+        check_in: sanitizedCheckIn,
+        volunteer_hours: sanitizedVolunteerHours
+    };
+    
+    // Create attendance record
+    const attendanceResult = await business.createAttendance(attendanceData);
+    if (attendanceResult.error && attendanceResult.error !== error.noError) {
+        return res.status(500).json({ error: attendanceResult.error });
+    }
+    
+    return res.status(201).json({ 
+        data: attendanceResult.data 
+    });
+});
+
 module.exports = router;
