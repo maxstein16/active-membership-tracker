@@ -183,12 +183,37 @@ async function addTestData() {
     const shuffled = allPossibleBonusIds.sort(() => 0.5 - Math.random());
     const selectedBonuses = shuffled.slice(0, numBonuses);
 
-    let randomNum = Math.floor(Math.random() * org2.organization_threshold) + 1;
+    randomNum = Math.floor(Math.random() * 40) + 1;
     const membership1b = await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
       organization_id: org2.organization_id,
       semester_id: sem1.semester_id,
+      membership_points: randomNum,
+      active_member: randomNum >= 23,
+      received_bonus: selectedBonuses,
+    });
+
+    // INSERT SPRING 2025 MEMBERSHIPS (semester_id = 1124) HERE:
+    randomNum = Math.floor(Math.random() * 40) + 1;
+
+    await Membership.create({
+      membership_role: 2,
+      member_id: member.member_id,
+      organization_id: org1.organization_id,
+      semester_id: sem2.semester_id,
+      membership_points: randomNum,
+      active_member: randomNum >= 42,
+      active_semesters: 1,
+    });
+
+    randomNum = Math.floor(Math.random() * 40) + 1;
+
+    await Membership.create({
+      membership_role: 2,
+      member_id: member.member_id,
+      organization_id: org2.organization_id,
+      semester_id: sem2.semester_id,
       membership_points: randomNum,
       active_member: randomNum >= 23,
       received_bonus: selectedBonuses,
