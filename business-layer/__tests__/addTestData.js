@@ -45,7 +45,7 @@ async function addTestData() {
     organization_abbreviation: "WiC TEST",
     organization_email: "wic@rit.edu",
     organization_membership_type: "attendance",
-    organization_threshold: 0,
+    organization_threshold: 30,
   });
 
   const org2 = await Organization.create({
