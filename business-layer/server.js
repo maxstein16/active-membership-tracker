@@ -136,7 +136,7 @@ app.get('/login/fail',
 app.get('/saml2/metadata',
   (req, res) => {
     res.set("Content-Type", "text/xml");
-    res.status(200).send(samlStrategy.generateServiceProviderMetadata(SP_CERT,SP_CERT));
+    res.status(200).send(defaultSamlStrategy.generateServiceProviderMetadata(SP_CERT,SP_CERT));
   }
   );
 
