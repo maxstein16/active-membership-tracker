@@ -55,6 +55,7 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
         ...member.toJSON(),
         membership: memberships[0],
         active_percentage: percentageResult.percentage,
+        remaining_attendance: percentageResult.remainingAttendance
       },
     };
   } catch (err) {

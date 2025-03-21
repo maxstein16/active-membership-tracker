@@ -61,12 +61,18 @@ export default function UserProfileData({ user, hideName, color }) {
       <a href={`mailto:${user.email}`} style={contactStyle}>
         {user.email}
       </a>
-      <a href={`mailto:${user.personalEmail}`} style={contactStyle}>
-        {user.personalEmail}
-      </a>
-      <p className="phone-num" style={contactStyle}>
-        {user.phone}
-      </p>
+
+      {user.personalEmail && (
+        <a href={`mailto:${user.personalEmail}`} style={contactStyle}>
+          {user.personalEmail}
+        </a>
+      )}
+
+      {user.phoneNumber && user.phoneNumber !== "N/A" && (
+        <p className="phone-num" style={contactStyle}>
+          {user.phoneNumber}
+        </p>
+      )}
     </div>
   );
 }

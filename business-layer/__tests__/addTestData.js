@@ -244,7 +244,7 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    event_type: "general meeting",
+    event_type: "general_meeting",
     requirement_type: "attendance_count",
     requirement_value: 8,
   });
@@ -265,7 +265,7 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    event_type: "general meeting",
+    event_type: "general_meeting",
     requirement_type: "points",
     requirement_value: 10,
   });
@@ -318,7 +318,7 @@ async function addTestData() {
   console.log("7. Adding Events");
   const event1 = await Event.create({
     organization_id: org1.organization_id,
-    event_name: "WiC General Meeting",
+    event_name: "WiC general_meeting",
     event_start: "2025-02-05 18:00:00",
     event_end: "2025-02-05 19:30:00",
     event_location: "GOL 1400",
@@ -557,7 +557,7 @@ EVENTS
 +----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
 | event_id | event_name                     | event_start         | event_end           | event_location         | event_description                                                   | event_type      | createdAt           | updatedAt           | organization_id | semester_id |
 +----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
-|        7 | WiC General Meeting            | 2025-02-05 23:00:00 | 2025-02-06 00:30:00 | GOL 1400               | An overview of upcoming events and initiatives.                     | general_meeting | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
+|        7 | WiC general_meeting            | 2025-02-05 23:00:00 | 2025-02-06 00:30:00 | GOL 1400               | An overview of upcoming events and initiatives.                     | general_meeting | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
 |        8 | WiC Volunteer Day              | 2025-03-10 14:00:00 | 2025-03-10 18:00:00 | Local Community Center | Helping out at the community center with tech workshops.            | volunteer       | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
 |        9 | WiC Social Night               | 2025-04-15 23:00:00 | 2025-04-16 02:00:00 | Java's Café            | A night of networking, games, and fun!                              | social          | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
 |       10 | COMS Workshop: Resume Building | 2025-02-12 22:30:00 | 2025-02-13 00:00:00 | GOL 2250               | Learn how to craft a compelling resume with industry professionals. | workshop        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |        NULL |

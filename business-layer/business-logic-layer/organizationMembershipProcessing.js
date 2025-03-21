@@ -1,6 +1,7 @@
 const {
   getMemberAttendanceForEventType,
 } = require("../data-layer/attendance.js");
+const { getEventsByAttributes } = require("../data-layer/event.js");
 const {
   getMembershipsByAttributes,
   getMembershipByAttributes,
@@ -129,25 +130,30 @@ async function getMembershipsAcrossSemesters(organizationId, semesterIds) {
 
 async function calculateActivePercentage(membership) {
   try {
-    const { organization_id, membership_points, member_id } = membership;
+    const { organization_id, membership_points, member_id, semester_id } =
+      membership;
 
     const organization = await getOrganizationById(organization_id);
-    const membershipRequirements = await getOrganizationMembershipRequirements(organization_id);
+    const membershipRequirements = await getOrganizationMembershipRequirements(
+      organization_id
+    );
 
     if (!organization || !membershipRequirements.length) {
       console.error("Organization or membership requirements not found.");
-      return { percentage: 0, success: false };
+      return { percentage: 0, success: false, remainingAttendance: [] };
     }
 
     let percentage = 0;
+    let remainingAttendance = [];
 
-    // Points-based calculation
+    // ===== POINTS-BASED ORG =====
     if (organization.organization_membership_type === "points") {
       const requiredPoints = organization.organization_threshold;
       percentage = (membership_points / requiredPoints) * 100;
       percentage = Math.min(percentage, 100); // Cap at 100%
-    } 
-    // Attendance-based calculation
+    }
+
+    // ===== ATTENDANCE-BASED ORG =====
     else if (organization.organization_membership_type === "attendance") {
       let totalRequirements = membershipRequirements.length;
       let fulfilledRequirements = 0;
@@ -155,26 +161,87 @@ async function calculateActivePercentage(membership) {
       for (const requirement of membershipRequirements) {
         const { event_type, requirement_type, requirement_value } = requirement;
 
-        const attendanceCount = await getMemberAttendanceForEventType(
+        const attendanceRecords = await getMemberAttendanceForEventType(
           member_id,
           organization_id,
           event_type
         );
 
+        const attendanceCount = attendanceRecords.length;
+ 
+        let requirementFulfilled = false;
+
+        let attendancePercentage = null;
+        let remainingPercentage = null;
+        let totalEvents = null;
+        let remaining = null;
+
+        // === attendance_count requirement ===
         if (requirement_type === "attendance_count") {
           if (attendanceCount >= requirement_value) {
             fulfilledRequirements++;
+            requirementFulfilled = true;
           }
+          remaining = Math.max(0, requirement_value - attendanceCount);
         }
+
+        // === percentage requirement ===
+        else if (requirement_type === "percentage") {
+          const events = await getEventsByAttributes({
+            organization_id: organization.organization_id,
+            event_type: requirement.event_type,
+            semester_id: semester_id,
+          });
+
+          totalEvents = events.length;
+
+          attendancePercentage =
+            totalEvents > 0 ? (attendanceCount / totalEvents) * 100 : 0;
+
+          if (attendancePercentage >= requirement_value) {
+            fulfilledRequirements++;
+            requirementFulfilled = true;
+          }
+
+          remainingPercentage = Math.max(
+            0,
+            requirement_value - attendancePercentage
+          );
+        }
+
+        // === Push info for frontend ===
+        remainingAttendance.push({
+          event_type,
+          requirement_type,
+          required: requirement_value,
+          attended: attendanceCount || 0,
+          remaining,
+          attendancePercentage:
+            attendancePercentage !== null
+              ? Math.round(attendancePercentage)
+              : null,
+          requiredPercentage:
+            requirement_type === "percentage" ? requirement_value : null,
+          remainingPercentage:
+            remainingPercentage !== null
+              ? Math.round(remainingPercentage)
+              : null,
+          totalEvents,
+          fulfilled: requirementFulfilled,
+        });
       }
 
+      // Attendance-based percentage
       percentage = (fulfilledRequirements / totalRequirements) * 100;
     }
-
-    return { percentage: Math.round(percentage), success: true };
+    return {
+      percentage: Math.round(percentage),
+      success: true,
+      remainingAttendance,
+    };
   } catch (error) {
     console.error("Error calculating active percentage:", error);
-    return { percentage: 0, success: false };
+    return { percentage: 0, success: false, remainingAttendance: [] };
   }
 }
 
@@ -189,11 +256,12 @@ async function checkActiveMembership(membership) {
     if (percentage >= 100) {
       membership.active_member = true; // Mark as active
       await membership.save();
-      const organization = await getOrganizationById(membership.organization_id);
+      const organization = await getOrganizationById(
+        membership.organization_id
+      );
       await sendActiveMembershipEmail(membership, organization);
       return true;
-    }
-    else {
+    } else {
       membership.active_member = false; // Mark as active
       await membership.save();
     }
