@@ -43,7 +43,7 @@ app.use(
 );
 
 
-passport.use('saml',defaultSamlStrategysamlStrategy);
+passport.use('saml',defaultSamlStrategy);
 
 passport.serializeUser((user, done) => {
   done(null, user);
