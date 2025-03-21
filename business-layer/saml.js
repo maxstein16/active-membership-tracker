@@ -7,7 +7,7 @@ const SP_PVK = fs.readFileSync('/var/www/html/active-membership-tracker/business
 const SP_CERT = fs.readFileSync('/var/www/html/active-membership-tracker/business-layer/cert/service.crt', { encoding: 'utf8' });
 
 const IDP_SSO_URL = 'https://shibboleth.main.ad.rit.edu/idp/profile/SAML2/Redirect/SSO';
-const IDP_CERT = fs.readFileSync('/opt/shared/idp.crt', { encoding: 'utf8' });
+const IDP_CERT = fs.readFileSync('/var/www/html/active-membership-tracker/business-layer/cert/cert_idp.pem', { encoding: 'utf8' });
 
 /* settings example */
 const defaultSamlStrategy = new SamlStrategy(
