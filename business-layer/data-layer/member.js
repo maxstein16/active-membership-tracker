@@ -25,10 +25,6 @@ async function createMember(memberData) {
  */
 async function updateMember(memberId, updateData) {
 
-  console.log("member.js made it to updateMember")
-  console.log("member.js NO .data is " + memberId)
-  console.log("member.js with .data is " + memberId.data)
-
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },
@@ -38,7 +34,7 @@ async function updateMember(memberId, updateData) {
       console.log(`Member with ID ${memberId} updated successfully.`);
       return true;
     } else {
-      console.log(`No member found with ID ${memberId}.`);
+      console.log("Nothing Updated.");
       return false;
     }
   } catch (error) {
@@ -73,9 +69,6 @@ async function getAllMembers() {
  * @returns {Promise<object|null>} The member object if found, otherwise `null`.
  */
 async function getMemberById(memberId) {
-
-  console.log("member.js says getMemberById by memberID w .data: " + memberId.data)
-  console.log("member.js says getMemberById by memberID wOUT .data: " + memberId)
 
   try {
     const member = await Member.findByPk(memberId);

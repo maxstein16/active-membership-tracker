@@ -1,4 +1,3 @@
-const { ConnectionAcquireTimeoutError } = require("sequelize");
 const { Membership, Member, MembershipRequirement } = require("../db");
 
 /**

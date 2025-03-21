@@ -8,10 +8,9 @@ import AreYouSure from "../../components/AreYouSure";
 import PageSetup from "../../components/PageSetup/PageSetup";
 import BackButton from "../../components/BackButton";
 import UserInput from "../../components/UserInput";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Snackbar } from "@mui/material";
 import CustomSelect from "../../components/CustomSelect";
 import { API_METHODS, getAPIData } from "../../utils/callAPI"; // Import getAPIData
-import SuccessDialog from "../../components/SuccessDialog";
 
 import {
   genderOptions,
@@ -19,50 +18,49 @@ import {
   raceOptions,
   statusOptions,
 } from "../../utils/allowedUserAttributes";
+import displayErrors from "../../utils/displayErrors";
 
 export default function EditProfilePage() {
+  const [breakingError, setBreakingError] = React.useState("");
   const [userData, setUserData] = React.useState(null);
-  const [originalData, setOriginalData] = React.useState(null);
-  const [navTarget, setNavTarget] = React.useState("");
   const [successMessage, setSuccessMessage] = React.useState("");
-  const [unchangedMessage, setUnchangedMessage] = React.useState("");
   const [error, setError] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = React.useState(false);
   const [memberName, setMemberName] = React.useState("");
   const [memberEmail, setMemberEmail] = React.useState("");
 
   React.useEffect(() => {
     const fetchUserData = async () => {
-      try {
-        const data = await getAPIData("/member", API_METHODS.GET); // Use getAPIData instead of fetch
+      setBreakingError("");
+      const data = await getAPIData("/member", API_METHODS.get, {}); // Use getAPIData instead of fetch
 
-        if (data && data.data) {
-          const member = data.data;
-          const formattedData = {
-            personalEmail: member.member_personal_email,
-            phone: member.member_phone_number,
-            major: member.member_major,
-            graduationDate: new Date(member.member_graduation_date)
-              .toISOString()
-              .split("T")[0],
-            race: member.member_race,
-            tshirt: member.member_tshirt_size,
-            gender: member.member_gender,
-            status: member.member_status,
-          };
-          setUserData(formattedData);
-          setOriginalData(formattedData); // Save original for change tracking
-          setMemberName(member.member_name);
-          setMemberEmail(member.member_email);
-        } else {
-          console.error(
-            "Error fetching user data:",
-            data?.error || "Unknown error"
-          );
-        }
-      } catch (error) {
-        console.error("Error:", error);
+      if (!data || !data.hasOwnProperty("data")) {
+        console.error("Error fetching user data:", data);
+        setBreakingError(displayErrors.errorFetchingContactSupport);
+        return;
       }
+
+      const member = data.data;
+      const formattedData = {
+        personalEmail: member.member_personal_email ?? "",
+        phone: member.member_phone_number ?? "",
+        major: member.member_major ?? "",
+        graduationDate: new Date(
+          member.member_graduation_date ??
+            `${new Date().getFullYear()}-05-10 00:00:00`
+        )
+          .toISOString()
+          .split("T")[0],
+        race: member.member_race ?? "",
+        tshirt: member.member_tshirt_size ?? "",
+        gender: member.member_gender ?? "",
+        status: member.member_status ?? "",
+      };
+
+      setUserData(formattedData);
+      setMemberName(member.member_name);
+      setMemberEmail(member.member_email);
     };
 
     fetchUserData();
@@ -122,105 +120,119 @@ export default function EditProfilePage() {
     setUserData((prev) => ({ ...prev, [field]: newValue }));
   };
 
-  const hasUnsavedChanges =
-    JSON.stringify(userData) !== JSON.stringify(originalData);
-
-  const handleNavigation = (target) => {
-    if ((target === "/profile" || target === "cancel") && hasUnsavedChanges) {
-      setNavTarget(target);
-      setOpenDialog(true);
-    } else {
-      window.location.href = target;
-    }
-  };
-
   const handleSave = async () => {
-    if (!hasUnsavedChanges) {
-      setOpenDialog(true); // Open the dialog after saving data
-      setUnchangedMessage("Nothing to update.");
-      setError("");
-      setSuccessMessage("");
-      return;
-    }
+
+    // clear any pre-existing messages
+    setError(""); 
+    setSuccessMessage("");
 
     const validationError = validateFields();
 
     if (validationError) {
-      setError(validationError);
-      setUnchangedMessage("");
+      setError(validationError); 
       setSuccessMessage("");
       return;
     }
 
-    try {
-      const payload = {
-        personal_email: userData.personalEmail, // Remove "member_" prefix
-        phone_number: userData.phone, // Remove "member_" prefix
-        major: userData.major, // Remove "member_" prefix
-        graduation_date: userData.graduationDate, // Remove "member_" prefix
-        race: userData.race,
-        gender: userData.gender,
-        tshirt_size: userData.tshirt, // Remove "member_" prefix
-        status: userData.status,
-      };
+    const payload = {
+      personal_email: userData.personalEmail,
+      phone_number: userData.phone,
+      major: userData.major,
+      graduation_date: userData.graduationDate,
+      race: userData.race,
+      gender: userData.gender,
+      tshirt_size: userData.tshirt,
+      status: userData.status,
+    };
 
-      const response = await getAPIData(`/member`, API_METHODS.put, payload);
-      if (!response || response.error)
-        throw new Error(response?.error || "Failed to save data");
-      else {
-        setOpenDialog(true); // Open success dialog
-        setSuccessMessage("Data saved successfully!");
-        setError(""); // Clear any previous errors
-        setUnchangedMessage("");
-      }
+    const response = await getAPIData(`/member`, API_METHODS.put, payload);
 
-      setOriginalData(userData);
-      setError(""); // Clear any previous error
-      setUnchangedMessage("");
-    } catch (err) {
-      setError(err.message);
+    if (response && response.error && response.error === "Nothing Updated") {
+      setIsSuccessOpen(true);
+      setSuccessMessage("Nothing to update.");
+      setError(""); // Clear any previous errors
+      return;
     }
+
+    if (!response || response.error) {
+      setError("Error saving your data");
+      return;
+    }
+
+    setIsSuccessOpen(true);
+    setSuccessMessage("Data saved successfully!");
+    setError(""); // Clear any previous errors
   };
 
-  if (!userData) return <CircularProgress />;
+  if (breakingError !== "")
+    return (
+      <PageSetup>
+        <BackButton route={"/profile"} />
+        <p>{breakingError}</p>
+      </PageSetup>
+    );
+  if (!userData)
+    return (
+      <PageSetup>
+        <BackButton route={"/profile"} />
+        <CircularProgress />
+      </PageSetup>
+    );
 
   return (
     <PageSetup>
       <BackButton
-        route={"/profile"}
-        onClick={() => handleNavigation("/profile")}
+        areYouSure={() => {
+          setOpenDialog(true);
+        }}
       />
       <h1>Edit Profile</h1>
-      <h2>{`${memberName}, ${memberEmail}`}</h2>
-      {/* <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog} /> */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-      {unchangedMessage && (
-        <p style={{ color: "orange" }}>{unchangedMessage}</p>
-      )}
+      <h2 style={{ fontWeight: "normal", color: "var(--orange)" }}>
+        {memberName}
+      </h2>
+      <p style={{ color: "var(--orange)" }}>{memberEmail}</p>
+
+      {error !== "" ? <p style={{ color: "red" }}>{error}</p> : <></>}
+      {successMessage !== "" ? <p style={{ color: "green" }}>{successMessage}</p> : <></>}
       <UserInput
         label="Personal Email"
         value={userData.personalEmail}
         setValue={(value) => saveNewAttribute(value, "personalEmail")}
         isMultiline={false}
+        color={"orange"}
+        onLeaveField={() => {
+          /* Nothing to do here */
+        }}
       />
       <UserInput
         label="Phone"
         value={userData.phone}
         setValue={(value) => saveNewAttribute(value, "phone")}
         isMultiline={false}
+        color={"orange"}
+        onLeaveField={() => {
+          /* Nothing to do here */
+        }}
       />
       <UserInput
         label="Major"
         value={userData.major}
         setValue={(value) => saveNewAttribute(value, "major")}
         isMultiline={false}
+        color={"orange"}
+        onLeaveField={() => {
+          /* Nothing to do here */
+        }}
       />
       <UserInput
         label="Graduation Date"
         value={userData.graduationDate}
         setValue={(value) => saveNewAttribute(value, "graduationDate")}
         isMultiline={false}
+        color={"orange"}
+        onLeaveField={() => {
+          /* Nothing to do here */
+        }}
       />
 
       <CustomSelect
@@ -228,6 +240,7 @@ export default function EditProfilePage() {
         options={["XS", "S", "M", "L", "XL", "XXL"]}
         startingValue={userData.tshirt}
         onSelect={(value) => saveNewAttribute(value, "tshirt")}
+        color={"orange"}
       />
 
       <CustomSelect
@@ -246,6 +259,7 @@ export default function EditProfilePage() {
         ]}
         startingValue={userData.race}
         onSelect={(value) => saveNewAttribute(value, "race")}
+        color={"orange"}
       />
 
       <CustomSelect
@@ -253,6 +267,7 @@ export default function EditProfilePage() {
         options={["male", "female", "non-binary", "other", "prefer not to say"]}
         startingValue={userData.gender}
         onSelect={(value) => saveNewAttribute(value, "gender")}
+        color={"orange"}
       />
 
       <CustomSelect
@@ -260,12 +275,13 @@ export default function EditProfilePage() {
         options={["undergraduate", "graduate", "staff", "faculty", "alumni"]}
         startingValue={userData.status}
         onSelect={(value) => saveNewAttribute(value, "status")}
+        color={"orange"}
       />
 
       <button
         onClick={(e) => {
           e.preventDefault();
-          handleNavigation("cancel");
+          setOpenDialog(true);
         }}
         className="secondary"
       >
@@ -284,7 +300,15 @@ export default function EditProfilePage() {
       <AreYouSure
         open={openDialog}
         setOpen={setOpenDialog}
-        navLink={navTarget}
+        navLink={"/profile"}
+      />
+      <Snackbar
+        open={isSuccessOpen}
+        autoHideDuration={5000}
+        onClose={() => {
+          setIsSuccessOpen(false);
+        }}
+        message={successMessage}
       />
     </PageSetup>
   );

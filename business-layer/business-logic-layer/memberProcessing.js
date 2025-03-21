@@ -62,13 +62,7 @@ async function getMemberByIdInDB(memberId) {
  */
 async function updateMemberInDB(memberId, memberData) {
 
-    console.log("memberProcessing  updateMemberInDB says memberId is " + memberId)
-    console.log("memberProcessing  updateMemberInDB says memberId is W DATA " + memberId.data)
-    console.log("memberProcessing member data is  " + JSON.stringify(memberData))
-
-
-    if (isNaN(memberId.data)) {
-        console.log("memberID is NAN")
+    if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
     if (!memberData || typeof memberData !== "object" || Object.keys(memberData).length === 0) {
@@ -93,13 +87,13 @@ async function updateMemberInDB(memberId, memberData) {
             (key) => updateFields[key] === undefined && delete updateFields[key]
         );
 
-        const updated = await updateMember(memberId.data, updateFields);
+        const updated = await updateMember(memberId, updateFields);
         if (!updated) {
-            return { error: error.memberNotFound, data: null };
+            return { error: error.nothingUpdated, data: null };
         }
 
         // Fetch updated member data
-        const updatedMember = await getMemberById(memberId.data);
+        const updatedMember = await getMemberById(memberId);
         return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
         return { error: error.somethingWentWrong, data: null };
