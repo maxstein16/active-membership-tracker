@@ -119,7 +119,7 @@ async function handlePostOrganization(req, res) {
     }
 
     // Fetch member ID using the function
-    let memberId = await business.getMemberIDByUsernameInDB(
+    let memberId = await business.getMemberIDByUsername(
       req.session.user.username
     );
 
