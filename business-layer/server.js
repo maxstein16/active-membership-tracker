@@ -14,7 +14,7 @@ const path = require("path"); // finding the react pages
 const passport = require("passport"); // authentication for SSO/SHIBBOLETH
 const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 const fs = require("fs"); // file system for reading the certificates
-
+const {defaultSamlStrategy} = require("./saml.js");
 // create app
 const app = express();
 
@@ -42,36 +42,22 @@ app.use(
   })
 );
 
-// Passport SAML configuration
-var samlStrategy = new SamlStrategy({
-  // URL that goes from the Identity Provider -> Service Provider
-  callbackUrl: process.env.CALLBACK_URL,
-  // URL that goes from the Service Provider -> Identity Provider
-  entryPoint: process.env.ENTRY_POINT,
-  // Usually specified as `/shibboleth` from site root
-  issuer: process.env.ISSUER,
-  identifierFormat: null,
-  // Service Provider private key
-  decryptionPvk: fs.readFileSync(__dirname + '/cert/service.key', 'utf8'),
-  // Service Provider Certificate
-  privateCert: fs.readFileSync(__dirname + '/cert/service.crt', 'utf8'),
-  // Identity Provider's public key
-  cert: fs.readFileSync(__dirname + '/cert/cert_idp.pem', 'utf8'),
-  validateInResponseTo: false,
-  disableRequestedAuthnContext: true
-}, function(profile, done) {
-  return done(null, profile); 
-});
-passport.use(samlStrategy);
 
-passport.use(samlStrategy);
+passport.use('saml',defaultSamlStrategysamlStrategy);
+
 passport.serializeUser((user, done) => {
   done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
-  done(null, user);
+  done(null, {
+    email: user['urn:oid:0.9.2342.19200300.100.1.3'],
+    firstName: user['urn:oid:2.5.4.42'],
+    lastName: user['urn:oid:2.5.4.4'],
+    username: user['urn:oid:0.9.2342.19200300.100.1.1'],
+  });
 });
+const SITE_ROOT = '/saml2';
 
 // Initialize Passport
 app.use(passport.initialize());
