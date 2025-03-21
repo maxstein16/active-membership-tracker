@@ -11,6 +11,8 @@ import UserInput from "../../components/UserInput";
 import { CircularProgress } from "@mui/material";
 import CustomSelect from "../../components/CustomSelect";
 import { API_METHODS, getAPIData } from "../../utils/callAPI"; // Import getAPIData
+import SuccessDialog from "../../components/SuccessDialog";
+
 import {
   genderOptions,
   allowedTshirtSizes,
@@ -134,6 +136,7 @@ export default function EditProfilePage() {
 
   const handleSave = async () => {
     if (!hasUnsavedChanges) {
+      setOpenDialog(true); // Open the dialog after saving data
       setUnchangedMessage("Nothing to update.");
       setError("");
       setSuccessMessage("");
@@ -165,6 +168,7 @@ export default function EditProfilePage() {
       if (!response || response.error)
         throw new Error(response?.error || "Failed to save data");
       else {
+        setOpenDialog(true); // Open success dialog
         setSuccessMessage("Data saved successfully!");
         setError(""); // Clear any previous errors
         setUnchangedMessage("");
@@ -188,6 +192,8 @@ export default function EditProfilePage() {
       />
       <h1>Edit Profile</h1>
       <h2>{`${memberName}, ${memberEmail}`}</h2>
+
+      {/* <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog} /> */}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
