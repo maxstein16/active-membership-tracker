@@ -65,15 +65,7 @@ async function updateOrganizationByID(organizationId, updatedOrgInfo) {
             logging: true,
     });
 
-    if (updatedOrgRows > 0) {
-      console.log(
-        `Organization with ID ${organizationId} updated successfully.`
-      );
-      return true;
-    } else {
-      console.log(`No organization found with ID ${organizationId}`);
-      return false;
-    }
+    return true;
   } catch (err) {
     console.error("Error updating organization:", err);
     throw err;
@@ -120,11 +112,12 @@ async function getOrganizationMembershipRequirements(orgId) {
       include: [
         {
           model: BonusRequirement,
+          as: "bonusRequirements",
           required: false, // Include bonus requirements if they exist
         },
       ],
     });
-
+    
     return membershipRequirements;
   } catch (err) {
     console.error("Error fetching membership requirements:", err);

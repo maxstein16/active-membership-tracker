@@ -43,6 +43,7 @@ const {
   getAnnualOrgReportInDB,
   getSemesterOrgReportInDB,
   getEventOrgReportInDB,
+  getSemesterOrgReportBySemesterIdInDB,
 } = require("../organizationReportProcessing");
 const {
   editOrganizationMembershipRequirementsInDB,
@@ -61,7 +62,8 @@ const {
   getCurrentSemesterDB, 
   getSemestersByYearDB, 
   getSemesterByDateDB, 
-  createSemesterDB 
+  createSemesterDB, 
+  getAllAcademicYearsInDB
 } = require("../semesterProcessing");
 
 // export to api calls
@@ -87,9 +89,9 @@ module.exports = function () {
     return await getMemberAttendanceBySemesterDB(memberId, semesterId);
   };
 
-    this.getAttendeesDetailsByEventId = async (eventId) => {
-      return await getAttendeesDetailsByEventIdDB(eventId);
-    }
+  this.getAttendeesDetailsByEventId = async (eventId) => {
+    return await getAttendeesDetailsByEventIdDB(eventId);
+  }
 
   // Event Management
   this.createEvent = async (eventData, body) => {
@@ -129,7 +131,7 @@ module.exports = function () {
     return await getMemberByIdInDB(memberId);
   };
 
-  this.getMemberIDByUsernameInDB = async (username) => {
+  this.getMemberIDByUsername = async (username) => {
     return await getMemberIDByUsernameInDB(username);
   };
 
@@ -215,6 +217,14 @@ module.exports = function () {
   this.getSemesterOrgReport = async (orgId, semesterId) => {
     return await getSemesterOrgReportInDB(orgId, semesterId);
   };
+  
+  this.getSemesterOrgReportBySemesterId = async (orgId, semesterId) => {
+    return await getSemesterOrgReportBySemesterIdInDB(orgId, semesterId);
+  };
+
+  this.getAnnualOrgReportByYear = async (orgId, year) => {
+    return await getAnnualOrgReportInDB(orgId, year);
+  }
 
   this.getEventOrgReport = async (orgId, meetingId) => {
     return await getEventOrgReportInDB(orgId, meetingId);
@@ -281,4 +291,8 @@ module.exports = function () {
   this.getSemestersByYear = async (year) => {
     return await getSemestersByYearDB(year);
   };
+
+  this.getAllAcademicYears = async () => {
+    return await getAllAcademicYearsInDB();
+  }
 };
