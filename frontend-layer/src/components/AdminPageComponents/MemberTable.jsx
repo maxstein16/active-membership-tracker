@@ -4,7 +4,7 @@ import "../../assets/css/pageSetup.css";
 import "../../assets/css/general.css";
 import "../../assets/css/adminPages.css";
 import { getOrganizationMembers } from "../../utils/handleSettingsData";
-import { CircularProgress, Paper } from "@mui/material";
+import { CircularProgress, Paper, Snackbar } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import displayErrors from "../../utils/displayErrors";
 import { ROLE_ADMIN, ROLE_EBOARD } from "../../utils/constants";
@@ -39,6 +39,7 @@ export default function MemberTable({ color, orgId, membersList }) {
   const [popUpOpen, setPopUpOpen] = React.useState(false);
   const [memberId, setMemberId] = React.useState(undefined);
   const [memberShipId, setMemberShipId] = React.useState(undefined);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
   // GET THE DATA (if needed)
   const fetchMembers = React.useCallback(async () => {
@@ -101,6 +102,14 @@ export default function MemberTable({ color, orgId, membersList }) {
 
   const paginationModel = { page: 0, pageSize: 15 };
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleSnackbarTrigger = () => {
+    setSnackbarOpen(true);
+  };
+
   return (
     <div className="org-email-settings">
       <h2>Members</h2>
@@ -146,6 +155,21 @@ export default function MemberTable({ color, orgId, membersList }) {
             memberId={memberId}
             membershipId={memberShipId}
             refreshMembers={fetchMembers}
+            triggerSnackbar={handleSnackbarTrigger}
+          />
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={3000}
+            onClose={handleSnackbarClose}
+            message={"Membership details updated successfully!"}
+            ContentProps={{
+              sx: {
+                backgroundColor: color,
+                color: "#fff",
+                fontWeight: "bold",
+                textAlign: "center",
+              },
+            }}
           />
         </>
       )}

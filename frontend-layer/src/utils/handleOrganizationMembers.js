@@ -1,35 +1,5 @@
 import { API_METHODS, getAPIData } from "./callAPI";
 
-/**
- * Fetch member information from the API and format it for use in the frontend.
- * @param {Number} orgId - Organization ID from the database
- * @param {Number} memberId - Member ID from the database
- * @returns Formatted member data or an error/session object
- *
- * Format:
- * {
- *   id: Number,              // Member ID
- *   name: String,            // Full name of the member
- *   email: String,           // Member's email
- *   personalEmail: String,   // Member's personal email
- *   phoneNumber: String,     // Contact number (if available)
- *   graduationDate: String,  // Formatted graduation date (MM/DD/YYYY) or "N/A"
- *   tshirtSize: String,      // T-shirt size (if available)
- *   major: String,           // Major field of study
- *   gender: String,          // Gender
- *   race: String,            // Race
- *   status: String,          // Membership status (undergraduate, graduate, etc.)
- *   activePercentage: Number,// Percentage to active membership
- *   membership: {
- *     id: Number,            // Membership ID
- *     role: Number,          // Membership role (0=Member, 1=E-Board, 2=Admin)
- *     roleName: String,      // Mapped role name ("Member", "E-Board", "Admin")
- *     points: Number,        // Membership points
- *     isActive: Boolean,     // Whether the member is active
- *     receivedBonuses: Array // List of received bonus IDs
- *   }
- * }
- */
 export async function getMemberInfoData(orgId, memberId) {
   // Fetch data from the API
   const memberData = await getAPIData(
@@ -39,7 +9,7 @@ export async function getMemberInfoData(orgId, memberId) {
   );
 
   console.log(memberData);
-  
+
   if (!memberData) {
     console.log("Must login", memberData);
     return { session: false };
@@ -48,6 +18,16 @@ export async function getMemberInfoData(orgId, memberId) {
   if (!memberData || memberData.data == null) {
     return { error: true };
   }
+
+  // === Preprocess remainingAttendance ===
+  const cleanedRemainingAttendance = (
+    memberData.data.remaining_attendance || []
+  ).map((requirement) => ({
+    ...requirement,
+    attendancePercentage: requirement.attendancePercentage ?? 0,
+    remainingPercentage: requirement.remainingPercentage ?? 0,
+    totalEvents: requirement.totalEvents ?? 0,
+  }));
 
   // Format the data
   const memberInfo = {
@@ -65,6 +45,7 @@ export async function getMemberInfoData(orgId, memberId) {
     race: memberData.data.member_race || "Unknown",
     status: memberData.data.member_status,
     activePercentage: memberData.data.active_percentage,
+    remainingAttendance: cleanedRemainingAttendance,
     membership: {
       id: memberData.data.membership.membership_id,
       role: memberData.data.membership.membership_role,
@@ -128,7 +109,7 @@ export async function getOrgInfoData(orgId) {
  * @returns true if no errors, false if error :(
  */
 export async function updateMembershipData(orgId, memberId, membershipData) {
-  console.log("Membership data to update:" + membershipData);
+  console.log("Submitting to API:", membershipData);
 
   const result = await getAPIData(
     `/organization/${orgId}/member/${memberId}`,

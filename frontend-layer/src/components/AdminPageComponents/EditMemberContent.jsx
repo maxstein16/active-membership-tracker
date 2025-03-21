@@ -1,7 +1,9 @@
 import * as React from "react";
 import DialogContent from "@mui/material/DialogContent";
 import UserInput from "../../components/UserInput";
+import CustomSelect from "../../components/CustomSelect";
 import { updateMembershipData } from "../../utils/handleOrganizationMembers";
+import { ROLE_ADMIN, ROLE_EBOARD, ROLE_MEMBER } from "../../utils/constants";
 
 export default function EditMemberContent({
   member,
@@ -9,18 +11,24 @@ export default function EditMemberContent({
   setIsEditMode,
   refreshMemberData,
   refreshMembers,
+  triggerSnackbar,
   setOpen,
   color,
 }) {
-  // State for membership data (easily extendable)
+  const roleOptions = [
+    { label: "Member", value: ROLE_MEMBER },
+    { label: "E-Board", value: ROLE_EBOARD },
+    { label: "Admin", value: ROLE_ADMIN },
+  ];
+
   const [membershipData, setMembershipData] = React.useState({
     membership_points: member.membership.points,
-    // Add more fields here in future (e.g., role, active_member, received_bonus)
+    membership_role: member.membership.role,
   });
 
   const [error, setError] = React.useState("");
 
-  // Generic handler for input changes
+  // Generic handler
   const handleFieldChange = (field, value) => {
     setMembershipData((prev) => ({
       ...prev,
@@ -29,17 +37,19 @@ export default function EditMemberContent({
   };
 
   const handleSave = async () => {
-    // Basic validation for points
-    const pointsNum = parseInt(membershipData.membership_points, 10);
-    if (isNaN(pointsNum) || pointsNum < 0) {
-      setError("Points must be a valid non-negative number");
-      return;
+    const submissionData = {};
+
+    // Points-based orgs
+    if (organization.membershipType === "points") {
+      const pointsNum = parseInt(membershipData.membership_points, 10);
+      if (isNaN(pointsNum) || pointsNum < 0) {
+        setError("Points must be a valid non-negative number");
+        return;
+      }
+      submissionData.membership_points = pointsNum;
     }
 
-    const submissionData = {
-      membership_points: pointsNum,
-      // Add more fields as needed
-    };
+    submissionData.role = membershipData.membership_role;
 
     const success = await updateMembershipData(
       organization.id,
@@ -47,13 +57,12 @@ export default function EditMemberContent({
       submissionData
     );
 
-    console.log("Frontend API PUT response: ", success);
-
     if (success) {
-      await refreshMemberData(); // Refresh data after successful update
+      await refreshMemberData();
       await refreshMembers();
-      setIsEditMode(false); // Return to details view
-      setOpen(false); // Optionally close dialog
+      setIsEditMode(false);
+      setOpen(false);
+      triggerSnackbar();
     } else {
       setError("Failed to update membership. Please try again.");
     }
@@ -62,23 +71,41 @@ export default function EditMemberContent({
   return (
     <DialogContent
       style={{
-        textAlign: "center",
         padding: "2rem",
       }}
     >
-      {/* Membership Points */}
+      {/* Membership Role */}
       <div style={{ margin: "1rem 0" }}>
-        <UserInput
-          label="Membership Points"
+        <CustomSelect
+          label="Membership Role"
           color={color}
-          value={membershipData.membership_points}
-          setValue={(value) => handleFieldChange("membership_points", value)}
-          isMultiline={false}
-          onLeaveField={() => {}}
+          options={roleOptions.map((role) => role.label)}
+          startingValue={
+            roleOptions.find((r) => r.value === membershipData.membership_role)
+              ?.label || "Member"
+          }
+          onSelect={(selectedRole) => {
+            const roleObj = roleOptions.find(
+              (role) => role.label === selectedRole
+            );
+            handleFieldChange("membership_role", roleObj.value);
+          }}
         />
       </div>
 
-      {/* Add more editable fields here easily later */}
+      {/* Points-based field */}
+      {organization.membershipType === "points" && (
+        <div style={{ margin: "1rem 0" }}>
+          <UserInput
+            label="Membership Points"
+            color={color}
+            value={membershipData.membership_points}
+            setValue={(value) => handleFieldChange("membership_points", value)}
+            isMultiline={false}
+            onLeaveField={() => {}}
+          />
+        </div>
+      )}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 

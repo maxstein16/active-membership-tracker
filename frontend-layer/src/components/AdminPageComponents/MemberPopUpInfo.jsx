@@ -27,6 +27,8 @@ export default function MemberPopUpInfo({
   setOpen,
   orgId,
   memberId,
+  refreshMembers,
+  triggerSnackbar,
 }) {
   const [member, setMember] = React.useState(undefined);
   const [organization, setOrganization] = React.useState(undefined);
@@ -100,7 +102,7 @@ export default function MemberPopUpInfo({
               ? "Active Member"
               : "General Member"}
             <br />
-            <span style={{ color: "#00bcd4", fontSize: "3rem" }}>
+            <span style={{ color: color, fontSize: "3rem" }}>
               {member.name}
             </span>
           </DialogTitle>
@@ -110,9 +112,11 @@ export default function MemberPopUpInfo({
               member={member}
               organization={organization}
               setIsEditMode={setIsEditMode}
+              refreshMembers={refreshMembers}
               refreshMemberData={fetchData}
               color={color}
               setOpen={setOpen}
+              triggerSnackbar={triggerSnackbar}
             />
           ) : (
             <>

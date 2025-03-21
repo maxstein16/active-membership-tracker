@@ -1,4 +1,10 @@
+const { ROLE_ADMIN } = require("../constants.js");
 const { createEmailSettings } = require("../data-layer/email-settings.js");
+const {
+  createMembership,
+  getMembershipByAttributes,
+  getMembershipsByAttributes,
+} = require("../data-layer/membership.js");
 const {
   getOrganizationById,
   createOrganization,
@@ -6,6 +12,7 @@ const {
   getOrganizations,
   getUserOrganizations,
 } = require("../data-layer/organization.js");
+const { getCurrentSemester } = require("../data-layer/semester.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -160,14 +167,13 @@ async function getSpecificOrgDataInDB(orgId) {
  * @param {Object} orgData - Organization data.
  * @returns {Promise<Object>} - Returns error and new organization data.
  */
-async function createOrganizationInDB(orgData) {
+async function createOrganizationInDB(orgData, memberId) {
   const validationError = validateOrgFields(orgData);
   if (validationError) {
     return { error: validationError, data: null };
   }
 
   try {
-    console.log(orgData);
     const newOrganization = await createOrganization({
       organization_name: orgData.organization_name,
       organization_description: orgData.organization_desc,
@@ -177,6 +183,23 @@ async function createOrganizationInDB(orgData) {
       organization_email: orgData.organization_email,
       organization_membership_type: orgData.organization_membership_type,
     });
+
+    // add the current user as admin
+    const currentSemester = await getCurrentSemester();
+
+    const membership = await createMembership({
+      membership_role: ROLE_ADMIN,
+      member_id: memberId,
+      membership_points: 0,
+      active_member: false,
+      organization_id: newOrganization.organization_id,
+      semester_id: currentSemester.semester_id,
+    });
+    console.log(membership.dataValues);
+
+    if (!membership) {
+      return { error: error.couldNotCreateMembership, data: null };
+    }
 
     // create email settings for the org
     const newEmailSettings = await createEmailSettings(
@@ -209,28 +232,17 @@ async function createOrganizationInDB(orgData) {
  * @returns {Promise<Object>} - Returns error and success message.
  */
 async function updateOrganizationInDB(orgId, orgDataToUpdate) {
-  if (!Number.isInteger(orgId) || orgId <= 0) {
+  if (isNaN(orgId) || orgId <= 0) {
     return { error: error.invalidOrganizationId, data: null };
   }
 
-  if (Object.keys(orgDataToUpdate).length === 0) {
+  if (orgDataToUpdate.length === 0) {
     return { error: error.mustHaveAtLeastOneFieldToEditOrg, data: null };
   }
 
-  const validationError = validateOrgFields(orgDataToUpdate);
-  if (validationError) {
-    return { error: validationError, data: null };
-  }
-
   try {
-    const mappedData = mapToDbFields(orgDataToUpdate);
+    const updateSuccess = await updateOrganizationByID(orgId, orgDataToUpdate);
 
-    // Remove undefined fields
-    Object.keys(mappedData).forEach(
-      (key) => mappedData[key] === undefined && delete mappedData[key]
-    );
-
-    const updateSuccess = await updateOrganizationByID(orgId, mappedData);
     if (updateSuccess) {
       return {
         error: null,
@@ -260,47 +272,78 @@ async function getAllOrganizationDataInDB() {
   }
 }
 
-/**
- * Get the organizations a user is a member of
- * @param {string} username - The username of the user
- * @returns {Promise<Object>} - Returns error and organization data
- */
-async function getUserOrganizationsInDB(username) {
-  if (!username || typeof username !== "string" || username.trim() === "") {
-    return {
-      error: error.invalidUsername || { message: "Invalid username" },
-      data: null,
-    };
-  }
+// /**
+//  * Get the organizations a user is a member of
+//  * @param {string} username - The username of the user
+//  * @returns {Promise<Object>} - Returns error and organization data
+//  */
+// async function getUserOrganizationsInDB(username) {
+//   if (!username || typeof username !== "string" || username.trim() === "") {
+//     return {
+//       error: error.invalidUsername || { message: "Invalid username" },
+//       data: null,
+//     };
+//   }
 
+//   try {
+//     const organizations = await getUserOrganizations(username);
+
+//     if (!organizations || organizations.length === 0) {
+//       return {
+//         error: null,
+//         data: [],
+//       };
+//     }
+
+//     // Map database fields to API fields
+//     const formattedOrganizations = organizations.map((org) => ({
+//       organization_id: org.organization_id,
+//       organization_name: org.organization_name,
+//       organization_description: org.organization_description,
+//       organization_color: org.organization_color,
+//       organization_threshold: org.organization_threshold,
+//       organization_membership_type: org.organization_membership_type,
+//       organization_email: org.email,
+//     }));
+
+//     return { error: null, data: formattedOrganizations };
+//   } catch (err) {
+//     console.error("Error in getUserOrganizationsInDB:", err);
+//     return {
+//       error: error.databaseError || { message: "Database error occurred" },
+//       data: null,
+//     };
+//   }
+// }
+
+async function getUserOrganizationsInDB(memberId) {
   try {
-    const organizations = await getUserOrganizations(username);
+    // get all the memberships
+    const memberships = await getMembershipsByAttributes({
+      member_id: memberId,
+    });
 
-    if (!organizations || organizations.length === 0) {
-      return {
-        error: null,
-        data: [],
-      };
+    if (!memberships) {
+      return { error: error.membershipNotFound };
     }
 
-    // Map database fields to API fields
-    const formattedOrganizations = organizations.map((org) => ({
-      organization_id: org.organization_id,
-      organization_name: org.organization_name,
-      organization_description: org.organization_description,
-      organization_color: org.organization_color,
-      organization_threshold: org.organization_threshold,
-      organization_membership_type: org.organization_membership_type,
-      organization_email: org.email,
-    }));
+    console.log(memberships)
 
-    return { error: null, data: formattedOrganizations };
-  } catch (err) {
-    console.error("Error in getUserOrganizationsInDB:", err);
-    return {
-      error: error.databaseError || { message: "Database error occurred" },
-      data: null,
-    };
+    // get all their orgs
+    const membershipDetails = await Promise.all(
+      memberships.map(async (membership) => {
+        const org = await getOrganizationById(membership.organization_id);
+        return {
+          ...membership.toJSON(),
+          organization: org ? org.toJSON() : null,
+        };
+      })
+    );
+
+    return { data: membershipDetails }
+  } catch (error) {
+    console.log(error)
+    return { error: "Error getting my organization data from database" };
   }
 }
 
