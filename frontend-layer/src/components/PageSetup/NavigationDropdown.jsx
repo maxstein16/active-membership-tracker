@@ -68,7 +68,6 @@ export default function NavigationDropdown() {
       ) : (
         <>
           <div>
-            {/* TODO: get their organizations */}
             {userData.organizations.map((org) => {
               if (org.role === ROLE_MEMBER) {
                 return <Link to={`/${org.id}/status`}>{org.abbreviation}</Link>;
