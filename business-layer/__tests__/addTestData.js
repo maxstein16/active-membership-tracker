@@ -45,7 +45,7 @@ async function addTestData() {
     organization_abbreviation: "WiC TEST",
     organization_email: "wic@rit.edu",
     organization_membership_type: "attendance",
-    organization_threshold: 0,
+    organization_threshold: 30,
   });
 
   const org2 = await Organization.create({
@@ -167,48 +167,25 @@ async function addTestData() {
   ];
 
   for (const member of members) {
-    let randomBoolean = Math.random() >= 0.5;
-    const membership1a = await Membership.create({
-      membership_role: 2,
-      member_id: member.member_id,
-      organization_id: org1.organization_id,
-      semester_id: sem1.semester_id,
-      membership_points: 0,
-      active_member: randomBoolean,
-      received_bonus: [],
-    });
-
     const allPossibleBonusIds = [1, 2, 3, 4, 5];
     const numBonuses = Math.floor(Math.random() * 4);
     const shuffled = allPossibleBonusIds.sort(() => 0.5 - Math.random());
     const selectedBonuses = shuffled.slice(0, numBonuses);
 
-    randomNum = Math.floor(Math.random() * 40) + 1;
-    const membership1b = await Membership.create({
-      membership_role: 2,
-      member_id: member.member_id,
-      organization_id: org2.organization_id,
-      semester_id: sem1.semester_id,
-      membership_points: randomNum,
-      active_member: randomNum >= 23,
-      received_bonus: selectedBonuses,
-    });
-
-    // INSERT SPRING 2025 MEMBERSHIPS (semester_id = 1124) HERE:
-    randomNum = Math.floor(Math.random() * 40) + 1;
-
+    // Membership for WiC
     await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
       organization_id: org1.organization_id,
       semester_id: sem2.semester_id,
-      membership_points: randomNum,
-      active_member: randomNum >= 42,
+      membership_points: 0,
+      active_member: false,
+      received_bonus: [],
       active_semesters: 1,
     });
 
-    randomNum = Math.floor(Math.random() * 40) + 1;
-
+    // Membership for COMS
+    const randomNum = Math.floor(Math.random() * 40) + 1;
     await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
@@ -217,6 +194,7 @@ async function addTestData() {
       membership_points: randomNum,
       active_member: randomNum >= 23,
       received_bonus: selectedBonuses,
+      active_semesters: 1,
     });
   }
 
@@ -244,7 +222,7 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org1.organization_id,
-    event_type: "general meeting",
+    event_type: "general_meeting",
     requirement_type: "attendance_count",
     requirement_value: 8,
   });
@@ -265,7 +243,7 @@ async function addTestData() {
 
   await MembershipRequirement.create({
     organization_id: org2.organization_id,
-    event_type: "general meeting",
+    event_type: "general_meeting",
     requirement_type: "points",
     requirement_value: 10,
   });
@@ -318,12 +296,13 @@ async function addTestData() {
   console.log("7. Adding Events");
   const event1 = await Event.create({
     organization_id: org1.organization_id,
-    event_name: "WiC General Meeting",
+    event_name: "WiC general_meeting",
     event_start: "2025-02-05 18:00:00",
     event_end: "2025-02-05 19:30:00",
     event_location: "GOL 1400",
     event_description: "An overview of upcoming events and initiatives.",
     event_type: "general_meeting",
+    semester_id: sem2.semester_id,
   });
   const event2 = await Event.create({
     organization_id: org1.organization_id,
@@ -334,6 +313,7 @@ async function addTestData() {
     event_description:
       "Helping out at the community center with tech workshops.",
     event_type: "volunteer",
+    semester_id: sem2.semester_id,
   });
 
   const event3 = await Event.create({
@@ -344,6 +324,7 @@ async function addTestData() {
     event_location: "Java's Café",
     event_description: "A night of networking, games, and fun!",
     event_type: "social",
+    semester_id: sem2.semester_id,
   });
   const event4 = await Event.create({
     organization_id: org2.organization_id,
@@ -354,6 +335,7 @@ async function addTestData() {
     event_description:
       "Learn how to craft a compelling resume with industry professionals.",
     event_type: "workshop",
+    semester_id: sem2.semester_id,
   });
   const event5 = await Event.create({
     organization_id: org2.organization_id,
@@ -364,6 +346,7 @@ async function addTestData() {
     event_description:
       "A night of fundraising for a local cause with guest speakers.",
     event_type: "fundraiser",
+    semester_id: sem2.semester_id,
   });
   const event6 = await Event.create({
     organization_id: org2.organization_id,
@@ -374,6 +357,7 @@ async function addTestData() {
     event_description:
       "Collaborate and plan initiatives for the next semester.",
     event_type: "committee",
+    semester_id: sem2.semester_id,
   });
 
   // Events
@@ -557,7 +541,7 @@ EVENTS
 +----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
 | event_id | event_name                     | event_start         | event_end           | event_location         | event_description                                                   | event_type      | createdAt           | updatedAt           | organization_id | semester_id |
 +----------+--------------------------------+---------------------+---------------------+------------------------+---------------------------------------------------------------------+-----------------+---------------------+---------------------+-----------------+-------------+
-|        7 | WiC General Meeting            | 2025-02-05 23:00:00 | 2025-02-06 00:30:00 | GOL 1400               | An overview of upcoming events and initiatives.                     | general_meeting | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
+|        7 | WiC general_meeting            | 2025-02-05 23:00:00 | 2025-02-06 00:30:00 | GOL 1400               | An overview of upcoming events and initiatives.                     | general_meeting | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
 |        8 | WiC Volunteer Day              | 2025-03-10 14:00:00 | 2025-03-10 18:00:00 | Local Community Center | Helping out at the community center with tech workshops.            | volunteer       | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
 |        9 | WiC Social Night               | 2025-04-15 23:00:00 | 2025-04-16 02:00:00 | Java's Café            | A night of networking, games, and fun!                              | social          | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              35 |        NULL |
 |       10 | COMS Workshop: Resume Building | 2025-02-12 22:30:00 | 2025-02-13 00:00:00 | GOL 2250               | Learn how to craft a compelling resume with industry professionals. | workshop        | 2025-02-18 23:19:09 | 2025-02-18 23:19:09 |              36 |        NULL |

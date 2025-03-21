@@ -104,6 +104,8 @@
     color: var(--dark-grey);
     font-style: italic;
 }
+    
+/**used for Organization Status Page **/
 
 /* Events */
 .rbc-toolbar span button {
@@ -153,4 +155,22 @@
 .event-info-popup-buttons {
     display: flex;
     margin-bottom: -1em;
+}    
+
+/**used for Organization Status Page**/
+.member-progress-chart-page{ 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: '100%';
+    gap: '10%';
+    margin-left: '10%';
+    margin-right: '10%';
 }
+
+/**used for Organization Status Page (mobile edition)**/
+.member-progress-chart-page-mobile {
+    display: grid;
+    gap: '6%';
+    grid-template-columns: 1fr;
+    width: 100%;
+     }

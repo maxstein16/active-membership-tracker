@@ -52,6 +52,17 @@ async function getSemesterByDate(date) {
 
 async function getCurrentSemester() {
   try {
+/** Old code, pre-merge 1:02PM 3/20:
+ * const currentSemesters = await getSemestersByYear();
+ * if (!currentSemesters || currentSemesters.length === 0){
+ * throw new Error("No current semesters found");
+ * }
+ * 
+ * //if multiple semesters are active, return the one with the latest start_date
+ * return currentSemesters.sort
+ * (a,b)  => new Date(b.start_date) - new Date(a.start_date) ) [0];
+ */
+
     const today = new Date();
     
     const currentSemester = await Semester.findOne({

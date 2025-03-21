@@ -12,7 +12,7 @@ const {
   getMembershipsByAttributes,
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
-const { getCurrentSemester } = require("../data-layer/semester.js");
+const { getCurrentSemester, getSemestersByYear } = require("../data-layer/semester.js");
 const {
   checkActiveMembership,
 } = require("./organizationMembershipProcessing.js");
@@ -43,9 +43,23 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
       return { error: error.memberNotFoundInOrg, data: null };
     }
 
+  // Count active semesters
+  const activeSemestersCount = memberships.filter(
+    (m) => m.active_member
+  ).length;
+
+  console.log("Semesters active: " + activeSemestersCount);
+  // Get current semester membership if exists
+  const currentSemester = await getSemestersByYear();
+  const currentMembership = memberships.find(
+    (m) => m.semester_id === currentSemester.semester_id
+  );
+
+
     return {
       error: error.noError,
-      data: { ...member.toJSON(), membership: memberships[0] },
+      data: { ...member.toJSON(), membership: currentMembership || memberships[0], // fallback to first membership
+        activeSemesters: activeSemestersCount, },
     };
   } catch (err) {
     console.error("Error fetching specific member + membership:", err);
