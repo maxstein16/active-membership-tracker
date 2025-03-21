@@ -19,6 +19,7 @@ const {
   getMemberByIdInDB,
   getMemberIDByUsernameInDB,
   getSpecificMemberOrgStatsInDB,
+  getAllMembersPlease
 } = require("../memberProcessing");
 const {
   getSpecificMemberWithOrgDataInDB,
@@ -137,6 +138,10 @@ module.exports = function () {
 
   this.getSpecificMemberOrgStats = async (memberId, orgId) => {
     return await getSpecificMemberOrgStatsInDB(memberId, orgId);
+  };
+
+  this.getAllMembersFromDB = async () => {
+    return await getAllMembersPlease();
   };
 
   // Organization Member Management
