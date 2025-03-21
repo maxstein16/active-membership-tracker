@@ -24,6 +24,7 @@ export default function NavigationDropdown() {
       // set user data
       if (!result || result.hasOwnProperty("error")) {
         setError(displayErrors.errorFetchingContactSupport);
+        return
       }
 
       // temp data
