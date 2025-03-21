@@ -12,9 +12,9 @@ const cors = require("cors"); // defines our cors policy (protects our api)
 const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
 const path = require("path"); // finding the react pages
 const passport = require("passport"); // authentication for SSO/SHIBBOLETH
-const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
+//const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 const fs = require("fs"); // file system for reading the certificates
-const {defaultSamlStrategy} = require("./saml.js");
+const {defaultSamlStrategy, SP_CERT} = require("./saml.js");
 // create app
 const app = express();
 
@@ -136,7 +136,7 @@ app.get('/login/fail',
 app.get('/saml2/metadata',
   (req, res) => {
     res.set("Content-Type", "text/xml");
-    res.status(200).send(samlStrategy.generateServiceProviderMetadata(fs.readFileSync(__dirname + '/cert/service.crt', 'utf8')));
+    res.status(200).send(samlStrategy.generateServiceProviderMetadata(SP_CERT,SP_CERT));
   }
   );
 
