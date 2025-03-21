@@ -8,15 +8,40 @@ import CheckroomIcon from "@mui/icons-material/Checkroom";
 import PersonIcon from "@mui/icons-material/Person";
 import FaceIcon from "@mui/icons-material/Face";
 
-export default function UserProfileData({ user }) {
+export default function UserProfileData({ user, hideName, color }) {
+  // Month number to name mapping
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  let monthIndex = parseInt(user.gradMonth, 10) - 1;
+  let monthName =
+    !isNaN(monthIndex) && monthIndex >= 0 && monthIndex < 12
+      ? monthNames[monthIndex]
+      : "Unknown";
+
+  const contactStyle = color ? { color: color, fontWeight: "bold" } : {};
+
   return (
     <div className="member-profile-wrapper">
-      <h1>{user.name}</h1>
+      {hideName !== true && <h1>{user.name}</h1>}
+
       <p>
         <b>{user.major}</b>
       </p>
       <p>
-        Graduation Expected {user.gradMonth}, {user.gradYear}
+        Graduation Expected {monthName} {user.gradYear || "Unknown"}
       </p>
 
       <div className="icon-data">
@@ -33,9 +58,21 @@ export default function UserProfileData({ user }) {
 
       <hr />
 
-      <a href={`mailto:${user.email}`}>{user.email}</a>
-      <a href={`mailto:${user.personalEmail}`}>{user.personalEmail}</a>
-      <p className="phone-num">{user.phone}</p>
+      <a href={`mailto:${user.email}`} style={contactStyle}>
+        {user.email}
+      </a>
+
+      {user.personalEmail && (
+        <a href={`mailto:${user.personalEmail}`} style={contactStyle}>
+          {user.personalEmail}
+        </a>
+      )}
+
+      {user.phoneNumber && user.phoneNumber !== "N/A" && (
+        <p className="phone-num" style={contactStyle}>
+          {user.phoneNumber}
+        </p>
+      )}
     </div>
   );
 }
