@@ -85,7 +85,7 @@ async function updateMemberInDB(memberId, memberData) {
             member_tshirt_size: memberData.tshirt_size,
             member_major: memberData.major,
             member_graduation_date: memberData.graduation_date,
-            member_status: memberData.member_status
+            member_status: memberData.status
         };
 
         // Remove undefined fields
