@@ -192,9 +192,7 @@ export default function EditProfilePage() {
       />
       <h1>Edit Profile</h1>
       <h2>{`${memberName}, ${memberEmail}`}</h2>
-
       {/* <SuccessDialog open={showSuccessDialog} setOpen={setShowSuccessDialog} /> */}
-
       {error && <p style={{ color: "red" }}>{error}</p>}
       {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
       {unchangedMessage && (
