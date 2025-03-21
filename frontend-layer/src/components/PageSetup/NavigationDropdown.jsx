@@ -69,12 +69,12 @@ export default function NavigationDropdown() {
       ) : (
         <>
           <div>
-            {userData.organizations.map((org) => {
+            {userData.organizations.map((org, index) => {
               if (org.role === ROLE_MEMBER) {
-                return <Link to={`/${org.id}/status`}>{org.abbreviation}</Link>;
+                return <Link to={`/${org.id}/status`} key={index}>{org.abbreviation}</Link>;
               } else {
                 return (
-                  <>
+                  <div key={index}>
                     <Link to={`/${org.id}/status`}>{org.abbreviation}</Link>
                     <Link className="sub-link" to={`/${org.id}/settings`}>
                       Settings
@@ -82,7 +82,7 @@ export default function NavigationDropdown() {
                     <Link className="sub-link" to={`/${org.id}/reports`}>
                       Reports
                     </Link>
-                  </>
+                  </div>
                 );
               }
             })}
