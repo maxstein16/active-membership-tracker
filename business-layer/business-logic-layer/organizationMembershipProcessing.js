@@ -155,7 +155,6 @@ async function calculateActivePercentage(membership) {
 
     // ===== ATTENDANCE-BASED ORG =====
     else if (organization.organization_membership_type === "attendance") {
-      let totalRequirements = membershipRequirements.length;
       let fulfilledRequirements = 0;
 
       for (const requirement of membershipRequirements) {
@@ -168,8 +167,9 @@ async function calculateActivePercentage(membership) {
         );
 
         const attendanceCount = attendanceRecords.length;
- 
+
         let requirementFulfilled = false;
+        let requirementPercentage = 0;
 
         let attendancePercentage = null;
         let remainingPercentage = null;
@@ -178,11 +178,19 @@ async function calculateActivePercentage(membership) {
 
         // === attendance_count requirement ===
         if (requirement_type === "attendance_count") {
+          requirementPercentage = (attendanceCount / requirement_value) * 100;
+        
           if (attendanceCount >= requirement_value) {
             fulfilledRequirements++;
             requirementFulfilled = true;
+            requirementPercentage = 100;
           }
+        
           remaining = Math.max(0, requirement_value - attendanceCount);
+        
+          attendancePercentage = requirementPercentage;
+          remainingPercentage = Math.max(0, 100 - attendancePercentage);
+          totalEvents = requirement_value;
         }
 
         // === percentage requirement ===
@@ -194,13 +202,14 @@ async function calculateActivePercentage(membership) {
           });
 
           totalEvents = events.length;
-
           attendancePercentage =
             totalEvents > 0 ? (attendanceCount / totalEvents) * 100 : 0;
 
+          requirementPercentage = attendancePercentage;
           if (attendancePercentage >= requirement_value) {
             fulfilledRequirements++;
             requirementFulfilled = true;
+            requirementPercentage = 100;
           }
 
           remainingPercentage = Math.max(
@@ -209,7 +218,6 @@ async function calculateActivePercentage(membership) {
           );
         }
 
-        // === Push info for frontend ===
         remainingAttendance.push({
           event_type,
           requirement_type,
@@ -228,11 +236,16 @@ async function calculateActivePercentage(membership) {
               : null,
           totalEvents,
           fulfilled: requirementFulfilled,
+          requirementPercentage: Math.min(
+            Math.round(requirementPercentage),
+            100
+          ),
         });
       }
 
-      // Attendance-based percentage
-      percentage = (fulfilledRequirements / totalRequirements) * 100;
+      // Master percentage based on requirements fulfilled
+      percentage =
+        (fulfilledRequirements / membershipRequirements.length) * 100;
     }
     return {
       percentage: Math.round(percentage),

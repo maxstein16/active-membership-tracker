@@ -1,6 +1,5 @@
 import * as React from "react";
 import DialogContent from "@mui/material/DialogContent";
-import Snackbar from "@mui/material/Snackbar";
 import UserInput from "../../components/UserInput";
 import CustomSelect from "../../components/CustomSelect";
 import { updateMembershipData } from "../../utils/handleOrganizationMembers";
@@ -12,6 +11,7 @@ export default function EditMemberContent({
   setIsEditMode,
   refreshMemberData,
   refreshMembers,
+  triggerSnackbar,
   setOpen,
   color,
 }) {
@@ -27,7 +27,6 @@ export default function EditMemberContent({
   });
 
   const [error, setError] = React.useState("");
-  const [toggleSnackbar, setToggleSnackbar] = React.useState(false);
 
   // Generic handler
   const handleFieldChange = (field, value) => {
@@ -63,7 +62,7 @@ export default function EditMemberContent({
       await refreshMembers();
       setIsEditMode(false);
       setOpen(false);
-      setToggleSnackbar(true);
+      triggerSnackbar();
     } else {
       setError("Failed to update membership. Please try again.");
     }
@@ -116,20 +115,6 @@ export default function EditMemberContent({
         </button>
         <button onClick={handleSave}>Save</button>
       </div>
-
-      <Snackbar
-        open={toggleSnackbar}
-        autoHideDuration={3000}
-        message={"Membership details updated successfully!"}
-        ContentProps={{
-          sx: {
-            backgroundColor: color,
-            color: "#fff",
-            fontWeight: "bold",
-            textAlign: "center",
-          },
-        }}
-      />
     </DialogContent>
   );
 }

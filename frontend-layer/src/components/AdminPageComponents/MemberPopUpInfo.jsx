@@ -28,6 +28,7 @@ export default function MemberPopUpInfo({
   orgId,
   memberId,
   refreshMembers,
+  triggerSnackbar,
 }) {
   const [member, setMember] = React.useState(undefined);
   const [organization, setOrganization] = React.useState(undefined);
@@ -115,6 +116,7 @@ export default function MemberPopUpInfo({
               refreshMemberData={fetchData}
               color={color}
               setOpen={setOpen}
+              triggerSnackbar={triggerSnackbar}
             />
           ) : (
             <>

@@ -8,6 +8,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -61,7 +62,11 @@ export default function MemberDetailsContent({
           </b>
         ) : (
           <div
-            style={{ textAlign: "left", marginTop: "1rem", marginLeft: "1rem" }}
+            style={{
+              textAlign: "left",
+              marginTop: "1rem",
+              marginLeft: "1rem",
+            }}
           >
             {member.remainingAttendance.map((requirement, index) => (
               <Accordion key={index} style={{ marginBottom: "0.5rem" }}>
@@ -91,34 +96,70 @@ export default function MemberDetailsContent({
                     )}
                   </Typography>
                 </AccordionSummary>
+
                 <AccordionDetails>
-                  {requirement.requirement_type === "attendance" ? (
-                    <>
-                      <Typography>
-                        Attended: {requirement.attended} /{" "}
-                        {requirement.required}
-                      </Typography>
-                      <Typography>
-                        Remaining: {requirement.remaining}
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <Typography>
-                        Total Events: {requirement.totalEvents}
-                      </Typography>
-                      <Typography>
-                        Attendance %: {requirement.attendancePercentage}%
-                      </Typography>
-                      <Typography>
-                        Required %: {requirement.required}%
-                      </Typography>
-                      <Typography>
-                        Remaining %:{" "}
-                        {requirement.remainingPercentage.toFixed(1)}%
-                      </Typography>
-                    </>
-                  )}
+                  <Tooltip
+                    title={
+                      <div style={{ textAlign: "left" }}>
+                        {requirement.requirement_type === "attendance_count" ? (
+                          <>
+                            <Typography variant="body2">
+                              Attended: {requirement.attended} /{" "}
+                              {requirement.required}
+                            </Typography>
+                            <Typography variant="body2">
+                              Remaining: {requirement.remaining}
+                            </Typography>
+                          </>
+                        ) : (
+                          <>
+                            <Typography variant="body2">
+                              Total Events: {requirement.totalEvents}
+                            </Typography>
+                            <Typography variant="body2">
+                              Attendance %: {requirement.attendancePercentage}%
+                            </Typography>
+                            <Typography variant="body2">
+                              Required %: {requirement.requiredPercentage}%
+                            </Typography>
+                            <Typography variant="body2">
+                              Remaining %:{" "}
+                              {requirement.remainingPercentage.toFixed(1)}%
+                            </Typography>
+                          </>
+                        )}
+                      </div>
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      <Gauge
+                        value={requirement.requirementPercentage}
+                        startAngle={0}
+                        endAngle={-360}
+                        text={`${requirement.requirementPercentage}%`}
+                        width={150}
+                        height={150}
+                        innerRadius="65%"
+                        outerRadius="100%"
+                        sx={{
+                          [`& .${gaugeClasses.valueArc}`]: {
+                            fill: color,
+                          },
+                          [`& .${gaugeClasses.referenceArc}`]: {
+                            fill: "#e0e0e0",
+                          },
+                        }}
+                      />
+                    </div>
+                  </Tooltip>
 
                   <Typography
                     style={{

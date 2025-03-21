@@ -167,48 +167,25 @@ async function addTestData() {
   ];
 
   for (const member of members) {
-    let randomBoolean = Math.random() >= 0.5;
-    const membership1a = await Membership.create({
-      membership_role: 2,
-      member_id: member.member_id,
-      organization_id: org1.organization_id,
-      semester_id: sem2.semester_id,
-      membership_points: 0,
-      active_member: randomBoolean,
-      received_bonus: [],
-    });
-
     const allPossibleBonusIds = [1, 2, 3, 4, 5];
     const numBonuses = Math.floor(Math.random() * 4);
     const shuffled = allPossibleBonusIds.sort(() => 0.5 - Math.random());
     const selectedBonuses = shuffled.slice(0, numBonuses);
 
-    randomNum = Math.floor(Math.random() * 40) + 1;
-    const membership1b = await Membership.create({
-      membership_role: 2,
-      member_id: member.member_id,
-      organization_id: org2.organization_id,
-      semester_id: sem2.semester_id,
-      membership_points: randomNum,
-      active_member: randomNum >= 23,
-      received_bonus: selectedBonuses,
-    });
-
-    // INSERT SPRING 2025 MEMBERSHIPS (semester_id = 1124) HERE:
-    randomNum = Math.floor(Math.random() * 40) + 1;
-
+    // Membership for WiC
     await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
       organization_id: org1.organization_id,
       semester_id: sem2.semester_id,
-      membership_points: randomNum,
-      active_member: randomNum >= 42,
+      membership_points: 0,
+      active_member: false,
+      received_bonus: [],
       active_semesters: 1,
     });
 
-    randomNum = Math.floor(Math.random() * 40) + 1;
-
+    // Membership for COMS
+    const randomNum = Math.floor(Math.random() * 40) + 1;
     await Membership.create({
       membership_role: 2,
       member_id: member.member_id,
@@ -217,6 +194,7 @@ async function addTestData() {
       membership_points: randomNum,
       active_member: randomNum >= 23,
       received_bonus: selectedBonuses,
+      active_semesters: 1,
     });
   }
 
@@ -324,6 +302,7 @@ async function addTestData() {
     event_location: "GOL 1400",
     event_description: "An overview of upcoming events and initiatives.",
     event_type: "general_meeting",
+    semester_id: sem2.semester_id,
   });
   const event2 = await Event.create({
     organization_id: org1.organization_id,
@@ -334,6 +313,7 @@ async function addTestData() {
     event_description:
       "Helping out at the community center with tech workshops.",
     event_type: "volunteer",
+    semester_id: sem2.semester_id,
   });
 
   const event3 = await Event.create({
@@ -344,6 +324,7 @@ async function addTestData() {
     event_location: "Java's Café",
     event_description: "A night of networking, games, and fun!",
     event_type: "social",
+    semester_id: sem2.semester_id,
   });
   const event4 = await Event.create({
     organization_id: org2.organization_id,
@@ -354,6 +335,7 @@ async function addTestData() {
     event_description:
       "Learn how to craft a compelling resume with industry professionals.",
     event_type: "workshop",
+    semester_id: sem2.semester_id,
   });
   const event5 = await Event.create({
     organization_id: org2.organization_id,
@@ -364,6 +346,7 @@ async function addTestData() {
     event_description:
       "A night of fundraising for a local cause with guest speakers.",
     event_type: "fundraiser",
+    semester_id: sem2.semester_id,
   });
   const event6 = await Event.create({
     organization_id: org2.organization_id,
@@ -374,6 +357,7 @@ async function addTestData() {
     event_description:
       "Collaborate and plan initiatives for the next semester.",
     event_type: "committee",
+    semester_id: sem2.semester_id,
   });
 
   // Events
