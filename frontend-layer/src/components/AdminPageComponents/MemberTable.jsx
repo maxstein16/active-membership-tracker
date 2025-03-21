@@ -4,7 +4,7 @@ import "../../assets/css/pageSetup.css";
 import "../../assets/css/general.css";
 import "../../assets/css/adminPages.css";
 import { getOrganizationMembers } from "../../utils/handleSettingsData";
-import { CircularProgress, Paper } from "@mui/material";
+import { CircularProgress, Paper, Snackbar } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import displayErrors from "../../utils/displayErrors";
 import { ROLE_ADMIN, ROLE_EBOARD } from "../../utils/constants";
@@ -39,9 +39,10 @@ export default function MemberTable({ color, orgId, membersList }) {
   const [popUpOpen, setPopUpOpen] = React.useState(false);
   const [memberId, setMemberId] = React.useState(undefined);
   const [memberShipId, setMemberShipId] = React.useState(undefined);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
   // GET THE DATA (if needed)
-  React.useEffect(() => {
+  const fetchMembers = React.useCallback(async () => {
     // if given members list, display it
     if (membersList) {
       membersList.forEach((member, key) => {
@@ -50,21 +51,19 @@ export default function MemberTable({ color, orgId, membersList }) {
       setMembers(membersList);
     } else if (orgId) {
       // else if given org id, get all the members
-      getOrganizationMembers(orgId).then((result) => {
-        // console.log(result);
-        if (result.hasOwnProperty("session")) {
-          setError(displayErrors.noSession);
-        } else if (!result.hasOwnProperty("error")) {
-          setError("");
-          result.forEach((member, key) => {
-            member.id = key + 1;
-          });
-          console.log(result);
-          setMembers(result);
-        } else {
-          setError(displayErrors.errorFetchingContactSupport);
-        }
-      });
+      const result = await getOrganizationMembers(orgId);
+      // console.log(result);
+      if (result.hasOwnProperty("session")) {
+        setError(displayErrors.noSession);
+      } else if (!result.hasOwnProperty("error")) {
+        setError("");
+        result.forEach((member, key) => {
+          member.id = key + 1;
+        });
+        setMembers(result);
+      } else {
+        setError(displayErrors.errorFetchingContactSupport);
+      }
     } else {
       // given nothing is not acceptable
       setError(
@@ -72,6 +71,10 @@ export default function MemberTable({ color, orgId, membersList }) {
       );
     }
   }, [orgId, membersList]);
+
+  React.useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   // TABLE INFO
   const columns = [
@@ -98,6 +101,14 @@ export default function MemberTable({ color, orgId, membersList }) {
   ];
 
   const paginationModel = { page: 0, pageSize: 15 };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleSnackbarTrigger = () => {
+    setSnackbarOpen(true);
+  };
 
   return (
     <div className="org-email-settings">
@@ -143,6 +154,22 @@ export default function MemberTable({ color, orgId, membersList }) {
             orgId={orgId}
             memberId={memberId}
             membershipId={memberShipId}
+            refreshMembers={fetchMembers}
+            triggerSnackbar={handleSnackbarTrigger}
+          />
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={3000}
+            onClose={handleSnackbarClose}
+            message={"Membership details updated successfully!"}
+            ContentProps={{
+              sx: {
+                backgroundColor: color,
+                color: "#fff",
+                fontWeight: "bold",
+                textAlign: "center",
+              },
+            }}
           />
         </>
       )}
