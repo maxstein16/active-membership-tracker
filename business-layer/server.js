@@ -5,6 +5,7 @@ const { MIN_30 } = require("./constants.js");
 
 // Requires
 require("dotenv").config(); // Load .env variables
+const bodyParser = require("body-parser"); // parse the body of the request
 const express = require("express"); // REST API 
 const session = require("express-session"); // sessions to log the user out
 const logger = require("morgan"); // logging out the routes
