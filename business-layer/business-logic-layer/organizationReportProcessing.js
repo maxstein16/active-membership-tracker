@@ -5,7 +5,8 @@ const { getMemberById } = require("../data-layer/member.js");
 const { getMembershipsByAttributes, getMembershipsByOrgAndSemester } = require("../data-layer/membership.js");
 const { getMemberAttendanceWithEvents, getEventAttendanceWithMembers } = require("../data-layer/attendance.js");
 const { getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
-const { getEventsWithAttendance, getEventById } = require("../data-layer/event.js");
+const { getEventsWithAttendance } = require("../data-layer/event.js");
+const { Semester } = require("../db.js");
 
 /**
  * Get specific report data for a member in an organization
@@ -65,48 +66,153 @@ async function getAnnualOrgReportInDB(orgId) {
 
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
+    const twoYearsAgo = lastYear - 1;
 
     // Get semesters for current and last year
     const currentYearSemesters = await getSemestersByYear(currentYear);
     const lastYearSemesters = await getSemestersByYear(lastYear);
-
-    const currentYearSemesterIds = currentYearSemesters.map(s => s.semester_id);
-    const lastYearSemesterIds = lastYearSemesters.map(s => s.semester_id);
-
-    // Get members for current and last year based on semesters
-    const currentYearMembers = await getMembershipsByOrgAndSemester(
-      orgId, 
-      currentYearSemesterIds
-    );
     
-    const lastYearMembers = await getMembershipsByOrgAndSemester(
-      orgId, 
-      lastYearSemesterIds
-    );
+    if (!currentYearSemesters || currentYearSemesters.length === 0) {
+      console.error("No semesters found for current year");
+      return { error: error.noCurrentSemesterFound, data: null };
+    }
+
+    const currentYearSemesterIds = currentYearSemesters.map(sem => sem.semester_id);
+    const lastYearSemesterIds = lastYearSemesters.map(sem => sem.semester_id);
+
+    const currentYearMemberships = await getMembershipsByOrgAndSemester(orgId, currentYearSemesterIds) || [];
+    const currentYearMemberIds = new Set(currentYearMemberships.map(m => m.member_id));
+    
+    const currentActiveMembers = currentYearMemberships.filter(m => m.active_member) || [];
+    const currentActiveMemberIds = new Set(currentActiveMembers.map(m => m.member_id));
+    
+    const lastYearMemberships = await getMembershipsByOrgAndSemester(orgId, lastYearSemesterIds) || [];
+    const lastYearMemberIds = new Set(lastYearMemberships.map(m => m.member_id));
+    
+    const lastYearActiveMembers = lastYearMemberships.filter(m => m.active_member) || [];
+    const lastYearActiveMemberIds = new Set(lastYearActiveMembers.map(m => m.member_id));
+    
+    const newMemberIds = [...currentYearMemberIds].filter(id => !lastYearMemberIds.has(id));
+    
+    const newActiveMembers = [...currentActiveMemberIds].filter(id => !lastYearActiveMemberIds.has(id));
+    
+    let lastYearNewMemberIds = [];
+    let lastYearNewActiveMembers = [];
+    
+    try {
+      const twoYearsAgoSemesters = await getSemestersByYear(twoYearsAgo);
+      
+      if (twoYearsAgoSemesters && twoYearsAgoSemesters.length > 0) {
+        const twoYearsAgoSemesterIds = twoYearsAgoSemesters.map(sem => sem.semester_id);
+        
+        const twoYearsAgoMemberships = await getMembershipsByOrgAndSemester(orgId, twoYearsAgoSemesterIds) || [];
+        
+        const twoYearsAgoMemberIds = new Set(twoYearsAgoMemberships.map(m => m.member_id));
+        const twoYearsAgoActiveMembers = twoYearsAgoMemberships.filter(m => m.active_member) || [];
+        const twoYearsAgoActiveMemberIds = new Set(twoYearsAgoActiveMembers.map(m => m.member_id));
+        
+        lastYearNewMemberIds = [...lastYearMemberIds].filter(id => !twoYearsAgoMemberIds.has(id));
+        
+        lastYearNewActiveMembers = [...lastYearActiveMemberIds].filter(id => !twoYearsAgoActiveMemberIds.has(id));
+      }
+    } catch (err) {
+      console.error("Error getting two years ago data:", err);
+    }
 
     // Get events with attendance
     const events = await getEventsWithAttendance(orgId);
-    
-    // Filter events by year
-    const currentYearEvents = events.filter(e => {
-      const eventDate = new Date(e.event_start);
-      return eventDate.getFullYear() === currentYear;
-    });
-    
-    const lastYearEvents = events.filter(e => {
-      const eventDate = new Date(e.event_start);
-      return eventDate.getFullYear() === lastYear;
-    });
+    if (!events || events.length === 0) {
+      return { error: error.databaseError, data: null };
+    }
 
-    // Format response data
+    const currentYearEvents = events.filter(e => 
+      new Date(e.event_start).getFullYear() === currentYear
+    );
+
+    const lastYearEvents = events.filter(e => 
+      new Date(e.event_start).getFullYear() === lastYear
+    );
+
+    const processMeetings = (eventsList) => {
+      return eventsList.map(event => ({
+        event_id: event.event_id,
+        event_name: event.event_name,
+        event_date: event.event_start,
+        total_attendance: event.Attendances ? event.Attendances.length : 0,
+        attendees: event.Attendances ? event.Attendances.map(a => ({
+          member_id: a.member_id,
+          firstName: a.Member?.member_name?.split(' ')[0] || "Unknown",
+          lastName: a.Member?.member_name?.split(' ')[1] || "Unknown",
+          rit_username: a.Member?.member_email?.split('@')[0] || "Unknown"
+        })) : []
+      }));
+    };
+
+    const categorizeEvents = (eventsList) => {
+      const general = eventsList.filter(e => e.event_type === 'general meeting').length;
+      const volunteering = eventsList.filter(e => e.event_type === 'volunteering').length;
+      const events = eventsList.length - general - volunteering;
+      
+      return {
+        general,
+        volunteering,
+        events
+      };
+    };
+
+    const currentYearMeetings = processMeetings(currentYearEvents);
+    const lastYearMeetings = processMeetings(lastYearEvents);
+    
+    const currentYearEventTypes = categorizeEvents(currentYearEvents);
+    const lastYearEventTypes = categorizeEvents(lastYearEvents);
+
+    const formatMembers = (membershipsList) => {
+      return membershipsList.map(member => ({
+        member_id: member?.member_id || null,
+        role_num: member?.membership_role || 0,
+        firstName: member?.Member?.member_name?.split(' ')[0] || "",
+        lastName: member?.Member?.member_name?.split(' ')[1] || "",
+        rit_username: member?.Member?.member_email?.split('@')[0] || "",
+        phone: member?.Member?.member_phone_number || "",
+        points: member?.membership_points || 0
+      }));
+    };
+
     const data = {
       organization_id: organization.organization_id,
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
       current_year: currentYear,
-      "meetings_data_this_year": {
-        number_of_meetings: events.filter(e => e.event_type === 'general_meeting').length,
-        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
+      
+      memberDataThis: {
+        totalMembers: currentYearMemberIds.size,
+        newMembers: newMemberIds.length,
+        totalActive_members: currentActiveMemberIds.size,
+        newActive_members: newActiveMembers.length,
+        members: formatMembers(currentYearMemberships)
+      },
+      
+      memberDataLast: {
+        totalMembers: lastYearMemberIds.size,
+        newMembers: lastYearNewMemberIds.length,
+        totalActiveMembers: lastYearActiveMemberIds.size,
+        newActiveMembers: lastYearNewActiveMembers.length,
+      },
+
+      meetingsDataThis: {
+        numMeetings: currentYearEventTypes.general,
+        numEvents: currentYearEventTypes.events,
+        numVolunteering: currentYearEventTypes.volunteering,
+        totalAttendance: currentYearMeetings.reduce((sum, m) => sum + m.total_attendance, 0),
+        meetings: currentYearMeetings
+      },
+
+      meetingsDataLast: {
+        numMeetings: lastYearEventTypes.general,
+        numEvents: lastYearEventTypes.events,
+        numVolunteering: lastYearEventTypes.volunteering,
+        totalAttendance: lastYearMeetings.reduce((sum, m) => sum + m.total_attendance, 0),
+        meetings: lastYearMeetings
       }
     };
 
@@ -134,52 +240,305 @@ async function getSemesterOrgReportInDB(orgId) {
       return { error: error.semesterNotFound, data: null };
     }
 
-    // Get semester data
-    const semesterMembers = await getMembershipsByOrgAndSemester(
-      orgId,
-      [currentSemester.semester_id]
-    );
-
-    // Get events with attendance
-    const events = await getEventsWithAttendance(orgId);
+    const allSemesters = await Semester.findAll({
+      order: [['start_date', 'DESC']]
+    });
     
-    // Filter events for current semester
-    const semesterEvents = events.filter(e => {
-      const eventDate = new Date(e.event_start);
-      const semesterStart = new Date(currentSemester.start_date);
-      const semesterEnd = new Date(currentSemester.end_date);
-      return eventDate >= semesterStart && eventDate <= semesterEnd;
+    const currentSemesterIndex = allSemesters.findIndex(sem => 
+      sem.semester_id === currentSemester.semester_id
+    );
+    
+    const previousSemester = currentSemesterIndex >= 0 && currentSemesterIndex < allSemesters.length - 1 
+      ? allSemesters[currentSemesterIndex + 1] 
+      : null;
+
+    const currentSemesterMembers = await getMembershipsByOrgAndSemester(orgId, [currentSemester.semester_id]);
+    if (!currentSemesterMembers) {
+      return { error: error.databaseError, data: null };
+    }
+
+    let previousSemesterMembers = [];
+    if (previousSemester) {
+      previousSemesterMembers = await getMembershipsByOrgAndSemester(orgId, [previousSemester.semester_id]) || [];
+    }
+
+    const allEvents = await getEventsWithAttendance(orgId);
+    if (!allEvents) {
+      return { error: error.databaseError, data: null };
+    }
+
+    const currentSemesterStartDate = new Date(currentSemester.start_date);
+    const currentSemesterEndDate = new Date(currentSemester.end_date);
+    
+    let previousSemesterStartDate, previousSemesterEndDate;
+    if (previousSemester) {
+      previousSemesterStartDate = new Date(previousSemester.start_date);
+      previousSemesterEndDate = new Date(previousSemester.end_date);
+    }
+
+    const currentSemesterEvents = allEvents.filter(event => {
+      const eventDate = new Date(event.event_start);
+      return eventDate >= currentSemesterStartDate && eventDate <= currentSemesterEndDate;
     });
 
-    // Format response data
+    const previousSemesterEvents = previousSemester ? allEvents.filter(event => {
+      const eventDate = new Date(event.event_start);
+      return eventDate >= previousSemesterStartDate && eventDate <= previousSemesterEndDate;
+    }) : [];
+
+    const currentActiveMemberIds = new Set(currentSemesterMembers
+      .filter(m => m.active_member)
+      .map(m => m.member_id)
+    );
+
+    const previousMemberIds = new Set(previousSemesterMembers.map(m => m.member_id));
+    const previousActiveMemberIds = new Set(previousSemesterMembers
+      .filter(m => m.active_member)
+      .map(m => m.member_id)
+    );
+
+    const newMemberIds = currentSemesterMembers
+      .filter(m => !previousMemberIds.has(m.member_id))
+      .map(m => m.member_id);
+
+    const newActiveMembers = [...currentActiveMemberIds]
+      .filter(id => !previousActiveMemberIds.has(id));
+
+    const currentSemesterEventCounts = {
+      generalMeetings: currentSemesterEvents.filter(e => e.event_type === 'general meeting').length,
+      volunteeringEvents: currentSemesterEvents.filter(e => e.event_type === 'volunteering').length,
+      otherEvents: currentSemesterEvents.filter(e => 
+        e.event_type !== 'general meeting' && e.event_type !== 'volunteering'
+      ).length
+    };
+
+    const previousSemesterEventCounts = {
+      generalMeetings: previousSemesterEvents.filter(e => e.event_type === 'general meeting').length,
+      volunteeringEvents: previousSemesterEvents.filter(e => e.event_type === 'volunteering').length,
+      otherEvents: previousSemesterEvents.filter(e => 
+        e.event_type !== 'general meeting' && e.event_type !== 'volunteering'
+      ).length
+    };
+
+    const currentSemesterTotalAttendance = currentSemesterEvents.reduce((sum, event) => 
+      sum + (event.Attendances ? event.Attendances.length : 0), 0
+    );
+
+    const previousSemesterTotalAttendance = previousSemesterEvents.reduce((sum, event) => 
+      sum + (event.Attendances ? event.Attendances.length : 0), 0
+    );
+
     const data = {
       organization_id: organization.organization_id,
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
       semester: currentSemester.semester_name,
       academic_year: currentSemester.academic_year,
+      semester_start_date: currentSemester.start_date,
+      semester_end_date: currentSemester.end_date,
+      
       member_data: {
-        total_members: semesterMembers.length,
-        active_members: semesterMembers.filter(m => m.active_member).length,
-        members: semesterMembers.map(m => ({
-          member_id: m.Member.member_id,
-          role_num: m.membership_role,
-          firstName: m.Member.member_name.split(' ')[0],
-          lastName: m.Member.member_name.split(' ')[1],
-          rit_username: m.Member.member_email.split('@')[0],
-          phone: m.Member.member_phone_number,
-          points: m.membership_points
+        total_members: currentSemesterMembers.length,
+        active_members: currentSemesterMembers.filter(m => m.active_member).length,
+        new_members: newMemberIds.length,
+        new_active_members: newActiveMembers.length,
+        members: currentSemesterMembers.map(member => ({
+          member_id: member?.Member?.member_id || null,
+          role_num: member?.membership_role || 0,
+          firstName: member?.Member?.member_name?.split(' ')[0] || "",
+          lastName: member?.Member?.member_name?.split(' ')[1] || "",
+          rit_username: member?.Member?.member_email?.split('@')[0] || "",
+          phone: member?.Member?.member_phone_number || "",
+          points: member?.membership_points || 0
         }))
       },
+      
+      previous_semester: previousSemester ? {
+        semester_name: previousSemester.semester_name,
+        academic_year: previousSemester.academic_year,
+        total_members: previousSemesterMembers.length,
+        active_members: previousSemesterMembers.filter(m => m.active_member).length,
+        new_members: 0, // Would need additional historical data to calculate accurately
+        new_active_members: 0, // Would need additional historical data to calculate accurately
+        general_meetings: previousSemesterEventCounts.generalMeetings,
+        events: previousSemesterEventCounts.otherEvents,
+        volunteering_events: previousSemesterEventCounts.volunteeringEvents,
+        total_attendance: previousSemesterTotalAttendance
+      } : null,
+      
       event_data: {
-        total_events: events.length,
-        total_attendance: events.reduce((sum, event) => sum + (event.Attendances ? event.Attendances.length : 0), 0)
+        total_events: currentSemesterEvents.length,
+        general_meetings: currentSemesterEventCounts.generalMeetings,
+        events: currentSemesterEventCounts.otherEvents,
+        volunteering_events: currentSemesterEventCounts.volunteeringEvents, 
+        total_attendance: currentSemesterTotalAttendance
       }
     };
 
     return { error: error.noError, data };
   } catch (err) {
     console.error("Error in getSemesterOrgReportInDB:", err);
+    return { error: error.databaseError, data: null };
+  }
+}
+
+/**
+ * Generate semester report for organization by specific semester ID
+ * @param {number} orgId - The organization ID
+ * @param {number} semesterId - The semester ID to get report for
+ * @returns {object} Error and data object
+ */
+async function getSemesterOrgReportBySemesterIdInDB(orgId, semesterId) {
+  try {
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return { error: error.organizationNotFound, data: null };
+    }
+
+    const semester = await Semester.findByPk(semesterId);
+    if (!semester) {
+      return { error: error.semesterNotFound, data: null };
+    }
+
+    const allSemesters = await Semester.findAll({
+      order: [['start_date', 'DESC']]
+    });
+    
+    const semesterIndex = allSemesters.findIndex(sem => 
+      sem.semester_id === semester.semester_id
+    );
+    
+    const previousSemester = semesterIndex >= 0 && semesterIndex < allSemesters.length - 1 
+      ? allSemesters[semesterIndex + 1] 
+      : null;
+
+    const semesterMembers = await getMembershipsByOrgAndSemester(orgId, [semester.semester_id]);
+    if (!semesterMembers) {
+      return { error: error.databaseError, data: null };
+    }
+
+    let previousSemesterMembers = [];
+    if (previousSemester) {
+      previousSemesterMembers = await getMembershipsByOrgAndSemester(orgId, [previousSemester.semester_id]) || [];
+    }
+
+    const allEvents = await getEventsWithAttendance(orgId);
+    if (!allEvents) {
+      return { error: error.databaseError, data: null };
+    }
+
+    const semesterStartDate = new Date(semester.start_date);
+    const semesterEndDate = new Date(semester.end_date);
+    
+    let previousSemesterStartDate, previousSemesterEndDate;
+    if (previousSemester) {
+      previousSemesterStartDate = new Date(previousSemester.start_date);
+      previousSemesterEndDate = new Date(previousSemester.end_date);
+    }
+
+    const semesterEvents = allEvents.filter(event => {
+      const eventDate = new Date(event.event_start);
+      return eventDate >= semesterStartDate && eventDate <= semesterEndDate;
+    });
+
+    const previousSemesterEvents = previousSemester ? allEvents.filter(event => {
+      const eventDate = new Date(event.event_start);
+      return eventDate >= previousSemesterStartDate && eventDate <= previousSemesterEndDate;
+    }) : [];
+
+    const activeMemberIds = new Set(semesterMembers
+      .filter(m => m.active_member)
+      .map(m => m.member_id)
+    );
+
+    const previousMemberIds = new Set(previousSemesterMembers.map(m => m.member_id));
+    const previousActiveMemberIds = new Set(previousSemesterMembers
+      .filter(m => m.active_member)
+      .map(m => m.member_id)
+    );
+
+    const newMemberIds = semesterMembers
+      .filter(m => !previousMemberIds.has(m.member_id))
+      .map(m => m.member_id);
+
+    const newActiveMembers = [...activeMemberIds]
+      .filter(id => !previousActiveMemberIds.has(id));
+
+    const semesterEventCounts = {
+      generalMeetings: semesterEvents.filter(e => e.event_type === 'general meeting').length,
+      volunteeringEvents: semesterEvents.filter(e => e.event_type === 'volunteering').length,
+      otherEvents: semesterEvents.filter(e => 
+        e.event_type !== 'general meeting' && e.event_type !== 'volunteering'
+      ).length
+    };
+
+    const previousSemesterEventCounts = {
+      generalMeetings: previousSemesterEvents.filter(e => e.event_type === 'general meeting').length,
+      volunteeringEvents: previousSemesterEvents.filter(e => e.event_type === 'volunteering').length,
+      otherEvents: previousSemesterEvents.filter(e => 
+        e.event_type !== 'general meeting' && e.event_type !== 'volunteering'
+      ).length
+    };
+
+    const semesterTotalAttendance = semesterEvents.reduce((sum, event) => 
+      sum + (event.Attendances ? event.Attendances.length : 0), 0
+    );
+
+    const previousSemesterTotalAttendance = previousSemesterEvents.reduce((sum, event) => 
+      sum + (event.Attendances ? event.Attendances.length : 0), 0
+    );
+
+    const data = {
+      organization_id: organization.organization_id,
+      organization_name: organization.organization_name,
+      organization_abbreviation: organization.organization_abbreviation,
+      semester: semester.semester_name,
+      academic_year: semester.academic_year,
+      semester_start_date: semester.start_date,
+      semester_end_date: semester.end_date,
+      
+      member_data: {
+        total_members: semesterMembers.length,
+        active_members: semesterMembers.filter(m => m.active_member).length,
+        new_members: newMemberIds.length,
+        new_active_members: newActiveMembers.length,
+        members: semesterMembers.map(member => ({
+          member_id: member?.Member?.member_id || null,
+          membership_id: member?.membership_id || null,
+          role_num: member?.membership_role || 0,
+          firstName: member?.Member?.member_name?.split(' ')[0] || "",
+          lastName: member?.Member?.member_name?.split(' ')[1] || "",
+          rit_username: member?.Member?.member_email?.split('@')[0] || "",
+          phone: member?.Member?.member_phone_number || "",
+          points: member?.membership_points || 0
+        }))
+      },
+      
+      previous_semester: previousSemester ? {
+        semester_name: previousSemester.semester_name,
+        academic_year: previousSemester.academic_year,
+        total_members: previousSemesterMembers.length,
+        active_members: previousSemesterMembers.filter(m => m.active_member).length,
+        new_members: 0, // Would need additional historical data to calculate accurately
+        new_active_members: 0, // Would need additional historical data to calculate accurately
+        general_meetings: previousSemesterEventCounts.generalMeetings,
+        events: previousSemesterEventCounts.otherEvents,
+        volunteering_events: previousSemesterEventCounts.volunteeringEvents,
+        total_attendance: previousSemesterTotalAttendance
+      } : null,
+      
+      event_data: {
+        total_events: semesterEvents.length,
+        general_meetings: semesterEventCounts.generalMeetings,
+        events: semesterEventCounts.otherEvents,
+        volunteering_events: semesterEventCounts.volunteeringEvents, 
+        total_attendance: semesterTotalAttendance
+      }
+    };
+
+    return { error: error.noError, data };
+  } catch (err) {
+    console.error("Error in getSemesterOrgReportBySemesterId:", err);
     return { error: error.databaseError, data: null };
   }
 }
@@ -248,5 +607,6 @@ module.exports = {
   getSpecificReportOrgDataInDB,
   getAnnualOrgReportInDB,
   getSemesterOrgReportInDB,
+  getSemesterOrgReportBySemesterIdInDB,
   getEventOrgReportInDB
 };

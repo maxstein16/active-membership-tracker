@@ -52,7 +52,7 @@ router.get(
 router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 
   // Fetch member ID using the function
-  let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
+  let memberId = await business.getMemberIDByUsername(req.session.user.username);
 
   // Check if an error occurred while fetching member ID
   if (memberId.error) {
@@ -133,7 +133,7 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 
   console.log("you made it to put member!")
   let body = req.body;
-  let memberId = await business.getMemberIDByUsernameInDB(req.session.user.username);
+  let memberId = await business.getMemberIDByUsername(req.session.user.username);
 
 
   console.log("memberRoute says memberID is (non .data) " + memberId)

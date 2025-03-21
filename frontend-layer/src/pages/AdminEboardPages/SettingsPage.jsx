@@ -9,13 +9,15 @@ import BackButton from "../../components/BackButton";
 import OrgSettingsBasicInfo from "../../components/AdminPageComponents/Settings/OrgSettingsBasicInfo";
 import DisplayEmailSettings from "../../components/AdminPageComponents/Settings/DisplayEmailSettings";
 import DisplayMembershipRequirements from "../../components/AdminPageComponents/Settings/DisplayMembershipRequirements";
-import CreateNewRequirement from "../../components/AdminPageComponents/Settings/CreateNewRequirement";
 import MemberTable from "../../components/AdminPageComponents/MemberTable";
 import { CircularProgress } from "@mui/material";
 import {
+  createNewBonusRequirementInDB,
   createNewMembershipRequirementInDB,
+  deleteBonusRequirement,
   deleteMemberRequirement,
   getOrganizationSettingsData,
+  saveBonusRequirementDetail,
   saveEmailSettingInDB,
   saveInfoSetting,
   saveMembershipRequirementDetail,
@@ -76,16 +78,28 @@ export default function SettingsPage() {
     // console.log(newData);
   };
 
-  const updateValueInDB = (newValue, reqId, valueName) => {
+  const updateValueInDB = (newValue, id, valueName, isBonus = false) => {
     // update a value for a membership requirement in the db
     // example param values: '3' '39' 'amount'
-    saveMembershipRequirementDetail(orgId, reqId, newValue, valueName).then(
-      (success) => {
-        if (!success) {
-          setError(displayErrors.somethingWentWrong);
+
+    if (isBonus) {
+      saveBonusRequirementDetail(orgId, id, newValue, valueName).then(
+        (success) => {
+          if (!success) {
+            setError(displayErrors.somethingWentWrong);
+          }
         }
-      }
-    );
+      );
+    } else {
+      saveMembershipRequirementDetail(orgId, id, newValue, valueName).then(
+        (success) => {
+          if (!success) {
+            setError(displayErrors.somethingWentWrong);
+          }
+        }
+      );
+    }
+    
   };
   const deleteRequirementInDB = (reqId) => {
     // delete the requirement by reqId in the database
@@ -96,29 +110,68 @@ export default function SettingsPage() {
     });
   };
 
-  const createNewRequirement = (isPoints) => {
-    // create the requirement in the database
-    createNewMembershipRequirementInDB(orgId, isPoints).then((success) => {
-      if (success.hasOwnProperty("session")) {
-        setError(displayErrors.noSession);
-      }
+  const deleteBonusRequirementInDB = (bonusId) => {
+    // delete the requirement by reqId in the database
+    deleteBonusRequirement(orgId, bonusId).then((success) => {
       if (!success) {
         setError(displayErrors.somethingWentWrong);
-        return;
       }
-      // add to orgData variable to display without reload
-      let newData = { ...orgData };
-      newData.membershipRequirements.push({
-        id: success.requirement_id,
-        meetingType: success.meeting_type,
-        frequency: success.frequency,
-        amountType: success.amountType,
-        amount: success.amount,
-        requirementScope: success.requirement_scope,
-      });
-      setOrgData(newData);
     });
   };
+
+  const createNewRequirement = () => {
+    // create the requirement in the database
+    createNewMembershipRequirementInDB(orgId, orgData.isPointBased).then(
+      (success) => {
+        if (success.hasOwnProperty("session")) {
+          setError(displayErrors.noSession);
+          return;
+        }
+        if (!success) {
+          setError(displayErrors.somethingWentWrong);
+          return;
+        }
+        // add to orgData variable to display without reload
+        let newData = { ...orgData };
+        newData.membershipRequirements.push({
+          id: success.requirement_id,
+          eventType: success.event_type,
+          type: success.requirement_type,
+          value: success.requirement_value,
+          bonuses: [],
+        });
+
+        setOrgData(newData);
+      }
+    );
+  };
+
+  const createNewBonus = (reqId) => {
+    // create the requirement in the database
+    createNewBonusRequirementInDB(orgId, reqId).then(
+      (success) => {
+        if (success.hasOwnProperty("session")) {
+          setError(displayErrors.noSession);
+          return;
+        }
+        if (!success) {
+          setError(displayErrors.somethingWentWrong);
+          return;
+        }
+        // add to orgData variable to display without reload
+        let newData = { ...orgData };
+        let requirement = newData.membershipRequirements.filter((req) => req.id === reqId)
+        requirement[0].bonuses.push({
+          id: success.bonus_id,
+          threshold: success.threshold_percentage,
+          points: success.bonus_points
+        });
+
+        setOrgData(newData);
+      }
+    );
+  };
+
 
   return (
     <PageSetup>
@@ -147,10 +200,9 @@ export default function SettingsPage() {
             setOrgData={setOrgData}
             updateValueInDB={updateValueInDB}
             deleteRequirementInDB={deleteRequirementInDB}
-          />
-          <CreateNewRequirement
-            color={orgData.color}
+            deleteBonusRequirementInDb={deleteBonusRequirementInDB}
             createNewRequirement={createNewRequirement}
+            createNewBonus={createNewBonus}
           />
 
           <MemberTable color={orgData.color} orgId={orgId} />

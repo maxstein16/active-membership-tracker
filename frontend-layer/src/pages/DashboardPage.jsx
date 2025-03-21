@@ -28,7 +28,7 @@ export default function DashboardPage() {
           id: 1,
           abbreviation: "WiC",
           color: "#381A58",
-          role: 0,
+          role: 2,
         },
         {
           id: 2,
