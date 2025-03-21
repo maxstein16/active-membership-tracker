@@ -29,7 +29,6 @@ app.use(express.json());
 app.enable("trust proxy");
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index : false }));
-app.set('trust proxy', true);
 
 // Session Middleware
 app.use(
@@ -113,27 +112,25 @@ app.use("/v1/organization/:orgId/events", eventsRouter);
 
 
 // Handle routes that do not exist
-app.get('/login',
-  passport.authenticate('saml', { failureRedirect: '/login/fail' }),
-  function (req, res) {
-    res.redirect('/');
-  }
+
+const siteRoot = express.Router();
+app.use(SITE_ROOT, siteRoot);
+app.set('trust proxy', true);
+
+siteRoot.get('/login', passport.authenticate('saml'));
+
+siteRoot.post('/acs',
+bodyParser.urlencoded({ extended: false }),
+// might need route for unauthorized user
+passport.authenticate('saml', { failureRedirect: '/login' }),
+(req, res) => {
+  res.redirect('/');
+}
 );
 
-app.post('/login/callback',
-   passport.authenticate('saml', { failureRedirect: '/login/fail' }),
-  function(req, res) {
-    res.redirect('/');
-  }
-);
 
-app.get('/login/fail', 
-  function(req, res) {
-    res.status(401).send('Login failed');
-  }
-);
 
-app.get('/saml2/metadata',
+siteRoot.get("/metadata",
   (req, res) => {
     res.set("Content-Type", "text/xml");
     res.status(200).send(defaultSamlStrategy.generateServiceProviderMetadata(SP_CERT,SP_CERT));
@@ -147,7 +144,7 @@ app.get("*", (req, res) => {
   res.redirect('/')
 });
 
-// Database
+// DatabaseF
 const ensureDatabaseExists = async () => {
   const dbName = "membertracker";
 
