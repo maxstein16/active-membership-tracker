@@ -45,7 +45,7 @@ export default function EventsPage() {
 
   return (
     <PageSetup>
-      <BackButton route={`/${orgId}/status`} />
+      <BackButton route={`/`} />
       {error !== "" ? (
         <p className="error">{error}</p>
       ) : !events || !orgData ? (
