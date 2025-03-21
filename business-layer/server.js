@@ -29,6 +29,7 @@ app.use(express.json());
 app.enable("trust proxy");
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index : false }));
+app.set('trust proxy', true);
 
 // Session Middleware
 app.use(
