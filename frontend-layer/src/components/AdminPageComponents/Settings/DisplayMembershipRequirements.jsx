@@ -16,18 +16,16 @@ export default function DisplayMembershipRequirements({
   createNewRequirement,
   createNewBonus,
 }) {
-  // TODO CHANGE FOR REQS
   const updateValueAsTyping = (newValue, id, valueName, isBonus = false) => {
-
     let newData = { ...orgData };
 
     if (isBonus) {
       newData.membershipRequirements.forEach((requirement) => {
         requirement.bonuses.forEach((bonus) => {
-          if (bonus.id === id ){
-            bonus[valueName] = newValue
+          if (bonus.id === id) {
+            bonus[valueName] = newValue;
           }
-        })
+        });
       });
     } else {
       newData.membershipRequirements.forEach((requirement) => {
@@ -36,38 +34,33 @@ export default function DisplayMembershipRequirements({
         }
       });
     }
-  
+
     setOrgData(newData);
   };
 
   const deleteRequirement = (id) => {
-    // delete the requirement in the api
     deleteRequirementInDB(id);
 
-    // remove the requirement from the orgData
     let newData = { ...orgData };
     newData.membershipRequirements = newData.membershipRequirements.filter(
       (requirement) => requirement.id !== id
     );
     setOrgData(newData);
-    // console.log(newData);
   };
 
   const deleteBonus = (reqId, bonusId) => {
-    deleteBonusRequirementInDb(bonusId)
+    deleteBonusRequirementInDb(bonusId);
 
-    console.log(reqId, bonusId)
-    // remove the requirement from the orgData
     let newData = { ...orgData };
-
     newData.membershipRequirements.forEach((requirement, index) => {
       if (requirement.id === reqId) {
-        newData.membershipRequirements[index].bonuses = requirement.bonuses.filter((bonus) => bonus.id !== bonusId);
+        newData.membershipRequirements[index].bonuses =
+          requirement.bonuses.filter((bonus) => bonus.id !== bonusId);
       }
     });
 
     setOrgData(newData);
-  }
+  };
 
   return (
     <div className="org-email-settings">
@@ -88,7 +81,11 @@ export default function DisplayMembershipRequirements({
                   updateValueWhenDone={updateValueInDB}
                   deleteRequirement={deleteRequirement}
                   deleteBonus={deleteBonus}
-                  createBonus={createNewBonus}
+                  createBonus={
+                    orgData.isPointBased
+                      ? createNewBonus // Only pass if points-based
+                      : null
+                  }
                 />
                 <hr />
               </div>
