@@ -29,8 +29,8 @@ const { deleteOldTestData } = require("./deleteOldTestData");
 
 async function addTestData() {
   // Delete old test data
-  console.log("Deleting old test data...");
-  await deleteOldTestData();
+  // console.log("Deleting old test data...");
+  // await deleteOldTestData();
 
   console.log("\n\nAdding test data to Database...");
 
@@ -45,7 +45,7 @@ async function addTestData() {
     organization_abbreviation: "WiC TEST",
     organization_email: "wic@rit.edu",
     organization_membership_type: "attendance",
-    organization_threshold: 30,
+    organization_threshold: 0,
   });
 
   const org2 = await Organization.create({
