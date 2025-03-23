@@ -72,7 +72,7 @@ const Member = sequelize.define(
       allowNull: false,
       unique: true,
       validate: {
-        is: /^[a-zA-Z0-9._%+-]+@g?\.rit\.edu$/, // RIT emails only
+        is: /^[a-zA-Z0-9._%+-]+@(g\.)?rit\.edu$/i, // RIT emails only
       },
     },
     member_personal_email: {
