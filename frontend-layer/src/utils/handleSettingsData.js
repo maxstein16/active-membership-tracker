@@ -423,6 +423,7 @@ export async function getPastOrganizationEvents(orgId) {
 }
 
 export async function getMeetingReport(orgId, meetingId) {
+  console.log('here')
   const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
 
   const result = await getAPIData(apiUrl, API_METHODS.get, {});
