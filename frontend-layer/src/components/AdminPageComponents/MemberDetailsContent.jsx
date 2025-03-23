@@ -179,7 +179,6 @@ export default function MemberDetailsContent({
 
       {/* PERSONAL DATA SECTION */}
       <div style={{ width: "45%", textAlign: "center" }}>
-        <h3>Personal Data</h3>
         <UserProfileData
           user={{
             name: member.name,

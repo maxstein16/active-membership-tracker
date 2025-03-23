@@ -11,10 +11,14 @@ export async function whatRoleAmI(orgId) {
     
     let role = ROLE_MEMBER;
 
-    if (!memberInfo.data.memberships) {
+    if (!memberInfo || memberInfo.hasOwnProperty("error") || !memberInfo.data.memberships) {
         console.log('do here')
         return role;
     }
+
+    console.log(orgId)
+    console.log(memberInfo.data)
+    console.log(memberInfo.data.memberships)
 
     memberInfo.data.memberships.forEach(membership => {
         if (`${membership.organization_id}` === orgId) {
