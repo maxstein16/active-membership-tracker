@@ -13,45 +13,54 @@ import { API_METHODS, getAPIData } from "../utils/callAPI";
 import { ROLE_ADMIN } from "../utils/constants";
 
 export default function DashboardPage() {
-  // Define my variables
   const [userData, setUserData] = React.useState(undefined);
   const [userIsAdmin, setUserIsAdmin] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  // Get user data
+  // Auto-login session check using getAPIData
   React.useEffect(() => {
-    // get API data
+    getAPIData(`/session`, API_METHODS.get, {}).then((sessionData) => {
+      if (!sessionData || sessionData.hasOwnProperty("error")) {
+        // No session, so login
+        console.log("No session, logging in...");
+        getAPIData(`/session/login`, API_METHODS.get, {}).then((loginResult) => {
+          console.log("Login result:", loginResult);
+        });
+      } else {
+        console.log("Session exists:", sessionData);
+      }
+    });
+  }, []);
+
+  // Fetch member data
+  React.useEffect(() => {
     setError("");
     getAPIData(`/member`, API_METHODS.get, {}).then((result) => {
-      // set user data
       if (!result || result.hasOwnProperty("error")) {
         setError(displayErrors.errorFetchingContactSupport);
         return;
       }
 
-      // temp data
       let newData = {
         name: result.data.member_name,
         organizations: [],
       };
 
-      // if a user is an admin of any org
-      let isAdminOfOneOrg = false
+      let isAdminOfOneOrg = false;
 
       result.data.memberships.forEach((membership) => {
-          if (membership.membership_role === ROLE_ADMIN) {
-            isAdminOfOneOrg = true
-          }
-          newData.organizations.push({
-            id: membership.organization.organization_id,
-            abbreviation: membership.organization.organization_abbreviation,
-            color: membership.organization.organization_color,
-            role: membership.membership_role
-          })
-      })
+        if (membership.membership_role === ROLE_ADMIN) {
+          isAdminOfOneOrg = true;
+        }
+        newData.organizations.push({
+          id: membership.organization.organization_id,
+          abbreviation: membership.organization.organization_abbreviation,
+          color: membership.organization.organization_color,
+          role: membership.membership_role,
+        });
+      });
 
-      // set the state variables
-      setUserData(newData)
+      setUserData(newData);
       setUserIsAdmin(isAdminOfOneOrg);
     });
   }, []);
@@ -67,7 +76,6 @@ export default function DashboardPage() {
           <h1>Welcome, {userData.name}</h1>{" "}
           <div className="org-boxes">
             {userData.organizations.map((organization, key) => {
-              // In here there is a check for role
               return (
                 <OrgBoxWithAdminLinks organization={organization} key={key} />
               );
