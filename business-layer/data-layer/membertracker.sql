@@ -37,19 +37,23 @@ CREATE TABLE Semester (
 -- Member Table
 -- ==============================
 CREATE TABLE Member (
-  member_id INT AUTO_INCREMENT, -- Unique ID for each member
+  member_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each member
   member_name VARCHAR(255) NOT NULL, -- Full name of the member
-  member_email VARCHAR(255) UNIQUE NOT NULL, -- University or primary email
-  member_personal_email VARCHAR(255), -- Personal email (optional)
-  member_phone_number VARCHAR(15), -- Contact number
-  member_graduation_date DATE, -- Expected graduation date
-  member_tshirt_size VARCHAR(10), -- T-shirt size for events, swag, etc.
-  member_major VARCHAR(255), -- Member's academic major
-  member_gender VARCHAR(50), -- Gender identifier
-  member_race VARCHAR(50), -- Race/Ethnicity identifier
-  member_status ENUM('undergraduate', 'graduate', 'staff', 'faculty', 'alumni') DEFAULT 'undergraduate', -- Membership status
-  PRIMARY KEY (member_id)
+  member_email VARCHAR(255) UNIQUE NOT NULL CHECK (member_email REGEXP '^[a-zA-Z0-9._%+-]+@g?\\.rit\\.edu$'), -- Ensures RIT emails only
+  member_personal_email VARCHAR(255) CHECK (member_personal_email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$' OR member_personal_email IS NULL), -- Ensures it's a valid email format or null
+  member_phone_number VARCHAR(15) CHECK (member_phone_number REGEXP '^[+]?[0-9]{10,15}$' OR member_phone_number IS NULL), -- Allows international phone numbers or null
+  member_graduation_date DATE CHECK (member_graduation_date >= CURDATE() OR member_graduation_date IS NULL), -- Ensures date is in the future or null
+  member_tshirt_size ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL') NULL, -- T-shirt size options or null
+member_major VARCHAR(255) NULL, -- Member's academic major or null
+member_gender ENUM('male', 'female', 'non-binary', 'other', 'prefer not to say') NULL, -- Gender identifier or null
+member_race ENUM('asian', 'black', 'white', 'hispanic', 'indigenous', 'pacific islander', 'middle eastern / north african', 'multiracial', 'other', 'prefer not to say') NULL, -- Race/Ethnicity identifier or null
+member_race_other VARCHAR(50) NULL, -- If "other" is selected, allows input or null
+member_status ENUM('undergraduate', 'graduate', 'staff', 'faculty', 'alumni') NULL -- Membership status or null
+
 );
+
+
+
 
 -- ==============================
 -- Membership Table

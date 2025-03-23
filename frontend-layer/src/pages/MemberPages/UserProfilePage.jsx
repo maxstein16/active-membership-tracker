@@ -12,57 +12,45 @@ import UserProfileData from "../../components/MemberPageComponents/UserProfileDa
 import { useNavigate } from "react-router-dom";
 import { API_METHODS, getAPIData } from "../../utils/callAPI";
 import { CircularProgress } from "@mui/material";
+import displayErrors from "../../utils/displayErrors";
 
 export default function UserProfilePage() {
   const navigate = useNavigate();
   const [userData, setUserData] = React.useState(undefined);
+  const [error, setError] = React.useState("");
 
   // Fetch user data on component mount
   React.useEffect(() => {
     const fetchMemberData = async () => {
-      try {
-        const data = await getAPIData("/member", API_METHODS.GET);
+      const data = await getAPIData("/member", API_METHODS.get, {});
 
-        // Check if API response is successful
-        if (data && data.data) {
-          // Map the response data to state
-          const member = data.data;
-          setUserData({
-            name: member.member_name,
-            email: member.member_email,
-            personalEmail: member.member_personal_email,
-            phone: member.member_phone_number,
-            major: member.member_major,
-            gradMonth: new Date(member.member_graduation_date).toLocaleString(
-              "default",
-              { month: "long" }
-            ),
-            gradYear: new Date(member.member_graduation_date).getFullYear(),
-            tshirt: member.member_tshirt_size,
-            race: member.member_race,
-            gender:
-              member.member_gender === "F"
-                ? "Female"
-                : member.member_gender === "M"
-                ? "Male"
-                : member.member_gender,
-            status: member.member_status,
-            memberships: member.memberships.map((membership) => ({
-              organizationName: membership.organization.organization_name,
-              points: membership.membership_points,
-              role: membership.membership_role,
-              activeMember: membership.active_member,
-            })),
-          });
-        } else {
-          console.error(
-            "Error fetching member data:",
-            data?.error || "Unknown error"
-          );
-        }
-      } catch (error) {
-        console.error("Error:", error);
+      // Check if API response is successful
+      if (!data || !data.hasOwnProperty("data")) {
+        console.error("Error fetching member data:", data);
+        setError(displayErrors.errorFetchingContactSupport);
       }
+
+      // Map the response data to state
+      const member = data.data;
+      setUserData({
+        name: member.member_name ?? "",
+        email: member.member_email ?? "",
+        personalEmail: member.member_personal_email ?? "",
+        phone: member.member_phone_number ?? "",
+        major: member.member_major ?? "",
+        gradMonth: new Date(
+          member.member_graduation_date ??
+            `${new Date().getFullYear()}-05-10 00:00:00`
+        ).getMonth(),
+        gradYear: new Date(
+          member.member_graduation_date ??
+            `${new Date().getFullYear()}-05-10 00:00:00`
+        ).getFullYear(),
+        tshirt: member.member_tshirt_size ?? "",
+        race: member.member_race ?? "",
+        gender: member.member_gender ?? "",
+        status: member.member_status ?? "",
+      });
     };
 
     fetchMemberData();
@@ -80,7 +68,7 @@ export default function UserProfilePage() {
       </BottomCornerButton>
 
       {/* Render CircularProgress if data is still loading */}
-      {!userData ? <CircularProgress /> : <UserProfileData user={userData} />}
+      {error !== "" ? <p>{error}</p> : !userData ? <CircularProgress /> : <UserProfileData user={userData} />}
     </PageSetup>
   );
 }

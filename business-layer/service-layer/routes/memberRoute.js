@@ -79,11 +79,14 @@ router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 
   // Check if an error occurred while fetching member ID
   if (memberId.error) {
-    console.log("Error fetching member ID: " + memberId.error);
     res.status(404).json({ error: memberId.error });
     return;
   }
-  
+
+  // console.log("Session user username is " + req.session.user.username);
+  // console.log("Member ID is " + memberId.data); // Accessing the member ID from the 'data' field
+  // console.log("Member ID w no .data is " + memberId); // Accessing the member ID from the 'data' field
+
   // Fetch member data using the ID
   const memberData = await business.getMemberById(memberId.data);
 
@@ -147,37 +150,46 @@ router.put(
   }
 );
 
+// PUT-UPDATE/v1/member
 router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
   let body = req.body;
   let memberId = await business.getMemberIDByUsername(req.session.user.username);
 
+  // Check if an error occurred while fetching member ID
+  if (!memberId || memberId.error) {
+    console.log("memberRoute says an error occurred while fetching member ID")
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
   // check if at least one valid field is provided for update
   const allowedFields = [
     "personal_email",
     "phone_number",
-    "gender",
-    "race",
-    "tshirt_size",
     "major",
     "graduation_date",
+    "race",
+    "gender",
+    "tshirt_size",
     "status",
   ];
+
   const hasValidFields = Object.keys(body).some((key) =>
     allowedFields.includes(key)
   );
 
   if (!hasValidFields) {
+    console.log("memberRoute says you dont have valid fields")
     res.status(400).json({
       error: error.mustIncludeValidFieldAddMember,
     });
     return;
   }
-
   // send data to backend for update
-  const updateResult = await business.updateMember(memberId, body);
+  const updateResult = await business.updateMember(memberId.data, body);
+
 
   if (updateResult.error && updateResult.error !== error.noError) {
-    res.status(404).json({ error: error.memberCannotBeFoundInDB });
+    res.status(404).json({ error: updateResult.error });
     return;
   }
 

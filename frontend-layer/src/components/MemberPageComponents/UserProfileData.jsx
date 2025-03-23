@@ -25,11 +25,11 @@ export default function UserProfileData({ user, hideName, color }) {
     "December",
   ];
 
-  let monthIndex = parseInt(user.gradMonth, 10) - 1;
-  let monthName =
-    !isNaN(monthIndex) && monthIndex >= 0 && monthIndex < 12
-      ? monthNames[monthIndex]
-      : "Unknown";
+  // let monthIndex = parseInt(user.gradMonth, 10) - 1;
+  // let monthName =
+  //   !isNaN(monthIndex) && monthIndex >= 0 && monthIndex < 12
+  //     ? monthNames[monthIndex]
+  //     : "Unknown";
 
   const contactStyle = color ? { color: color, fontWeight: "bold" } : {};
 
@@ -41,7 +41,7 @@ export default function UserProfileData({ user, hideName, color }) {
         <b>{user.major}</b>
       </p>
       <p>
-        Graduation Expected {monthName} {user.gradYear || "Unknown"}
+        Graduation Expected {monthNames[user.gradMonth]} {user.gradYear || "Unknown"}
       </p>
 
       <div className="icon-data">
