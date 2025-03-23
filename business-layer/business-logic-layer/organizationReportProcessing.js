@@ -5,7 +5,7 @@ const { getMemberById } = require("../data-layer/member.js");
 const { getMembershipsByAttributes, getMembershipsByOrgAndSemester } = require("../data-layer/membership.js");
 const { getMemberAttendanceWithEvents, getEventAttendanceWithMembers } = require("../data-layer/attendance.js");
 const { getSemestersByYear, getCurrentSemester } = require("../data-layer/semester.js");
-const { getEventsWithAttendance } = require("../data-layer/event.js");
+const { getEventsWithAttendance, getEventById } = require("../data-layer/event.js");
 const { Semester } = require("../db.js");
 
 /**
@@ -555,7 +555,7 @@ async function getEventOrgReportInDB(orgId, eventId) {
     }
 
     // Get event info
-    const event = await getEventById(orgId, eventId);
+    const event = await getEventById(eventId, orgId);
     if (!event) {
       return { error: error.eventNotFound, data: null };
     }
