@@ -67,14 +67,70 @@ const Member = sequelize.define(
       primaryKey: true,
     },
     member_name: { type: DataTypes.STRING, allowNull: false },
-    member_email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    member_personal_email: { type: DataTypes.STRING },
-    member_phone_number: { type: DataTypes.STRING(15) },
-    member_graduation_date: { type: DataTypes.DATE },
-    member_tshirt_size: { type: DataTypes.STRING(10) },
-    member_major: { type: DataTypes.STRING },
-    member_gender: { type: DataTypes.STRING(50) },
-    member_race: { type: DataTypes.STRING(50) },
+    member_email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        is: /^[a-zA-Z0-9._%+-]+@g?\.rit\.edu$/, // RIT emails only
+      },
+    },
+    member_personal_email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        is: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      },
+    },
+    member_phone_number: {
+      type: DataTypes.STRING(15),
+      allowNull: true,
+      validate: {
+        is: /^[+]?[0-9]{10,15}$/,
+      },
+    },
+    member_graduation_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      validate: {
+        isFutureDate(value) {
+          if (value && new Date(value) < new Date()) {
+            throw new Error("Graduation date must be in the future");
+          }
+        },
+      },
+    },
+    member_tshirt_size: {
+      type: DataTypes.ENUM("XS", "S", "M", "L", "XL", "XXL"),
+      allowNull: true,
+    },
+    member_major: { type: DataTypes.STRING, allowNull: true },
+    member_gender: {
+      type: DataTypes.ENUM(
+        "male",
+        "female",
+        "non-binary",
+        "other",
+        "prefer not to say"
+      ),
+      allowNull: true,
+    },
+    member_race: {
+      type: DataTypes.ENUM(
+        "asian",
+        "black",
+        "white",
+        "hispanic",
+        "indigenous",
+        "pacific islander",
+        "middle eastern / north african",
+        "multiracial",
+        "other",
+        "prefer not to say"
+      ),
+      allowNull: true,
+    },
+    member_race_other: { type: DataTypes.STRING(50), allowNull: true },
     member_status: {
       type: DataTypes.ENUM(
         "undergraduate",
@@ -83,7 +139,7 @@ const Member = sequelize.define(
         "faculty",
         "alumni"
       ),
-      defaultValue: "undergraduate",
+      allowNull: true,
     },
   },
   {
