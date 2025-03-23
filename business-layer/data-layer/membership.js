@@ -71,11 +71,6 @@ const getMembershipsByAttributes = async (filters) => {
       where: filters
     });
 
-    if (memberships.length === 0) {
-      console.log("No memberships found matching the given criteria.");
-      return [];
-    }
-    console.log("successfully found membership!")
     return memberships;
   } catch (err) {
     console.error("Error fetching memberships by attributes:", err);

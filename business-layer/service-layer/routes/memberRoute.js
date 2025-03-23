@@ -14,6 +14,29 @@ const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
 
 const { Member } = require("../../db");
 
+
+router.get(
+  "/all",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    
+    // Fetch member stats for the organization
+    const result = await business.getAllMembersFromDB();
+
+    if (result.error) {
+      return res.status(404).json({
+        error: result.error
+      });
+    }
+
+    // Return successful response
+    return res.status(200).json({
+      status: "Success",
+      data: result
+    });
+  }
+);
+
 // GET /v1/member/:memberId
 router.get(
   "/:memberId",
@@ -261,6 +284,5 @@ router.get(
     });
   }
 );
-
 
 module.exports = router;

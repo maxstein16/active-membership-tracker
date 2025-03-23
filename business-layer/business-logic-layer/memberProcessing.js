@@ -3,7 +3,7 @@ const error = new Error();
 const { sendEmail } = require("../service-layer/emailService");
 const { activeMembershipEmail } = require("./public/emailTemplates");
 
-const { getMemberById, getMembersByAttributes, updateMember, createMember } = require("../data-layer/member.js");
+const { getMemberById, getMembersByAttributes, updateMember, createMember, getAllMembers } = require("../data-layer/member.js");
 const { getOrganizationById } = require("../data-layer/organization.js");
 const { getMembershipsByAttributes } = require("../data-layer/membership.js");
 const { Member } = require("../db");
@@ -213,10 +213,22 @@ async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
     }
 }
 
+async function getAllMembersPlease() {
+    
+    try {
+        const members = await getAllMembers()
+        return {data: members}
+    } catch {
+        return error.databaseError
+    }
+    
+}
+
 module.exports = {
     getMemberByIdInDB,
     updateMemberInDB,
     createMemberInDB,
     getMemberIDByUsernameInDB,
-    getSpecificMemberOrgStatsInDB
+    getSpecificMemberOrgStatsInDB,
+    getAllMembersPlease
 };

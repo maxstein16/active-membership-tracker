@@ -7,6 +7,7 @@ const {
   updateEvent,
   getAttendanceByEventId,
 } = require("../data-layer/event.js");
+const { getSemesterByDate } = require("../data-layer/semester.js");
 
 /**
  * Retrieve all events for a specific organization with attendance records.
@@ -115,7 +116,7 @@ async function createEventInDB(orgId, eventData) {
  */
 async function ensureSemesterExistsForEvent(eventDate) {
   try {
-    const semester = await findSemesterByDate(eventDate);
+    const semester = await getSemesterByDate(eventDate);
     if (semester) {
       return semester;
     }

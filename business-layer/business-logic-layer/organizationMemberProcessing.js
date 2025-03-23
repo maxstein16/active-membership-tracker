@@ -146,17 +146,11 @@ async function editMemberInOrganizationInDB(
     const currentSemester = await getCurrentSemester();
 
     // Get the membership first to ensure it exists
-    const memberships = await getMembershipByAttributes({
+    let membership = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
-
-        if (!memberships || memberships.length === 0) {
-            return { error: error.membershipNotFound, data: null };
-        }
-
-    const membership = memberships[0];
 
     // Check if this is the last admin being removed
     if (memberDataToUpdate.hasOwnProperty("membership_role")) {
@@ -264,17 +258,17 @@ async function getMembersInOrganizationInDB(orgId) {
     // Combine member and membership data
     const resultData = memberships
       .map((membership) => {
-        const memberData = members.find(
+        const memberData = members.data.filter(
           (member) => member.member_id === membership.member_id
         );
         if (!memberData) return null;
 
         return {
           ...membership.toJSON(),
-          member_name: memberData.member_name,
-          member_email: memberData.member_email,
-          member_major: memberData.member_major,
-          member_graduation_date: memberData.member_graduation_date,
+          member_name: memberData[0].member_name,
+          member_email: memberData[0].member_email,
+          member_major: memberData[0].member_major,
+          member_graduation_date: memberData[0].member_graduation_date,
         };
       })
       .filter((data) => data !== null);

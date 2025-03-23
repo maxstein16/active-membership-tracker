@@ -100,6 +100,7 @@ export async function getAttendanceMemberData(event) {
       if (memberData && memberData.hasOwnProperty("data")) {
         // console.log(memberData.data)
         try {
+          // ignore this error it doesn't harm the data: TypeError: Cannot add property 2, object is not extensible
           attendeesMemberData.push({ ...memberData.data }); // needs the copy because it causes an error otherwise
         } catch (error) {
           console.log("error: ", error);
@@ -113,7 +114,6 @@ export async function getAttendanceMemberData(event) {
 
   return attendeesMemberData;
 }
-
 
 /**
  * Save the specific event setting to the db on edit
@@ -132,8 +132,8 @@ export async function updateEventSetting(
   let body = {};
   body[settingName] = newValue;
 
-  if (settingName === 'event_type' && newValue === 'general meeting') {
-    body[settingName] = 'general_meeting';
+  if (settingName === "event_type" && newValue === "general meeting") {
+    body[settingName] = "general_meeting";
   }
   // console.log(body)
 
@@ -146,7 +146,7 @@ export async function updateEventSetting(
   // console.log(result);
 
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return false;
   }
   // decide return
@@ -156,22 +156,18 @@ export async function updateEventSetting(
   return false;
 }
 
-
 /**
  * Create a new event in the DB
- * @param {*} orgId - org the event belongs to 
+ * @param {*} orgId - org the event belongs to
  * @param {*} newEventData - all the data required for the API call
  * @returns true if no errors, false if errors
  */
-export async function createNewEvent(
-  orgId,
-  newEventData
-) {
-  const body = {...newEventData}
+export async function createNewEvent(orgId, newEventData) {
+  const body = { ...newEventData };
   if (body.event_type === "general meeting") {
     body.event_type = "general_meeting";
   }
-  console.log(body)
+  console.log(body);
 
   // call the api
   const result = await getAPIData(
@@ -182,7 +178,7 @@ export async function createNewEvent(
   console.log(result);
 
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return false;
   }
   // decide return
@@ -190,4 +186,89 @@ export async function createNewEvent(
     return true;
   }
   return false;
+}
+
+export async function getMembersInOrg(orgId) {
+  const result = await getAPIData(
+    `/organization/${orgId}/member`,
+    API_METHODS.get,
+    {}
+  );
+
+  if (!result || result.hasOwnProperty("error")) {
+    return [];
+  }
+
+  let returnData = [];
+  result.data.forEach((member) => {
+    returnData.push({
+      member: member.member_name,
+      id: member.member_id,
+    });
+  });
+  return returnData;
+}
+
+export async function getAllMembers() {
+  const result = await getAPIData(`/member/all`, API_METHODS.get, {});
+
+  if (!result || result.hasOwnProperty("error")) {
+    return [];
+  }
+
+  let returnData = [];
+  result.data.data.forEach((member) => {
+    returnData.push({
+      member: member.member_name,
+      id: member.member_id,
+    });
+  });
+  return returnData;
+}
+
+export async function manuallyAddAttendanceToDB(
+  orgId,
+  eventId,
+  memberId,
+  points
+) {
+  // add attendance
+  const member = await getAPIData(`/attendance`, API_METHODS.post, {
+    member_id: memberId,
+    event_id: eventId,
+  });
+  console.log(member)
+  if (!member || member.hasOwnProperty("error")) {
+    return false;
+  }
+
+  // check if need to add extra points (one is added by default)
+  if (points > 1) {
+    // get the current membership points
+    const member = await getAPIData(
+      `/organization/${orgId}/member/${memberId}`,
+      API_METHODS.get,
+      {}
+    );
+    if (!member || member.hasOwnProperty("error")) {
+      return false;
+    }
+
+    // add the new extra ones (one is automatically added)
+    console.log(member.data.membership.membership_points);
+    let newPoints = member.data.membership.membership_points + points - 1;
+    const result = await getAPIData(
+      `/organization/${orgId}/member/${memberId}`,
+      API_METHODS.put,
+      {
+        membership_points: newPoints,
+      }
+    );
+
+    if (!result || result.hasOwnProperty("error")) {
+      return false;
+    }
+  }
+
+  return true;
 }

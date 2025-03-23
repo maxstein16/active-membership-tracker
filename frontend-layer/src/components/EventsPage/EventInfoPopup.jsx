@@ -15,6 +15,7 @@ import DisplayEventAttendance from "./DisplayEventAttendance";
 import { ROLE_MEMBER } from "../../utils/constants";
 import { toAMPMtime } from "../../utils/toAMPMtime";
 import EditEventsDialog from "./EditEventsDialog";
+import ManualAddAttendanceDialog from "./ManualAddAttendanceDialog";
 
 export default function EventInfoPopup({
   orgId,
@@ -63,61 +64,64 @@ export default function EventInfoPopup({
 
   return (
     <>
-        <Dialog onClose={close} open={open}>
-          <DialogTitle>{event ? event.event_name : "Title Here"}</DialogTitle>
-          <DialogContent>
-            {/* EVENT DATA */}
-            <p style={{ textTransform: "capitalize" }}>
-              <i>{formattedMeetingType()}</i>
-            </p>
-            <p>{getDateTimeRange()}</p>
-            <p>
-              <strong>{event.event_location}</strong>
-            </p>
-            <br />
-            <p>{event.event_description}</p>
+      <Dialog onClose={close} open={open}>
+        <DialogTitle>{event ? event.event_name : "Title Here"}</DialogTitle>
+        <DialogContent>
+          {/* EVENT DATA */}
+          <p style={{ textTransform: "capitalize" }}>
+            <i>{formattedMeetingType()}</i>
+          </p>
+          <p>{getDateTimeRange()}</p>
+          <p>
+            <strong>{event.event_location}</strong>
+          </p>
+          <br />
+          <p>{event.event_description}</p>
 
-            {/* ACTION BUTTONS */}
-            {role !== ROLE_MEMBER ? (
-              <div className="event-info-popup-buttons">
-                {isFuture ? (
-                  <EditEventsDialog isEdit={true} orgId={orgId} color={color} event={event} />
-                  
-                ) : (
-                  <></>
-                )}
-                <UploadDataModal
+          {/* ACTION BUTTONS */}
+          {role !== ROLE_MEMBER ? (
+            <div className="event-info-popup-buttons">
+              {isFuture ? (
+                <EditEventsDialog
+                  isEdit={true}
                   orgId={orgId}
-                  eventId={event.event_id}
                   color={color}
+                  event={event}
                 />
-              </div>
-            ) : (
-              <></>
-            )}
+              ) : (
+                <>
+                  <UploadDataModal
+                    orgId={orgId}
+                    eventId={event.event_id}
+                    color={color}
+                  />
+                  <ManualAddAttendanceDialog
+                    orgId={orgId}
+                    color={color}
+                    event={event}
+                  />
+                </>
+              )}
+            </div>
+          ) : (
+            <></>
+          )}
 
-            {/* ATTENDANCE DATA */}
-            {role !== ROLE_MEMBER ? (
-              <DisplayEventAttendance
-                orgId={orgId}
-                color={color}
-                event={event}
-              />
-            ) : (
-              <></>
-            )}
-          </DialogContent>
-          <DialogActions>
-            {/* CLOSE DIALOG */}
-            <button
-              onClick={close}
-              className="custom-color-button"
-              style={{ backgroundColor: color, borderColor: color }}
-            >
-              Close
-            </button>
-          </DialogActions>
-        </Dialog>
+          {!isFuture && role !== ROLE_MEMBER && (
+            <DisplayEventAttendance orgId={orgId} color={color} event={event} />
+          )}
+        </DialogContent>
+        <DialogActions>
+          {/* CLOSE DIALOG */}
+          <button
+            onClick={close}
+            className="custom-color-button"
+            style={{ backgroundColor: color, borderColor: color }}
+          >
+            Close
+          </button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
