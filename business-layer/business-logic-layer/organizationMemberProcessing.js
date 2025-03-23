@@ -148,18 +148,15 @@ async function editMemberInOrganizationInDB(
 
     const currentSemester = await getCurrentSemester();
 
-    const memberships = await getMembershipByAttributes({
+    const membership = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    if (!memberships || memberships.length === 0)
+    if (!membership)
       return { error: error.membershipNotFound, data: null };
 
-    const membership = memberships[0];
-
-    // Admin check
     if (memberDataToUpdate.hasOwnProperty("membership_role")) {
       const currentRole = membership.membership_role;
       const newRole = memberDataToUpdate.membership_role;
