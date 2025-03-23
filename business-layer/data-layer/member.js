@@ -14,7 +14,7 @@ async function createMember(memberData) {
     console.error("Error creating member:", error);
     throw error;
   }
-};
+}
 
 /**
  * Updates an existing member by their ID.
@@ -41,7 +41,7 @@ async function updateMember(memberId, updateData) {
     console.error("Error updating member:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves all members from the database.
@@ -60,7 +60,7 @@ async function getAllMembers() {
     console.error("Error fetching members:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves a specific member by their ID.
@@ -82,7 +82,32 @@ async function getMemberById(memberId) {
     console.error("Error fetching member by ID:", error);
     throw error;
   }
-};
+}
+
+/**
+ * Retrieves a specific member by their ID.
+ *
+ * @param {number} username - The username of the member to retrieve.
+ * @returns {Promise<object|null>} The member object if found, otherwise `null`.
+ */
+async function getMemberByUsername(username) {
+  try {
+    const member = await Member.findOne({
+      where: { member_email: username },
+    });
+
+    if (!member) {
+      console.log(`No member found with username ${username}.`);
+      return null;
+    }
+
+    // console.log("Member found:", member.toJSON());
+    return member;
+  } catch (error) {
+    console.error("Error fetching member by username:", error);
+    throw error;
+  }
+}
 
 /**
  * Retrieves members based on provided filters.
@@ -112,16 +137,12 @@ async function getMembersByAttributes(filters) {
   }
 }
 
-
-
-
-
-
 // Export all functions for external use
 module.exports = {
   createMember,
   updateMember,
   getAllMembers,
   getMemberById,
+  getMemberByUsername,
   getMembersByAttributes,
 };

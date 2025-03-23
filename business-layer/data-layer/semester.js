@@ -1,7 +1,6 @@
 const { Op } = require("sequelize");
 const { Semester } = require("../db");
 
-
 /**
  * Creates a new semester.
  *
@@ -13,18 +12,18 @@ const { Semester } = require("../db");
  */
 async function createSemester(semesterName, academicYear, startDate, endDate) {
   try {
-      const newSemester = await Semester.create({
-          semester_name: semesterName,
-          academic_year: academicYear,
-          start_date: startDate,
-          end_date: endDate
-      });
+    const newSemester = await Semester.create({
+      semester_name: semesterName,
+      academic_year: academicYear,
+      start_date: startDate,
+      end_date: endDate,
+    });
 
-      console.log(`New semester created: ${newSemester.semester_name}`);
-      return newSemester;
+    console.log(`New semester created: ${newSemester.semester_name}`);
+    return newSemester;
   } catch (error) {
-      console.error("Error creating semester:", error);
-      throw error;
+    console.error("Error creating semester:", error);
+    throw error;
   }
 }
 
@@ -36,17 +35,17 @@ async function createSemester(semesterName, academicYear, startDate, endDate) {
  */
 async function getSemesterByDate(date) {
   try {
-      const semester = await Semester.findOne({
-          where: {
-              start_date: { [Op.lte]: date },
-              end_date: { [Op.gte]: date }
-          }
-      });
+    const semester = await Semester.findOne({
+      where: {
+        start_date: { [Op.lte]: date },
+        end_date: { [Op.gte]: date },
+      },
+    });
 
-      return semester;
+    return semester;
   } catch (error) {
-      console.error("Error finding semester by date:", error);
-      throw error;
+    console.error("Error finding semester by date:", error);
+    throw error;
   }
 }
 

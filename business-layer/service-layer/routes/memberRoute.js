@@ -10,7 +10,10 @@ const business = new BusinessLogic();
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
-const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const {
+  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
+} = require("../sessionMiddleware");
 
 const { Member } = require("../../db");
 
@@ -198,7 +201,7 @@ router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
 });
 
 // POST /v1/member
-router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
+router.post("/", isAdminOrEboardForOrg, async function (req, res) {
   let body = req.body;
 
   // validate required fields
@@ -248,7 +251,7 @@ router.get(
     // Immediately check for orgId query parameter
     if (!req.query.orgId) {
       return res.status(400).json({
-        error: error.mustIncludeOrgId
+        error: error.mustIncludeOrgId,
       });
     }
 
@@ -258,29 +261,32 @@ router.get(
 
     if (isNaN(memberId)) {
       return res.status(400).json({
-        error: error.mustIncludeValidMemberId
+        error: error.mustIncludeValidMemberId,
       });
     }
 
     // Validate organization ID
     if (isNaN(orgId)) {
       return res.status(400).json({
-        error: error.mustIncludeValidOrgId
+        error: error.mustIncludeValidOrgId,
       });
     }
 
     // Fetch member stats for the organization
-    const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
+    const memberStats = await business.getSpecificMemberOrgStats(
+      memberId,
+      orgId
+    );
 
     if (memberStats.error) {
       return res.status(404).json({
-        error: memberStats.error
+        error: memberStats.error,
       });
     }
 
     // Return successful response
     return res.status(200).json({
-      data: memberStats
+      data: memberStats,
     });
   }
 );

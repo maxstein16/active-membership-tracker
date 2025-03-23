@@ -1,7 +1,10 @@
 let express = require("express");
 const router = express.Router();
 const path = require("path");
-const { isAuthorizedHasSessionForWebsite } = require("../sessionMiddleware");
+const {
+  isAuthorizedHasSessionForWebsite,
+  isAdminOrEboardForOrg,
+} = require("../sessionMiddleware");
 
 /*
 
@@ -53,11 +56,15 @@ router.get(
 );
 
 // GET org status
-router.get("/:orgId/status", isAuthorizedHasSessionForWebsite, function (req, res) {
-  res.sendFile(
-    path.join(__dirname, "../../../frontend-layer/build", "index.html")
-  );
-});
+router.get(
+  "/:orgId/status",
+  isAuthorizedHasSessionForWebsite,
+  function (req, res) {
+    res.sendFile(
+      path.join(__dirname, "../../../frontend-layer/build", "index.html")
+    );
+  }
+);
 
 // GET org events
 router.get("/:orgId/events", isAuthorizedHasSessionForWebsite, function (req, res) {
@@ -67,21 +74,21 @@ router.get("/:orgId/events", isAuthorizedHasSessionForWebsite, function (req, re
 });
 
 // GET org settings
-router.get("/:orgId/settings", isAuthorizedHasSessionForWebsite, function (req, res) {
+router.get("/:orgId/settings", isAdminOrEboardForOrg, (req, res) => {
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );
 });
 
 // GET org reports
-router.get("/:orgId/reports", isAuthorizedHasSessionForWebsite, function (req, res) {
+router.get("/:orgId/reports", isAdminOrEboardForOrg, function (req, res) {
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );
 });
 
 // GET create organization
-router.get("/createOrg", isAuthorizedHasSessionForWebsite, function (req, res) {
+router.get("/createOrg", isAdminOrEboardForOrg, function (req, res) {
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );

@@ -10,14 +10,17 @@ const business = new BusinessLogic();
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
-const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const {
+  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
+} = require("../sessionMiddleware");
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 /**
  * Base route /v1/organization/
  * Returns error when no organization ID is provided for methods that require it
  */
-router.all("/", isAuthorizedHasSessionForAPI, (req, res) => {
+router.all("/", isAdminOrEboardForOrg, (req, res) => {
   // POST is allowed without an ID
   if (req.method === "POST") {
     return handlePostOrganization(req, res);
@@ -156,7 +159,7 @@ async function handlePostOrganization(req, res) {
  * PUT /v1/organization/{orgId}
  * Updates an existing organization
  */
-router.put("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
+router.put("/:orgId", isAdminOrEboardForOrg, async (req, res) => {
   try {
     const orgId = sanitizer.sanitize(req.params.orgId);
 
