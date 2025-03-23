@@ -10,23 +10,23 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
 export default function CustomSelect({ label, color, options, startingValue, onSelect }) {
-  const [age, setAge] = React.useState(startingValue);
+  const [selectedValue, setSelectedValue] = React.useState(startingValue);
 
   const handleChange = (event) => {
-    setAge(event.target.value);
-    onSelect(event.target.value);
+    setSelectedValue(event.target.value);
+    onSelect(event.target.value); // Pass value to parent
   };
 
   return (
     <div className="select">
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label" color="black">
+        <InputLabel id={`select-${label}`} color="black">
           {label}
         </InputLabel>
         <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={age}
+          labelId={`select-${label}`}
+          id={`select-${label}`}
+          value={selectedValue}
           label={label}
           onChange={handleChange}
           sx={{
@@ -41,8 +41,8 @@ export default function CustomSelect({ label, color, options, startingValue, onS
           }}
         >
           {options.map((option, key) => (
-            <MenuItem value={option} key={key}>
-              {option}
+            <MenuItem value={option.value || option} key={key}>
+              {option.label || option}
             </MenuItem>
           ))}
         </Select>

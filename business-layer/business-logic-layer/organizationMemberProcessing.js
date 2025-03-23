@@ -12,54 +12,59 @@ const {
   getMembershipsByAttributes,
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
-const { getCurrentSemester, getSemestersByYear } = require("../data-layer/semester.js");
+const {
+  getCurrentSemester,
+  getSemestersByYear,
+} = require("../data-layer/semester.js");
 const {
   checkActiveMembership,
+  calculateActivePercentage,
 } = require("./organizationMembershipProcessing.js");
-const { ROLE_ADMIN } = require("../constants"); // Import the constant
+const { ROLE_ADMIN } = require("../constants");
 
 async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
   try {
-    if (isNaN(orgId)) {
+    if (isNaN(orgId))
       return { error: error.organizationIdMustBeInteger, data: null };
-    }
-    if (isNaN(memberId)) {
+    if (isNaN(memberId))
       return { error: error.memberIdMustBeInteger, data: null };
-    }
 
-    // Get member data
     const member = await getMemberById(memberId);
-    if (!member) {
-      return { error: error.memberNotFound, data: null };
-    }
+    if (!member) return { error: error.memberNotFound, data: null };
 
-    // Get membership data
     const memberships = await getMembershipsByAttributes({
       member_id: memberId,
       organization_id: orgId,
     });
 
-    if (!memberships || memberships.length === 0) {
+    if (!memberships || memberships.length === 0)
       return { error: error.memberNotFoundInOrg, data: null };
-    }
 
-  // Count active semesters
-  const activeSemestersCount = memberships.filter(
-    (m) => m.active_member
-  ).length;
+    // Count active semesters
+    const activeSemestersCount = memberships.filter(
+      (m) => m.active_member
+    ).length;
 
-  console.log("Semesters active: " + activeSemestersCount);
-  // Get current semester membership if exists
-  const currentSemester = await getSemestersByYear();
-  const currentMembership = memberships.find(
-    (m) => m.semester_id === currentSemester.semester_id
-  );
+    // Get current semester
+    const currentSemester = await getSemestersByYear();
+    const currentMembership = memberships.find(
+      (m) => m.semester_id === currentSemester.semester_id
+    );
 
+    // Active percentage + attendance (if needed)
+    const percentageResult = await calculateActivePercentage(
+      currentMembership || memberships[0]
+    );
 
     return {
       error: error.noError,
-      data: { ...member.toJSON(), membership: currentMembership || memberships[0], // fallback to first membership
-        activeSemesters: activeSemestersCount, },
+      data: {
+        ...member.toJSON(),
+        membership: currentMembership || memberships[0],
+        active_percentage: percentageResult.percentage,
+        remaining_attendance: percentageResult.remainingAttendance,
+        activeSemesters: activeSemestersCount,
+      },
     };
   } catch (err) {
     console.error("Error fetching specific member + membership:", err);
@@ -120,17 +125,14 @@ async function editMemberInOrganizationInDB(
   memberDataToUpdate
 ) {
   try {
-    // Map role to membership_role
     if (memberDataToUpdate.hasOwnProperty("role")) {
       memberDataToUpdate.membership_role = memberDataToUpdate.role;
       delete memberDataToUpdate.role;
     }
-    if (isNaN(orgId)) {
+    if (isNaN(orgId))
       return { error: error.organizationIdMustBeInteger, data: null };
-    }
-    if (isNaN(memberId)) {
+    if (isNaN(memberId))
       return { error: error.memberIdMustBeInteger, data: null };
-    }
     if (
       memberDataToUpdate.hasOwnProperty("membership_role") &&
       isNaN(memberDataToUpdate.membership_role)
@@ -143,59 +145,44 @@ async function editMemberInOrganizationInDB(
     ) {
       return { error: error.memberPointsNaN, data: null };
     }
+
     const currentSemester = await getCurrentSemester();
 
-    // Get the membership first to ensure it exists
-    let membership = await getMembershipByAttributes({
+    const membership = await getMembershipByAttributes({
       member_id: memberId,
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    // Check if this is the last admin being removed
+    if (!membership)
+      return { error: error.membershipNotFound, data: null };
+
     if (memberDataToUpdate.hasOwnProperty("membership_role")) {
       const currentRole = membership.membership_role;
       const newRole = memberDataToUpdate.membership_role;
-
-      // If changing from admin role to something else
       if (currentRole === ROLE_ADMIN && newRole !== ROLE_ADMIN) {
-        // Get all admins in the organization
         const adminMembers = await getMembershipsByAttributes({
           organization_id: orgId,
           membership_role: ROLE_ADMIN,
         });
-
-        // If there's only one admin, prevent the change
         if (adminMembers.length === 1) {
           return { error: error.cannotRemoveLastAdmin, data: null };
         }
       }
     }
 
-    // Perform the update
     const updated = await editMembership(
       membership.membership_id,
       memberDataToUpdate
     );
+    if (!updated) return { error: error.membershipNotFound, data: null };
 
-    if (!updated) {
-      return { error: error.membershipNotFound, data: null };
-    }
-
-    // **Check active membership status if points were updated**
     if (memberDataToUpdate.hasOwnProperty("membership_points")) {
-      const organization = await getOrganizationById(orgId);
-      if (!organization) {
-        return { error: error.organizationNotFound, data: null };
-      }
-
+      await membership.reload(); // Make sure membership has latest data
       checkActiveMembership(membership);
     }
 
-    return {
-      error: error.noError,
-      data: { update: "success" },
-    };
+    return { error: error.noError, data: { update: "success" } };
   } catch (err) {
     console.error("Error editing membership:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -238,45 +225,37 @@ async function deleteMemberInOrganizationInDB(orgId, memberId) {
 
 async function getMembersInOrganizationInDB(orgId) {
   try {
-    if (isNaN(orgId)) {
+    if (isNaN(orgId))
       return { error: error.organizationIdMustBeInteger, data: null };
-    }
 
     const currentSemester = await getCurrentSemester();
 
-    // Get all members and memberships for this organization
     const members = await getMembersByAttributes({});
     const memberships = await getMembershipsByAttributes({
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
 
-    if (!members || !memberships) {
+    if (!members || !memberships)
       return { error: error.membershipNotFound, data: null };
-    }
 
-    // Combine member and membership data
     const resultData = memberships
       .map((membership) => {
-        const memberData = members.data.filter(
+        const memberData = members.data.find(
           (member) => member.member_id === membership.member_id
         );
         if (!memberData) return null;
-
         return {
           ...membership.toJSON(),
-          member_name: memberData[0].member_name,
-          member_email: memberData[0].member_email,
-          member_major: memberData[0].member_major,
-          member_graduation_date: memberData[0].member_graduation_date,
+          member_name: memberData.member_name,
+          member_email: memberData.member_email,
+          member_major: memberData.member_major,
+          member_graduation_date: memberData.member_graduation_date,
         };
       })
       .filter((data) => data !== null);
 
-    return {
-      error: error.noError,
-      data: resultData,
-    };
+    return { error: error.noError, data: resultData };
   } catch (err) {
     console.error("Error fetching all members of org:", err);
     return { error: error.somethingWentWrong, data: null };
@@ -284,11 +263,10 @@ async function getMembersInOrganizationInDB(orgId) {
 }
 
 module.exports = {
-    getSpecificMemberWithOrgDataInDB,
-    addMemberToAnOrganizationInDB,
-    editMemberInOrganizationInDB,
-    deleteMemberInOrganizationInDB,
-    getMembersInOrganizationInDB,
-    getMembersByAttributes
+  getSpecificMemberWithOrgDataInDB,
+  addMemberToAnOrganizationInDB,
+  editMemberInOrganizationInDB,
+  deleteMemberInOrganizationInDB,
+  getMembersInOrganizationInDB,
+  getMembersByAttributes,
 };
-

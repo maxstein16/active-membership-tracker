@@ -16,9 +16,7 @@ export async function getMemberInfoData(orgId, memberId) {
   if (!memberData || memberData.data == null) {
     return { error: true };
   }
-
-
-  console.log("mem", memberData.data.remaining_attendance)
+  
   // === Preprocess remainingAttendance ===
   const cleanedRemainingAttendance = (
     memberData.data.remaining_attendance || []
@@ -54,16 +52,6 @@ export async function getMemberInfoData(orgId, memberId) {
       receivedBonuses: memberData.data.membership.received_bonus || [],
     },
   };
-
-
-  // QUICK FIX
-  const result = await getAPIData(`/organization/${orgId}`, API_METHODS.get, {});
-
-  if (!result || result.hasOwnProperty("error")) {
-    return { error: true };
-  }
-
-  memberInfo.activePercentage = Math.floor(((memberData.data.membership.membership_points) / (result.data.organization_threshold)) * 100)
 
   return memberInfo;
 }

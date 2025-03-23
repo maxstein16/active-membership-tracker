@@ -44,16 +44,12 @@ CREATE TABLE Member (
   member_phone_number VARCHAR(15) CHECK (member_phone_number REGEXP '^[+]?[0-9]{10,15}$' OR member_phone_number IS NULL), -- Allows international phone numbers or null
   member_graduation_date DATE CHECK (member_graduation_date >= CURDATE() OR member_graduation_date IS NULL), -- Ensures date is in the future or null
   member_tshirt_size ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL') NULL, -- T-shirt size options or null
-member_major VARCHAR(255) NULL, -- Member's academic major or null
-member_gender ENUM('male', 'female', 'non-binary', 'other', 'prefer not to say') NULL, -- Gender identifier or null
-member_race ENUM('asian', 'black', 'white', 'hispanic', 'indigenous', 'pacific islander', 'middle eastern / north african', 'multiracial', 'other', 'prefer not to say') NULL, -- Race/Ethnicity identifier or null
-member_race_other VARCHAR(50) NULL, -- If "other" is selected, allows input or null
-member_status ENUM('undergraduate', 'graduate', 'staff', 'faculty', 'alumni') NULL -- Membership status or null
-
+  member_major VARCHAR(255) NULL, -- Member's academic major or null
+  member_gender ENUM('male', 'female', 'non-binary', 'other', 'prefer not to say') NULL, -- Gender identifier or null
+  member_race ENUM('asian', 'black', 'white', 'hispanic', 'indigenous', 'pacific islander', 'middle eastern / north african', 'multiracial', 'other', 'prefer not to say') NULL, -- Race/Ethnicity identifier or null
+  member_race_other VARCHAR(50) NULL, -- If "other" is selected, allows input or null
+  member_status ENUM('undergraduate', 'graduate', 'staff', 'faculty', 'alumni') NULL -- Membership status or null
 );
-
-
-
 
 -- ==============================
 -- Membership Table
