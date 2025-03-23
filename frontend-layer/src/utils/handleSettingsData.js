@@ -423,7 +423,7 @@ export async function getPastOrganizationEvents(orgId) {
 }
 
 export async function getMeetingReport(orgId, meetingId) {
-  const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
+  const apiUrl = `/organization/${orgId}/reports/evens/${meetingId}`;
 
   const result = await getAPIData(apiUrl, API_METHODS.get, {});
 
@@ -482,7 +482,7 @@ export async function getSemesterReportData(orgId) {
 }
 
 export async function getMeetingReportData(orgId, meetingId) {
-  const apiUrl = `/organization/${orgId}/reports/meeting/${meetingId}`;
+  const apiUrl = `/organization/${orgId}/reports/event/${meetingId}`;
 
   const response = await getAPIData(apiUrl, API_METHODS.get, {});
 
@@ -561,5 +561,50 @@ export async function getAllAcademicYears() {
     return [];
   }
   
+  return result.data;
+}
+
+/**
+ * Get member data for a specific member in an organization
+ * @param {Number} orgId - organization id from the db
+ * @param {Number} memberId - member id to fetch data for
+ * @returns member data including membership info
+ */
+export async function getMemberData(orgId, memberId) {
+  const result = await getAPIData(
+    `/organization/${orgId}/member/${memberId}`,
+    API_METHODS.get,
+    {}
+  );
+  
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  if (result.hasOwnProperty("error")) {
+    return { error: true };
+  }
+  return result.data;
+}
+
+/**
+ * Get general organization data
+ * @param {Number} orgId - organization id from the db
+ * @returns organization data
+ */
+export async function getOrganizationData(orgId) {
+  const result = await getAPIData(
+    `/organization/${orgId}`,
+    API_METHODS.get,
+    {}
+  );
+  
+  if (!result) {
+    console.log("must login", result);
+    return { session: false };
+  }
+  if (result.hasOwnProperty("error")) {
+    return { error: true };
+  }
   return result.data;
 }

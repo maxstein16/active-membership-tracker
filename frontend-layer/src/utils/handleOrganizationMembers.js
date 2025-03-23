@@ -8,8 +8,6 @@ export async function getMemberInfoData(orgId, memberId) {
     {}
   );
 
-  console.log(memberData);
-
   if (!memberData) {
     console.log("Must login", memberData);
     return { session: false };
@@ -18,7 +16,7 @@ export async function getMemberInfoData(orgId, memberId) {
   if (!memberData || memberData.data == null) {
     return { error: true };
   }
-
+  
   // === Preprocess remainingAttendance ===
   const cleanedRemainingAttendance = (
     memberData.data.remaining_attendance || []

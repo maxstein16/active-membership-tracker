@@ -11,28 +11,36 @@ import YearlyReport from "../../components/AdminPageComponents/Reports/YearlyRep
 import SemesterReport from "../../components/AdminPageComponents/Reports/SemesterReports";
 import EventTable from "../../components/AdminPageComponents/Reports/EventTable";
 import { CircularProgress } from "@mui/material";
+import { API_METHODS, getAPIData } from "../../utils/callAPI";
+import displayErrors from "../../utils/displayErrors";
 
 export default function ReportsPage() {
   const { orgId } = useParams();
   const [orgInfo, setOrgInfo] = React.useState(undefined);
+  const [error, setError] = React.useState("");
 
   React.useEffect(() => {
     // get the generic org info from the database with the orgId
-
-    // set the orgInfo state variable
-    // the data MUST BE FORMATTED AND LABELLED LIKE THIS
-    setOrgInfo({
-      name: "Computing Organization for Multicultural Students",
-      abbreviation: "COMS",
-      color: "#20BDE4",
-    });
+    getAPIData(`/organization/${orgId}`, API_METHODS.get, {}).then((response) => {
+      if (!response || response.hasOwnProperty("error")) {
+        setError(displayErrors.errorFetchingContactSupport)
+        return;
+      }
+      setOrgInfo({
+        name: response.data.organization_name,
+        abbreviation: response.data.organization_abbreviation,
+        color: response.data.organization_color,
+      });
+    })
+    
   }, []);
 
   return (
     <PageSetup>
       <BackButton route={"/"} />
 
-      {!orgInfo ? (
+
+      {error !== "" ? <p>{error}</p> : !orgInfo ? (
         <CircularProgress/>
       ) : (
         <div className="reports-wrapper">

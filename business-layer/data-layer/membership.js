@@ -65,20 +65,12 @@ const editMembershipRole = async (membershipId, newRole) => {
  * @returns {Promise<Object[]>} An array of matching membership objects (empty if no matches found)
  */
 const getMembershipsByAttributes = async (filters) => {
+
   try {
     const memberships = await Membership.findAll({
       where: filters
     });
 
-    if (memberships.length === 0) {
-      console.log("No memberships found matching the given criteria.");
-      return [];
-    }
-
-    // console.log(
-    //   "Memberships found:",
-    //   memberships.map(m => m.toJSON())
-    // );
     return memberships;
   } catch (err) {
     console.error("Error fetching memberships by attributes:", err);
@@ -92,6 +84,7 @@ const getMembershipsByAttributes = async (filters) => {
  * @returns {Promise<Object|null>} The membership object if found, otherwise null
  */
 const getMembershipByAttributes = async (filters) => {
+
   try {
     const membership = await Membership.findOne({
       where: filters

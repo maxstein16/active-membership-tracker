@@ -9,7 +9,6 @@ const { Member } = require("../db");
 async function createMember(memberData) {
   try {
     const newMember = await Member.create(memberData);
-    // console.log("Member created:", newMember.toJSON());
     return newMember;
   } catch (error) {
     console.error("Error creating member:", error);
@@ -25,6 +24,7 @@ async function createMember(memberData) {
  * @returns {Promise<boolean>} Returns `true` if the member was updated, `false` if no matching member was found.
  */
 async function updateMember(memberId, updateData) {
+
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },
@@ -34,7 +34,7 @@ async function updateMember(memberId, updateData) {
       console.log(`Member with ID ${memberId} updated successfully.`);
       return true;
     } else {
-      console.log(`No member found with ID ${memberId}.`);
+      console.log("Nothing Updated.");
       return false;
     }
   } catch (error) {
@@ -55,10 +55,6 @@ async function getAllMembers() {
       console.log("No members found in the database.");
       return [];
     }
-    // console.log(
-    //   "Members found:",
-    //   members.map((m) => m.toJSON())
-    // );
     return members;
   } catch (error) {
     console.error("Error fetching members:", error);
@@ -73,6 +69,7 @@ async function getAllMembers() {
  * @returns {Promise<object|null>} The member object if found, otherwise `null`.
  */
 async function getMemberById(memberId) {
+
   try {
     const member = await Member.findByPk(memberId);
 
@@ -80,8 +77,6 @@ async function getMemberById(memberId) {
       console.log(`No member found with ID ${memberId}.`);
       return null;
     }
-
-    // console.log("Member found:", member.toJSON());
     return member;
   } catch (error) {
     console.error("Error fetching member by ID:", error);

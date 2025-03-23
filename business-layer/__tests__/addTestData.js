@@ -29,8 +29,8 @@ const { deleteOldTestData } = require("./deleteOldTestData");
 
 async function addTestData() {
   // Delete old test data
-  console.log("Deleting old test data...");
-  await deleteOldTestData();
+  // console.log("Deleting old test data...");
+  // await deleteOldTestData();
 
   console.log("\n\nAdding test data to Database...");
 
@@ -45,7 +45,7 @@ async function addTestData() {
     organization_abbreviation: "WiC TEST",
     organization_email: "wic@rit.edu",
     organization_membership_type: "attendance",
-    organization_threshold: 30,
+    organization_threshold: 0,
   });
 
   const org2 = await Organization.create({
@@ -87,8 +87,8 @@ async function addTestData() {
     member_graduation_date: "2025-05-10",
     member_tshirt_size: "S",
     member_major: "Web and Mobile Computing",
-    member_gender: "Female",
-    member_race: "White",
+    member_gender: "female",
+    member_race: "white",
   });
 
   const member2 = await Member.create({
@@ -98,8 +98,8 @@ async function addTestData() {
     member_graduation_date: "2025-05-10",
     member_tshirt_size: "M",
     member_major: "Web and Mobile Computing",
-    member_gender: "Male",
-    member_race: "White",
+    member_gender: "male",
+    member_race: "white",
   });
 
   const member3 = await Member.create({
@@ -109,8 +109,8 @@ async function addTestData() {
     member_graduation_date: "2025-05-10",
     member_tshirt_size: "S",
     member_major: "Web and Mobile Computing",
-    member_gender: "Female",
-    member_race: "White",
+    member_gender: "female",
+    member_race: "white",
   });
 
   const member4 = await Member.create({
@@ -119,8 +119,8 @@ async function addTestData() {
     member_personal_email: "kasim.omeally@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Web and Mobile Computing",
-    member_gender: "Male",
-    member_race: "Black",
+    member_gender: "male",
+    member_race: "black",
   });
 
   const member5 = await Member.create({
@@ -129,8 +129,8 @@ async function addTestData() {
     member_personal_email: "joseph.henry@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Web and Mobile Computing",
-    member_gender: "Male",
-    member_race: "White",
+    member_gender: "male",
+    member_race: "white",
   });
 
   const member6 = await Member.create({
@@ -139,8 +139,8 @@ async function addTestData() {
     member_personal_email: "alexandria.eddings@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Web and Mobile Computing",
-    member_gender: "Female",
-    member_race: "Black",
+    member_gender: "female",
+    member_race: "black",
   });
 
   const member7 = await Member.create({
@@ -149,8 +149,8 @@ async function addTestData() {
     member_personal_email: "Gabriella.alvarez-mcleod@gmail.com",
     member_graduation_date: "2025-05-10",
     member_major: "Human Computer Interaction",
-    member_gender: "Non-Binary",
-    member_race: "Hispanic",
+    member_gender: "non-binary",
+    member_race: "hispanic",
   });
 
   // Memberships
