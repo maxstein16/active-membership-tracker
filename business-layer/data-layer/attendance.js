@@ -1,4 +1,4 @@
-const { Attendance } = require("../db")
+const { Attendance, Event, Member } = require("../db")
 
 /**
  * Create an attendance record
@@ -8,6 +8,7 @@ const { Attendance } = require("../db")
 async function createAttendance(attendanceData) {
   try {
     const attendance = await Attendance.create(attendanceData);
+    console.log("Attendance created successfully")
     return attendance;
   } catch (err) {
     console.error("Error creating attendance:", err);
@@ -85,10 +86,10 @@ async function getMemberAttendanceWithEvents(orgId, memberId) {
   }
 }
 
-async function getMeetingAttendanceWithMembers(meetingId) {
+async function getEventAttendanceWithMembers(eventId) {
   try {
     const attendances = await Attendance.findAll({
-      where: { event_id: meetingId },
+      where: { event_id: eventId },
       include: {
         model: Member,
         required: true
@@ -101,11 +102,43 @@ async function getMeetingAttendanceWithMembers(meetingId) {
   }
 }
 
+/**
+ * Retrieves a member's attendance records for a specific event type within an organization.
+ *
+ * @param {number} memberId - The ID of the member.
+ * @param {number} orgId - The ID of the organization.
+ * @param {string} eventType - The type of event to filter by (e.g., "General Meeting").
+ * @returns {Promise<object[]>} - A list of attendance records for the specified event type.
+ */
+async function getMemberAttendanceForEventType(memberId, orgId, eventType) {
+  try {
+    const attendanceRecords = await Attendance.findAll({
+      include: [
+        {
+          model: Event,
+          where: {
+            organization_id: orgId,
+            event_type: eventType,
+          },
+          required: true,
+        },
+      ],
+      where: { member_id: memberId },
+    });
+
+    return attendanceRecords;
+  } catch (error) {
+    console.error("Error fetching attendance records for event type:", error);
+    throw error;
+  }
+}
+
 module.exports = {
   createAttendance,
   getAttendanceById,
   getAttendanceByMemberId,
   getAttendanceByMemberAndEvent,
   getMemberAttendanceWithEvents,
-  getMeetingAttendanceWithMembers
+  getEventAttendanceWithMembers,
+  getMemberAttendanceForEventType,
 };

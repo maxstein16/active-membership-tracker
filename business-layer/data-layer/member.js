@@ -6,16 +6,15 @@ const { Member } = require("../db");
  * @param {object} memberData - The attributes of the new member
  * @returns {Promise<object>} The newly created member object.
  */
-async function createMember (memberData) {
+async function createMember(memberData) {
   try {
     const newMember = await Member.create(memberData);
-    console.log("Member created:", newMember.toJSON());
     return newMember;
   } catch (error) {
     console.error("Error creating member:", error);
     throw error;
   }
-};
+}
 
 /**
  * Updates an existing member by their ID.
@@ -24,7 +23,8 @@ async function createMember (memberData) {
  * @param {object} updateData - The fields to update
  * @returns {Promise<boolean>} Returns `true` if the member was updated, `false` if no matching member was found.
  */
-async function updateMember (memberId, updateData) {
+async function updateMember(memberId, updateData) {
+
   try {
     const [updatedRows] = await Member.update(updateData, {
       where: { member_id: memberId },
@@ -34,14 +34,14 @@ async function updateMember (memberId, updateData) {
       console.log(`Member with ID ${memberId} updated successfully.`);
       return true;
     } else {
-      console.log(`No member found with ID ${memberId}.`);
+      console.log("Nothing Updated.");
       return false;
     }
   } catch (error) {
     console.error("Error updating member:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves all members from the database.
@@ -55,16 +55,12 @@ async function getAllMembers() {
       console.log("No members found in the database.");
       return [];
     }
-    console.log(
-      "Members found:",
-      members.map((m) => m.toJSON())
-    );
     return members;
   } catch (error) {
     console.error("Error fetching members:", error);
     throw error;
   }
-};
+}
 
 /**
  * Retrieves a specific member by their ID.
@@ -73,6 +69,7 @@ async function getAllMembers() {
  * @returns {Promise<object|null>} The member object if found, otherwise `null`.
  */
 async function getMemberById(memberId) {
+
   try {
     const member = await Member.findByPk(memberId);
 
@@ -80,14 +77,37 @@ async function getMemberById(memberId) {
       console.log(`No member found with ID ${memberId}.`);
       return null;
     }
-
-    console.log("Member found:", member.toJSON());
     return member;
   } catch (error) {
     console.error("Error fetching member by ID:", error);
     throw error;
   }
-};
+}
+
+/**
+ * Retrieves a specific member by their ID.
+ *
+ * @param {number} username - The username of the member to retrieve.
+ * @returns {Promise<object|null>} The member object if found, otherwise `null`.
+ */
+async function getMemberByUsername(username) {
+  try {
+    const member = await Member.findOne({
+      where: { member_email: username },
+    });
+
+    if (!member) {
+      console.log(`No member found with username ${username}.`);
+      return null;
+    }
+
+    // console.log("Member found:", member.toJSON());
+    return member;
+  } catch (error) {
+    console.error("Error fetching member by username:", error);
+    throw error;
+  }
+}
 
 /**
  * Retrieves members based on provided filters.
@@ -96,24 +116,26 @@ async function getMemberById(memberId) {
  * @returns {Promise<object[]>} An array of matching member objects (empty if no matches found).
  */
 async function getMembersByAttributes(filters) {
+
   try {
     const members = await Member.findAll({ where: filters });
 
     if (members.length === 0) {
       console.log("No members found matching the given criteria.");
-      return [];
+      return { error: null, data: [] }; // Return an object with `data` property
     }
 
-    console.log(
-      "Members found:",
-      members.map((m) => m.toJSON())
-    );
-    return members;
+    // Log the JSON representation of members (to make it readable)
+    // console.log("Members found:", members.map((m) => m.toJSON()));
+    // console.log("Trying to get member(s) by attribute(s): " + JSON.stringify(filters));
+
+
+    return { error: null, data: members }; // Return the data and no error
   } catch (error) {
-    console.error("Error fetching members by attributes:", error);
-    throw error;
+    console.error("member-js says Error fetching members by attributes:", error);
+    return { error: error.message, data: [] }; // Return an error message and an empty array
   }
-};
+}
 
 // Export all functions for external use
 module.exports = {
@@ -121,5 +143,6 @@ module.exports = {
   updateMember,
   getAllMembers,
   getMemberById,
+  getMemberByUsername,
   getMembersByAttributes,
 };
