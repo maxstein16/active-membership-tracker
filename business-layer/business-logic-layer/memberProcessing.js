@@ -61,7 +61,6 @@ async function getMemberByIdInDB(memberId) {
  * @returns {Promise<object>} The updated member object or an error.
  */
 async function updateMemberInDB(memberId, memberData) {
-
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
@@ -70,17 +69,39 @@ async function updateMemberInDB(memberId, memberData) {
     }
 
     try {
-        // Map incoming fields to database fields
-        const updateFields = {
-            member_personal_email: memberData.personal_email,
-            member_phone_number: memberData.phone_number,
-            member_gender: memberData.gender,
-            member_race: memberData.race,
-            member_tshirt_size: memberData.tshirt_size,
-            member_major: memberData.major,
-            member_graduation_date: memberData.graduation_date,
-            member_status: memberData.status
-        };
+        const updateFields = {};
+        
+        if (memberData.personal_email !== undefined && memberData.personal_email !== '') {
+            updateFields.member_personal_email = memberData.personal_email;
+        }
+        
+        if (memberData.phone_number !== undefined && memberData.phone_number !== '') {
+            updateFields.member_phone_number = memberData.phone_number;
+        }
+        
+        if (memberData.gender !== undefined && memberData.gender !== '') {
+            updateFields.member_gender = memberData.gender;
+        }
+        
+        if (memberData.race !== undefined && memberData.race !== '') {
+            updateFields.member_race = memberData.race;
+        }
+        
+        if (memberData.tshirt_size !== undefined && memberData.tshirt_size !== '') {
+            updateFields.member_tshirt_size = memberData.tshirt_size;
+        }
+        
+        if (memberData.major !== undefined && memberData.major !== '') {
+            updateFields.member_major = memberData.major;
+        }
+        
+        if (memberData.graduation_date !== undefined) {
+            updateFields.member_graduation_date = memberData.graduation_date;
+        }
+        
+        if (memberData.status && memberData.status.trim() !== '') {
+            updateFields.member_status = memberData.status;
+        }
 
         // Remove undefined fields
         Object.keys(updateFields).forEach(

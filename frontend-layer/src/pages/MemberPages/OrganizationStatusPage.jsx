@@ -20,8 +20,10 @@ export default function OrganizationStatusPage() {
   const [memberInfo, setMemberInfo] = React.useState({
     active_percentage: 0,
     activeSemesters: 1,
-    membership: {},
-    remaining_attendance: [], // For attendance-based orgs
+    membership: {
+      membership_points: 0
+    },
+    remaining_attendance: [],
   });
   const [orgData, setOrgData] = React.useState({
     organization_abbreviation: "",
@@ -41,11 +43,22 @@ export default function OrganizationStatusPage() {
         const result = await getMemberData(orgId, memberId);
         const orgResult = await getOrganizationData(orgId);
 
-        console.log("Member result:", result);
-        console.log("Org result:", orgResult);
+        const safeResult = {
+          ...result,
+          active_percentage: result.active_percentage || 0,
+          activeSemesters: result.activeSemesters || 1,
+          membership: {
+            ...(result.membership || {}),
+            membership_points: result.membership?.membership_points || 0
+          },
+          remaining_attendance: result.remaining_attendance || []
+        };
 
-        setMemberInfo(result);
-        setOrgData(orgResult);
+        setMemberInfo(safeResult);
+        setOrgData({
+          ...orgResult,
+          organization_threshold: orgResult.organization_threshold || 0
+        });
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -73,6 +86,11 @@ export default function OrganizationStatusPage() {
   const activeSemestersText = `${memberInfo.activeSemesters} semester${
     memberInfo.activeSemesters === 1 ? "" : "s"
   }`;
+
+  const currentPoints = memberInfo.membership?.membership_points || 0;
+  const threshold = orgData.organization_threshold || 0;
+  const pointsAbove = Math.max(0, currentPoints - threshold);
+  const pointsNeeded = Math.max(0, threshold - currentPoints);
 
   return (
     <PageSetup>
@@ -159,16 +177,14 @@ export default function OrganizationStatusPage() {
                 <>
                   <p>
                     You have{" "}
-                    <strong>{memberInfo.membership.membership_points}</strong>{" "}
+                    <strong>{currentPoints}</strong>{" "}
                     total points.
                   </p>
-                  {memberInfo.membership.membership_points >=
-                  orgData.organization_threshold ? (
+                  {currentPoints >= threshold ? (
                     <p>
                       That is{" "}
                       <strong>
-                        {memberInfo.membership.membership_points -
-                          orgData.organization_threshold}
+                        {pointsAbove}
                       </strong>{" "}
                       points above the minimum requirement!
                     </p>
@@ -176,8 +192,7 @@ export default function OrganizationStatusPage() {
                     <p>
                       Earn{" "}
                       <strong>
-                        {orgData.organization_threshold -
-                          memberInfo.membership.membership_points}
+                        {pointsNeeded}
                       </strong>{" "}
                       more points to become an active member this semester!
                     </p>
@@ -191,34 +206,34 @@ export default function OrganizationStatusPage() {
                       key={idx}
                       style={{ marginBottom: "1rem", textAlign: "left" }}
                     >
-                      <h4>{req.event_type.replace("_", " ").toUpperCase()}</h4>
+                      <h4>{req.event_type?.replace("_", " ").toUpperCase() || "Unknown Event Type"}</h4>
                       {req.requirement_type === "attendance_count" ? (
                         <>
                           <p>
-                            Attended: <strong>{req.attended}</strong> /{" "}
-                            {req.required}
+                            Attended: <strong>{req.attended || 0}</strong> /{" "}
+                            {req.required || 0}
                           </p>
                           <p>
-                            Remaining: <strong>{req.remaining}</strong>
+                            Remaining: <strong>{req.remaining || 0}</strong>
                           </p>
                         </>
                       ) : (
                         <>
                           <p>
-                            Total Events: <strong>{req.totalEvents}</strong>
+                            Total Events: <strong>{req.totalEvents || 0}</strong>
                           </p>
                           <p>
                             Attendance %:{" "}
-                            <strong>{req.attendancePercentage}%</strong>
+                            <strong>{req.attendancePercentage || 0}%</strong>
                           </p>
                           <p>
                             Required %:{" "}
-                            <strong>{req.requiredPercentage}%</strong>
+                            <strong>{req.requiredPercentage || 0}%</strong>
                           </p>
                           <p>
                             Remaining %:{" "}
                             <strong>
-                              {req.remainingPercentage.toFixed(1)}%
+                              {(req.remainingPercentage || 0).toFixed(1)}%
                             </strong>
                           </p>
                         </>

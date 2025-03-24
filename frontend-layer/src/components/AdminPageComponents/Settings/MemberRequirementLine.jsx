@@ -22,7 +22,7 @@ export default function MembershipRequirementLine({
   const [error, setError] = React.useState("");
 
   const requirementTypes = ["attendance_count", "percentage"];
-  console.log(requirement);
+  // console.log(requirement);
   
 
   return (
