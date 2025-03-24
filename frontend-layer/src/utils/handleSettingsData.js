@@ -423,7 +423,7 @@ export async function getPastOrganizationEvents(orgId) {
 }
 
 export async function getMeetingReport(orgId, meetingId) {
-  const apiUrl = `/organization/${orgId}/reports/evens/${meetingId}`;
+  const apiUrl = `/organization/${orgId}/reports/event/${meetingId}`;
 
   const result = await getAPIData(apiUrl, API_METHODS.get, {});
 
@@ -494,24 +494,38 @@ export async function getMeetingReportData(orgId, meetingId) {
   return response.orgData;
 }
 
-export async function getAllSemesters() {
-  const result = await getAPIData(
-    `/semester`,
-    API_METHODS.get,
-    {}
-  );
-
-  if (!result) {
-    console.log("must login", result);
-    return { session: false };
-  }
-  
-  if (!result.data || result.error) {
-    console.error("Error fetching semesters:", result.error);
+export async function getAllSemestersAcrossYears() {
+  try {
+    const academicYearsResponse = await getAllAcademicYears();
+    
+    if (!Array.isArray(academicYearsResponse)) {
+      console.error("Failed to fetch academic years");
+      return [];
+    }
+    
+    const semestersMap = new Map();
+    
+    for (const year of academicYearsResponse) {
+      const yearResult = await getAPIData(
+        `/semester/year/${year}`,
+        API_METHODS.get,
+        {}
+      );
+      
+      if (yearResult && yearResult.data && Array.isArray(yearResult.data)) {
+        yearResult.data.forEach(semester => {
+          if (!semestersMap.has(semester.semester_id)) {
+            semestersMap.set(semester.semester_id, semester);
+          }
+        });
+      }
+    }
+    
+    return Array.from(semestersMap.values());
+  } catch (err) {
+    console.error("Error fetching all semesters:", err);
     return [];
   }
-  
-  return result.data;
 }
 
 export async function getSemesterReportDataById(orgId, semesterId) {

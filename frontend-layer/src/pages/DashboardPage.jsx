@@ -48,17 +48,26 @@ export default function DashboardPage() {
 
       let isAdminOfOneOrg = false;
 
+      const uniqueOrganizations = new Map();
+      
       result.data.memberships.forEach((membership) => {
-        if (membership.membership_role === ROLE_ADMIN) {
-          isAdminOfOneOrg = true;
+        const orgId = membership.organization.organization_id;
+        
+        if (!uniqueOrganizations.has(orgId)) {
+          uniqueOrganizations.set(orgId, {
+            id: orgId,
+            abbreviation: membership.organization.organization_abbreviation,
+            color: membership.organization.organization_color,
+            role: membership.membership_role,
+          });
+          
+          if (membership.membership_role === ROLE_ADMIN) {
+            isAdminOfOneOrg = true;
+          }
         }
-        newData.organizations.push({
-          id: membership.organization.organization_id,
-          abbreviation: membership.organization.organization_abbreviation,
-          color: membership.organization.organization_color,
-          role: membership.membership_role,
-        });
       });
+
+      newData.organizations = Array.from(uniqueOrganizations.values());
 
       setUserData(newData);
       setUserIsAdmin(isAdminOfOneOrg);

@@ -26,6 +26,7 @@ const {
   Event,
 } = require("../db");
 const { deleteOldTestData } = require("./deleteOldTestData");
+const { Op } = require("sequelize");
 
 async function addTestData() {
   // Delete old test data
@@ -58,10 +59,26 @@ async function addTestData() {
     organization_threshold: 23,
   });
 
-  // SEMESTERS
+  // SEMESTERS - EXPANDED TO INCLUDE PREVIOUS ACADEMIC YEAR
   console.log("2. Creating Test Semesters");
 
   const sem1 = await Semester.create({
+    semester_id: 1121,
+    semester_name: "2023 FALL TEST",
+    academic_year: "2023-2024",
+    start_date: "2023-08-15",
+    end_date: "2023-12-18",
+  });
+
+  const sem2 = await Semester.create({
+    semester_id: 1122,
+    semester_name: "2024 SPRING TEST",
+    academic_year: "2023-2024",
+    start_date: "2024-01-16",
+    end_date: "2024-05-04",
+  });
+
+  const sem3 = await Semester.create({
     semester_id: 1123,
     semester_name: "2024 FALL TEST",
     academic_year: "2024-2025",
@@ -69,7 +86,7 @@ async function addTestData() {
     end_date: "2024-12-16",
   });
 
-  const sem2 = await Semester.create({
+  const sem4 = await Semester.create({
     semester_id: 1124,
     semester_name: "2025 SPRING TEST",
     academic_year: "2024-2025",
@@ -153,7 +170,7 @@ async function addTestData() {
     member_race: "hispanic",
   });
 
-  // Memberships
+  // Memberships FOR ALL SEMESTERS
   console.log("4. Creating Test Memberships");
 
   const members = [
@@ -165,37 +182,49 @@ async function addTestData() {
     member6,
     member7,
   ];
+  
+  const semesters = [sem1, sem2, sem3, sem4];
+  
+  // Create memberships for each semester for each member
+  for (const semester of semesters) {
+    console.log(`Creating memberships for ${semester.semester_name}`);
+    
+    for (const member of members) {
+      const allPossibleBonusIds = [1, 2, 3, 4, 5];
+      const numBonuses = Math.floor(Math.random() * 4);
+      const shuffled = allPossibleBonusIds.sort(() => 0.5 - Math.random());
+      const selectedBonuses = shuffled.slice(0, numBonuses);
+      
+      // Vary the active state more for historical data
+      const isActive = Math.random() > 0.3; // 70% chance of being active
+      const activeSemesters = semester.semester_id === 1124 ? 1 : Math.floor(Math.random() * 4) + 1; // 1-4 for old semesters
+      
+      // Membership for WiC (attendance-based)
+      const wicPoints = Math.floor(Math.random() * 12); // Random attendance count 0-11
+      await Membership.create({
+        membership_role: Math.random() > 0.8 ? 1 : 2, // 20% chance of being eboard (role 1)
+        member_id: member.member_id,
+        organization_id: org1.organization_id,
+        semester_id: semester.semester_id,
+        membership_points: wicPoints,
+        active_member: wicPoints >= 8, // Active if attended enough meetings
+        received_bonus: [],
+        active_semesters: activeSemesters,
+      });
 
-  for (const member of members) {
-    const allPossibleBonusIds = [1, 2, 3, 4, 5];
-    const numBonuses = Math.floor(Math.random() * 4);
-    const shuffled = allPossibleBonusIds.sort(() => 0.5 - Math.random());
-    const selectedBonuses = shuffled.slice(0, numBonuses);
-
-    // Membership for WiC
-    await Membership.create({
-      membership_role: 2,
-      member_id: member.member_id,
-      organization_id: org1.organization_id,
-      semester_id: sem2.semester_id,
-      membership_points: 0,
-      active_member: false,
-      received_bonus: [],
-      active_semesters: 1,
-    });
-
-    // Membership for COMS
-    const randomNum = Math.floor(Math.random() * 40) + 1;
-    await Membership.create({
-      membership_role: 2,
-      member_id: member.member_id,
-      organization_id: org2.organization_id,
-      semester_id: sem2.semester_id,
-      membership_points: randomNum,
-      active_member: randomNum >= 23,
-      received_bonus: selectedBonuses,
-      active_semesters: 1,
-    });
+      // Membership for COMS (points-based)
+      const randomNum = Math.floor(Math.random() * 40) + 1;
+      await Membership.create({
+        membership_role: Math.random() > 0.9 ? 1 : 2, // 10% chance of being eboard (role 1)
+        member_id: member.member_id,
+        organization_id: org2.organization_id,
+        semester_id: semester.semester_id,
+        membership_points: randomNum,
+        active_member: randomNum >= 23,
+        received_bonus: selectedBonuses,
+        active_semesters: activeSemesters,
+      });
+    }
   }
 
   // Email Settings
@@ -292,159 +321,257 @@ async function addTestData() {
     requirement_value: 1,
   });
 
-  // Events
-  console.log("7. Adding Events");
-  const event1 = await Event.create({
-    organization_id: org1.organization_id,
-    event_name: "WiC general_meeting",
-    event_start: "2025-02-05 18:00:00",
-    event_end: "2025-02-05 19:30:00",
-    event_location: "GOL 1400",
-    event_description: "An overview of upcoming events and initiatives.",
-    event_type: "general_meeting",
-    semester_id: sem2.semester_id,
-  });
-  const event2 = await Event.create({
-    organization_id: org1.organization_id,
-    event_name: "WiC Volunteer Day",
-    event_start: "2025-03-10 10:00:00",
-    event_end: "2025-03-10 14:00:00",
-    event_location: "Local Community Center",
-    event_description:
-      "Helping out at the community center with tech workshops.",
-    event_type: "volunteer",
-    semester_id: sem2.semester_id,
-  });
+  // Events for ALL semesters
+  console.log("7. Adding Events for all semesters");
+  
+  // Function to create date within semester bounds
+  const getRandomDateInSemester = (semester) => {
+    const start = new Date(semester.start_date);
+    const end = new Date(semester.end_date);
+    const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+    return new Date(randomTime);
+  };
+  
+  // Create events for each semester
+  for (const semester of semesters) {
+    console.log(`Creating events for ${semester.semester_name}`);
+    
+    // ======= WiC EVENTS =======
+    // General Meetings
+    const wicGeneralMeeting1 = await Event.create({
+      organization_id: org1.organization_id,
+      event_name: `WiC General Meeting 1 - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 90 * 60000), // 90 minutes later
+      event_location: "GOL 1400",
+      event_description: "First general meeting of the semester.",
+      event_type: "general_meeting",
+      semester_id: semester.semester_id,
+    });
+    
+    const wicGeneralMeeting2 = await Event.create({
+      organization_id: org1.organization_id,
+      event_name: `WiC General Meeting 2 - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 90 * 60000),
+      event_location: "GOL 1400",
+      event_description: "Second general meeting of the semester.",
+      event_type: "general_meeting",
+      semester_id: semester.semester_id,
+    });
+    
+    // Social Events
+    const wicSocial = await Event.create({
+      organization_id: org1.organization_id,
+      event_name: `WiC Social Night - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 180 * 60000), // 3 hours
+      event_location: "Java's Café",
+      event_description: "A night of networking, games, and fun!",
+      event_type: "social",
+      semester_id: semester.semester_id,
+    });
+    
+    // Volunteer Events
+    const wicVolunteer = await Event.create({
+      organization_id: org1.organization_id,
+      event_name: `WiC Volunteer Day - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 240 * 60000), // 4 hours
+      event_location: "Local Community Center",
+      event_description: "Helping out at the community center with tech workshops.",
+      event_type: "volunteer",
+      semester_id: semester.semester_id,
+    });
+    
+    // ======= COMS EVENTS =======
+    // Workshops
+    const comsWorkshop = await Event.create({
+      organization_id: org2.organization_id,
+      event_name: `COMS Workshop: Resume Building - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 90 * 60000),
+      event_location: "GOL 2250",
+      event_description: "Learn how to craft a compelling resume with industry professionals.",
+      event_type: "workshop",
+      semester_id: semester.semester_id,
+    });
+    
+    // Fundraisers
+    const comsFundraiser = await Event.create({
+      organization_id: org2.organization_id,
+      event_name: `COMS Charity Fundraiser - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 180 * 60000),
+      event_location: "RIT Ballroom",
+      event_description: "A night of fundraising for a local cause with guest speakers.",
+      event_type: "fundraiser",
+      semester_id: semester.semester_id,
+    });
+    
+    // Committee Meetings
+    const comsCommittee = await Event.create({
+      organization_id: org2.organization_id,
+      event_name: `COMS Committee Brainstorming - ${semester.semester_name}`,
+      event_start: getRandomDateInSemester(semester),
+      event_end: new Date(new Date(getRandomDateInSemester(semester)).getTime() + 120 * 60000), // 2 hours
+      event_location: "GOL 3000",
+      event_description: "Collaborate and plan initiatives for the next semester.",
+      event_type: "committee",
+      semester_id: semester.semester_id,
+    });
+    
+    // Create attendance for each event
+    const allEvents = [
+      wicGeneralMeeting1, 
+      wicGeneralMeeting2, 
+      wicSocial, 
+      wicVolunteer,
+      comsWorkshop,
+      comsFundraiser,
+      comsCommittee
+    ];
+    
+    console.log(`Creating attendance records for ${semester.semester_name}`);
+    
+    for (const event of allEvents) {
+      // Determine how many members attended (between 3-7)
+      const numAttendees = Math.floor(Math.random() * 5) + 3;
+      
+      // Shuffle members list to get random attendees
+      const shuffledMembers = [...members].sort(() => 0.5 - Math.random());
+      const attendees = shuffledMembers.slice(0, numAttendees);
+      
+      // Create attendance records
+      for (const attendee of attendees) {
+        const checkInTime = new Date(event.event_start);
+        // Add random minutes (0-30) for check-in time variation
+        checkInTime.setMinutes(checkInTime.getMinutes() + Math.floor(Math.random() * 30));
+        
+        await Attendance.create({
+          member_id: attendee.member_id,
+          event_id: event.event_id,
+          check_in: checkInTime,
+          volunteer_hours: event.event_type === "volunteer" ? Math.floor(Math.random() * 4) + 1 : 0, // 1-4 hours for volunteer events
+        });
+      }
+    }
+  }
 
-  const event3 = await Event.create({
-    organization_id: org1.organization_id,
-    event_name: "WiC Social Night",
-    event_start: "2025-04-15 19:00:00",
-    event_end: "2025-04-15 22:00:00",
-    event_location: "Java's Café",
-    event_description: "A night of networking, games, and fun!",
-    event_type: "social",
-    semester_id: sem2.semester_id,
-  });
-  const event4 = await Event.create({
-    organization_id: org2.organization_id,
-    event_name: "COMS Workshop: Resume Building",
-    event_start: "2025-02-12 17:30:00",
-    event_end: "2025-02-12 19:00:00",
-    event_location: "GOL 2250",
-    event_description:
-      "Learn how to craft a compelling resume with industry professionals.",
-    event_type: "workshop",
-    semester_id: sem2.semester_id,
-  });
-  const event5 = await Event.create({
-    organization_id: org2.organization_id,
-    event_name: "COMS Charity Fundraiser",
-    event_start: "2025-03-20 18:00:00",
-    event_end: "2025-03-20 21:00:00",
-    event_location: "RIT Ballroom",
-    event_description:
-      "A night of fundraising for a local cause with guest speakers.",
-    event_type: "fundraiser",
-    semester_id: sem2.semester_id,
-  });
-  const event6 = await Event.create({
-    organization_id: org2.organization_id,
-    event_name: "COMS Committee Brainstorming",
-    event_start: "2025-04-10 16:00:00",
-    event_end: "2025-04-10 18:00:00",
-    event_location: "GOL 3000",
-    event_description:
-      "Collaborate and plan initiatives for the next semester.",
-    event_type: "committee",
-    semester_id: sem2.semester_id,
-  });
-
-  // Events
-  console.log("8. Adding Attendance");
-
-  // wic events
-  await Attendance.create({
-    member_id: member1.member_id,
-    event_id: event1.event_id,
-    check_in: "2025-02-05 18:01:00",
-  });
-  await Attendance.create({
-    member_id: member2.member_id,
-    event_id: event1.event_id,
-    check_in: "2025-02-05 18:02:00",
-  });
-
-  await Attendance.create({
-    member_id: member3.member_id,
-    event_id: event2.event_id,
-    check_in: "2025-03-10 12:00:00",
-  });
-  await Attendance.create({
-    member_id: member4.member_id,
-    event_id: event2.event_id,
-    check_in: "2025-03-10 10:01:00",
-  });
-
-  await Attendance.create({
-    member_id: member5.member_id,
-    event_id: event3.event_id,
-    check_in: "2025-04-15 19:01:00",
-  });
-  await Attendance.create({
-    member_id: member6.member_id,
-    event_id: event3.event_id,
-    check_in: "2025-04-15 20:00:00",
-  });
-  await Attendance.create({
-    member_id: member7.member_id,
-    event_id: event3.event_id,
-    check_in: "2025-04-15 21:00:00",
-  });
-
-  // coms events
-
-  await Attendance.create({
-    member_id: member1.member_id,
-    event_id: event4.event_id,
-    check_in: "2025-02-12 18:00:00",
-  });
-  await Attendance.create({
-    member_id: member2.member_id,
-    event_id: event4.event_id,
-    check_in: "2025-02-12 18:30:00",
-  });
-
-  await Attendance.create({
-    member_id: member3.member_id,
-    event_id: event5.event_id,
-    check_in: "2025-03-20 18:01:00",
-  });
-  await Attendance.create({
-    member_id: member4.member_id,
-    event_id: event5.event_id,
-    check_in: "2025-03-20 18:02:00",
-  });
-
-  await Attendance.create({
-    member_id: member5.member_id,
-    event_id: event6.event_id,
-    check_in: "2025-04-10 16:01:00",
-  });
-  await Attendance.create({
-    member_id: member6.member_id,
-    event_id: event6.event_id,
-    check_in: "2025-04-10 16:30:00",
-  });
-  await Attendance.create({
-    member_id: member7.member_id,
-    event_id: event6.event_id,
-    check_in: "2025-04-10 17:00:00",
-  });
+  // Adding more detailed event + attendance data for current semester (sem4) for better reporting
+  console.log("8. Adding additional detailed events for current semester");
+  
+  // Additional WiC events for current semester - USING VALID EVENT TYPES
+  const additionalWicEvents = [
+    {
+      event_name: "WiC Workshop: Git Basics",
+      event_type: "workshop", // This is a valid event type from the original script
+      event_location: "GOL 2400",
+      event_description: "Learn the basics of Git and GitHub for version control.",
+    },
+    {
+      event_name: "WiC Industry Talk", // Changed from "Panel" to "Talk"
+      event_type: "social", // Changed to a valid event type
+      event_location: "GOL Auditorium",
+      event_description: "Hear from women in tech about their career journeys.",
+    },
+    {
+      event_name: "WiC Technical Interview Prep",
+      event_type: "workshop", 
+      event_location: "GOL 1440",
+      event_description: "Practice technical interviews with peers and industry mentors.",
+    }
+  ];
+  
+  // Additional COMS events for current semester - USING VALID EVENT TYPES
+  const additionalComsEvents = [
+    {
+      event_name: "COMS Game Night",
+      event_type: "social",
+      event_location: "MAGIC Center",
+      event_description: "A fun night of video games and board games.",
+    },
+    {
+      event_name: "COMS Coding Competition", // Changed from "Hackathon"
+      event_type: "volunteer", // Changed to valid event type
+      event_location: "MAGIC Center",
+      event_description: "24-hour coding competition with prizes.",
+    },
+    {
+      event_name: "COMS Career Fair Prep",
+      event_type: "workshop",
+      event_location: "GOL 1440",
+      event_description: "Get ready for the career fair with resume reviews and mock interviews.",
+    }
+  ];
+  
+  // Add additional WiC events
+  for (const eventData of additionalWicEvents) {
+    const eventDate = getRandomDateInSemester(sem4);
+    const event = await Event.create({
+      organization_id: org1.organization_id,
+      event_name: eventData.event_name,
+      event_start: eventDate,
+      event_end: new Date(eventDate.getTime() + 120 * 60000), // 2 hours
+      event_location: eventData.event_location,
+      event_description: eventData.event_description,
+      event_type: eventData.event_type,
+      semester_id: sem4.semester_id,
+    });
+    
+    // Create attendance for each event (4-6 attendees)
+    const numAttendees = Math.floor(Math.random() * 3) + 4;
+    const shuffledMembers = [...members].sort(() => 0.5 - Math.random());
+    const attendees = shuffledMembers.slice(0, numAttendees);
+    
+    for (const attendee of attendees) {
+      const checkInTime = new Date(event.event_start);
+      checkInTime.setMinutes(checkInTime.getMinutes() + Math.floor(Math.random() * 30));
+      
+      await Attendance.create({
+        member_id: attendee.member_id,
+        event_id: event.event_id,
+        check_in: checkInTime,
+      });
+    }
+  }
+  
+  // Add additional COMS events
+  for (const eventData of additionalComsEvents) {
+    const eventDate = getRandomDateInSemester(sem4);
+    const event = await Event.create({
+      organization_id: org2.organization_id,
+      event_name: eventData.event_name,
+      event_start: eventDate,
+      event_end: new Date(eventDate.getTime() + 120 * 60000), // 2 hours
+      event_location: eventData.event_location,
+      event_description: eventData.event_description,
+      event_type: eventData.event_type,
+      semester_id: sem4.semester_id,
+    });
+    
+    // Create attendance for each event (4-6 attendees)
+    const numAttendees = Math.floor(Math.random() * 3) + 4;
+    const shuffledMembers = [...members].sort(() => 0.5 - Math.random());
+    const attendees = shuffledMembers.slice(0, numAttendees);
+    
+    for (const attendee of attendees) {
+      const checkInTime = new Date(event.event_start);
+      checkInTime.setMinutes(checkInTime.getMinutes() + Math.floor(Math.random() * 30));
+      
+      await Attendance.create({
+        member_id: attendee.member_id,
+        event_id: event.event_id,
+        check_in: checkInTime,
+      });
+    }
+  }
 
   // Finishing up
   console.log("\nFinishing up...");
   console.log("This may take a couple minutes...wait for the script to end");
+  console.log("Added test data across 4 semesters for both organizations");
+  console.log("Added total events: " + (7 * 4 + additionalWicEvents.length + additionalComsEvents.length));
 }
 
 (async () => {

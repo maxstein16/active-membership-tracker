@@ -33,7 +33,7 @@ export default function ReportsPage() {
       });
     })
     
-  }, []);
+  }, [orgId]);
 
   return (
     <PageSetup>

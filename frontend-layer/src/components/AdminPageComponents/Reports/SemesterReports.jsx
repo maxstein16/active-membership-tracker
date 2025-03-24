@@ -8,7 +8,7 @@ import CustomSelect from "../../CustomSelect";
 import DownloadReport from "./DownloadReport";
 import { CircularProgress } from "@mui/material";
 import BarGraphForYearSemReports from "./BarGraphForYearSemReports";
-import { getSemesterReportData, getAllSemesters, getSemesterReportDataById } from "../../../utils/handleSettingsData";
+import { getSemesterReportData, getAllSemestersAcrossYears, getSemesterReportDataById } from "../../../utils/handleSettingsData";
 import MemberTable from "../MemberTable";
 
 export default function SemesterReport({ orgId, color }) {
@@ -16,32 +16,51 @@ export default function SemesterReport({ orgId, color }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [semesterList, setSemesterList] = React.useState([]);
-  const [selectedSemester, setSelectedSemester] = React.useState(undefined);
+  const [selectedSemester, setSelectedSemester] = React.useState("");
 
   // Fetch all semesters from the database
   const fetchAllSemesters = React.useCallback(async () => {
     try {
-      const semesters = await getAllSemesters();
+      const semesters = await getAllSemestersAcrossYears();
       
-      if (semesters.session === false) {
-        // Handle session timeout
-        setError("Your session has expired. Please log in again.");
-        return;
-      }
-      
-      if (Array.isArray(semesters)) {
-        // Format semesters for dropdown: just "Year Semester" without academic_year
-        const formattedSemesters = semesters.map(sem => 
-          `${sem.semester_name}`  // Just use the semester_name which should already include the year
+      if (Array.isArray(semesters) && semesters.length > 0) {
+        const sortedSemesters = [...semesters].sort((a, b) => {
+          const yearA = parseInt(a.semester_name.split(' ')[0]);
+          const yearB = parseInt(b.semester_name.split(' ')[0]);
+          
+          if (yearB !== yearA) {
+            return yearB - yearA;
+          }
+          
+          const semA = a.semester_name.split(' ')[1];
+          const semB = b.semester_name.split(' ')[1];
+          
+          if (semA === 'FALL' && semB === 'SPRING') {
+            return -1;
+          } else if (semA === 'SPRING' && semB === 'FALL') {
+            return 1;
+          }
+          
+          return 0;
+        });
+        
+        const formattedSemesters = sortedSemesters.map(sem => 
+          `${sem.semester_name}`
         );
         
         setSemesterList(formattedSemesters);
+        
+        if (!selectedSemester && formattedSemesters.length > 0) {
+          setSelectedSemester(formattedSemesters[0]);
+        }
+      } else {
+        setError("No semesters found in the system.");
       }
     } catch (err) {
       console.error("Error fetching semesters:", err);
       setError("Failed to load semester options. Please try again later.");
     }
-  }, []);
+  }, [selectedSemester]);
 
   const fetchSemesterReport = React.useCallback(async () => {
     setIsLoading(true);
@@ -85,8 +104,9 @@ export default function SemesterReport({ orgId, color }) {
       
       setReportData(formattedData);
       
-      // Set the current semester name (without academic year) as selected
-      setSelectedSemester(data.semester_name);
+      if (data.semester_name && (!selectedSemester || selectedSemester === "")) {
+        setSelectedSemester(data.semester_name);
+      }
       
     } catch (err) {
       console.error("Error fetching semester report:", err);
@@ -94,34 +114,34 @@ export default function SemesterReport({ orgId, color }) {
     } finally {
       setIsLoading(false);
     }
-  }, [orgId]);
+  }, [orgId, selectedSemester]);
 
-  // Function to fetch semester report data for a specific semester
   const fetchSemesterReportBySemester = React.useCallback(async (selectedSemesterValue) => {
+    if (!selectedSemesterValue) {
+      console.error("No semester selected for report fetch");
+      return;
+    }
+    
     setIsLoading(true);
     try {
-      // Get all semesters
-      const allSemesters = await getAllSemesters();
+      const allSemesters = await getAllSemestersAcrossYears();
       
-      // Find the semester that matches the selected name
-      const selectedSemester = allSemesters.find(sem => 
+      const selectedSemInfo = allSemesters.find(sem => 
         sem.semester_name === selectedSemesterValue
       );
       
-      if (!selectedSemester || !selectedSemester.semester_id) {
+      if (!selectedSemInfo || !selectedSemInfo.semester_id) {
         throw new Error(`Could not find semester: ${selectedSemesterValue}`);
       }
       
-      // Use the semester ID to get the report using the new function
-      const data = await getSemesterReportDataById(orgId, selectedSemester.semester_id);
+      const data = await getSemesterReportDataById(orgId, selectedSemInfo.semester_id);
       
       if (!data) {
         throw new Error("Failed to fetch semester report data");
       }
       
-      // Format data for the component
       const formattedData = {
-        currentYear: selectedSemester.academic_year,
+        currentYear: selectedSemInfo.academic_year,
         currentSemesterStart: data.semester_start_date || '',
         currentSemesterEnd: data.semester_end_date || '',
         memberDataThis: {
@@ -162,20 +182,30 @@ export default function SemesterReport({ orgId, color }) {
   }, [orgId]);
 
   const handleSemesterChange = (value) => {
-    setSelectedSemester(value);
-    fetchSemesterReportBySemester(value);
+    if (value && value !== selectedSemester) {
+      setSelectedSemester(value);
+      fetchSemesterReportBySemester(value);
+    }
   };
 
   // Load initial data on component mount
   React.useEffect(() => {
-    // Fetch both semesters list and current semester report
-    Promise.all([fetchAllSemesters(), fetchSemesterReport()])
-      .catch(err => {
-        console.error("Error during initial data loading:", err);
-        setError("Failed to initialize semester report. Please try again later.");
-        setIsLoading(false);
-      });
-  }, [fetchAllSemesters, fetchSemesterReport]);
+    const loadData = async () => {
+      setIsLoading(true);
+      await fetchAllSemesters();
+      
+      if (!reportData) {
+        await fetchSemesterReport();
+      }
+      setIsLoading(false);
+    };
+    
+    loadData().catch(err => {
+      console.error("Error during initial data loading:", err);
+      setError("Failed to initialize semester report. Please try again later.");
+      setIsLoading(false);
+    });
+  }, [fetchAllSemesters, fetchSemesterReport, reportData]);
 
   if (isLoading) {
     return (
@@ -194,13 +224,15 @@ export default function SemesterReport({ orgId, color }) {
       <h2>Semester Report</h2>
 
       <div className="report-pick-and-download">
-        <CustomSelect
-          label="Semester"
-          color={color}
-          options={semesterList}
-          startingValue={selectedSemester}
-          onSelect={handleSemesterChange}
-        />
+        {semesterList.length > 0 && (
+          <CustomSelect
+            label="Semester"
+            color={color}
+            options={semesterList}
+            startingValue={selectedSemester || semesterList[0]}
+            onSelect={handleSemesterChange}
+          />
+        )}
         <DownloadReport 
           color={color} 
           orgId={orgId} 
