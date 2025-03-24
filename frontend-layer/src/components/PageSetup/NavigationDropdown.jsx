@@ -24,7 +24,7 @@ export default function NavigationDropdown() {
       // set user data
       if (!result || result.hasOwnProperty("error")) {
         setError(displayErrors.errorFetchingContactSupport);
-        return
+        return;
       }
 
       // temp data
@@ -33,26 +33,41 @@ export default function NavigationDropdown() {
         organizations: [],
       };
 
-      // if a user is an admin of any org
+      const uniqueOrgs = new Map();
+      
       let isAdminOfOneOrg = false;
 
       result.data.memberships.forEach((membership) => {
-        if (membership.membership_role === ROLE_ADMIN) {
-          isAdminOfOneOrg = true;
+        const orgId = membership.organization.organization_id;
+        
+        if (!uniqueOrgs.has(orgId) || 
+            (membership.membership_role === ROLE_ADMIN && uniqueOrgs.get(orgId).role !== ROLE_ADMIN)) {
+          
+          if (membership.membership_role === ROLE_ADMIN) {
+            isAdminOfOneOrg = true;
+          }
+          
+          uniqueOrgs.set(orgId, {
+            id: orgId,
+            abbreviation: membership.organization.organization_abbreviation,
+            color: membership.organization.organization_color,
+            role: membership.membership_role,
+          });
         }
-        newData.organizations.push({
-          id: membership.organization.organization_id,
-          abbreviation: membership.organization.organization_abbreviation,
-          color: membership.organization.organization_color,
-          role: membership.membership_role,
-        });
       });
 
-      // set the state variables
+      newData.organizations = Array.from(uniqueOrgs.values());
+
       setUserData(newData);
       setUserIsAdmin(isAdminOfOneOrg);
     });
   }, []);
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
 
   return (
     <div
@@ -91,9 +106,9 @@ export default function NavigationDropdown() {
           <div>
             <Link to="/">Dashboard</Link>
             <Link to="/profile">Profile</Link>
+            <Link to="/logout" onClick={handleLogout} className="logout-link">Log out</Link>
           </div>
 
-          {/* TODO: If they are a admin */}
           {userIsAdmin ? (
             <div>
               <Link to="/createOrg">Create an Organization</Link>
