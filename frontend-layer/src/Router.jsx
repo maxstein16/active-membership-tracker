@@ -17,6 +17,7 @@ import ReportsPage from "./pages/AdminEboardPages/ReportsPage.jsx";
 import CreateOrganizationPage from "./pages/AdminEboardPages/CreateOrganizationPage.jsx";
 import OrganizationStatusPage from "./pages/MemberPages/OrganizationStatusPage.jsx";
 import GrantPrivilegePage from "./pages/AdminEboardPages/GrantPrivilegePage.jsx";
+import EventsPage from "./pages/EventsPage.jsx";
 
 export const Router = () => {
   // all the pages you can navigate to
@@ -42,6 +43,10 @@ export const Router = () => {
       element: <OrganizationStatusPage />,
     },
     {
+      path: ":orgId/events",
+      element: <EventsPage />,
+    },
+    {
       path: "/:orgId/settings",
       element: <SettingsPage />,
     },
@@ -61,7 +66,7 @@ export const Router = () => {
 
   return (
     <RouterProvider router={router}>
-        <DashboardPage />
+      <DashboardPage />
     </RouterProvider>
   );
 };

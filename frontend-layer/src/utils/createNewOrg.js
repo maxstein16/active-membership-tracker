@@ -13,27 +13,36 @@ export async function createNewOrgInDB(orgData) {
     return check;
   }
 
-  let numberThreshold = 0
+  let numberThreshold = 0;
   try {
-    numberThreshold = parseInt(orgData.threshold)
+    numberThreshold = parseInt(orgData.threshold);
   } catch (error) {
-    return displayErrors.thresholdMustBeNumber
+    return displayErrors.thresholdMustBeNumber;
   }
- 
 
   // add org basic details to db + create default email settings
   const newOrg = await getAPIData("/organization", API_METHODS.post, {
     organization_name: orgData.name,
     organization_abbreviation: orgData.abbreviation,
-    organization_desc: orgData.description,
+    organization_description: orgData.description,
+    organization_email: orgData.email,
     organization_color: orgData.color,
-    active_membership_threshold: numberThreshold,
+    organization_threshold: numberThreshold,
+    organization_membership_type: orgData.isPointBased
+      ? "points"
+      : "attendance",
   });
 
-  
   if (!newOrg) {
-    console.log("must login", newOrg)
+    console.log("must login", newOrg);
     return displayErrors.noSession;
+  }
+
+  if (
+    newOrg.hasOwnProperty("error") &&
+    newOrg.error === "Invalid contact email format."
+  ) {
+    return "Please put a real email";
   }
 
   if (newOrg.hasOwnProperty("error")) {
@@ -57,7 +66,7 @@ export async function createNewOrgInDB(orgData) {
   );
 
   if (!result) {
-    console.log("must login", result)
+    console.log("must login", result);
     return displayErrors.noSession;
   }
   if (result.hasOwnProperty("error")) {
@@ -65,23 +74,35 @@ export async function createNewOrgInDB(orgData) {
     return displayErrors.somethingWentWrong;
   }
 
-
   // add membership requirements
-  await orgData.membershipRequirements.forEach(async (requirement) => {
+  orgData.membershipRequirements.forEach(async (requirement) => {
     const newRequirement = await getAPIData(
       `/organization/${newOrgId}/settings/membership-requirements`,
       API_METHODS.post,
       {
-        meeting_type: requirement.meetingType,
-        frequency: requirement.frequency,
-        amount_type: requirement.amountType,
-        amount: requirement.amount,
+        event_type: requirement.eventType,
+        requirement_type: orgData.isPointBased ? "points" : "attendance_count",
+        requirement_value: requirement.value,
       }
     );
 
     if (!newRequirement || newRequirement.hasOwnProperty("error")) {
-        console.log("Something went wrong saving membership requirements: ", newRequirement)
-      return displayErrors.somethingWentWrong;
+      console.log(
+        "Something went wrong saving membership requirements: ",
+        newRequirement
+      );
+    } else {
+      requirement.bonuses.forEach(async (bonus) => {
+        await getAPIData(
+          `/organization/${newOrgId}/settings/membership-requirements/bonuses`,
+          API_METHODS.post,
+          {
+            threshold_percentage: bonus.threshold,
+            bonus_points: bonus.points,
+            requirement_id: newRequirement.data.requirement_id,
+          }
+        );
+      });
     }
   });
 
@@ -100,13 +121,37 @@ function checkData(orgData) {
   });
 
   // if they are missing fields return error
-  if (missingFields.length > 1) {
+  if (missingFields.length > 0) {
     return `Missing ${missingFields.join(", ")}`;
   }
 
   // check if there is at least one membership req
   if (orgData.membershipRequirements.length < 1) {
     return "Must have at least one membership requirement";
+  }
+
+  // check if number fields have numbers
+  let needsNumber = [];
+  if (isNaN(orgData.threshold)) {
+    needsNumber.push("Active Membership Threshold");
+  }
+
+  orgData.membershipRequirements.forEach((requirement, index) => {
+    if (isNaN(requirement.value)) {
+      needsNumber.push(`Requirement #${index + 1} value`);
+    }
+    requirement.bonuses.forEach((bonus, bindex) => {
+      if (isNaN(bonus.points)) {
+        needsNumber.push(`Requirement ${index}'s Bonus #${bindex + 1} points`);
+      }
+      if (isNaN(bonus.threshold)) {
+        needsNumber.push(`Requirement ${index}'s Bonus #${bindex + 1} amount`);
+      }
+    });
+  });
+
+  if (needsNumber.length > 0) {
+    return `These fields must have numerical values: ${needsNumber.join(", ")}`;
   }
 
   return null;

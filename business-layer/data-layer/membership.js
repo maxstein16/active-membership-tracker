@@ -1,4 +1,4 @@
-const { Membership } = require("../db");
+const { Membership, Member, MembershipRequirement } = require("../db");
 
 /**
  * Create a membership record
@@ -8,6 +8,7 @@ const { Membership } = require("../db");
 const createMembership = async (membershipData) => {
   try {
     const membership = await Membership.create(membershipData);
+    console.log("membership successfully created")
     return membership;
   } catch (err) {
     console.error("Error creating membership:", err);
@@ -64,20 +65,12 @@ const editMembershipRole = async (membershipId, newRole) => {
  * @returns {Promise<Object[]>} An array of matching membership objects (empty if no matches found)
  */
 const getMembershipsByAttributes = async (filters) => {
+
   try {
     const memberships = await Membership.findAll({
       where: filters
     });
 
-    if (memberships.length === 0) {
-      console.log("No memberships found matching the given criteria.");
-      return [];
-    }
-
-    // console.log(
-    //   "Memberships found:",
-    //   memberships.map(m => m.toJSON())
-    // );
     return memberships;
   } catch (err) {
     console.error("Error fetching memberships by attributes:", err);
@@ -91,6 +84,7 @@ const getMembershipsByAttributes = async (filters) => {
  * @returns {Promise<Object|null>} The membership object if found, otherwise null
  */
 const getMembershipByAttributes = async (filters) => {
+
   try {
     const membership = await Membership.findOne({
       where: filters
@@ -112,7 +106,7 @@ const getMembershipByAttributes = async (filters) => {
 async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   try {
     const memberships = await Membership.findAll({
-      where: { 
+      where: {
         organization_id: orgId,
         semester_id: semesterIds
       },
@@ -121,7 +115,7 @@ async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
         required: true
       }]
     });
-    
+
     return memberships;
   } catch (err) {
     console.error("Error in getMembershipsByOrgAndSemester:", err);
@@ -129,11 +123,27 @@ async function getMembershipsByOrgAndSemester(orgId, semesterIds) {
   }
 }
 
-module.exports = { 
-  createMembership, 
-  editMembership, 
+async function deleteMembershipRequirement(requirementId) {
+  try {
+    const results = await MembershipRequirement.destroy({
+      where: {
+        requirement_id: requirementId
+      }
+    });
+
+    return results;
+  } catch (err) {
+    console.error("Error in getMembershipsByOrgAndSemester:", err);
+    throw err;
+  }
+}
+
+module.exports = {
+  createMembership,
+  editMembership,
   editMembershipRole,
   getMembershipsByAttributes,
   getMembershipByAttributes,
-  getMembershipsByOrgAndSemester
+  getMembershipsByOrgAndSemester,
+  deleteMembershipRequirement
 };

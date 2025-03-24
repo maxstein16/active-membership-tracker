@@ -6,43 +6,47 @@ import "../../../assets/css/memberPages.css";
 
 import { BarChart } from "@mui/x-charts/BarChart";
 
+const ensureNumber = (value) => {
+  return typeof value === 'number' && !isNaN(value) && isFinite(value) ? value : 0;
+};
+
 export default function BarGraphForYearSemReports({ color, data, isYearly }) {
-  let dataForMeetingsThis = Object.values(data.meetingsDataThis);
-  dataForMeetingsThis.pop();
-  let dataForMeetingsLast = Object.values(data.meetingsDataLast);
-  dataForMeetingsLast.pop();
+  if (!data || !data.memberDataThis || !data.memberDataLast || 
+      !data.meetingsDataThis || !data.meetingsDataLast) {
+    console.error("Invalid data structure for bar chart:", data);
+    return <div className="error-message">Unable to display chart: invalid data format</div>;
+  }
 
-  const timeframeName = isYearly ? "year" : "semester"
+  const thisMemberData = [
+    ensureNumber(data.memberDataThis.totalMembers),
+    ensureNumber(data.memberDataThis.newMembers),
+    ensureNumber(data.memberDataThis.totalActive_members),
+    ensureNumber(data.memberDataThis.newActive_members)
+  ];
+  
+  const lastMemberData = [
+    ensureNumber(data.memberDataLast.totalMembers),
+    ensureNumber(data.memberDataLast.newMembers),
+    ensureNumber(data.memberDataLast.totalActiveMembers || data.memberDataLast.totalActive_members),
+    ensureNumber(data.memberDataLast.newActiveMembers || data.memberDataLast.newActive_members)
+  ];
 
-  // Report Data
-  //   {
-  //       current: current, // must be a number
-  //       memberDataThis: {
-  //         totalMembers: 35,
-  //         newMembers: 4,
-  //         totalActive_members: 16,
-  //         newActive_members: 6,
-  //         members: [],
-  //       },
-  //       memberDataLast: {
-  //         totalMembers: 35,
-  //         newMembers: 4,
-  //         totalActiveMembers: 16,
-  //         newActiveMembers: 6,
-  //       },
-  //       meetingsDataThis: {
-  //         numMeetings: 35,
-  //         numEvents: 329,
-  //         numVolunteering: 23,
-  //         totalAttendance: 3294,
-  //       },
-  //       meetingsDataLast: {
-  //         numMeetings: 24,
-  //         numEvents: 234,
-  //         numVolunteering: 12,
-  //         totalAttendance: 2345,
-  //       },
-  //     }
+  const thisMeetingsData = [
+    ensureNumber(data.meetingsDataThis.numMeetings),
+    ensureNumber(data.meetingsDataThis.numEvents),
+    ensureNumber(data.meetingsDataThis.numVolunteering)
+  ];
+  
+  const lastMeetingsData = [
+    ensureNumber(data.meetingsDataLast.numMeetings),
+    ensureNumber(data.meetingsDataLast.numEvents),
+    ensureNumber(data.meetingsDataLast.numVolunteering)
+  ];
+
+  const thisAttendance = ensureNumber(data.meetingsDataThis.totalAttendance);
+  const lastAttendance = ensureNumber(data.meetingsDataLast.totalAttendance);
+
+  const timeframeName = isYearly ? "year" : "semester";
 
   return (
     <div>
@@ -51,8 +55,8 @@ export default function BarGraphForYearSemReports({ color, data, isYearly }) {
       </p>
       <BarChart
         series={[
-          { data: Object.values(data.memberDataThis), color: color },
-          { data: Object.values(data.memberDataLast), color: "#D0D3D4" },
+          { data: thisMemberData, color: color },
+          { data: lastMemberData, color: "#D0D3D4" },
         ]}
         height={300}
         xAxis={[
@@ -75,8 +79,8 @@ export default function BarGraphForYearSemReports({ color, data, isYearly }) {
       </p>
       <BarChart
         series={[
-          { data: dataForMeetingsLast, color: color },
-          { data: dataForMeetingsLast, color: "#D0D3D4" },
+          { data: thisMeetingsData, color: color },
+          { data: lastMeetingsData, color: "#D0D3D4" },
         ]}
         height={300}
         xAxis={[
@@ -98,11 +102,8 @@ export default function BarGraphForYearSemReports({ color, data, isYearly }) {
       </p>
       <BarChart
         series={[
-          { data: [data.meetingsDataThis.totalAttendance], color: color },
-          {
-            data: [data.meetingsDataLast.totalAttendance],
-            color: "#D0D3D4",
-          },
+          { data: [thisAttendance], color: color },
+          { data: [lastAttendance], color: "#D0D3D4" },
         ]}
         height={300}
         xAxis={[

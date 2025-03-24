@@ -104,3 +104,73 @@
     color: var(--dark-grey);
     font-style: italic;
 }
+    
+/**used for Organization Status Page **/
+
+/* Events */
+.rbc-toolbar span button {
+    background-color: var(--org-color-light, --orange);
+    color: black;
+    border-radius: 0;
+    border: none;
+    margin: 0 0.5em;
+
+    font-family: "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
+    font-size: 0.9em;
+}
+
+.rbc-toolbar button.rbc-active {
+    box-shadow: none !important;
+}
+
+.rbc-toolbar span {
+    margin-bottom: 1em;
+}
+
+.rbc-event {
+    background-color: var(--org-color, --orange) !important;
+    border-radius: 0 !important;
+    padding: 0.5em !important;
+}
+
+.rbc-today {
+    background-color: var(--org-color-light-2, --orange) !important;
+}
+
+.rbc-month-view, .rbc-time-view {
+    border-color: var(--white) !important;
+}
+
+.rbc-month-header .rbc-header {
+    padding: 1em !important;
+    border-color: var(--white) !important;
+}
+
+.rbc-button-link:hover {
+    border: none !important;
+    background-color: var(--white) !important;
+    color: var(--medium-grey) !important;
+}
+
+.event-info-popup-buttons {
+    display: flex;
+    margin-bottom: -1em;
+}    
+
+/**used for Organization Status Page**/
+.member-progress-chart-page{ 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: '100%';
+    gap: '10%';
+    margin-left: '10%';
+    margin-right: '10%';
+}
+
+/**used for Organization Status Page (mobile edition)**/
+.member-progress-chart-page-mobile {
+    display: grid;
+    gap: '6%';
+    grid-template-columns: 1fr;
+    width: 100%;
+     }

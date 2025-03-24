@@ -10,7 +10,35 @@ const business = new BusinessLogic();
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
 
-const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware");
+const {
+  isAuthorizedHasSessionForAPI,
+  isAdminOrEboardForOrg,
+} = require("../sessionMiddleware");
+
+const { Member } = require("../../db");
+
+
+router.get(
+  "/all",
+  isAuthorizedHasSessionForAPI,
+  async function (req, res) {
+    
+    // Fetch member stats for the organization
+    const result = await business.getAllMembersFromDB();
+
+    if (result.error) {
+      return res.status(404).json({
+        error: result.error
+      });
+    }
+
+    // Return successful response
+    return res.status(200).json({
+      status: "Success",
+      data: result
+    });
+  }
+);
 
 // GET /v1/member/:memberId
 router.get(
@@ -18,6 +46,7 @@ router.get(
   isAuthorizedHasSessionForAPI,
   async function (req, res) {
     // check if memberId is provided
+
     if (!req.params.memberId) {
       res.status(400).json({ error: error.mustIncludeMemberId });
       return;
@@ -44,10 +73,36 @@ router.get(
   }
 );
 
+
 // Handle GET requests without memberId
-router.get("/", (req, res) => {
-  res.status(400).json({ error: error.mustIncludeMemberId });
+router.get("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+
+  // Fetch member ID using the function
+  let memberId = await business.getMemberIDByUsername(req.session.user.username);
+
+  // Check if an error occurred while fetching member ID
+  if (memberId.error) {
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
+
+  // console.log("Session user username is " + req.session.user.username);
+  // console.log("Member ID is " + memberId.data); // Accessing the member ID from the 'data' field
+  // console.log("Member ID w no .data is " + memberId); // Accessing the member ID from the 'data' field
+
+  // Fetch member data using the ID
+  const memberData = await business.getMemberById(memberId.data);
+
+  // Check if an error occurred while fetching member data
+  if (memberData.error && memberData.error !== error.noError) {
+    res.status(404).json({ error: error.memberCannotBeFoundInDB });
+    return;
+  }
+
+  // Return member data
+  res.status(200).json({ data: memberData.data });
 });
+
 
 // PUT /v1/member/:memberId
 router.put(
@@ -73,6 +128,7 @@ router.put(
       "tshirt_size",
       "major",
       "graduation_date",
+      "status",
     ];
     const hasValidFields = Object.keys(body).some((key) =>
       allowedFields.includes(key)
@@ -97,12 +153,55 @@ router.put(
   }
 );
 
-router.put("/", (req, res) => {
-  res.status(400).json({ error: error.mustIncludeMemberId });
+// PUT-UPDATE/v1/member
+router.put("/", isAuthorizedHasSessionForAPI, async (req, res) => {
+  let body = req.body;
+  let memberId = await business.getMemberIDByUsername(req.session.user.username);
+
+  // Check if an error occurred while fetching member ID
+  if (!memberId || memberId.error) {
+    console.log("memberRoute says an error occurred while fetching member ID")
+    res.status(404).json({ error: memberId.error });
+    return;
+  }
+  // check if at least one valid field is provided for update
+  const allowedFields = [
+    "personal_email",
+    "phone_number",
+    "major",
+    "graduation_date",
+    "race",
+    "gender",
+    "tshirt_size",
+    "status",
+  ];
+
+  const hasValidFields = Object.keys(body).some((key) =>
+    allowedFields.includes(key)
+  );
+
+  if (!hasValidFields) {
+    console.log("memberRoute says you dont have valid fields")
+    res.status(400).json({
+      error: error.mustIncludeValidFieldAddMember,
+    });
+    return;
+  }
+  // send data to backend for update
+  const updateResult = await business.updateMember(memberId.data, body);
+
+
+  if (updateResult.error && updateResult.error !== error.noError) {
+    res.status(404).json({ error: updateResult.error });
+    return;
+  }
+
+  res.status(200).json({ data: updateResult.data });
+
 });
 
 // POST /v1/member
-router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
+router.post("/", isAdminOrEboardForOrg, async function (req, res) {
   let body = req.body;
 
   // validate required fields
@@ -116,6 +215,7 @@ router.post("/", isAuthorizedHasSessionForAPI, async function (req, res) {
     "major",
     "gender",
     "race",
+    "status",
   ];
 
   const missingFields = requiredFields.filter(
@@ -151,40 +251,42 @@ router.get(
     // Immediately check for orgId query parameter
     if (!req.query.orgId) {
       return res.status(400).json({
-        error: error.mustIncludeOrgId
+        error: error.mustIncludeOrgId,
       });
     }
 
     // Rest of the validation and processing
     let memberId = sanitizer.sanitize(req.params.memberId);
-    let orgId = sanitizer.sanitize(req.query.orgId);
+    var orgId = sanitizer.sanitize(req.query.orgId);
 
-    // Validate member ID
     if (isNaN(memberId)) {
       return res.status(400).json({
-        error: error.mustIncludeValidMemberId
+        error: error.mustIncludeValidMemberId,
       });
     }
 
     // Validate organization ID
     if (isNaN(orgId)) {
       return res.status(400).json({
-        error: error.mustIncludeValidOrgId
+        error: error.mustIncludeValidOrgId,
       });
     }
 
     // Fetch member stats for the organization
-    const memberStats = await business.getSpecificMemberOrgStats(memberId, orgId);
+    const memberStats = await business.getSpecificMemberOrgStats(
+      memberId,
+      orgId
+    );
 
     if (memberStats.error) {
       return res.status(404).json({
-        error: memberStats.error
+        error: memberStats.error,
       });
     }
 
     // Return successful response
     return res.status(200).json({
-      data: memberStats
+      data: memberStats,
     });
   }
 );

@@ -3,9 +3,10 @@ const error = new Error();
 const { sendEmail } = require("../service-layer/emailService");
 const { activeMembershipEmail } = require("./public/emailTemplates");
 
-const { getMemberById, getMembersByAttributes, updateMember, createMember } = require("../data-layer/member.js");
+const { getMemberById, getMembersByAttributes, updateMember, createMember, getAllMembers } = require("../data-layer/member.js");
 const { getOrganizationById } = require("../data-layer/organization.js");
 const { getMembershipsByAttributes } = require("../data-layer/membership.js");
+const { Member } = require("../db");
 
 /**
  * Retrieves a member by their ID, including their memberships.
@@ -13,20 +14,25 @@ const { getMembershipsByAttributes } = require("../data-layer/membership.js");
  * @returns {Promise<object>} The member object if found, otherwise an error.
  */
 async function getMemberByIdInDB(memberId) {
+
+    console.log("memberProcessing says getMemberByIdInDB memberID WOUT .data is: " + memberId)
+
+
     if (isNaN(memberId)) {
+        console.log("memberId is not a number man")
         return { error: error.memberIdMustBeInteger, data: null };
     }
 
     try {
         const member = await getMemberById(memberId);
-        
+
         if (!member) {
             return { error: error.memberNotFound, data: null };
         }
 
         // Get all memberships for this member
         const memberships = await getMembershipsByAttributes({ member_id: memberId });
-        
+
         // Get organization details for each membership
         const membershipDetails = await Promise.all(
             memberships.map(async (membership) => {
@@ -55,6 +61,7 @@ async function getMemberByIdInDB(memberId) {
  * @returns {Promise<object>} The updated member object or an error.
  */
 async function updateMemberInDB(memberId, memberData) {
+
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger, data: null };
     }
@@ -72,6 +79,7 @@ async function updateMemberInDB(memberId, memberData) {
             member_tshirt_size: memberData.tshirt_size,
             member_major: memberData.major,
             member_graduation_date: memberData.graduation_date,
+            member_status: memberData.status
         };
 
         // Remove undefined fields
@@ -81,14 +89,13 @@ async function updateMemberInDB(memberId, memberData) {
 
         const updated = await updateMember(memberId, updateFields);
         if (!updated) {
-            return { error: error.memberNotFound, data: null };
+            return { error: error.nothingUpdated, data: null };
         }
 
         // Fetch updated member data
         const updatedMember = await getMemberById(memberId);
         return { error: null, data: updatedMember.toJSON() };
     } catch (err) {
-        console.error("Error updating member:", err);
         return { error: error.somethingWentWrong, data: null };
     }
 }
@@ -126,10 +133,29 @@ async function createMemberInDB(memberData) {
         const newMember = await createMember(mappedFields);
         return { error: null, data: newMember.toJSON() };
     } catch (err) {
-        console.error("Error creating member:", err);
         return { error: error.memberCanNotBeAddedToOrg, data: null };
     }
 }
+
+async function getMemberIDByUsernameInDB(username) {
+    try {
+        // Find member by email
+        const memberInfo = await Member.findOne({
+            where: { member_email: username },
+            raw: true,
+        });
+
+        // If no member is found, return an error
+        if (!memberInfo) {
+            return { error: "Member by username not found", data: null };
+        }
+        // Return member ID
+        return { error: null, data: memberInfo.member_id };
+    } catch (err) {
+        return { error: "Something went wrong", data: null };
+    }
+}
+
 
 /**
  * Retrieves a member's stats within a specific organization.
@@ -138,6 +164,7 @@ async function createMemberInDB(memberData) {
  * @returns {Promise<object>} Member's organizational stats or an error.
  */
 async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
+
     if (isNaN(memberId)) {
         return { error: error.memberIdMustBeInteger };
     }
@@ -150,6 +177,7 @@ async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
             member_id: memberId,
             organization_id: orgId
         });
+
 
         if (!memberships || memberships.length === 0) {
             return { error: error.membershipNotFound };
@@ -185,9 +213,22 @@ async function getSpecificMemberOrgStatsInDB(memberId, orgId) {
     }
 }
 
+async function getAllMembersPlease() {
+    
+    try {
+        const members = await getAllMembers()
+        return {data: members}
+    } catch {
+        return error.databaseError
+    }
+    
+}
+
 module.exports = {
     getMemberByIdInDB,
     updateMemberInDB,
     createMemberInDB,
-    getSpecificMemberOrgStatsInDB
+    getMemberIDByUsernameInDB,
+    getSpecificMemberOrgStatsInDB,
+    getAllMembersPlease
 };
