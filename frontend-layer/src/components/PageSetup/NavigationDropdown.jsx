@@ -34,19 +34,21 @@ export default function NavigationDropdown() {
       };
 
       const uniqueOrgs = new Map();
-      
+
       let isAdminOfOneOrg = false;
 
       result.data.memberships.forEach((membership) => {
         const orgId = membership.organization.organization_id;
-        
-        if (!uniqueOrgs.has(orgId) || 
-            (membership.membership_role === ROLE_ADMIN && uniqueOrgs.get(orgId).role !== ROLE_ADMIN)) {
-          
+
+        if (
+          !uniqueOrgs.has(orgId) ||
+          (membership.membership_role === ROLE_ADMIN &&
+            uniqueOrgs.get(orgId).role !== ROLE_ADMIN)
+        ) {
           if (membership.membership_role === ROLE_ADMIN) {
             isAdminOfOneOrg = true;
           }
-          
+
           uniqueOrgs.set(orgId, {
             id: orgId,
             abbreviation: membership.organization.organization_abbreviation,
@@ -65,8 +67,8 @@ export default function NavigationDropdown() {
 
   const handleLogout = (e) => {
     e.preventDefault();
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   return (
@@ -86,7 +88,18 @@ export default function NavigationDropdown() {
           <div>
             {userData.organizations.map((org, index) => {
               if (org.role === ROLE_MEMBER) {
-                return <Link to={`/${org.id}/status`} key={index}>{org.abbreviation}</Link>;
+                return (
+                  <div key={index}>
+                    <Link to={`/${org.id}/status`}>{org.abbreviation}</Link>
+                    <Link className="sub-link" to={`/${org.id}/events`}>
+                      Events
+                    </Link>
+                  </div>
+                );
+              } else if (userData.organizations.length > 3) {
+                return <div key={index}>
+                <Link to={`/${org.id}/status`}>{org.abbreviation}</Link>
+              </div>
               } else {
                 return (
                   <div key={index}>
@@ -97,6 +110,9 @@ export default function NavigationDropdown() {
                     <Link className="sub-link" to={`/${org.id}/reports`}>
                       Reports
                     </Link>
+                    <Link className="sub-link" to={`/${org.id}/events`}>
+                      Events
+                    </Link>
                   </div>
                 );
               }
@@ -106,7 +122,9 @@ export default function NavigationDropdown() {
           <div>
             <Link to="/">Dashboard</Link>
             <Link to="/profile">Profile</Link>
-            <Link to="/logout" onClick={handleLogout} className="logout-link">Log out</Link>
+            <Link to="/logout" onClick={handleLogout} className="logout-link">
+              Log out
+            </Link>
           </div>
 
           {userIsAdmin ? (
