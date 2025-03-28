@@ -66,7 +66,10 @@ function mapToAttendanceData(eventId, memberId) {
  * @returns {Promise<Object>} Processing results
  */
 class CSVProcessor {
+
   async processCSV(filePath, eventId, orgId) {
+    console.log("CSV Processor achieved");
+
     return new Promise((resolve, reject) => {
       const results = [];
       const promises = [];
