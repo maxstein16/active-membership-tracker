@@ -168,6 +168,7 @@ async function getSpecificOrgDataInDB(orgId) {
  * @returns {Promise<Object>} - Returns error and new organization data.
  */
 async function createOrganizationInDB(orgData, memberId) {
+
   const validationError = validateOrgFields(orgData);
   if (validationError) {
     return { error: validationError, data: null };
@@ -176,7 +177,7 @@ async function createOrganizationInDB(orgData, memberId) {
   try {
     const newOrganization = await createOrganization({
       organization_name: orgData.organization_name,
-      organization_description: orgData.organization_desc,
+      organization_description: orgData.organization_description,
       organization_color: orgData.organization_color,
       organization_abbreviation: orgData.organization_abbreviation,
       organization_threshold: orgData.organization_threshold,
@@ -195,7 +196,6 @@ async function createOrganizationInDB(orgData, memberId) {
       organization_id: newOrganization.organization_id,
       semester_id: currentSemester.semester_id,
     });
-    console.log(membership.dataValues);
 
     if (!membership) {
       return { error: error.couldNotCreateMembership, data: null };
