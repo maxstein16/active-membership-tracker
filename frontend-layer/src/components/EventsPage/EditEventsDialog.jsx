@@ -165,6 +165,10 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             value={start}
             setValue={setStart}
             onLeaveField={(newValue) => {
+              if (newValue > end) {
+                setError("Start date can not be after the end date")
+                return;
+              }
               updateInDBifEdit(newValue, "event_start");
             }}
           />
@@ -175,7 +179,10 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             value={end}
             setValue={setEnd}
             onLeaveField={(newValue) => {
-              // TODO save in db
+              if (newValue < start) {
+                setError("End date can not be before the start date")
+                return;
+              }
               updateInDBifEdit(newValue, "event_end");
             }}
           />
