@@ -88,7 +88,7 @@ export default function EventInfoPopup({
                   event={event}
                 />
               {isFuture ? (
-                <></>
+                <p><i>You can not add attendance to events that have not happened yet</i></p>
               ) : (
                 <>
                   <UploadDataModal
