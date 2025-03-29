@@ -13,16 +13,16 @@ const {
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
 const { processAttendance } = require("./attendanceProcessing.js");
-
+const { getMemberIDByUsernameInDB } = require("./memberProcessing.js")
 /**
  * Maps CSV row data to member data format
  * @param {Object} row Raw CSV row data
  * @returns {Object} Formatted member data
  */
-function mapToMemberData(row) {
+function mapToMemberData(name, email) {
   return {
-    member_name: `${row.firstName} ${row.lastName}`.trim(),
-    member_email: row.email,
+    member_name: name,
+    member_email: email
   };
 }
 
@@ -68,7 +68,7 @@ function mapToAttendanceData(eventId, memberId) {
 class CSVProcessor {
 
   async processCSV(filePath, eventId, orgId) {
-    console.log("CSV Processor achieved");
+    console.log("CSV Processor reached");
 
     return new Promise((resolve, reject) => {
       const results = [];
@@ -93,6 +93,8 @@ class CSVProcessor {
                 if (!currentSemester) {
                   console.error("No active semester found.");
                   return resolve();
+                } else {
+                  console.log("We got the current semester " + currentSemester)
                 }
 
                 // Step 2: Get event details
@@ -100,49 +102,76 @@ class CSVProcessor {
                 if (!event) {
                   console.error(`Event not found for eventId: ${eventId}`);
                   return resolve();
+                } else {
+                  console.log(`Found event by event ID: ${eventId}`)
                 }
                 const eventType = event.event_type;
 
                 const email = row["Email"];
 
-                // Step 3: Check for existing member
-                const existingMemberResult = await getMembersByAttributes({
-                  member_email: email,
-                });
+                const name = `${row["First Name"]} ${row["Last Name"].trim()}`;
 
-                if (
-                  !existingMemberResult ||
-                  existingMemberResult.length === 0
-                ) {
-                  // Create new member
-                  const newMemberData = mapToMemberData(row);
-                  const newMember = await createMember(newMemberData);
-                  member = newMember;
+                console.log("the email read form the csv is: " + email + " and the name is: " + name);
+
+                let existingMemberResult = await getMembersByAttributes({ member_email: email });
+
+                if (!existingMemberResult || existingMemberResult.error || existingMemberResult.data.length === 0) {
+                  console.log("No existing member found. Creating a new one...");
+
+                  try {
+                    const newMemberData = mapToMemberData(name, email);
+                    const newMember = await createMember(newMemberData);
+
+                    if (!newMember) {
+                      console.error("Failed to create a new member for email: " + email);
+                      return resolve(); // Skip this row and continue processing
+                    } else {
+                      console.log("Success creating new member:", newMember);
+                    }
+
+                    member = newMember;
+                  } catch (err) {
+                    console.error("Error creating a new member for email:", email, err);
+                    return resolve(); // Skip this row if member creation fails
+                  }
                 } else {
-                  member = existingMemberResult[0];
+                  member = existingMemberResult.data[0]; // Use `.data[0]` to get the actual member
                 }
 
+
+
                 // Step 4: Check for existing membership
+                console.log("Now we are checking memberships")
+                let memberId;
+                let memberResult = await getMemberIDByUsernameInDB(email);
+
+                if (memberResult.error) {
+                  console.log("Error fetching member ID via email:", memberResult.error);
+                } else {
+                  memberId = parseInt(memberResult.data, 10); // Ensure it's an integer
+                  console.log(`Found memberId by email ${email}, and it is: ${memberId}`);
+                }
+
+
                 let existingMembership = await getMembershipByAttributes({
-                  member_id: member.member_id,
+                  member_id: memberId,
                   organization_id: orgId,
                   semester_id: currentSemester.semester_id,
                 });
 
-                if (!existingMembership) {
+                if (!existingMembership || existingMembership.length === 0) {
                   const newMembershipData = mapToMembershipData(
                     member.member_id,
                     orgId,
                     currentSemester.semester_id
                   );
-                  existingMembership = await createMembership(
-                    newMembershipData
-                  );
+                  existingMembership = await createMembership(newMembershipData);
                 }
+
 
                 membership = existingMembership;
 
-                // Step 5: Create attendance + process points/bonus/active checks
+                // Step 5: Create attendance + process points / bonus / active checks
                 const attendanceData = mapToAttendanceData(eventId, member.member_id);
                 attendance = await processAttendance(
                   attendanceData,

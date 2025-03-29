@@ -50,13 +50,15 @@ router.post(
   isAdminOrEboardForOrg,
   upload.single("file"),
   async (req, res) => {
+
     console.log("We are in CSV upload route")
 
     let orgId = req.params.orgId;
     orgId = sanitizer.sanitize(orgId);
     if (isNaN(orgId)) {
-      res.status(400).json({ error: error.organizationIdMustBeInteger });
-      return;
+      return res.status(400).json({ error: error.organizationIdMustBeInteger });
+    } else {
+      console.log("orgId correct & sanitized")
     }
 
     let eventId = req.params.eventId;
@@ -64,17 +66,13 @@ router.post(
     if (isNaN(eventId)) {
       res.status(400).json({ error: error.eventIdMustBeInteger });
       return;
-    }
-
-    // Validate organization ID
-    if (isNaN(orgId)) {
-      return res.status(400).json({ error: error.organizationIdMustBeInteger });
     } else {
-      console.log("Your org id is valid");
+      console.log("eventId correct & sanitized")
     }
 
-    console.log("now we check the request file")
-    console.log("these are the params " + req.file)
+
+    console.log("This is the request file (w data): " + req.file.data)
+    console.log("This is the request file (NO data): " + req.file)
 
     // Check if file was uploaded
     if (!req.file) {
