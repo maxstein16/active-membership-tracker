@@ -64,15 +64,15 @@ export default function UploadDataModal({ orgId, eventId, color }) {
 
       // ✅ Handle possible non-JSON response gracefully
       if (!result || typeof result !== "object") {
-        setErrMsg("Upload completed, but no JSON response was received.");
+        setErrMsg("Upload completed, but no valid JSON response was received.");
         return;
       }
 
-      if (result.status === "success") {
+      if (result && result.status === "success") {
         setOpen(false);
         navigate("/");
       } else {
-        setErrMsg(result.message || "Upload failed.");
+        setErrMsg(result?.message || "Upload failed.");
       }
     } catch (err) {
       console.error("Error during file upload:", err);

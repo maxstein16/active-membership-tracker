@@ -61,14 +61,18 @@ const processAttendance = async (attendanceData, eventType, orgId) => {
     const organization = await getOrganizationById(orgId);
     if (!organization) throw new Error("Organization not found.");
 
-    const memberships = await getMembershipByAttributes({
+    const membership = await getMembershipByAttributes({
       member_id: attendanceData.member_id,
       organization_id: orgId,
     });
-    if (!memberships || memberships.length === 0)
-      throw new Error("Membership not found.");
 
-    const membership = memberships[0];
+    // Check if a membership was found
+    if (!membership) {
+      throw new Error("Membership not found.");
+    } else {
+      console.log("Membership is", membership.get({ plain: true }));
+    }
+
 
     // Step 4: If points-based, calculate and allocate points
     if (organization.organization_membership_type === "points") {

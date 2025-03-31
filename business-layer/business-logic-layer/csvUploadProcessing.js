@@ -13,7 +13,8 @@ const {
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
 const { processAttendance } = require("./attendanceProcessing.js");
-const { getMemberIDByUsernameInDB } = require("./memberProcessing.js")
+const { getAttendanceByMemberAndEvent } = require("../data-layer/attendance.js");
+
 /**
  * Maps CSV row data to member data format
  * @param {Object} row Raw CSV row data
@@ -56,8 +57,6 @@ function mapToAttendanceData(eventId, memberId) {
   };
 }
 
-
-
 /**
  * Process a CSV file and handle attendance for an event
  * @param {string} filePath Path to the CSV file
@@ -65,167 +64,98 @@ function mapToAttendanceData(eventId, memberId) {
  * @param {number} orgId Organization ID
  * @returns {Promise<Object>} Processing results
  */
-class CSVProcessor {
 
-  async processCSV(filePath, eventId, orgId) {
-    console.log("CSV Processor reached");
+class CSVProcessor {
+  async processCSV(filePath, eventId, organizationId, semesterId) {
+    console.log("csvUploadProcessing is doing processCSV");
+    console.log("Here is what is in parameters of the method " + filePath, eventId, organizationId, semesterId)
 
     return new Promise((resolve, reject) => {
-      const results = [];
-      const promises = [];
-
+      const csvRows = []; // Store all rows
       fs.createReadStream(filePath)
-        .pipe(
-          csv.parse({
-            headers: true,
-            skipEmptyLines: true,
-            trim: true,
-          })
-        )
-        .on("data", async (row) => {
-          promises.push(
-            new Promise(async (resolve) => {
-              let member, membership, attendance;
-
-              try {
-                // Step 1: Get the current semester
-                const currentSemester = await getCurrentSemester();
-                if (!currentSemester) {
-                  console.error("No active semester found.");
-                  return resolve();
-                } else {
-                  console.log("We got the current semester " + currentSemester)
-                }
-
-                // Step 2: Get event details
-                const event = await getEventById(eventId, orgId);
-                if (!event) {
-                  console.error(`Event not found for eventId: ${eventId}`);
-                  return resolve();
-                } else {
-                  console.log(`Found event by event ID: ${eventId}`)
-                }
-                const eventType = event.event_type;
-
-                const email = row["Email"];
-
-                const name = `${row["First Name"]} ${row["Last Name"].trim()}`;
-
-                console.log("the email read form the csv is: " + email + " and the name is: " + name);
-
-                let existingMemberResult = await getMembersByAttributes({ member_email: email });
-
-                if (!existingMemberResult || existingMemberResult.error || existingMemberResult.data.length === 0) {
-                  console.log("No existing member found. Creating a new one...");
-
-                  try {
-                    const newMemberData = mapToMemberData(name, email);
-                    const newMember = await createMember(newMemberData);
-
-                    if (!newMember) {
-                      console.error("Failed to create a new member for email: " + email);
-                      return resolve(); // Skip this row and continue processing
-                    } else {
-                      console.log("Success creating new member:", newMember);
-                    }
-
-                    member = newMember;
-                  } catch (err) {
-                    console.error("Error creating a new member for email:", email, err);
-                    return resolve(); // Skip this row if member creation fails
-                  }
-                } else {
-                  member = existingMemberResult.data[0]; // Use `.data[0]` to get the actual member
-                }
-
-
-
-                // Step 4: Check for existing membership
-                console.log("Now we are checking memberships")
-                let memberId;
-                let memberResult = await getMemberIDByUsernameInDB(email);
-
-                if (memberResult.error) {
-                  console.log("Error fetching member ID via email:", memberResult.error);
-                } else {
-                  memberId = parseInt(memberResult.data, 10); // Ensure it's an integer
-                  console.log(`Found memberId by email ${email}, and it is: ${memberId}`);
-                }
-
-
-                let existingMembership = await getMembershipByAttributes({
-                  member_id: memberId,
-                  organization_id: orgId,
-                  semester_id: currentSemester.semester_id,
-                });
-
-                if (!existingMembership || existingMembership.length === 0) {
-                  const newMembershipData = mapToMembershipData(
-                    member.member_id,
-                    orgId,
-                    currentSemester.semester_id
-                  );
-                  existingMembership = await createMembership(newMembershipData);
-                }
-
-
-                membership = existingMembership;
-
-                // Step 5: Create attendance + process points / bonus / active checks
-                const attendanceData = mapToAttendanceData(eventId, member.member_id);
-                attendance = await processAttendance(
-                  attendanceData,
-                  eventType,
-                  orgId
-                );
-
-                results.push({
-                  member: member,
-                  membership: membership,
-                  attendance: attendance,
-                  processed: true,
-                });
-              } catch (err) {
-                console.error("Error processing row:", err);
-                results.push({
-                  row,
-                  member: member,
-                  membership: membership,
-                  attendance: attendance,
-                  processed: false,
-                  error: err.message,
-                });
-              }
-              resolve();
-            })
-          );
+        .pipe(csv.parse({
+          headers: true,
+          skipEmptyLines: false,
+          trim: true
+        }))
+        .on("data", (row) => {
+          csvRows.push(row); // Store each row in the array
+          console.log("Row with info " + row + " just got stored/pushed in the array")
         })
         .on("end", async () => {
           try {
-            await Promise.all(promises);
-            await fs.promises.unlink(filePath);
+            const results = [];
 
-            resolve({
-              error: error.noError,
-              data: {
-                total: results.length,
-                processed: results.filter((r) => r.processed).length,
-                failed: results.filter((r) => !r.processed).length,
-                details: results,
-              },
-            });
+            for (const row of csvRows) {
+              const email = row["Email"]?.trim().toLowerCase() || "N/A";
+
+              // step 0
+              //getting semester
+              const currentSemester = await getCurrentSemester();
+              if (!currentSemester) {
+                console.log("current semester already exists")
+              }
+
+              // step 1
+              // Check if member exists in the member table
+              console.log("HELLO!!!! CSV Upload Processing is trying to get member by email: " + email + " and organization ID: " + organizationId)
+              const memberResults = await getMembersByAttributes({ member_email: email });
+              console.log(memberResults);
+
+              if (memberResults.error) {
+                console.error("Error fetching member:", memberResults.error);
+                continue;
+              }
+
+              let member = null; // Initialize member
+
+              if (memberResults.data.length === 0) {
+                console.log("No member found, creating a new one...");
+                const memberData = mapToMemberData(row); // Map row to member data
+                member = await createMember(memberData); // Create the member
+              } else {
+                console.log("Member exists " + memberResults.data[0]);
+                member = memberResults.data[0];
+              }
+
+              //step 2 membership
+              // Check if the member has a membership for the organization
+              const existingMembership = await getMembershipByAttributes({ member_id: member.member_id, organization_id: organizationId });
+
+              let membershipData = null; // Initialize membershipData
+
+              if (!existingMembership || existingMembership.length === 0) {
+                console.log("No membership exists");
+                membershipData = mapToMembershipData(member.member_id, organizationId, semesterId);
+                await createMembership(membershipData); // Create the membership
+              } else {
+                console.log("csvUploadProcessing - Yippe! Found membership, now we track attendance");
+              }
+
+              // step 3 attendance
+              // Record the attendance
+              console.log("Okay, now we check attendance")
+              const existingAttendance = getAttendanceByMemberAndEvent(member.member_id, eventId);
+
+              let attendanceData = null; // Initialize membershipData
+              ß
+              if (!existingAttendance || existingAttendance.length === 0) {
+                console.log("No attendance exists");
+                attendanceData = mapToAttendanceData(eventId, memberId);
+                await processAttendance(attendanceData, eventType, orgId);
+              } else {
+                console.log("found attendance, u good");
+              }
+
+
+              results.push({ member, membershipData, attendanceData });
+            }//foreach row
+
+            resolve(results); // Resolve the promise with results after processing all csvRows
           } catch (err) {
-            reject({
-              error: error.fileCleanupFailed,
-              details: err,
-            });
+            console.error("Error processing CSV:", err);
+            reject(err); // Reject the promise if an error occurs
           }
-        })
-        .on("error", (err) => {
-          reject({
-            error: error.csvProcessingFailed,
-            details: err,
-          });
         });
     });
   }
