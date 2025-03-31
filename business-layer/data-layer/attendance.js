@@ -62,12 +62,19 @@ async function getAttendanceByMemberAndEvent(memberId, eventId) {
         event_id: eventId,
       },
     });
+
+    if (!attendance) {
+      console.log("No attendance record found for the given member and event.");
+      return null;
+    }
+
     return attendance;
   } catch (err) {
     console.error("Error fetching attendance by member and event IDs:", err);
     throw err;
   }
 };
+
 
 async function getMemberAttendanceWithEvents(orgId, memberId) {
   try {

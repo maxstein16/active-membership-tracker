@@ -92,6 +92,7 @@ const processAttendance = async (attendanceData, eventType, orgId) => {
     } else {
       // Step 5: Attendance-based - check active membership
       checkActiveMembership(membership);
+      console.log("checkign active membership")
     }
 
     return { error: error.noError, data: attendance };
