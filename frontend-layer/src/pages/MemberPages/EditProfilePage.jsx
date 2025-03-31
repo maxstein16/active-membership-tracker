@@ -291,7 +291,11 @@ export default function EditProfilePage() {
       <button
         onClick={(e) => {
           e.preventDefault();
-          setOpenDialog(true);
+          if (hasChanges) {
+            setOpenDialog(true);
+          } else {
+            navigate("/profile")
+          }
         }}
         className="secondary"
       >
