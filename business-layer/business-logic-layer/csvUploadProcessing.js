@@ -20,10 +20,13 @@ const { getAttendanceByMemberAndEvent } = require("../data-layer/attendance.js")
  * @param {Object} row Raw CSV row data
  * @returns {Object} Formatted member data
  */
-function mapToMemberData(name, email) {
+function mapToMemberData(row) {
   return {
-    member_name: name,
-    member_email: email
+    member_name: `${row["First Name"]?.trim() || null} ${row["Last Name"]?.trim() || null}`.trim(),
+    member_email: row["Email"]?.trim().toLowerCase() || null,
+    member_personal_email: row["Email"]?.trim().toLowerCase() || null,  // Using the same email for now
+    member_major: row.degree,
+    // Add other relevant mappings as needed
   };
 }
 
@@ -61,14 +64,13 @@ function mapToAttendanceData(eventId, memberId) {
  * Process a CSV file and handle attendance for an event
  * @param {string} filePath Path to the CSV file
  * @param {number} eventId Event ID for attendance records
- * @param {number} orgId Organization ID
+ * @param {number} organizationId Organization ID
  * @returns {Promise<Object>} Processing results
  */
-
 class CSVProcessor {
-  async processCSV(filePath, eventId, organizationId, semesterId) {
+  async processCSV(filePath, eventId, organizationId) {
     console.log("csvUploadProcessing is doing processCSV");
-    console.log("Here is what is in parameters of the method " + filePath, eventId, organizationId, semesterId)
+    console.log("Here is what is in parameters of the method " + filePath, eventId, organizationId)
 
     return new Promise((resolve, reject) => {
       const csvRows = []; // Store all rows
@@ -93,7 +95,10 @@ class CSVProcessor {
               //getting semester
               const currentSemester = await getCurrentSemester();
               if (!currentSemester) {
-                console.log("current semester already exists")
+                console.log("bro this sucks what kind of semester is this?")
+              } else {
+                console.log("current semester already exists and it is " + currentSemester)
+
               }
 
               // step 1
@@ -126,6 +131,7 @@ class CSVProcessor {
 
               if (!existingMembership || existingMembership.length === 0) {
                 console.log("No membership exists");
+                let semesterId = currentSemester.semester_id
                 membershipData = mapToMembershipData(member.member_id, organizationId, semesterId);
                 await createMembership(membershipData); // Create the membership
               } else {
@@ -134,19 +140,18 @@ class CSVProcessor {
 
               // step 3 attendance
               // Record the attendance
-              console.log("Okay, now we check attendance")
-              const existingAttendance = getAttendanceByMemberAndEvent(member.member_id, eventId);
+              console.log("the event id is: " + eventId + " and the memberId is " + member.member_id + " and finally, for the org with id: " + organizationId + " also the current semester is " + currentSemester.semester_name)
+              const existingAttendance = await getAttendanceByMemberAndEvent(member.member_id, eventId);
 
-              let attendanceData = null; // Initialize membershipData
-              ß
-              if (!existingAttendance || existingAttendance.length === 0) {
+              let attendanceData = null;
+
+              if (!existingAttendance) { // `existingAttendance` is null if not found
                 console.log("No attendance exists");
-                attendanceData = mapToAttendanceData(eventId, memberId);
-                await processAttendance(attendanceData, eventType, orgId);
+                attendanceData = mapToAttendanceData(eventId, member.member_id);
+                await processAttendance(attendanceData);
               } else {
-                console.log("found attendance, u good");
+                console.log("Found attendance");
               }
-
 
               results.push({ member, membershipData, attendanceData });
             }//foreach row
