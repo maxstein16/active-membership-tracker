@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
 import "../../assets/css/constants.css";
 import "../../assets/css/pageSetup.css";
 import "../../assets/css/general.css";
@@ -15,7 +14,6 @@ export default function UploadDataModal({ orgId, eventId, color }) {
   const [file, setFile] = React.useState(null);
   const [fileName, setFileName] = React.useState("");
   const [errMsg, setErrMsg] = React.useState("");
-  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0]; // Get file
@@ -70,7 +68,6 @@ export default function UploadDataModal({ orgId, eventId, color }) {
 
       if (result && result.status === "success") {
         setOpen(false);
-        navigate("/");
       } else {
         setErrMsg(result?.message || "Upload failed.");
       }
