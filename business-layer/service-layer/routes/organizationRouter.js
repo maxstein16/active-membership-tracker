@@ -106,6 +106,7 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
  */
 async function handlePostOrganization(req, res) {
   try {
+
     if (
       !req.body.hasOwnProperty("organization_name") ||
       !req.body.hasOwnProperty("organization_abbreviation") ||

@@ -11,6 +11,7 @@ import UserInput from "../../components/UserInput";
 import { CircularProgress, Snackbar } from "@mui/material";
 import CustomSelect from "../../components/CustomSelect";
 import { API_METHODS, getAPIData } from "../../utils/callAPI"; // Import getAPIData
+import { useNavigate } from "react-router-dom";
 
 import {
   genderOptions,
@@ -21,6 +22,8 @@ import {
 import displayErrors from "../../utils/displayErrors";
 
 export default function EditProfilePage() {
+    const navigate = useNavigate();
+  
   const [breakingError, setBreakingError] = React.useState("");
   const [userData, setUserData] = React.useState(null);
   const [successMessage, setSuccessMessage] = React.useState("");
@@ -29,6 +32,7 @@ export default function EditProfilePage() {
   const [isSuccessOpen, setIsSuccessOpen] = React.useState(false);
   const [memberName, setMemberName] = React.useState("");
   const [memberEmail, setMemberEmail] = React.useState("");
+  const [hasChanges, setHasChanges] = React.useState(false);
 
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -117,6 +121,7 @@ export default function EditProfilePage() {
   };
 
   const saveNewAttribute = (newValue, field) => {
+    setHasChanges(true)    
     setUserData((prev) => ({ ...prev, [field]: newValue }));
   };
 
@@ -162,6 +167,7 @@ export default function EditProfilePage() {
     setIsSuccessOpen(true);
     setSuccessMessage("Data saved successfully!");
     setError(""); // Clear any previous errors
+    setHasChanges(false)
   };
 
   if (breakingError !== "")
@@ -183,7 +189,11 @@ export default function EditProfilePage() {
     <PageSetup>
       <BackButton
         areYouSure={() => {
-          setOpenDialog(true);
+          if (hasChanges) {
+            setOpenDialog(true);
+          } else {
+            navigate("/profile")
+          }
         }}
       />
       <h1>Edit Profile</h1>
@@ -281,7 +291,11 @@ export default function EditProfilePage() {
       <button
         onClick={(e) => {
           e.preventDefault();
-          setOpenDialog(true);
+          if (hasChanges) {
+            setOpenDialog(true);
+          } else {
+            navigate("/profile")
+          }
         }}
         className="secondary"
       >
