@@ -45,6 +45,7 @@ const {
   getSemesterOrgReportInDB,
   getEventOrgReportInDB,
   getSemesterOrgReportBySemesterIdInDB,
+  getAnnualOrgReportByYearInDB,
 } = require("../organizationReportProcessing");
 const {
   editOrganizationMembershipRequirementsInDB,
@@ -228,7 +229,7 @@ module.exports = function () {
   };
 
   this.getAnnualOrgReportByYear = async (orgId, year) => {
-    return await getAnnualOrgReportInDB(orgId, year);
+    return await getAnnualOrgReportByYearInDB(orgId, year);
   }
 
   this.getEventOrgReport = async (orgId, meetingId) => {

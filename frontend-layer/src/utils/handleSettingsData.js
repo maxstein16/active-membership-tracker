@@ -454,17 +454,114 @@ export async function getMeetingReport(orgId, meetingId) {
   };
 }
 
-export async function getAnnualReportData(orgId) {
-  const apiUrl = `/organization/${orgId}/reports/annual`;
-
-  const response = await getAPIData(apiUrl, API_METHODS.get, {});
-
-  if (!response || !response.orgData) {
-    console.error("Error fetching annual report data.");
+/**
+ * Get organization creation date to determine if it's a new org
+ * @param {Number} orgId - organization id from the db
+ * @returns {Date|null} The creation date or null if not found
+ */
+export async function getOrganizationCreationDate(orgId) {
+  try {
+    const orgData = await getOrganizationData(orgId);
+    if (orgData && (orgData.createdAt || orgData.created_at)) {
+      return new Date(orgData.createdAt || orgData.created_at);
+    }
+    return null;
+  } catch (err) {
+    console.error("Error fetching organization creation date:", err);
     return null;
   }
+}
 
-  return response.orgData;
+/**
+ * Get annual report data for an organization
+ * @param {Number} orgId - organization id from the db
+ * @returns {Object|null} Report data or null if error
+ */
+export async function getAnnualReportData(orgId) {
+  try {
+    const apiUrl = `/organization/${orgId}/reports/annual`;
+    const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+    if (!response) {
+      console.error("Failed to get response from annual report API");
+      return null;
+    }
+    
+    if (!response.orgData) {
+      console.error("No organization data in API response");
+      return null;
+    }
+
+    // Check if this is a new organization based on API response
+    const isNewOrg = response.orgData.isNewOrg || false;
+    
+    // If historical data is not present in a new org, set them to null
+    if (isNewOrg) {
+      response.orgData.memberDataLast = null;
+      response.orgData.meetingsDataLast = null;
+    }
+
+    return response.orgData;
+  } catch (err) {
+    console.error("Error fetching annual report data:", err);
+    return null;
+  }
+}
+
+/**
+ * Get annual report data for an organization by specific year
+ * @param {Number} orgId - organization id from the db
+ * @param {Number} year - The year to get data for
+ * @returns {Object|null} Report data or null if error
+ */
+export async function getAnnualReportDataByYear(orgId, year) {
+  try {
+    // First check if the org existed in this year
+    const creationDate = await getOrganizationCreationDate(orgId);
+    if (creationDate) {
+      const creationYear = creationDate.getFullYear();
+      if (year < creationYear) {
+        // Return empty data structure for years before the org existed
+        return {
+          isNewOrg: true,
+          current_year: year,
+          memberDataThis: {
+            totalMembers: 0,
+            newMembers: 0,
+            totalActive_members: 0,
+            newActive_members: 0,
+            members: []
+          },
+          memberDataLast: null,
+          meetingsDataThis: {
+            numMeetings: 0,
+            numEvents: 0,
+            numVolunteering: 0,
+            totalAttendance: 0
+          },
+          meetingsDataLast: null
+        };
+      }
+    }
+
+    const apiUrl = `/organization/${orgId}/reports/annual/${year}`;
+    const response = await getAPIData(apiUrl, API_METHODS.get, {});
+
+    if (!response) {
+      console.error("Failed to get response from annual report by year API");
+      return null;
+    }
+    
+    if (!response.orgData) {
+      console.error(`No organization data in API response for year ${year}`);
+      return null;
+    }
+
+    return response.orgData;
+  } catch (err) {
+    console.error(`Error fetching annual report data for year ${year}:`, err);
+    return null;
+  }
 }
 
 
@@ -541,41 +638,78 @@ export async function getSemesterReportDataById(orgId, semesterId) {
   return response.orgData;
 }
 
-export async function getAnnualReportDataByYear(orgId, year) {
-  const apiUrl = `/organization/${orgId}/reports/annual/${year}`;
-
-  const response = await getAPIData(apiUrl, API_METHODS.get, {});
-
-  if (!response || !response.orgData) {
-    console.error("Error fetching annual report data for year:", year);
-    return null;
-  }
-
-  return response.orgData;
-}
-
 /**
- * Get all academic years available in the database
- * @returns {Array} List of years
+ * Get academic years relevant for an organization
+ * @param {Number} orgId - organization id from the db
+ * @returns {Array} List of years available for this organization
  */
-export async function getAllAcademicYears() {
-  const result = await getAPIData(
-    `/semester/academic-years`,
-    API_METHODS.get,
-    {}
-  );
+export async function getAllAcademicYears(orgId) {
+  try {
+    // Get all available academic years from the standard endpoint
+    const result = await getAPIData(
+      `/semester/academic-years`,
+      API_METHODS.get,
+      {}
+    );
 
-  if (!result) {
-    console.log("must login", result);
-    return { session: false };
-  }
-  
-  if (!result.data || result.error) {
-    console.error("Error fetching academic years:", result.error);
+    if (!result) {
+      console.log("must login", result);
+      return { session: false };
+    }
+    
+    if (!result.data || result.error) {
+      console.error("Error fetching academic years:", result.error);
+      return [];
+    }
+    
+    // If no orgId provided, return all years (for backward compatibility)
+    if (!orgId) {
+      return result.data;
+    }
+    
+    // For organizations, we'll need to get the years that have org data
+    // First, fetch the organization's events to see what years they have data for
+    const orgEvents = await getPastOrganizationEvents(orgId);
+    
+    if (!Array.isArray(orgEvents) || orgEvents.length === 0) {
+      return [];
+    }
+    
+    // Extract years from event dates
+    const orgYears = new Set();
+    orgEvents.forEach(event => {
+      if (event.event_end) {
+        const eventYear = new Date(event.event_end).getFullYear();
+        if (!isNaN(eventYear)) {
+          orgYears.add(eventYear);
+        }
+      }
+    });
+        
+    // Filter the academic years to only include those where the org has data
+    const filteredYears = result.data.filter(year => {
+      // Handle different year formats
+      let yearValue;
+      if (typeof year === 'number') {
+        yearValue = year;
+      } else if (typeof year === 'string') {
+        if (year.includes('-')) {
+          // For academic years like "2023-2024", check if either year is in the set
+          const [startYear, endYear] = year.split('-').map(y => parseInt(y));
+          return !isNaN(startYear) && (orgYears.has(startYear) || orgYears.has(endYear));
+        } else {
+          yearValue = parseInt(year);
+        }
+      }
+      
+      return !isNaN(yearValue) && orgYears.has(yearValue);
+    });
+    
+    return filteredYears;
+  } catch (err) {
+    console.error(`Error in getAllAcademicYears for org ${orgId}:`, err);
     return [];
   }
-  
-  return result.data;
 }
 
 /**
