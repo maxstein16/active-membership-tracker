@@ -56,6 +56,7 @@ const defaultSamlStrategy = new SamlStrategy(
 
         try {
             business.getMemberIDByUsername(email).then((result) => {
+                console.log("have we got here", result)
                 if (!result || result.hasOwnProperty('error')) {
                     // create new user
                     createMember({
