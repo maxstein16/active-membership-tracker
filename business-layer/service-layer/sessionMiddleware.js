@@ -16,6 +16,11 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
 function isAuthorizedHasSessionForWebsite(req, res, next) {
   console.log(req.user)
   if (req.isAuthenticated()) {
+    console.log(req.user.email)
+    if (!req.session.user) {
+      req.session.user = { username: req.user.email };
+      req.session.save();
+    }
     next();
   } else {
     res.redirect("/login");
