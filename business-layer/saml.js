@@ -43,7 +43,7 @@ const defaultSamlStrategy = new SamlStrategy(
             lastName,
             username
         };
-        let userdb = await getMemberByEmail(email);
+        let userdb = await getMemberIDByUsernameInDB(email);
         console.log('SAML Attributes:', profile.attributes);
         console.log('EMAIl', email, 'FName', firstName, lastName, username);
         console.log(userdb);
