@@ -48,6 +48,17 @@ const defaultSamlStrategy = new SamlStrategy(
         console.log('EMAIl', email, 'FName', firstName, 'LName',lastName, username, displayName);
         //console.log(userdb);
         // or update a local user. Then return that user.
+
+
+        // set the session
+        // we should check if user exists
+        // if they don't create them
+            // redirect to profile/edit
+            // remove (RIT Student) from preferred name
+        // else 
+            // redirect to dashboard (/)
+
+
         return done(null, user)
     }
     /* end acs callback */
