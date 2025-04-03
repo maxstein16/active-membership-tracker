@@ -35,7 +35,8 @@ const defaultSamlStrategy = new SamlStrategy(
         const email = attributes['urn:oid:0.9.2342.19200300.100.1.3']; // Email
         const firstName = attributes['urn:oid:2.5.4.42']; // First Name
         const lastName = attributes['urn:oid:2.5.4.4']; // Last Name
-        const username = attributes['urn:oid:0.9.2342.19200300.100.1.1']; // Username
+        const username = attributes['urn:oid:0.9.2342.19200300.100.1.1']; // Username - empty? 
+        const displayName = attributes['urn:oid:2.16.840.1.113730.3.1.241']; // Display Name - empty?
         // Process or store the attributes
         const user = {
             email,
@@ -43,10 +44,9 @@ const defaultSamlStrategy = new SamlStrategy(
             lastName,
             username
         };
-        let userdb = await getMemberIDByUsernameInDB(email);
         console.log('SAML Attributes:', profile.attributes);
         console.log('EMAIl', email, 'FName', firstName, lastName, username);
-        console.log(userdb);
+        //console.log(userdb);
         // or update a local user. Then return that user.
         return done(null, user)
     }
