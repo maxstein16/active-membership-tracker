@@ -11,6 +11,7 @@
   "author": "The 7 Musketeers",
   "license": "ISC",
   "dependencies": {
+    "@node-saml/passport-saml": "github:node-saml/passport-saml",
     "@sequelize/mariadb": "^7.0.0-alpha.43",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
@@ -23,10 +24,12 @@
     "jsdom": "^26.0.0",
     "mariadb": "^3.4.0",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "node-schedule": "^2.1.1",
     "nodemailer": "^6.10.0",
-    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.7",
+    "passport": "^0.7.0",
+    "passport-saml": "^3.2.4",
     "sequelize": "^6.37.5"
   },
   "devDependencies": {

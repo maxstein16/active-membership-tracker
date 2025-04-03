@@ -1,8 +1,8 @@
 const SamlStrategy = require('@node-saml/passport-saml').Strategy;
 const fs = require('fs');
 
-const BASE_URL = 'http://gccis-dio.gccis.rit.edu/';
-const SP_ENTITY_ID = 'http://gccis-dio.gccis.rit.edu/saml2/';
+const BASE_URL = 'https://gccis-dio.gccis.rit.edu/';
+const SP_ENTITY_ID = 'https://gccis-dio.gccis.rit.edu/saml2/';
 const SP_PVK = fs.readFileSync('/var/www/html/active-membership-tracker/business-layer/cert/service.key', { encoding: 'utf8' });
 const SP_CERT = fs.readFileSync('/var/www/html/active-membership-tracker/business-layer/cert/service.crt', { encoding: 'utf8' });
 
