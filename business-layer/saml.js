@@ -45,7 +45,7 @@ const defaultSamlStrategy = new SamlStrategy(
             username
         };
         console.log('SAML Attributes:', profile.attributes);
-        console.log('EMAIl', email, 'FName', firstName, lastName, username);
+        console.log('EMAIl', email, 'FName', firstName, 'LName',lastName, username, displayName);
         //console.log(userdb);
         // or update a local user. Then return that user.
         return done(null, user)
