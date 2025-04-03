@@ -14,7 +14,7 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
 }
 
 function isAuthorizedHasSessionForWebsite(req, res, next) {
-  console.log(req)
+  console.log(req.user)
   if (req.isAuthenticated()) {
     next();
   } else {
