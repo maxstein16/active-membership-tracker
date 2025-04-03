@@ -29,7 +29,22 @@ const defaultSamlStrategy = new SamlStrategy(
     /* acs callback */
     (profile, done) => {
         // Called after successful authentication, parse
-        // the attributes in profile.attributes and create
+        // the attributes in profile.
+        const attributes = profile.attributes;
+        // attributes and create
+        const email = attributes['urn:oid:0.9.2342.19200300.100.1.3']; // Email
+        const firstName = attributes['urn:oid:2.5.4.42']; // First Name
+        const lastName = attributes['urn:oid:2.5.4.4']; // Last Name
+        const username = attributes['urn:oid:0.9.2342.19200300.100.1.1']; // Username
+        // Process or store the attributes
+        const user = {
+            email,
+            firstName,
+            lastName,
+            username
+        };
+        console.log('SAML Attributes:', profile.attributes);
+        console.log(email, firstName, lastName, username);
         // or update a local user. Then return that user.
         return done(null, profile.attributes)
     }

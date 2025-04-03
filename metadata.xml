@@ -32,8 +32,8 @@ wMN68synMVYSxq4M1TNNTIg=</X509Certificate>
         </X509Data>
       </KeyInfo>
     </KeyDescriptor>
-    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://gccis-dio.gccis.rit.edu/logout"/>
+    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://gccis-dio.gccis.rit.edu/logout"/>
     <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
-    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://gccis-dio.gccis.rit.edu/login/callback" index="1"/>
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://gccis-dio.gccis.rit.edu/login/callback" index="1"/>
   </SPSSODescriptor>
 </EntityDescriptor>
