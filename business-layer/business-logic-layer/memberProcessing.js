@@ -15,11 +15,11 @@ const { Member } = require("../db");
  */
 async function getMemberByIdInDB(memberId) {
 
-    console.log("memberProcessing says getMemberByIdInDB memberID WOUT .data is: " + memberId)
+  //  console.log("memberProcessing says getMemberByIdInDB memberID WOUT .data is: " + memberId)
 
 
     if (isNaN(memberId)) {
-        console.log("memberId is not a number man")
+     //   console.log("memberId is not a number man")
         return { error: error.memberIdMustBeInteger, data: null };
     }
 

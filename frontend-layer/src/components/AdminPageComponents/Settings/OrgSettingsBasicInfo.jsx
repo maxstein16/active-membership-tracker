@@ -40,7 +40,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
           saveSetting(newValue, "name");
         }}
       />
-
+     
       {/* Abbreviation */}
       <UserInput
         label="Organization Abbreviation"
@@ -148,7 +148,7 @@ export default function OrgSettingsBasicInfo({ orgData, saveSetting }) {
           saveSetting(newValue, "threshold");
         }}
       />
-
+ <p><i><b>Active Membership Point Threshold</b> is the minimum amount of points that a member of your organization needs to be considered an <b>active member</b>.</i></p>
       {/* Is Points or Percentage */}
       <CustomColorToggle
         label={"Is Points Based"}
