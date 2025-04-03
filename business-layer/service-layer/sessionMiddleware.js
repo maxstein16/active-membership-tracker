@@ -6,7 +6,7 @@ const {
 } = require("../business-logic-layer/public/hasCredentials");
 
 function isAuthorizedHasSessionForAPI(req, res, next) {
-  if (req.session.user) {
+  if (req.isAuthenticated()) {
     next();
   } else {
     res.status(401).json({ error: "No session, must log in to continue" });
@@ -14,11 +14,19 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
 }
 
 function isAuthorizedHasSessionForWebsite(req, res, next) {
-  if (req.session.user) {
+  console.log(req)
+  if (req.isAuthenticated()) {
     next();
   } else {
     res.redirect("/login");
   }
+}
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
 }
 
 /**
