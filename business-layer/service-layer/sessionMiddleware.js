@@ -17,7 +17,7 @@ function isAuthorizedHasSessionForWebsite(req, res, next) {
   if (req.session.user) {
     next();
   } else {
-    res.redirect("/saml2/login");
+    res.redirect("/login");
   }
 }
 
@@ -30,7 +30,7 @@ async function isAdminOrEboardForOrg(req, res, next) {
   const orgId = req.params.orgId;
 
   if (!user) {
-    return res.redirect("/saml2/login");
+    return res.redirect("/login");
   }
 
   const hasPrivilege = isEboardOrAdmin(user.username, orgId);
