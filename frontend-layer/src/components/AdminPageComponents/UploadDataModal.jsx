@@ -67,7 +67,7 @@ export default function UploadDataModal({ orgId, eventId, color }) {
       }
 
       if (result && result.status === "success") {
-        setOpen(false);
+        window.location.reload();
       } else {
         setErrMsg(result?.message || "Upload failed.");
       }
