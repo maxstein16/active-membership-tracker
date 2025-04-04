@@ -46,7 +46,8 @@ async function getSpecificMemberWithOrgDataInDB(orgId, memberId) {
     ).length;
 
     // Get current semester
-    const currentSemester = await getSemestersByYear();
+    const currentSemester = await getCurrentSemester();
+
     const currentMembership = memberships.find(
       (m) => m.semester_id === currentSemester.semester_id
     );
@@ -154,8 +155,9 @@ async function editMemberInOrganizationInDB(
       semester_id: currentSemester.semester_id,
     });
 
-    if (!membership)
-      return { error: error.membershipNotFound, data: null };
+    console.log("Editing membership: ", membership);
+
+    if (!membership) return { error: error.membershipNotFound, data: null };
 
     if (memberDataToUpdate.hasOwnProperty("membership_role")) {
       const currentRole = membership.membership_role;
