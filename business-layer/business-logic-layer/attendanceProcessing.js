@@ -23,8 +23,8 @@ const {
   getBasePointsForEventType,
   calculateBonusPoints,
 } = require("./organizationSettingsProcessing.js");
-const Error = require("./public/errors.js");
-const error = new Error();
+const ErrorMessages = require("./public/errors.js");
+const error = new ErrorMessages();
 
 /**
  * ATTENDANCE TABLE ATTRIBUTES (Based on DB):
@@ -91,8 +91,7 @@ const processAttendance = async (attendanceData, eventType, orgId) => {
       });
     } else {
       // Step 5: Attendance-based - check active membership
-      checkActiveMembership(membership);
-      console.log("checkign active membership")
+      await checkActiveMembership(membership);
     }
 
     return { error: error.noError, data: attendance };
