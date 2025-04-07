@@ -21,7 +21,7 @@ export default function SemesterReport({ orgId, color }) {
   // Fetch all semesters from the database
   const fetchAllSemesters = React.useCallback(async () => {
     try {
-      const semesters = await getAllSemestersAcrossYears();
+      const semesters = await getAllSemestersAcrossYears(orgId);
       
       if (Array.isArray(semesters) && semesters.length > 0) {
         const sortedSemesters = [...semesters].sort((a, b) => {
@@ -60,7 +60,7 @@ export default function SemesterReport({ orgId, color }) {
       console.error("Error fetching semesters:", err);
       setError("Failed to load semester options. Please try again later.");
     }
-  }, [selectedSemester]);
+  }, [selectedSemester, orgId]);
 
   const fetchSemesterReport = React.useCallback(async () => {
     setIsLoading(true);
