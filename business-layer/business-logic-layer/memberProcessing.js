@@ -21,15 +21,14 @@ const { getCurrentSemester } = require("../data-layer/semester.js");
  * @returns {Promise<object>} The member object if found, otherwise an error.
  */
 async function getMemberByIdInDB(memberId) {
-  console.log(
-    "memberProcessing says getMemberByIdInDB memberID WOUT .data is: " +
-      memberId
-  );
 
-  if (isNaN(memberId)) {
-    console.log("memberId is not a number man");
-    return { error: error.memberIdMustBeInteger, data: null };
-  }
+  //  console.log("memberProcessing says getMemberByIdInDB memberID WOUT .data is: " + memberId)
+
+
+    if (isNaN(memberId)) {
+     //   console.log("memberId is not a number man")
+        return { error: error.memberIdMustBeInteger, data: null };
+    }
 
   try {
     const member = await getMemberById(memberId);
