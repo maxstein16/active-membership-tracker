@@ -119,7 +119,7 @@ export default function ManualAddAttendanceDialog({ orgId, color, event }) {
               <p>
                 Can't find the member you are looking for?{" "}
                 <span
-                  style={{ textDecoration: "underline" }}
+                  style={{ textDecoration: "underline", fontWeight: 'bold', color: color }}
                   onClick={switchMemberList}
                 >
                   {findMembersInsideOrg

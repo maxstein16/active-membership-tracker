@@ -58,6 +58,11 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
         event_description: desc,
         event_type: type,
       };
+
+      if (end < start || start > end) {
+        setError("Can not save invalid dates. Make sure you start date is before your end date and your end date is before your start date.")
+        return;
+      }
       // call api then reload
       createNewEvent(orgId, newEvent).then((isSuccess) => {
         if (!isSuccess) {
@@ -165,6 +170,10 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             value={start}
             setValue={setStart}
             onLeaveField={(newValue) => {
+              if (newValue > end) {
+                setError("Start date can not be after the end date")
+                return;
+              }
               updateInDBifEdit(newValue, "event_start");
             }}
           />
@@ -175,7 +184,10 @@ export default function EditEventsDialog({ isEdit, orgId, color, event }) {
             value={end}
             setValue={setEnd}
             onLeaveField={(newValue) => {
-              // TODO save in db
+              if (newValue < start) {
+                setError("End date can not be before the start date")
+                return;
+              }
               updateInDBifEdit(newValue, "event_end");
             }}
           />
