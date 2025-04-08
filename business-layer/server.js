@@ -59,10 +59,10 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((user, done) => {
   done(null, {
-    email: user['urn:oid:0.9.2342.19200300.100.1.3'],
-    firstName: user['urn:oid:2.5.4.42'],
-    lastName: user['urn:oid:2.5.4.4'],
-    username: user['urn:oid:0.9.2342.19200300.100.1.1'],
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    username: user.username
   });
 });
 const SITE_ROOT = '/saml2';

@@ -25,6 +25,7 @@ RESOURCES:
 
 // GET index.html
 router.get("/", isAuthorizedHasSessionForWebsite, function (req, res) {
+  // console.log(req, res)
   res.sendFile(
     path.join(__dirname, "../../../frontend-layer/build", "index.html")
   );
@@ -32,9 +33,7 @@ router.get("/", isAuthorizedHasSessionForWebsite, function (req, res) {
 
 // GET login  -- change for shibboleth
 router.get("/login", function (req, res) {
-  res.sendFile( // should change to shibboleth login
-    path.join(__dirname, "../../../frontend-layer/build", "index.html")
-  );
+  res.redirect("/saml2/login");
 });
 
 //Get metadata for SSO -- this is where metadata lives

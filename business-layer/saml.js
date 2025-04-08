@@ -9,6 +9,10 @@ const SP_CERT = fs.readFileSync('/var/www/html/active-membership-tracker/busines
 const IDP_SSO_URL = 'https://shibboleth.main.ad.rit.edu/idp/profile/SAML2/Redirect/SSO';
 const IDP_CERT = fs.readFileSync('/var/www/html/active-membership-tracker/business-layer/cert/cert_idp.pem', { encoding: 'utf8' });
 
+const BusinessLogic = require("./business-logic-layer/public/exports.js");
+const { createMember } = require('./data-layer/member.js');
+const business = new BusinessLogic();
+
 /* settings example */
 const defaultSamlStrategy = new SamlStrategy(
     {
@@ -35,18 +39,41 @@ const defaultSamlStrategy = new SamlStrategy(
         const email = attributes['urn:oid:0.9.2342.19200300.100.1.3']; // Email
         const firstName = attributes['urn:oid:2.5.4.42']; // First Name
         const lastName = attributes['urn:oid:2.5.4.4']; // Last Name
-        const username = attributes['urn:oid:0.9.2342.19200300.100.1.1']; // Username
+        // const username = attributes['urn:oid:0.9.2342.19200300.100.1.1']; // Username - empty? 
+        const displayName = attributes['urn:oid:2.16.840.1.113730.3.1.241']; // Display Name
         // Process or store the attributes
+        const preferredName = displayName.replace(/\s*\(.*?\)/, '');
         const user = {
             email,
             firstName,
             lastName,
-            username
+            preferredName
         };
         console.log('SAML Attributes:', profile.attributes);
-        console.log(email, firstName, lastName, username);
+        console.log('EMAIl', email, 'FName', firstName, lastName, displayName);
+        //console.log(userdb);
         // or update a local user. Then return that user.
-        return done(null, profile.attributes)
+
+        try {
+            business.getMemberIDByUsername(email).then((result) => {
+                console.log("have we got here", result)
+                if (!result || result.error) {
+                    // create new user
+                    createMember({
+                        member_name: preferredName,
+                        member_email: email
+                    }).then((result) => {
+                        user.isNew = true
+                        return done(null, user)
+                    })   
+                }
+                user.isNew = false
+                return done(null, user)
+            })
+        } catch (error) {
+            user.isNew = false
+            return done(null, user)
+        }
     }
     /* end acs callback */
 )
