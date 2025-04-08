@@ -2,29 +2,33 @@
 // imports
 const { MIN_30 } = require("./constants.js");
 
-
 // Requires
 require("dotenv").config(); // Load .env variables
 const bodyParser = require("body-parser"); // parse the body of the request
-const express = require("express"); // REST API 
+const express = require("express"); // REST API
 const session = require("express-session"); // sessions to log the user out
 const logger = require("morgan"); // logging out the routes
 const cors = require("cors"); // defines our cors policy (protects our api)
 const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
 const path = require("path"); // finding the react pages
 const fs = require("fs"); // file system for reading the certificates
-if(process.env.LOCATION === "production"){
-const passport = require("passport"); // authentication for SSO/SHIBBOLETH
-//const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
+if (process.env.LOCATION === "production") {
+  console.log("here 1", passport
+  )
+  const passport = require("passport"); // authentication for SSO/SHIBBOLETH
+  //const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 
-const {defaultSamlStrategy, SP_CERT} = require("./saml.js");
-const https = require('https');
+  console.log("here2", passport
+  )
+  const { defaultSamlStrategy, SP_CERT } = require("./saml.js");
+  const https = require("https");
 }
 // create app
 const app = express();
 
 // Set env variables for prod
-if (process.env.LOCATION === "production"){} 
+if (process.env.LOCATION === "production") {
+}
 
 // Import the database and models
 const { sequelize } = require("./db.js");
@@ -36,7 +40,11 @@ app.use(logger("dev"));
 app.use(express.json());
 app.enable("trust proxy");
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index: false }));
+app.use(
+  express.static(path.join(__dirname, "../frontend-layer/build"), {
+    index: false,
+  })
+);
 
 // Session Middleware
 app.use(
@@ -51,25 +59,27 @@ app.use(
 
 // check env for production or development
 if (process.env.LOCATION === "production") {
-passport.use('saml',defaultSamlStrategy);
+  console.log("here 3", passport
+  )
+  passport.use("saml", defaultSamlStrategy);
 
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.deserializeUser((user, done) => {
-  done(null, {
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    username: user.username
+  passport.serializeUser((user, done) => {
+    done(null, user);
   });
-});
-const SITE_ROOT = '/saml2';
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+  passport.deserializeUser((user, done) => {
+    done(null, {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+    });
+  });
+  const SITE_ROOT = "/saml2";
+
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
 }
 // CORS policy middleware
 app.use(
@@ -100,7 +110,6 @@ let attendanceRouter = require("./service-layer/routes/attendanceRoute.js");
 let csvUploadRouter = require("./service-layer/routes/csvUploadRoute.js");
 let semesterRouter = require("./service-layer/routes/semesterRoute.js");
 
-
 // // Middleware to ensure the user is authenticated
 // function ensureAuthenticated(req, res, next) {
 //   if (req.isAuthenticated()) {
@@ -126,40 +135,38 @@ app.use("/v1/attendance", attendanceRouter);
 app.use("/v1/organization", csvUploadRouter);
 app.use("/v1/semester", semesterRouter);
 
-
-
 // Handle routes that do not exist
-if(process.env.LOCATION === "production"){
-const siteRoot = express.Router();
-app.use(SITE_ROOT, siteRoot);
-app.set('trust proxy', true);
+if (process.env.LOCATION === "production") {
+  const siteRoot = express.Router();
+  app.use(SITE_ROOT, siteRoot);
+  app.set("trust proxy", true);
 
-siteRoot.get('/login', passport.authenticate('saml'));
+  siteRoot.get("/login", passport.authenticate("saml"));
 
-siteRoot.post('/acs',
-bodyParser.urlencoded({ extended: false }),
-// might need route for unauthorized user
-passport.authenticate('saml', { failureRedirect: '/login' }),
-(req, res) => {
-  res.redirect('/');
-}
-);
-
-
-
-siteRoot.get("/metadata",
-  (req, res) => {
-    res.set("Content-Type", "text/xml");
-    res.status(200).send(defaultSamlStrategy.generateServiceProviderMetadata(SP_CERT,SP_CERT));
-  }
+  siteRoot.post(
+    "/acs",
+    bodyParser.urlencoded({ extended: false }),
+    // might need route for unauthorized user
+    passport.authenticate("saml", { failureRedirect: "/login" }),
+    (req, res) => {
+      res.redirect("/");
+    }
   );
 
-app.get("*", (req, res) => {
+  siteRoot.get("/metadata", (req, res) => {
+    res.set("Content-Type", "text/xml");
+    res
+      .status(200)
+      .send(
+        defaultSamlStrategy.generateServiceProviderMetadata(SP_CERT, SP_CERT)
+      );
+  });
 
-  console.log("redirecting from where? ", req.originalUrl)
-  console.log("Redirecting...")
-  res.redirect('/')
-});
+  app.get("*", (req, res) => {
+    console.log("redirecting from where? ", req.originalUrl);
+    console.log("Redirecting...");
+    res.redirect("/");
+  });
 }
 // DatabaseF
 const ensureDatabaseExists = async () => {
@@ -207,4 +214,3 @@ ensureDatabaseExists()
   .catch((err) => {
     console.error("Unable to start the application:", err);
   });
-
