@@ -48,7 +48,7 @@ async function getOrganizationSettingsInDB(orgId) {
     // Format the response to include bonus requirements
     const formattedData = {
       ...organization.toJSON(),
-      email_settings: emailSettings.data.dataValues,
+      email_settings: emailSettings?.dataValues || emailSettings?.data || null,
       membership_requirements: membershipSettings.map((membership) => {
         return {
           requirementId: membership.requirement_id,

@@ -30,11 +30,12 @@ async function updateEvent(eventId, updateData) {
       where: { event_id: eventId },
     });
 
-    // if (updatedRows > 0) {
-    //   console.log(`Event with ID ${eventId} updated successfully.`);
-    //   return true;
-    // } 
-    return true; // it still is fine if nothing is updated bc there was nothing tooo update
+    if (updatedRows === 0) {
+      console.log(`No event found with ID ${eventId}.`);
+      return false;
+    }
+
+    return true;
   } catch (error) {
     console.error("Error updating event:", error);
     throw error;

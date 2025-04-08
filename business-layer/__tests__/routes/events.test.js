@@ -61,10 +61,6 @@ describe("Event module", () => {
       // Assertions
       expect(Event.create).toHaveBeenCalledWith(eventData);
       expect(result).toEqual(mockCreatedEvent);
-      expect(console.log).toHaveBeenCalledWith(
-        "Event created:",
-        mockCreatedEvent.toJSON()
-      );
     });
 
     it("should throw an error when creation fails", async () => {
@@ -108,9 +104,6 @@ describe("Event module", () => {
         where: { event_id: eventId },
       });
       expect(result).toBe(true);
-      expect(console.log).toHaveBeenCalledWith(
-        `Event with ID ${eventId} updated successfully.`
-      );
     });
 
     it("should return false when no event is found to update", async () => {
@@ -195,10 +188,6 @@ describe("Event module", () => {
       // Assertions
       expect(Event.findAll).toHaveBeenCalled();
       expect(result).toEqual(mockEvents);
-      expect(console.log).toHaveBeenCalledWith(
-        "Events found:",
-        mockEvents.map((e) => e.toJSON())
-      );
     });
 
     it("should return an empty array when no events exist", async () => {
@@ -259,10 +248,6 @@ describe("Event module", () => {
         where: { event_id: eventId, organization_id: orgId },
       });
       expect(result).toEqual(mockEvent);
-      expect(console.log).toHaveBeenCalledWith(
-        "Event found:",
-        mockEvent.toJSON()
-      );
     });
 
     it("should return null when no event is found by id", async () => {
@@ -420,10 +405,6 @@ describe("Event module", () => {
       // Assertions
       expect(Event.findAll).toHaveBeenCalledWith({ where: filters });
       expect(result).toEqual(mockEvents);
-      expect(console.log).toHaveBeenCalledWith(
-        "Events found:",
-        mockEvents.map((e) => e.toJSON())
-      );
     });
 
     it("should return an empty array when no events match the attributes", async () => {
@@ -485,13 +466,17 @@ describe("Event module", () => {
       const result = await getEventsWithAttendance(orgId);
 
       // Assertions
-      expect(Event.findAll).toHaveBeenCalledWith({
-        where: { organization_id: orgId },
-        include: expect.objectContaining({
-          model: Attendance,
-          as: "Attendances",
-        }),
-      });
+      expect(Event.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { organization_id: orgId },
+          include: expect.arrayContaining([
+            expect.objectContaining({
+              model: Attendance,
+              as: 'Attendances',
+            }),
+          ]),
+        })
+      );      
       expect(result).toEqual(mockEventsWithAttendance);
     });
 

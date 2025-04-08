@@ -35,7 +35,7 @@ async function updateMember(memberId, updateData) {
       console.log(`Member with ID ${memberId} updated successfully.`);
       return true;
     } else {
-      console.log("Nothing Updated.");
+      console.log(`No member found with ID ${memberId}.`);
       return false;
     }
   } catch (error) {
