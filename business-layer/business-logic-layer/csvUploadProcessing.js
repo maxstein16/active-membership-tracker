@@ -110,6 +110,8 @@ class CSVProcessor {
                   member_email: email,
                 });
 
+                console.log('here 2', existingMemberResult)
+
                 if (
                   !existingMemberResult.data ||
                   existingMemberResult.data.length === 0
@@ -121,8 +123,11 @@ class CSVProcessor {
                   member = newMember;
                 } else {
                   console.log(`Member found for email: ${email}`);
-                  member = existingMemberResult[0];
+                  console.log('here 3', existingMemberResult)
+                  member = existingMemberResult.data[0];
                 }
+
+                console.log('here', member)
 
                 // Step 4: Check for existing membership
                 let existingMembership = await getMembershipByAttributes({
