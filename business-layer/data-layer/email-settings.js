@@ -43,8 +43,8 @@ async function checkMembersPointsAndSendEmails(orgId, semesterId) {
     }
 
     // Get the threshold for active membership
-    const membershipThreshold = organization.organization_threshold || 48;
-    
+    const membershipThreshold = organization.organization_threshold;
+
     // Get all memberships for the organization in the current semester
     const memberships = await Membership.findAll({
       where: { 
@@ -69,8 +69,7 @@ async function checkMembersPointsAndSendEmails(orgId, semesterId) {
       }
 
       // Calculate percentage towards active membership
-      const percentComplete = Math.round((membership.membership_points / membershipThreshold) * 100);
-      const pointsAway = Math.max(0, membershipThreshold - membership.membership_points);
+      const percentComplete = await calculateActivePercentage(membership);
       const wasActive = membership.active_member;
       
       // Check if member has reached active status
@@ -84,16 +83,16 @@ async function checkMembersPointsAndSendEmails(orgId, semesterId) {
         
         // Send congratulatory email
         const emailContent = activeMembershipEmail(
-          member.member_name,
-          organization.organization_name,
-          organization.organization_abbreviation || organization.organization_name.substring(0, 3).toUpperCase()
+            member.member_name,
+            organization.organization_name,
+            organization.organization_abbreviation || organization.organization_name.substring(0, 3).toUpperCase()
         );
         
         await sendEmail(
-          organization.organization_email,
-          member.member_email,
-          emailContent.subject,
-          emailContent.body
+            organization.organization_email,
+            member.member_email,
+            emailContent.subject,
+            emailContent.body
         );
         
         console.log(`Active membership email would be sent to ${member.member_email}`);
