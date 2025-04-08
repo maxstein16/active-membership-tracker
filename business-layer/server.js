@@ -14,7 +14,7 @@ const path = require("path"); // finding the react pages
 const fs = require("fs"); // file system for reading the certificates
 
 const passport = require("passport");
-const https = require("https");// authentication for SSO/SHIBBOLETH
+const https = require("https"); // authentication for SSO/SHIBBOLETH
 //const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 
 // create app
@@ -35,6 +35,8 @@ app.use(
     index: false,
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Session Middleware
 app.use(
@@ -76,13 +78,13 @@ let attendanceRouter = require("./service-layer/routes/attendanceRoute.js");
 let csvUploadRouter = require("./service-layer/routes/csvUploadRoute.js");
 let semesterRouter = require("./service-layer/routes/semesterRoute.js");
 
-// // Middleware to ensure the user is authenticated
-// function ensureAuthenticated(req, res, next) {
-//   if (req.isAuthenticated()) {
-//     return next();
-//   }
-//   res.redirect("/login");
-// }
+// Middleware to ensure the user is authenticated
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+}
 
 // use the routes
 app.use("/", serveFrontendRouter);
