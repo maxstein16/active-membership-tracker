@@ -26,15 +26,12 @@ describe("Organization Module", () => {
   describe("getSpecificOrgDataInDB", () => {
     it("should return organization data for a valid ID", async () => {
       getOrganizationById.mockResolvedValue({
-        organization_id: 1,
-        organization_name: "Test Org",
-        organization_description: "A test organization",
-        organization_color: "#FFFC76",
-        organization_abbreviation: "test",
-        organization_email: "test@org.com",
-        organization_membership_type: "points",
-        organization_threshold: "25",
-      });
+        toJSON: () => ({
+          organization_id: 1,
+          organization_name: "Test Org",
+          organization_description: "This is a test organization"
+        })
+      });      
 
       const result = await getSpecificOrgDataInDB(1);
 
