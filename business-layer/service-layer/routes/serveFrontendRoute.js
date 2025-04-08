@@ -33,7 +33,14 @@ router.get("/", isAuthorizedHasSessionForWebsite, function (req, res) {
 
 // GET login  -- change for shibboleth
 router.get("/login", function (req, res) {
-  res.redirect("/saml2/login");
+  if (process.env.LOCATION === "production") { 
+    res.redirect("/saml2/login");
+  } else {
+    res.sendFile(
+      path.join(__dirname, "../../../frontend-layer/build", "index.html")
+    );
+  }
+  
 });
 
 //Get metadata for SSO -- this is where metadata lives

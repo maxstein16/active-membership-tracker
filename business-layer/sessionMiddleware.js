@@ -11,12 +11,14 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
       next();
     } else {
       res.status(401).json({ error: "No session, must log in to continue" });
+      return;
     }
   } else {
     if (req.session.user) {
       next();
     } else {
       res.status(401).json({ error: "No session, must log in to continue" });
+      return;
     }
   }
 }
@@ -33,12 +35,14 @@ function isAuthorizedHasSessionForWebsite(req, res, next) {
       next();
     } else {
       res.redirect("/saml2/login");
+      return;
     }
   } else {
     if (req.session.user) {
       next();
     } else {
       res.redirect("/login");
+      return;
     }
   }
 }
@@ -65,6 +69,7 @@ async function isAdminOrEboardForOrg(req, res, next) {
       next();
     } else {
       res.redirect("/login");
+      return;
     }
   }
   
