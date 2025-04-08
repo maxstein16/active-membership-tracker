@@ -134,7 +134,7 @@ function mapToApiFields(dbData) {
     organization_description: dbData.organization_description,
     organization_threshold: dbData.organization_threshold,
     organization_membership_type: dbData.organization_membership_type,
-    organization_email: organization_email,
+    organization_email: dbData.organization_email,
     message: "Organization fetched successfully",
   };
 }
