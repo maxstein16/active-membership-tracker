@@ -10,6 +10,7 @@ const {
   getOrganizationById,
   getOrganizationMembershipRequirements,
 } = require("../data-layer/organization.js");
+const { sendActiveMembershipEmail } = require("../business-logic-layer/scheduleEmailProcessing.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
