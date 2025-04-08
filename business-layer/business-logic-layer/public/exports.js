@@ -60,11 +60,11 @@ const {
   editBonusRequirementInDB,
   deleteBonusRequirementInDB,
 } = require("../organizationSettingsProcessing");
-const { 
-  getCurrentSemesterDB, 
-  getSemestersByYearDB, 
-  getSemesterByDateDB, 
-  createSemesterDB, 
+const {
+  getCurrentSemesterDB,
+  getSemestersByYearDB,
+  getSemesterByDateDB,
+  createSemesterDB,
   getAllAcademicYearsInDB
 } = require("../semesterProcessing");
 
@@ -169,7 +169,7 @@ module.exports = function () {
 
   this.deleteOrganizationEmailSettings = async (orgId) => {
     return await deleteOrganizationEmailSettingsInDB(orgId);
-    }
+  }
 
   // Organization Membership Management
   this.getMembershipRoleInfoInOrganization = async (
@@ -224,7 +224,7 @@ module.exports = function () {
   this.getSemesterOrgReport = async (orgId, semesterId) => {
     return await getSemesterOrgReportInDB(orgId, semesterId);
   };
-  
+
   this.getSemesterOrgReportBySemesterId = async (orgId, semesterId) => {
     return await getSemesterOrgReportBySemesterIdInDB(orgId, semesterId);
   };

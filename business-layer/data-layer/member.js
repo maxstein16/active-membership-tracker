@@ -9,6 +9,7 @@ const { Member } = require("../db");
 async function createMember(memberData) {
   try {
     const newMember = await Member.create(memberData);
+    console.log("created a new member")
     return newMember;
   } catch (error) {
     console.error("Error creating member:", error);
@@ -121,7 +122,7 @@ async function getMembersByAttributes(filters) {
     const members = await Member.findAll({ where: filters });
 
     if (members.length === 0) {
-      console.log("No members found matching the given criteria.");
+      console.log("No members found matching the given criteria: " + JSON.stringify(filters));
       return { error: null, data: [] }; // Return an object with `data` property
     }
 

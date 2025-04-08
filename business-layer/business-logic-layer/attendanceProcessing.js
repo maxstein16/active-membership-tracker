@@ -23,8 +23,8 @@ const {
   getBasePointsForEventType,
   calculateBonusPoints,
 } = require("./organizationSettingsProcessing.js");
-const Error = require("./public/errors.js");
-const error = new Error();
+const ErrorMessages = require("./public/errors.js");
+const error = new ErrorMessages();
 
 /**
  * ATTENDANCE TABLE ATTRIBUTES (Based on DB):
@@ -61,14 +61,18 @@ const processAttendance = async (attendanceData, eventType, orgId) => {
     const organization = await getOrganizationById(orgId);
     if (!organization) throw new Error("Organization not found.");
 
-    const memberships = await getMembershipByAttributes({
+    const membership = await getMembershipByAttributes({
       member_id: attendanceData.member_id,
       organization_id: orgId,
     });
-    if (!memberships || memberships.length === 0)
-      throw new Error("Membership not found.");
 
-    const membership = memberships[0];
+    // Check if a membership was found
+    if (!membership) {
+      throw new Error("Membership not found.");
+    } else {
+      console.log("Membership is", membership.get({ plain: true }));
+    }
+
 
     // Step 4: If points-based, calculate and allocate points
     if (organization.organization_membership_type === "points") {
@@ -87,7 +91,7 @@ const processAttendance = async (attendanceData, eventType, orgId) => {
       });
     } else {
       // Step 5: Attendance-based - check active membership
-      checkActiveMembership(membership);
+      await checkActiveMembership(membership);
     }
 
     return { error: error.noError, data: attendance };
