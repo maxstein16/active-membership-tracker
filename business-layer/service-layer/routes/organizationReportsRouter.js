@@ -95,7 +95,9 @@ router.get("/annual/:year", isAuthorizedHasSessionForAPI, async function (req, r
 
     // Get organization info to check if it existed in the requested year
     try {
-      const organization = await business.getOrganization(orgId);
+      const organization = await business.getSpecificOrgData(orgId);
+      console.log("What's the organization?", organization);
+      
       if (!organization || !organization.data) {
         return res.status(404).json({ error: error.organizationNotFound, orgId: orgId });
       }
@@ -106,6 +108,8 @@ router.get("/annual/:year", isAuthorizedHasSessionForAPI, async function (req, r
       
       // If requesting data from before the org existed, return empty data with isNewOrg flag
       if (requestedYear < orgCreationYear) {
+        console.log("Requested year < orgCreationYear");
+        
         return res.status(200).json({
           orgData: {
             organization_id: orgId,
@@ -136,6 +140,8 @@ router.get("/annual/:year", isAuthorizedHasSessionForAPI, async function (req, r
 
     // Get report data for specific year
     const orgData = await business.getAnnualOrgReportByYear(orgId, parseInt(year, 10));
+    console.log("orgData:", orgData);
+    
 
     // Handle errors
     if (orgData.error && orgData.error !== error.noError) {
