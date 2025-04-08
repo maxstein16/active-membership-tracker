@@ -13,8 +13,6 @@ const cookieParser = require("cookie-parser"); // parse the cookies that our ses
 const path = require("path"); // finding the react pages
 const fs = require("fs"); // file system for reading the certificates
 if (process.env.LOCATION === "production") {
-  console.log("here 1", passport
-  )
   const passport = require("passport"); // authentication for SSO/SHIBBOLETH
   //const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 
