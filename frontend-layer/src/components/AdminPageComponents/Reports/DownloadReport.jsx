@@ -1,14 +1,14 @@
 import * as React from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { getAnnualReportData, getSemesterReportData, getMeetingReportData } from "../../../utils/handleSettingsData";
+import { getAnnualReportData, getAnnualReportDataByYear, getSemesterReportData, getMeetingReportData, getSemesterReportDataById } from "../../../utils/handleSettingsData";
 import { PieChart, Pie, Cell } from "recharts";
 import { createRoot } from "react-dom/client";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import "../../../assets/css/downloadReport.css";
 
-const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
+const DownloadReport = ({ color, orgId, reportType, meetingId, year, selectedSemesterId, selectedSemesterName }) => {
   const [isDownloading, setIsDownloading] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState({
     open: false,
@@ -279,9 +279,12 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
   const generateReportFilename = (reportData, reportType) => {
     let reportFilename = `${reportType}_report`;
     if (reportType === "annual") {
-      reportFilename += `_${reportData.current_year || year || new Date().getFullYear()}`;
+      const yearValue = reportData.current_year || year || new Date().getFullYear();
+      reportFilename += `_${yearValue}`;
     } else if (reportType === "semester") {
-      reportFilename += `_${reportData.semester || "current"}`;
+      // Safely handle semester name by replacing spaces with underscores and ensuring it exists
+      const semesterValue = (reportData.semester_name || selectedSemesterName || "current").replace(/\s+/g, '_');
+      reportFilename += `_${semesterValue}`;
     } else if (reportType === "meeting") {
       reportFilename += `_${reportData.meeting_name?.replace(/\s+/g, '_') || meetingId}`;
     }
@@ -314,11 +317,11 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
             <p><strong>Organization:</strong> {reportData.organization_name}</p>
             <p><strong>Abbreviation:</strong> {reportData.organization_abbreviation}</p>
             {reportType === "annual" ? (
-              <p><strong>Year:</strong> {reportData.current_year}</p>
+              <p><strong>Year:</strong> {reportData.current_year || year}</p>
             ) : (
               <>
-                <p><strong>Semester:</strong> {reportData.semester}</p>
-                <p><strong>Academic Year:</strong> {reportData.academic_year}</p>
+                <p><strong>Semester:</strong> {reportData.semester_name || selectedSemesterName}</p>
+                <p><strong>Academic Year:</strong> {reportData.academic_year || `${selectedSemesterName?.split(' ')[0]}`}</p>
               </>
             )}
           </div>
@@ -414,11 +417,34 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
       setIsDownloading(true);
       let reportData;
 
-      // Fetch the appropriate report data based on report type
+      // Fetch the appropriate report data based on report type and selection
       if (reportType === "annual") {
-        reportData = await getAnnualReportData(orgId, year);
+        // Check if a specific year is provided and different from current year
+        const currentYear = new Date().getFullYear();
+        if (year && year !== currentYear) {
+          // Use getAnnualReportDataByYear for specific years
+          reportData = await getAnnualReportDataByYear(orgId, year);
+        } else {
+          // Use getAnnualReportData for current year
+          reportData = await getAnnualReportData(orgId);
+        }
+        
+        // Ensure year is set in the report data
+        if (reportData && year) {
+          reportData.current_year = year;
+        }
       } else if (reportType === "semester") {
-        reportData = await getSemesterReportData(orgId);
+        // Use selectedSemesterId if provided, otherwise fetch current semester
+        if (selectedSemesterId) {
+          reportData = await getSemesterReportDataById(orgId, selectedSemesterId);
+          
+          // Ensure the semester name is added to the report data
+          if (reportData && selectedSemesterName) {
+            reportData.semester_name = selectedSemesterName;
+          }
+        } else {
+          reportData = await getSemesterReportData(orgId);
+        }
       } else if (reportType === "meeting") {
         if (!meetingId) {
           showNotification("Missing meeting ID for meeting report.", "error");
@@ -432,10 +458,16 @@ const DownloadReport = ({ color, orgId, reportType, meetingId, year }) => {
         return;
       }
 
+      // Check if we have a valid reportData
       if (!reportData) {
         showNotification("Error fetching report data.", "error");
         setIsDownloading(false);
         return;
+      }
+      
+      // Ensure organization name is present
+      if (!reportData.organization_name) {
+        reportData.organization_name = "Organization";
       }
 
       // Render the report component to a temporary DOM container
