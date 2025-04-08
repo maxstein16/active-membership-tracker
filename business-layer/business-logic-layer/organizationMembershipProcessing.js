@@ -10,6 +10,7 @@ const {
   getOrganizationById,
   getOrganizationMembershipRequirements,
 } = require("../data-layer/organization.js");
+const { sendActiveMembershipEmail } = require("../business-logic-layer/scheduleEmailProcessing.js");
 const Error = require("./public/errors.js");
 const error = new Error();
 
@@ -261,24 +262,16 @@ async function calculateActivePercentage(membership) {
 async function checkActiveMembership(membership) {
   try {
     const { percentage, success } = await calculateActivePercentage(membership);
-
-    if (!success) {
-      return false;
-    }
-
     if (percentage >= 100) {
-      membership.active_member = true; // Mark as active
+      membership.active_member = true;
       await membership.save();
-      const organization = await getOrganizationById(
-        membership.organization_id
-      );
+      const organization = await getOrganizationById(membership.organization_id);
       await sendActiveMembershipEmail(membership, organization);
       return true;
     } else {
-      membership.active_member = false; // Mark as active
+      membership.active_member = false;
       await membership.save();
     }
-
     return false;
   } catch (error) {
     console.error("Error checking active membership:", error);

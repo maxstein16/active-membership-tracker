@@ -65,6 +65,7 @@ let eventsRouter = require("./service-layer/routes/eventsRoute.js");
 let attendanceRouter = require("./service-layer/routes/attendanceRoute.js");
 let csvUploadRouter = require("./service-layer/routes/csvUploadRoute.js");
 let semesterRouter = require("./service-layer/routes/semesterRoute.js");
+let emailRouter = require("./service-layer/routes/emailRoute.js");
 
 
 // use the routes
@@ -83,6 +84,7 @@ app.use("/v1/organization/:orgId/events", eventsRouter);
 app.use("/v1/attendance", attendanceRouter);
 app.use("/v1/organization", csvUploadRouter);
 app.use("/v1/semester", semesterRouter);
+app.use("/v1/email", emailRouter);
 
 
 // Handle routes that do not exist
