@@ -12,13 +12,19 @@ const logger = require("morgan"); // logging out the routes
 const cors = require("cors"); // defines our cors policy (protects our api)
 const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
 const path = require("path"); // finding the react pages
+const fs = require("fs"); // file system for reading the certificates
+if(process.env.LOCATION === "production"){
 const passport = require("passport"); // authentication for SSO/SHIBBOLETH
 //const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
-const fs = require("fs"); // file system for reading the certificates
+
 const {defaultSamlStrategy, SP_CERT} = require("./saml.js");
 const https = require('https');
+}
 // create app
 const app = express();
+
+// Set env variables for prod
+if (process.env.LOCATION === "production"){} 
 
 // Import the database and models
 const { sequelize } = require("./db.js");
@@ -43,7 +49,8 @@ app.use(
   })
 );
 
-
+// check env for production or development
+if (process.env.LOCATION === "production") {
 passport.use('saml',defaultSamlStrategy);
 
 passport.serializeUser((user, done) => {
@@ -63,7 +70,7 @@ const SITE_ROOT = '/saml2';
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
-
+}
 // CORS policy middleware
 app.use(
   cors({
@@ -122,7 +129,7 @@ app.use("/v1/semester", semesterRouter);
 
 
 // Handle routes that do not exist
-
+if(process.env.LOCATION === "production"){
 const siteRoot = express.Router();
 app.use(SITE_ROOT, siteRoot);
 app.set('trust proxy', true);
@@ -153,7 +160,7 @@ app.get("*", (req, res) => {
   console.log("Redirecting...")
   res.redirect('/')
 });
-
+}
 // DatabaseF
 const ensureDatabaseExists = async () => {
   const dbName = "membertracker";
