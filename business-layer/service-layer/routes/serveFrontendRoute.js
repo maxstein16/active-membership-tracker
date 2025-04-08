@@ -4,7 +4,7 @@ const path = require("path");
 const {
   isAuthorizedHasSessionForWebsite,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware");
+} = require("../../sessionMiddleware");
 
 /*
 

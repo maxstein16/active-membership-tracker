@@ -13,7 +13,7 @@ const sanitizer = new Sanitizer();
 const {
   isAuthorizedHasSessionForAPI,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware");
+} = require("../../sessionMiddleware.js");
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 /*
 

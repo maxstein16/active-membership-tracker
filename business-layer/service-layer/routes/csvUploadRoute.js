@@ -12,11 +12,9 @@ const business = new BusinessLogic();
 
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const sanitizer = new Sanitizer();
-const {
-  isAuthorizedHasSessionForAPI,
-  isAdminOrEboardForOrg,
-} = require("../sessionMiddleware.js");
+
 const { compareSync } = require("bcrypt");
+const { isAdminOrEboardForOrg } = require("../../sessionMiddleware.js");
 
 // Define the upload directory
 const uploadDir = path.join(__dirname, "uploads");

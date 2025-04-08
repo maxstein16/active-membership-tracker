@@ -13,7 +13,7 @@ const sanitizer = new Sanitizer();
 const {
   isAuthorizedHasSessionForAPI,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware");
+} = require("../../sessionMiddleware.js");
 
 // GET /v1/organization/{orgId}/reports/annual
 router.get("/annual", isAdminOrEboardForOrg, async function (req, res) {

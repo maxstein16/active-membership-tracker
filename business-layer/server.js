@@ -101,13 +101,13 @@ let csvUploadRouter = require("./service-layer/routes/csvUploadRoute.js");
 let semesterRouter = require("./service-layer/routes/semesterRoute.js");
 
 
-// Middleware to ensure the user is authenticated
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect("/login");
-}
+// // Middleware to ensure the user is authenticated
+// function ensureAuthenticated(req, res, next) {
+//   if (req.isAuthenticated()) {
+//     return next();
+//   }
+//   res.redirect("/login");
+// }
 
 // use the routes
 app.use("/", serveFrontendRouter);

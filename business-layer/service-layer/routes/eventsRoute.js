@@ -11,7 +11,7 @@ const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
 const {
   isAuthorizedHasSessionForAPI,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware.js");
+} = require("../../sessionMiddleware.js");
 const sanitizer = new Sanitizer();
 
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
