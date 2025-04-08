@@ -13,23 +13,12 @@ const cookieParser = require("cookie-parser"); // parse the cookies that our ses
 const path = require("path"); // finding the react pages
 const fs = require("fs"); // file system for reading the certificates
 
-let passport, defaultSamlStrategy, SP_CERT, https;
+const passport = require("passport");
+const https = require("https");// authentication for SSO/SHIBBOLETH
+//const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 
-if (process.env.LOCATION === "production") {
-  passport = require("passport"); // authentication for SSO/SHIBBOLETH
-  //const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
-
-  const { defaultSamlStrategyTemp, SP_CERTTemp } = require("./saml.js");
-  defaultSamlStrategy = defaultSamlStrategyTemp;
-  SP_CERT = SP_CERTTemp;
-  https = require("https");
-}
 // create app
 const app = express();
-
-// Set env variables for prod
-// if (process.env.LOCATION === "production") {
-// }
 
 // Import the database and models
 const { sequelize } = require("./db.js");
@@ -58,28 +47,6 @@ app.use(
   })
 );
 
-const SITE_ROOT = "/saml2";
-// check env for production or development
-if (process.env.LOCATION === "production") {
-  passport.use("saml", defaultSamlStrategy);
-
-  passport.serializeUser((user, done) => {
-    done(null, user);
-  });
-
-  passport.deserializeUser((user, done) => {
-    done(null, {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      username: user.username,
-    });
-  });
-
-  // Initialize Passport
-  app.use(passport.initialize());
-  app.use(passport.session());
-}
 // CORS policy middleware
 app.use(
   cors({
@@ -137,6 +104,28 @@ app.use("/v1/semester", semesterRouter);
 let siteRoot;
 // Handle routes that do not exist
 if (process.env.LOCATION === "production") {
+  const SITE_ROOT = "/saml2";
+  const { defaultSamlStrategy, SP_CERT } = require("./saml.js");
+
+  passport.use("saml", defaultSamlStrategy);
+
+  passport.serializeUser((user, done) => {
+    done(null, user);
+  });
+
+  passport.deserializeUser((user, done) => {
+    done(null, {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+    });
+  });
+
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
   siteRoot = express.Router();
   app.use(SITE_ROOT, siteRoot);
   app.set("trust proxy", true);
