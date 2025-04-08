@@ -35,8 +35,6 @@ app.use(
     index: false,
   })
 );
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Session Middleware
 app.use(
@@ -60,6 +58,8 @@ app.use(
 );
 app.enable("trust proxy");
 app.set("trust proxy", true);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
