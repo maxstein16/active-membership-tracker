@@ -167,7 +167,7 @@ export async function createNewEvent(orgId, newEventData) {
   if (body.event_type === "general meeting") {
     body.event_type = "general_meeting";
   }
-  console.log(body);
+  // console.log(body);
 
   // call the api
   const result = await getAPIData(
@@ -175,7 +175,7 @@ export async function createNewEvent(orgId, newEventData) {
     API_METHODS.post,
     body
   );
-  console.log(result);
+  // console.log(result);
 
   if (!result) {
     console.log("must login", result);
@@ -237,7 +237,7 @@ export async function manuallyAddAttendanceToDB(
     member_id: memberId,
     event_id: eventId,
   });
-  console.log(member)
+  // console.log(member)
   if (!member || member.hasOwnProperty("error")) {
     return false;
   }
@@ -255,7 +255,7 @@ export async function manuallyAddAttendanceToDB(
     }
 
     // add the new extra ones (one is automatically added)
-    console.log(member.data.membership.membership_points);
+    // console.log(member.data.membership.membership_points);
     let newPoints = member.data.membership.membership_points + points - 1;
     const result = await getAPIData(
       `/organization/${orgId}/member/${memberId}`,

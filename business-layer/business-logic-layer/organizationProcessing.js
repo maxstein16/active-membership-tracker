@@ -327,7 +327,7 @@ async function getUserOrganizationsInDB(memberId) {
       return { error: error.membershipNotFound };
     }
 
-    console.log(memberships)
+    // console.log(memberships)
 
     // get all their orgs
     const membershipDetails = await Promise.all(

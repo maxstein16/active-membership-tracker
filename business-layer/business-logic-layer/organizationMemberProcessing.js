@@ -155,7 +155,7 @@ async function editMemberInOrganizationInDB(
       semester_id: currentSemester.semester_id,
     });
 
-    console.log("Editing membership: ", membership);
+    // console.log("Editing membership: ", membership);
 
     if (!membership) return { error: error.membershipNotFound, data: null };
 

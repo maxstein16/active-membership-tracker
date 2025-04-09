@@ -60,8 +60,8 @@ router.post(
             console.log("Your org id is valid");
     }
 
-        console.log("now we check the request file")
-        console.log("these are the params " + req.file)
+        // console.log("now we check the request file")
+        // console.log("these are the params " + req.file)
 
     // Check if file was uploaded
     if (!req.file) {
@@ -71,7 +71,7 @@ router.post(
     }
 
     try {
-            console.log("Trying to await processCSV, the file path is " + req.file.path)
+            // console.log("Trying to await processCSV, the file path is " + req.file.path)
       // Process the uploaded file using business logic
       const result = await business.processCSV(req.file.path, eventId, orgId);
 

@@ -186,7 +186,7 @@ router.put("/:orgId", isAdminOrEboardForOrg, async (req, res) => {
       });
     }
 
-    console.log(orgId)
+    // console.log(orgId)
     const result = await business.updateOrganization(orgId, req.body);
 
     if (result.error) {

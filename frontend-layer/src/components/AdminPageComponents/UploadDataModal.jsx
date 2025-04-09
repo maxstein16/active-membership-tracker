@@ -35,12 +35,12 @@ export default function UploadDataModal({ orgId, color }) {
     reader.onload = () => {
       const content = reader.result;
       setFileContent(content); // Set the file content
-      console.log("File content:", content); // Log the content to console
+      // console.log("File content:", content); // Log the content to console
 
       // Convert the content to a CSV format and download it
       const csvData = content; // Assuming the content is already in CSV format
       downloadCSV(csvData);
-      console.log("downloaded");
+      // console.log("downloaded");
     };
     reader.readAsText(file); // Read file as text (CSV content)
   };

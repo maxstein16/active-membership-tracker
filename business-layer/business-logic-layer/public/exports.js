@@ -155,7 +155,7 @@ module.exports = function () {
   };
 
   this.editMemberInOrganization = async (orgId, memberId, updatedRole) => {
-    console.log("\nUpdated role", updatedRole);
+    // console.log("\nUpdated role", updatedRole);
     return await editMemberInOrganizationInDB(orgId, memberId, updatedRole);
   };
 

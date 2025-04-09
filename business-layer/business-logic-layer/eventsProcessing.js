@@ -88,7 +88,7 @@ async function createEventInDB(orgId, eventData) {
     }
 
     // Create the event with the found/created semester
-    console.log(eventData)
+    // console.log(eventData)
     const newEvent = await createEvent({
       organization_id: orgId,
       semester_id: semester.semester_id,  // Assign the semester

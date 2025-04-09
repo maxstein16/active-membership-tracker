@@ -107,14 +107,14 @@ export async function getOrgInfoData(orgId) {
  * @returns true if no errors, false if error :(
  */
 export async function updateMembershipData(orgId, memberId, membershipData) {
-  console.log("Submitting to API:", membershipData);
+  // console.log("Submitting to API:", membershipData);
 
   const result = await getAPIData(
     `/organization/${orgId}/member/${memberId}`,
     API_METHODS.put,
     membershipData
   );
-  console.log("Result:" + result);
+  // console.log("Result:" + result);
 
   if (!result) {
     return false;
