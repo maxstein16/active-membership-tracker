@@ -145,12 +145,13 @@ function mapToApiFields(dbData) {
  * @returns {Promise<Object>} - Returns error and organization data.
  */
 async function getSpecificOrgDataInDB(orgId) {
-  if (!Number.isInteger(orgId)) {
+  if (isNaN(orgId)) {
     return { error: error.organizationIdMustBeInteger, data: null };
   }
 
   try {
     const orgData = await getOrganizationById(orgId);
+    
     if (!orgData) {
       return { error: error.notFound, data: null };
     }
