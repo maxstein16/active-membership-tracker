@@ -27,6 +27,7 @@ export default function DashboardPage() {
           console.log("Login result:", loginResult);
         });
       } else {
+        console.log("Session data:", sessionData);
       }
     });
   }, []);
