@@ -11,6 +11,7 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
     console.log('here PROD')
     if (req.isAuthenticated()) {
       next();
+      return
     } else {
       res.status(401).json({ error: "No session, must log in to continue" });
       return;
@@ -20,6 +21,7 @@ function isAuthorizedHasSessionForAPI(req, res, next) {
     if (req.session.user) {
       console.log('here on our way')
       next();
+      return;
     } else {
       console.log('not logged in')
       res.status(401).json({ error: "No session, must log in to continue" });
@@ -40,6 +42,7 @@ function isAuthorizedHasSessionForWebsite(req, res, next) {
         req.session.save();
       }
       next();
+      return
     } else {
       res.redirect("/saml2/login");
       return;
@@ -49,6 +52,7 @@ function isAuthorizedHasSessionForWebsite(req, res, next) {
     if (req.session.user) {
       console.log('here for web, move on')
       next();
+      return;
     } else {
       console.log('here for web redirect')
       res.redirect("/login");
@@ -96,6 +100,7 @@ function isAdminOrEboardForOrg(req, res, next) {
   
     console.log('here is admin or eboard, continue priviledge')
     next();
+    return
   });
   
 }
