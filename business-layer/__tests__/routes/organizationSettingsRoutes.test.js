@@ -21,10 +21,12 @@ describe("Organization Settings Module", () => {
     describe("getOrganizationSettingsInDB", () => {
         it("should return organization settings for a valid organization", async () => {
             getOrganizationById.mockResolvedValue({
-                organization_id: 1,
-                organization_name: "Test Org",
-                organization_description: "This is a test organization",
-            });
+                toJSON: () => ({
+                  organization_id: 1,
+                  organization_name: "Test Org",
+                  organization_description: "This is a test organization"
+                })
+              });              
 
             getOrganizationMembershipRequirements.mockResolvedValue([
                 {
@@ -40,7 +42,7 @@ describe("Organization Settings Module", () => {
             expect(result.error).toBe("No error.");
             expect(result.data).not.toBeNull();
             expect(result.data.organization_id).toBe(1);
-            expect(result.data.Memberships.length).toBe(1);
+            expect(result.data.membership_requirements.length).toBe(1);
         });
 
         it("should return an error if organization is not found", async () => {

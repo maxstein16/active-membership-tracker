@@ -81,13 +81,14 @@ export default function EventInfoPopup({
           {/* ACTION BUTTONS */}
           {role !== ROLE_MEMBER ? (
             <div className="event-info-popup-buttons">
-              {isFuture ? (
-                <EditEventsDialog
+              <EditEventsDialog
                   isEdit={true}
                   orgId={orgId}
                   color={color}
                   event={event}
                 />
+              {isFuture ? (
+                <p><i>You can not add attendance to events that have not happened yet</i></p>
               ) : (
                 <>
                   <UploadDataModal

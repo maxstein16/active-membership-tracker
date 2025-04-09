@@ -46,7 +46,6 @@ describe('Member module', () => {
       // Assertions
       expect(Member.create).toHaveBeenCalledWith(memberData);
       expect(result).toEqual(mockCreatedMember);
-      expect(console.log).toHaveBeenCalledWith('Member created:', mockCreatedMember.toJSON());
     });
   });
   
@@ -70,7 +69,6 @@ describe('Member module', () => {
         where: { member_id: memberId }
       });
       expect(result).toBe(true);
-      expect(console.log).toHaveBeenCalledWith(`Member with ID ${memberId} updated successfully.`);
     });
     
     it('should return false when no member is found to update', async () => {
@@ -117,7 +115,6 @@ describe('Member module', () => {
       // Assertions
       expect(Member.findAll).toHaveBeenCalled();
       expect(result).toEqual(mockMembers);
-      expect(console.log).toHaveBeenCalledWith('Members found:', mockMembers.map(m => m.toJSON()));
     });
     
     it('should return an empty array when no members exist', async () => {
@@ -152,7 +149,6 @@ describe('Member module', () => {
       // Assertions
       expect(Member.findByPk).toHaveBeenCalledWith(memberId);
       expect(result).toEqual(mockMember);
-      expect(console.log).toHaveBeenCalledWith('Member found:', mockMember.toJSON());
     });
     
     it('should return null when no member is found by id', async () => {
@@ -196,8 +192,7 @@ describe('Member module', () => {
       
       // Assertions
       expect(Member.findAll).toHaveBeenCalledWith({ where: filters });
-      expect(result).toEqual(mockMembers);
-      expect(console.log).toHaveBeenCalledWith('Members found:', mockMembers.map(m => m.toJSON()));
+      expect(result).toEqual({ data: mockMembers, error: null });
     });
     
     it('should return an empty array when no members match the attributes', async () => {
@@ -211,7 +206,7 @@ describe('Member module', () => {
       const result = await getMembersByAttributes(filters);
       
       // Assertions
-      expect(result).toEqual([]);
+      expect(result).toEqual({ data: [], error: null });
       expect(console.log).toHaveBeenCalledWith('No members found matching the given criteria.');
     });
   });

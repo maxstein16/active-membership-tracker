@@ -13,7 +13,7 @@ const sanitizer = new Sanitizer();
 const {
   isAuthorizedHasSessionForAPI,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware");
+} = require("../../sessionMiddleware.js");
 const hasCredentials = require("../../business-logic-layer/public/hasCredentials.js");
 
 /**
@@ -106,6 +106,7 @@ router.get("/:orgId", isAuthorizedHasSessionForAPI, async (req, res) => {
  */
 async function handlePostOrganization(req, res) {
   try {
+
     if (
       !req.body.hasOwnProperty("organization_name") ||
       !req.body.hasOwnProperty("organization_abbreviation") ||

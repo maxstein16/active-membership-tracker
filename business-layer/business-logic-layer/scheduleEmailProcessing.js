@@ -1,5 +1,5 @@
 const schedule = require("node-schedule");
-const { sendEmail } = require("./emailService");
+const { sendEmail } = require("../service-layer/emailService");
 const {
   annualReportEmail,
   semesterReportEmail,
@@ -7,10 +7,7 @@ const {
   activeMembershipEmail,
 } = require("./public/emailTemplates");
 const {
-  Organization,
-  EmailSettings,
   Membership,
-  Member,
   Attendance,
 } = require("../db");
 const {

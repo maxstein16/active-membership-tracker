@@ -26,7 +26,6 @@ const { getEventsWithAttendance } = require("../../data-layer/event");
 // Mock dependencies
 jest.mock("../../data-layer/organization");
 jest.mock("../../data-layer/member");
-jest.mock("../../data-layer/reports");
 jest.mock("../../data-layer/membership");
 jest.mock("../../data-layer/attendance");
 jest.mock("../../data-layer/semester");
@@ -99,40 +98,42 @@ describe("Organization Reports Module", () => {
         organization_name: "Test Org",
         organization_abbreviation: "TO",
       });
-
+  
       getSemestersByYear.mockResolvedValue([
         { semester_id: 201 },
         { semester_id: 202 },
       ]);
-
+  
       getMembershipsByOrgAndSemester.mockResolvedValue([
         { member_id: 1, active_member: true },
         { member_id: 2, active_member: false },
       ]);
+  
+      const currentYear = new Date().getFullYear();
 
       getEventsWithAttendance.mockResolvedValue([
         {
           event_id: 101,
-          event_start: "2024-03-15T10:00:00Z",
-          event_type: "general_meeting",
+          event_start: `${currentYear}-03-15T10:00:00Z`,
+          event_type: "general meeting",
           Attendances: [{ member_id: 1 }, { member_id: 2 }],
         },
       ]);
-
+  
       const result = await getAnnualOrgReportInDB(1);
-
+  
       expect(result.error).toBe("No error.");
       expect(result.data).not.toBeNull();
       expect(result.data.organization_id).toBe(1);
-      expect(result.data["meetings_data_this_year"].number_of_meetings).toBe(1);
-      expect(result.data["meetings_data_this_year"].total_attendance).toBe(2);
+      expect(result.data.meetingsDataThis.numMeetings).toBe(1);
+      expect(result.data.meetingsDataThis.totalAttendance).toBe(2);
     });
-
+  
     it("should return an error if organization is not found", async () => {
       getOrganizationById.mockResolvedValue(null);
-
+  
       const result = await getAnnualOrgReportInDB(1);
-
+  
       expect(result.error).toBe("Organization with the given ID not found");
       expect(result.data).toBeNull();
     });

@@ -134,7 +134,7 @@ function mapToApiFields(dbData) {
     organization_description: dbData.organization_description,
     organization_threshold: dbData.organization_threshold,
     organization_membership_type: dbData.organization_membership_type,
-    organization_email: organization_email,
+    organization_email: dbData.organization_email,
     message: "Organization fetched successfully",
   };
 }
@@ -145,12 +145,13 @@ function mapToApiFields(dbData) {
  * @returns {Promise<Object>} - Returns error and organization data.
  */
 async function getSpecificOrgDataInDB(orgId) {
-  if (!Number.isInteger(orgId)) {
+  if (isNaN(orgId)) {
     return { error: error.organizationIdMustBeInteger, data: null };
   }
 
   try {
     const orgData = await getOrganizationById(orgId);
+    
     if (!orgData) {
       return { error: error.notFound, data: null };
     }
@@ -168,6 +169,7 @@ async function getSpecificOrgDataInDB(orgId) {
  * @returns {Promise<Object>} - Returns error and new organization data.
  */
 async function createOrganizationInDB(orgData, memberId) {
+
   const validationError = validateOrgFields(orgData);
   if (validationError) {
     return { error: validationError, data: null };
@@ -176,7 +178,7 @@ async function createOrganizationInDB(orgData, memberId) {
   try {
     const newOrganization = await createOrganization({
       organization_name: orgData.organization_name,
-      organization_description: orgData.organization_desc,
+      organization_description: orgData.organization_description,
       organization_color: orgData.organization_color,
       organization_abbreviation: orgData.organization_abbreviation,
       organization_threshold: orgData.organization_threshold,
@@ -195,7 +197,6 @@ async function createOrganizationInDB(orgData, memberId) {
       organization_id: newOrganization.organization_id,
       semester_id: currentSemester.semester_id,
     });
-    console.log(membership.dataValues);
 
     if (!membership) {
       return { error: error.couldNotCreateMembership, data: null };

@@ -20,10 +20,7 @@ export default function MembershipRequirementLine({
   createBonus,
 }) {
   const [error, setError] = React.useState("");
-
-  const requirementTypes = ["attendance_count", "percentage"];
-  // console.log(requirement);
-  
+  const [showPercent, setShowPercent] = React.useState(!isPoints && requirement.type === "percentage")
 
   return (
     <div className="requirement-wrapper">
@@ -56,7 +53,7 @@ export default function MembershipRequirementLine({
         />
 
         {/* % label if percentage-based attendance */}
-        {!isPoints && requirement.type === "percentage" ? (
+        {showPercent ? (
           <p className="percent">% of</p>
         ) : null}
 
@@ -66,12 +63,12 @@ export default function MembershipRequirementLine({
             label="Meeting Type"
             color={color}
             options={[
-              { label: "general meeting", value: "general_meeting" },
-              { label: "volunteer", value: "volunteer" },
-              { label: "social", value: "social" },
-              { label: "workshop", value: "workshop" },
-              { label: "fundraiser", value: "fundraiser" },
-              { label: "committee", value: "committee" },
+              "general meeting",
+              "volunteer",
+              "social",
+              "workshop",
+              "fundraiser",
+              "committee",
             ]}
             startingValue={requirement.eventType}
             onSelect={(value) =>
@@ -86,10 +83,15 @@ export default function MembershipRequirementLine({
             <CustomSelect
               label="Requirement Type"
               color={color}
-              options={requirementTypes}
+              options={[
+                { label: "attendance count", value: "attendance_count" },
+                { label: "percentage", value: "percentage" }
+              ]}
               startingValue={requirement.type}
-              onSelect={(value) =>
+              onSelect={(value) => {
                 updateValueWhenDone(value, requirement.id, "type")
+                setShowPercent(value === "percentage")
+              }
               }
             />
           </span>

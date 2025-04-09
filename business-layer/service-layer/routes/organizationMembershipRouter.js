@@ -13,7 +13,7 @@ const sanitizer = new Sanitizer();
 const {
   isAuthorizedHasSessionForAPI,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware");
+} = require("../../sessionMiddleware.js");
 
 /**
  * Get members by role in an organization for a specific semester

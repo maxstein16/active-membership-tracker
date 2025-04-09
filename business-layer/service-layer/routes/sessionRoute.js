@@ -1,4 +1,5 @@
 let express = require("express");
+require("dotenv").config(); // Load .env variables
 const isNewUser = require("../../business-logic-layer/public/isNewUser");
 const router = express.Router({ mergeParams: true });
 
@@ -17,12 +18,16 @@ router.get("/", function (req, res) {
 
 //TODO this should be automatic upon login, not a call... but we don't have a login flow yet
 router.get("/login", function (req, res) {
+  if (process.env.LOCATION === "production") {
+    res.redirect("/saml2/login"); // Redirect to SAML login in production
+  }else{
+    console.log("here in dev session route");
   req.session.user = { username: "mep4741@rit.edu" };
   req.session.save();
 
-  req.session.user = res
-    .status(200)
-    .json({ status: "success", "session-data": req.session });
+  res.status(200).json({ status: "success", "session-data": req.session }); // Respond with session data
+  console.log(req.session.user);
+  }
 });
 
 // this is the steps that login will follow once SSO is complete

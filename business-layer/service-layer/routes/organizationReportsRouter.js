@@ -13,7 +13,7 @@ const sanitizer = new Sanitizer();
 const {
   isAuthorizedHasSessionForAPI,
   isAdminOrEboardForOrg,
-} = require("../sessionMiddleware");
+} = require("../../sessionMiddleware.js");
 
 // GET /v1/organization/{orgId}/reports/annual
 router.get("/annual", isAdminOrEboardForOrg, async function (req, res) {
@@ -34,6 +34,34 @@ router.get("/annual", isAdminOrEboardForOrg, async function (req, res) {
     // Handle errors
     if (orgData.error && orgData.error !== error.noError) {
       return res.status(404).json({ error: orgData.error, orgId: orgId });
+    }
+
+    // For new organizations with no data, still return a 200 with empty data
+    if (!orgData.data) {
+      res.status(200).json({
+        orgData: {
+          organization_id: orgId,
+          current_year: new Date().getFullYear(),
+          isNewOrg: true,
+          memberDataThis: {
+            totalMembers: 0,
+            newMembers: 0,
+            totalActive_members: 0,
+            newActive_members: 0,
+            members: []
+          },
+          memberDataLast: null,
+          meetingsDataThis: {
+            numMeetings: 0,
+            numEvents: 0,
+            numVolunteering: 0,
+            totalAttendance: 0,
+            meetings: []
+          },
+          meetingsDataLast: null
+        }
+      });
+      return;
     }
 
     // Return successful response without error field
@@ -64,11 +92,83 @@ router.get("/annual/:year", isAuthorizedHasSessionForAPI, async function (req, r
       return res.status(400).json({ error: error.yearMustBeInteger });
     }
 
+    // Get organization info to check if it existed in the requested year
+    try {
+      const organization = await business.getSpecificOrgData(orgId);
+      
+      if (!organization || !organization.data) {
+        return res.status(404).json({ error: error.organizationNotFound, orgId: orgId });
+      }
+      
+      const orgCreationDate = new Date(organization.data.createdAt || organization.data.created_at);
+      const orgCreationYear = orgCreationDate.getFullYear();
+      const requestedYear = parseInt(year, 10);
+      
+      // If requesting data from before the org existed, return empty data with isNewOrg flag
+      if (requestedYear < orgCreationYear) {
+        
+        return res.status(200).json({
+          orgData: {
+            organization_id: orgId,
+            current_year: requestedYear,
+            isNewOrg: true,
+            memberDataThis: {
+              totalMembers: 0,
+              newMembers: 0,
+              totalActive_members: 0,
+              newActive_members: 0,
+              members: []
+            },
+            memberDataLast: null,
+            meetingsDataThis: {
+              numMeetings: 0,
+              numEvents: 0,
+              numVolunteering: 0,
+              totalAttendance: 0,
+              meetings: []
+            },
+            meetingsDataLast: null
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error checking organization creation date:", err);
+    }
+
     // Get report data for specific year
-    const orgData = await business.getAnnualOrgReportByYear(orgId, parseInt(year, 10));
+    const orgData = await business.getAnnualOrgReportByYear(orgId, parseInt(year, 10));    
 
     // Handle errors
     if (orgData.error && orgData.error !== error.noError) {
+      console.error(`Error getting annual report for org ${orgId}, year ${year}:`, orgData.error);
+      
+      // If no data found, still return a 200 with empty data
+      if (orgData.error === error.noSemestersFoundForYear || orgData.error === error.databaseError) {
+        return res.status(200).json({
+          orgData: {
+            organization_id: orgId,
+            current_year: parseInt(year, 10),
+            isNewOrg: true,
+            memberDataThis: {
+              totalMembers: 0,
+              newMembers: 0,
+              totalActive_members: 0,
+              newActive_members: 0,
+              members: []
+            },
+            memberDataLast: null,
+            meetingsDataThis: {
+              numMeetings: 0,
+              numEvents: 0,
+              numVolunteering: 0,
+              totalAttendance: 0,
+              meetings: []
+            },
+            meetingsDataLast: null
+          }
+        });
+      }
+      
       return res.status(404).json({ 
         error: orgData.error, 
         orgId: orgId, 

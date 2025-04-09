@@ -33,7 +33,7 @@ describe("Organization Module", () => {
         organization_abbreviation: "test",
         organization_email: "test@org.com",
         organization_membership_type: "points",
-        organization_threshold: "25",
+        organization_threshold: 25,
       });
 
       const result = await getSpecificOrgDataInDB(1);
@@ -60,14 +60,16 @@ describe("Organization Module", () => {
   describe("createOrganizationInDB", () => {
     it("should create an organization successfully", async () => {
       createOrganization.mockResolvedValue({
-        organization_id: 1,
-        organization_name: "Test Org",
-        organization_description: "A test organization",
-        organization_color: "#FFFC76",
-        organization_abbreviation: "test",
-        organization_email: "test@org.com",
-        organization_membership_type: "points",
-        organization_threshold: "25",
+        dataValues: {
+          organization_id: 1,
+          organization_name: "Test Org",
+          organization_description: "A test organization",
+          organization_color: "#FFFC76",
+          organization_abbreviation: "test",
+          organization_email: "test@org.com",
+          organization_membership_type: "points",
+          organization_threshold: 25
+        },
       });
 
       const orgData = {
@@ -77,7 +79,7 @@ describe("Organization Module", () => {
         organization_abbreviation: "test",
         organization_email: "test@org.com",
         organization_membership_type: "points",
-        organization_threshold: "25",
+        organization_threshold: 25,
       };
 
       const result = await createOrganizationInDB(orgData);
@@ -135,7 +137,7 @@ describe("Organization Module", () => {
           organization_abbreviation: "test",
           organization_email: "test@org.com",
           organization_membership_type: "points",
-          organization_threshold: "25",
+          organization_threshold: 25,
         },
       ]);
 

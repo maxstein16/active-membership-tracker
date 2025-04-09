@@ -13,6 +13,9 @@ const {
   getMembershipByAttributes,
 } = require("../data-layer/membership.js");
 const { processAttendance } = require("./attendanceProcessing.js");
+const {
+  getAttendanceByMemberAndEvent,
+} = require("../data-layer/attendance.js");
 
 /**
  * Maps CSV row data to member data format
@@ -21,30 +24,32 @@ const { processAttendance } = require("./attendanceProcessing.js");
  */
 function mapToMemberData(row) {
   return {
-    member_name: `${row.firstName} ${row.lastName}`.trim(),
-    member_email: row.email,
+    member_name: `${row["First Name"]?.trim() || ""} ${
+      row["Last Name"]?.trim() || ""
+    }`.trim(),
+    member_email: row["Email"]?.trim().toLowerCase() || null,
   };
 }
 
 /**
  * Maps member, organization, and semester IDs to membership data format.
- * 
+ *
  * @param {number} memberId - The ID of the member.
- * @param {number} organizationId - The ID of the organization.
+ * @param {number} orgId - The ID of the organization.
  * @param {number} semesterId - The ID of the semester.
  * @returns {Object} Formatted membership data object
  */
-function mapToMembershipData(memberId, organizationId, semesterId) {
+function mapToMembershipData(memberId, orgId, semesterId) {
   return {
     member_id: memberId,
-    organization_id: organizationId,
+    organization_id: orgId,
     semester_id: semesterId,
   };
 }
 
 /**
  * Maps event and member IDs to attendance data format.
- * 
+ *
  * @param {number} eventId - The ID of the event.
  * @param {number} memberId - The ID of the member.
  * @returns {Object} Formatted attendance data object
@@ -55,8 +60,6 @@ function mapToAttendanceData(eventId, memberId) {
     member_id: memberId,
   };
 }
-
-
 
 /**
  * Process a CSV file and handle attendance for an event
@@ -107,17 +110,24 @@ class CSVProcessor {
                   member_email: email,
                 });
 
+                console.log('here 2', existingMemberResult)
+
                 if (
-                  !existingMemberResult ||
-                  existingMemberResult.length === 0
+                  !existingMemberResult.data ||
+                  existingMemberResult.data.length === 0
                 ) {
                   // Create new member
+                  console.log(`No member found, creating new member for: ${email}`);
                   const newMemberData = mapToMemberData(row);
                   const newMember = await createMember(newMemberData);
                   member = newMember;
                 } else {
-                  member = existingMemberResult[0];
+                  console.log(`Member found for email: ${email}`);
+                  console.log('here 3', existingMemberResult)
+                  member = existingMemberResult.data[0];
                 }
+
+                console.log('here', member)
 
                 // Step 4: Check for existing membership
                 let existingMembership = await getMembershipByAttributes({
@@ -138,14 +148,22 @@ class CSVProcessor {
                 }
 
                 membership = existingMembership;
-
+        
                 // Step 5: Create attendance + process points/bonus/active checks
-                const attendanceData = mapToAttendanceData(eventId, member.member_id);
-                attendance = await processAttendance(
-                  attendanceData,
-                  eventType,
-                  orgId
+                const existingAttendance = await getAttendanceByMemberAndEvent(
+                  member.member_id,
+                  eventId
                 );
+
+                let attendanceData = null;
+
+                if (!existingAttendance) {
+                  attendanceData = mapToAttendanceData(
+                    eventId,
+                    member.member_id
+                  );
+                  await processAttendance(attendanceData, eventType, orgId);
+                }
 
                 results.push({
                   member: member,
@@ -174,7 +192,7 @@ class CSVProcessor {
             await fs.promises.unlink(filePath);
 
             resolve({
-              error: error.noError,
+              error: null,
               data: {
                 total: results.length,
                 processed: results.filter((r) => r.processed).length,

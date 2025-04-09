@@ -8,7 +8,7 @@ const BusinessLogic = require("../../business-logic-layer/public/exports.js");
 const business = new BusinessLogic();
 
 const Sanitizer = require("../../business-logic-layer/public/sanitize.js");
-const { isAuthorizedHasSessionForAPI } = require("../sessionMiddleware.js");
+const { isAuthorizedHasSessionForAPI } = require("../../sessionMiddleware.js");
 const sanitizer = new Sanitizer();
 
 /**

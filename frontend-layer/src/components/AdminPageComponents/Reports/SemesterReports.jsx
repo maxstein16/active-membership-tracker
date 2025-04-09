@@ -17,13 +17,20 @@ export default function SemesterReport({ orgId, color }) {
   const [error, setError] = React.useState(null);
   const [semesterList, setSemesterList] = React.useState([]);
   const [selectedSemester, setSelectedSemester] = React.useState("");
+  const [selectedSemesterId, setSelectedSemesterId] = React.useState(null);
 
   // Fetch all semesters from the database
+  // Store the full semester data for lookup purposes
+  const [allSemestersData, setAllSemestersData] = React.useState([]);
+  
   const fetchAllSemesters = React.useCallback(async () => {
     try {
-      const semesters = await getAllSemestersAcrossYears();
+      const semesters = await getAllSemestersAcrossYears(orgId);
       
       if (Array.isArray(semesters) && semesters.length > 0) {
+        // Store the full semesters data for reference
+        setAllSemestersData(semesters);
+        
         const sortedSemesters = [...semesters].sort((a, b) => {
           const yearA = parseInt(a.semester_name.split(' ')[0]);
           const yearB = parseInt(b.semester_name.split(' ')[0]);
@@ -52,6 +59,12 @@ export default function SemesterReport({ orgId, color }) {
         
         if (!selectedSemester && formattedSemesters.length > 0) {
           setSelectedSemester(formattedSemesters[0]);
+          
+          // Set the semester ID for the first item
+          const firstSemester = sortedSemesters[0];
+          if (firstSemester && firstSemester.semester_id) {
+            setSelectedSemesterId(firstSemester.semester_id);
+          }
         }
       } else {
         setError("No semesters found in the system.");
@@ -60,7 +73,7 @@ export default function SemesterReport({ orgId, color }) {
       console.error("Error fetching semesters:", err);
       setError("Failed to load semester options. Please try again later.");
     }
-  }, [selectedSemester]);
+  }, [selectedSemester, orgId]);
 
   const fetchSemesterReport = React.useCallback(async () => {
     setIsLoading(true);
@@ -108,6 +121,11 @@ export default function SemesterReport({ orgId, color }) {
         setSelectedSemester(data.semester_name);
       }
       
+      // Set the semester ID for the current semester
+      if (data.semester_id) {
+        setSelectedSemesterId(data.semester_id);
+      }
+      
     } catch (err) {
       console.error("Error fetching semester report:", err);
       setError("Failed to load semester report data. Please try again later.");
@@ -124,7 +142,7 @@ export default function SemesterReport({ orgId, color }) {
     
     setIsLoading(true);
     try {
-      const allSemesters = await getAllSemestersAcrossYears();
+      const allSemesters = await getAllSemestersAcrossYears(orgId);
       
       const selectedSemInfo = allSemesters.find(sem => 
         sem.semester_name === selectedSemesterValue
@@ -133,6 +151,9 @@ export default function SemesterReport({ orgId, color }) {
       if (!selectedSemInfo || !selectedSemInfo.semester_id) {
         throw new Error(`Could not find semester: ${selectedSemesterValue}`);
       }
+      
+      // Update the selected semester ID
+      setSelectedSemesterId(selectedSemInfo.semester_id);
       
       const data = await getSemesterReportDataById(orgId, selectedSemInfo.semester_id);
       
@@ -184,6 +205,15 @@ export default function SemesterReport({ orgId, color }) {
   const handleSemesterChange = (value) => {
     if (value && value !== selectedSemester) {
       setSelectedSemester(value);
+      
+      // Find the matching semester to get its ID
+      if (allSemestersData.length > 0) {
+        const selectedSemesterData = allSemestersData.find(sem => sem.semester_name === value);
+        if (selectedSemesterData && selectedSemesterData.semester_id) {
+          setSelectedSemesterId(selectedSemesterData.semester_id);
+        }
+      }
+      
       fetchSemesterReportBySemester(value);
     }
   };
@@ -236,7 +266,9 @@ export default function SemesterReport({ orgId, color }) {
         <DownloadReport 
           color={color} 
           orgId={orgId} 
-          reportType="semester" 
+          reportType="semester"
+          selectedSemesterId={selectedSemesterId}
+          selectedSemesterName={selectedSemester}
         />
       </div>
 

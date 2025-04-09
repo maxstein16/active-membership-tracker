@@ -68,6 +68,11 @@ async function getAnnualOrgReportInDB(orgId) {
     const lastYear = currentYear - 1;
     const twoYearsAgo = lastYear - 1;
 
+    // Check if this is a new organization
+    const orgCreationDate = new Date(organization.createdAt || organization.created_at);
+    const orgCreationYear = orgCreationDate.getFullYear();
+    const isNewOrg = orgCreationYear === currentYear;
+
     // Get semesters for current and last year
     const currentYearSemesters = await getSemestersByYear(currentYear);
     const lastYearSemesters = await getSemestersByYear(lastYear);
@@ -86,42 +91,86 @@ async function getAnnualOrgReportInDB(orgId) {
     const currentActiveMembers = currentYearMemberships.filter(m => m.active_member) || [];
     const currentActiveMemberIds = new Set(currentActiveMembers.map(m => m.member_id));
     
-    const lastYearMemberships = await getMembershipsByOrgAndSemester(orgId, lastYearSemesterIds) || [];
-    const lastYearMemberIds = new Set(lastYearMemberships.map(m => m.member_id));
-    
-    const lastYearActiveMembers = lastYearMemberships.filter(m => m.active_member) || [];
-    const lastYearActiveMemberIds = new Set(lastYearActiveMembers.map(m => m.member_id));
-    
-    const newMemberIds = [...currentYearMemberIds].filter(id => !lastYearMemberIds.has(id));
-    
-    const newActiveMembers = [...currentActiveMemberIds].filter(id => !lastYearActiveMemberIds.has(id));
-    
+    let lastYearMemberships = [];
+    let lastYearMemberIds = new Set();
+    let lastYearActiveMembers = [];
+    let lastYearActiveMemberIds = new Set();
+    let newMemberIds = [];
+    let newActiveMembers = [];
     let lastYearNewMemberIds = [];
     let lastYearNewActiveMembers = [];
-    
-    try {
-      const twoYearsAgoSemesters = await getSemestersByYear(twoYearsAgo);
+
+    // Only process historical data if this is not a new organization
+    if (!isNewOrg) {
+      lastYearMemberships = await getMembershipsByOrgAndSemester(orgId, lastYearSemesterIds) || [];
+      lastYearMemberIds = new Set(lastYearMemberships.map(m => m.member_id));
       
-      if (twoYearsAgoSemesters && twoYearsAgoSemesters.length > 0) {
-        const twoYearsAgoSemesterIds = twoYearsAgoSemesters.map(sem => sem.semester_id);
+      lastYearActiveMembers = lastYearMemberships.filter(m => m.active_member) || [];
+      lastYearActiveMemberIds = new Set(lastYearActiveMembers.map(m => m.member_id));
+      
+      newMemberIds = [...currentYearMemberIds].filter(id => !lastYearMemberIds.has(id));
+      
+      newActiveMembers = [...currentActiveMemberIds].filter(id => !lastYearActiveMemberIds.has(id));
+      
+      try {
+        const twoYearsAgoSemesters = await getSemestersByYear(twoYearsAgo);
         
-        const twoYearsAgoMemberships = await getMembershipsByOrgAndSemester(orgId, twoYearsAgoSemesterIds) || [];
-        
-        const twoYearsAgoMemberIds = new Set(twoYearsAgoMemberships.map(m => m.member_id));
-        const twoYearsAgoActiveMembers = twoYearsAgoMemberships.filter(m => m.active_member) || [];
-        const twoYearsAgoActiveMemberIds = new Set(twoYearsAgoActiveMembers.map(m => m.member_id));
-        
-        lastYearNewMemberIds = [...lastYearMemberIds].filter(id => !twoYearsAgoMemberIds.has(id));
-        
-        lastYearNewActiveMembers = [...lastYearActiveMemberIds].filter(id => !twoYearsAgoActiveMemberIds.has(id));
+        if (twoYearsAgoSemesters && twoYearsAgoSemesters.length > 0) {
+          const twoYearsAgoSemesterIds = twoYearsAgoSemesters.map(sem => sem.semester_id);
+          
+          const twoYearsAgoMemberships = await getMembershipsByOrgAndSemester(orgId, twoYearsAgoSemesterIds) || [];
+          
+          const twoYearsAgoMemberIds = new Set(twoYearsAgoMemberships.map(m => m.member_id));
+          const twoYearsAgoActiveMembers = twoYearsAgoMemberships.filter(m => m.active_member) || [];
+          const twoYearsAgoActiveMemberIds = new Set(twoYearsAgoActiveMembers.map(m => m.member_id));
+          
+          lastYearNewMemberIds = [...lastYearMemberIds].filter(id => !twoYearsAgoMemberIds.has(id));
+          
+          lastYearNewActiveMembers = [...lastYearActiveMemberIds].filter(id => !twoYearsAgoActiveMemberIds.has(id));
+        }
+      } catch (err) {
+        console.error("Error getting two years ago data:", err);
       }
-    } catch (err) {
-      console.error("Error getting two years ago data:", err);
+    } else {
+      // For new organizations, all members are new
+      newMemberIds = [...currentYearMemberIds];
+      newActiveMembers = [...currentActiveMemberIds];
     }
 
     // Get events with attendance
     const events = await getEventsWithAttendance(orgId);
-    if (!events || events.length === 0) {
+    if (!events) {
+      // For new organizations, there might not be any events yet
+      if (isNewOrg) {
+        // Return with empty events data but no error
+        const data = {
+          organization_id: organization.organization_id,
+          organization_name: organization.organization_name,
+          organization_abbreviation: organization.organization_abbreviation,
+          current_year: currentYear,
+          isNewOrg: true,
+          
+          memberDataThis: {
+            totalMembers: currentYearMemberIds.size,
+            newMembers: newMemberIds.length,
+            totalActive_members: currentActiveMemberIds.size,
+            newActive_members: newActiveMembers.length,
+            members: formatMembers(currentYearMemberships)
+          },
+          
+          memberDataLast: null,
+          meetingsDataThis: {
+            numMeetings: 0,
+            numEvents: 0,
+            numVolunteering: 0,
+            totalAttendance: 0,
+            meetings: []
+          },
+          meetingsDataLast: null
+        };
+        
+        return { error: error.noError, data };
+      }
       return { error: error.databaseError, data: null };
     }
 
@@ -129,7 +178,7 @@ async function getAnnualOrgReportInDB(orgId) {
       new Date(e.event_start).getFullYear() === currentYear
     );
 
-    const lastYearEvents = events.filter(e => 
+    const lastYearEvents = isNewOrg ? [] : events.filter(e => 
       new Date(e.event_start).getFullYear() === lastYear
     );
 
@@ -161,10 +210,10 @@ async function getAnnualOrgReportInDB(orgId) {
     };
 
     const currentYearMeetings = processMeetings(currentYearEvents);
-    const lastYearMeetings = processMeetings(lastYearEvents);
+    const lastYearMeetings = isNewOrg ? [] : processMeetings(lastYearEvents);
     
     const currentYearEventTypes = categorizeEvents(currentYearEvents);
-    const lastYearEventTypes = categorizeEvents(lastYearEvents);
+    const lastYearEventTypes = isNewOrg ? { general: 0, volunteering: 0, events: 0 } : categorizeEvents(lastYearEvents);
 
     const formatMembers = (membershipsList) => {
       return membershipsList.map(member => ({
@@ -183,6 +232,7 @@ async function getAnnualOrgReportInDB(orgId) {
       organization_name: organization.organization_name,
       organization_abbreviation: organization.organization_abbreviation,
       current_year: currentYear,
+      isNewOrg: isNewOrg,
       
       memberDataThis: {
         totalMembers: currentYearMemberIds.size,
@@ -192,7 +242,7 @@ async function getAnnualOrgReportInDB(orgId) {
         members: formatMembers(currentYearMemberships)
       },
       
-      memberDataLast: {
+      memberDataLast: isNewOrg ? null : {
         totalMembers: lastYearMemberIds.size,
         newMembers: lastYearNewMemberIds.length,
         totalActiveMembers: lastYearActiveMemberIds.size,
@@ -207,7 +257,8 @@ async function getAnnualOrgReportInDB(orgId) {
         meetings: currentYearMeetings
       },
 
-      meetingsDataLast: {
+      // If this is a new org, set meetingsDataLast to null instead of empty data
+      meetingsDataLast: isNewOrg ? null : {
         numMeetings: lastYearEventTypes.general,
         numEvents: lastYearEventTypes.events,
         numVolunteering: lastYearEventTypes.volunteering,
@@ -219,6 +270,182 @@ async function getAnnualOrgReportInDB(orgId) {
     return { error: error.noError, data };
   } catch (err) {
     console.error("Error in getAnnualOrgReportInDB:", err);
+    return { error: error.databaseError, data: null };
+  }
+}
+
+async function getAnnualOrgReportByYearInDB(orgId, year) {
+  try {
+    // Get organization info
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return { error: error.organizationNotFound, data: null };
+    }
+
+    // Check if organization existed in the requested year
+    const orgCreationDate = new Date(organization.createdAt || organization.created_at);
+    const orgCreationYear = orgCreationDate.getFullYear();
+    const isNewOrg = year < orgCreationYear;
+    const previousYear = year - 1;
+
+    // Get semesters for the specified year
+    const yearSemesters = await getSemestersByYear(year);
+    const previousYearSemesters = await getSemestersByYear(previousYear);
+    
+    if (!yearSemesters || yearSemesters.length === 0) {
+      console.error(`No semesters found for year ${year}`);
+      return { error: error.noSemestersFoundForYear, data: null };
+    }
+
+    const yearSemesterIds = yearSemesters.map(sem => sem.semester_id);
+    const previousYearSemesterIds = previousYearSemesters.map(sem => sem.semester_id);
+
+    // For a new org or requesting data from before the org existed
+    if (isNewOrg) {
+      const data = {
+        organization_id: organization.organization_id,
+        organization_name: organization.organization_name,
+        organization_abbreviation: organization.organization_abbreviation,
+        current_year: year,
+        isNewOrg: true,
+        memberDataThis: {
+          totalMembers: 0,
+          newMembers: 0,
+          totalActive_members: 0,
+          newActive_members: 0,
+          members: []
+        },
+        memberDataLast: null,
+        meetingsDataThis: {
+          numMeetings: 0,
+          numEvents: 0,
+          numVolunteering: 0,
+          totalAttendance: 0,
+          meetings: []
+        },
+        meetingsDataLast: null
+      };
+      
+      return { error: error.noError, data };
+    }
+
+    // Continue with normal data fetching for existing organizations
+    const yearMemberships = await getMembershipsByOrgAndSemester(orgId, yearSemesterIds) || [];
+    const yearMemberIds = new Set(yearMemberships.map(m => m.member_id));
+    
+    const yearActiveMembers = yearMemberships.filter(m => m.active_member) || [];
+    const yearActiveMemberIds = new Set(yearActiveMembers.map(m => m.member_id));
+    
+    const previousYearMemberships = await getMembershipsByOrgAndSemester(orgId, previousYearSemesterIds) || [];
+    const previousYearMemberIds = new Set(previousYearMemberships.map(m => m.member_id));
+    
+    const previousYearActiveMembers = previousYearMemberships.filter(m => m.active_member) || [];
+    const previousYearActiveMemberIds = new Set(previousYearActiveMembers.map(m => m.member_id));
+    
+    const newMemberIds = [...yearMemberIds].filter(id => !previousYearMemberIds.has(id));
+    
+    const newActiveMembers = [...yearActiveMemberIds].filter(id => !previousYearActiveMemberIds.has(id));
+
+    // Get events with attendance
+    const events = await getEventsWithAttendance(orgId);
+    if (!events || events.length === 0) {
+      return { error: error.databaseError, data: null };
+    }
+
+    const yearEvents = events.filter(e => 
+      new Date(e.event_start).getFullYear() === year
+    );
+
+    const previousYearEvents = events.filter(e => 
+      new Date(e.event_start).getFullYear() === previousYear
+    );
+
+    const processMeetings = (eventsList) => {
+      return eventsList.map(event => ({
+        event_id: event.event_id,
+        event_name: event.event_name,
+        event_date: event.event_start,
+        total_attendance: event.Attendances ? event.Attendances.length : 0,
+        attendees: event.Attendances ? event.Attendances.map(a => ({
+          member_id: a.member_id,
+          firstName: a.Member?.member_name?.split(' ')[0] || "Unknown",
+          lastName: a.Member?.member_name?.split(' ')[1] || "Unknown",
+          rit_username: a.Member?.member_email?.split('@')[0] || "Unknown"
+        })) : []
+      }));
+    };
+
+    const categorizeEvents = (eventsList) => {
+      const general = eventsList.filter(e => e.event_type === 'general meeting').length;
+      const volunteering = eventsList.filter(e => e.event_type === 'volunteering').length;
+      const events = eventsList.length - general - volunteering;
+      
+      return {
+        general,
+        volunteering,
+        events
+      };
+    };
+
+    const yearMeetings = processMeetings(yearEvents);
+    const previousYearMeetings = processMeetings(previousYearEvents);
+    
+    const yearEventTypes = categorizeEvents(yearEvents);
+    const previousYearEventTypes = categorizeEvents(previousYearEvents);
+
+    const formatMembers = (membershipsList) => {
+      return membershipsList.map(member => ({
+        member_id: member?.member_id || null,
+        role_num: member?.membership_role || 0,
+        firstName: member?.Member?.member_name?.split(' ')[0] || "",
+        lastName: member?.Member?.member_name?.split(' ')[1] || "",
+        rit_username: member?.Member?.member_email?.split('@')[0] || "",
+        phone: member?.Member?.member_phone_number || "",
+        points: member?.membership_points || 0
+      }));
+    };
+
+    const data = {
+      organization_id: organization.organization_id,
+      organization_name: organization.organization_name,
+      organization_abbreviation: organization.organization_abbreviation,
+      current_year: year,
+      
+      memberDataThis: {
+        totalMembers: yearMemberIds.size,
+        newMembers: newMemberIds.length,
+        totalActive_members: yearActiveMemberIds.size,
+        newActive_members: newActiveMembers.length,
+        members: formatMembers(yearMemberships)
+      },
+      
+      memberDataLast: {
+        totalMembers: previousYearMemberIds.size,
+        newMembers: 0, // We don't have data for previous year's new members
+        totalActiveMembers: previousYearActiveMemberIds.size,
+        newActiveMembers: 0, // We don't have data for previous year's new active members
+      },
+
+      meetingsDataThis: {
+        numMeetings: yearEventTypes.general,
+        numEvents: yearEventTypes.events,
+        numVolunteering: yearEventTypes.volunteering,
+        totalAttendance: yearMeetings.reduce((sum, m) => sum + m.total_attendance, 0),
+        meetings: yearMeetings
+      },
+
+      meetingsDataLast: {
+        numMeetings: previousYearEventTypes.general,
+        numEvents: previousYearEventTypes.events,
+        numVolunteering: previousYearEventTypes.volunteering,
+        totalAttendance: previousYearMeetings.reduce((sum, m) => sum + m.total_attendance, 0),
+        meetings: previousYearMeetings
+      }
+    };
+
+    return { error: error.noError, data };
+  } catch (err) {
+    console.error(`Error in getAnnualOrgReportByYearInDB for year ${year}:`, err);
     return { error: error.databaseError, data: null };
   }
 }
@@ -606,6 +833,7 @@ async function getEventOrgReportInDB(orgId, eventId) {
 module.exports = {
   getSpecificReportOrgDataInDB,
   getAnnualOrgReportInDB,
+  getAnnualOrgReportByYearInDB,
   getSemesterOrgReportInDB,
   getSemesterOrgReportBySemesterIdInDB,
   getEventOrgReportInDB

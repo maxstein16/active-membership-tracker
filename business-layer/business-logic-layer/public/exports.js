@@ -45,6 +45,7 @@ const {
   getSemesterOrgReportInDB,
   getEventOrgReportInDB,
   getSemesterOrgReportBySemesterIdInDB,
+  getAnnualOrgReportByYearInDB,
 } = require("../organizationReportProcessing");
 const {
   editOrganizationMembershipRequirementsInDB,
@@ -59,11 +60,11 @@ const {
   editBonusRequirementInDB,
   deleteBonusRequirementInDB,
 } = require("../organizationSettingsProcessing");
-const { 
-  getCurrentSemesterDB, 
-  getSemestersByYearDB, 
-  getSemesterByDateDB, 
-  createSemesterDB, 
+const {
+  getCurrentSemesterDB,
+  getSemestersByYearDB,
+  getSemesterByDateDB,
+  createSemesterDB,
   getAllAcademicYearsInDB
 } = require("../semesterProcessing");
 
@@ -154,6 +155,7 @@ module.exports = function () {
   };
 
   this.editMemberInOrganization = async (orgId, memberId, updatedRole) => {
+    console.log("\nUpdated role", updatedRole);
     return await editMemberInOrganizationInDB(orgId, memberId, updatedRole);
   };
 
@@ -167,7 +169,7 @@ module.exports = function () {
 
   this.deleteOrganizationEmailSettings = async (orgId) => {
     return await deleteOrganizationEmailSettingsInDB(orgId);
-    }
+  }
 
   // Organization Membership Management
   this.getMembershipRoleInfoInOrganization = async (
@@ -222,13 +224,13 @@ module.exports = function () {
   this.getSemesterOrgReport = async (orgId, semesterId) => {
     return await getSemesterOrgReportInDB(orgId, semesterId);
   };
-  
+
   this.getSemesterOrgReportBySemesterId = async (orgId, semesterId) => {
     return await getSemesterOrgReportBySemesterIdInDB(orgId, semesterId);
   };
 
   this.getAnnualOrgReportByYear = async (orgId, year) => {
-    return await getAnnualOrgReportInDB(orgId, year);
+    return await getAnnualOrgReportByYearInDB(orgId, year);
   }
 
   this.getEventOrgReport = async (orgId, meetingId) => {
