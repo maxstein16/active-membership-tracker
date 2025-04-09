@@ -2,7 +2,9 @@
 
 # dependencies
 /node_modules
+/cert
 
 # misc
 .env
 .DS_Store
+.htaccess

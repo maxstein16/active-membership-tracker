@@ -63,7 +63,7 @@ async function addTestData() {
   console.log("2. Creating Test Semesters");
 
   const sem1 = await Semester.create({
-    semester_id: 1121,
+    semester_id: 11,
     semester_name: "2023 FALL TEST",
     academic_year: "2023-2024",
     start_date: "2023-08-15",
@@ -87,7 +87,7 @@ async function addTestData() {
   });
 
   const sem4 = await Semester.create({
-    semester_id: 1124,
+    semester_id: 1,
     semester_name: "2025 SPRING TEST",
     academic_year: "2024-2025",
     start_date: "2025-01-14",

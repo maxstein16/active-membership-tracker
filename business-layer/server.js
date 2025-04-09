@@ -4,12 +4,18 @@ const { MIN_30 } = require("./constants.js");
 
 // Requires
 require("dotenv").config(); // Load .env variables
-const express = require("express"); // REST API 
+const bodyParser = require("body-parser"); // parse the body of the request
+const express = require("express"); // REST API
 const session = require("express-session"); // sessions to log the user out
 const logger = require("morgan"); // logging out the routes
 const cors = require("cors"); // defines our cors policy (protects our api)
 const cookieParser = require("cookie-parser"); // parse the cookies that our session uses
 const path = require("path"); // finding the react pages
+const fs = require("fs"); // file system for reading the certificates
+
+const passport = require("passport");
+const https = require("https"); // authentication for SSO/SHIBBOLETH
+//const SamlStrategy = require("passport-saml").Strategy; // SSO/SHIBBOLETH
 
 // create app
 const app = express();
@@ -24,7 +30,11 @@ app.use(logger("dev"));
 app.use(express.json());
 app.enable("trust proxy");
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../frontend-layer/build"), { index: false }));
+app.use(
+  express.static(path.join(__dirname, "../frontend-layer/build"), {
+    index: false,
+  })
+);
 
 // Session Middleware
 app.use(
@@ -48,6 +58,8 @@ app.use(
 );
 app.enable("trust proxy");
 app.set("trust proxy", true);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // import routes
 let serveFrontendRouter = require("./service-layer/routes/serveFrontendRoute.js");
@@ -67,6 +79,13 @@ let csvUploadRouter = require("./service-layer/routes/csvUploadRoute.js");
 let semesterRouter = require("./service-layer/routes/semesterRoute.js");
 let emailRouter = require("./service-layer/routes/emailRoute.js");
 
+// Middleware to ensure the user is authenticated
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+}
 
 // use the routes
 app.use("/", serveFrontendRouter);
@@ -86,17 +105,63 @@ app.use("/v1/organization", csvUploadRouter);
 app.use("/v1/semester", semesterRouter);
 app.use("/v1/email", emailRouter);
 
-
+let siteRoot;
 // Handle routes that do not exist
-app.get("*", (req, res) => {
+if (process.env.LOCATION === "production") {
+  const SITE_ROOT = "/saml2";
+  const { defaultSamlStrategy, SP_CERT } = require("./saml.js");
 
-  console.log("redirecting from where? ", req.originalUrl)
-  console.log("Redirecting...")
-  res.redirect('/')
-});
+  passport.use("saml", defaultSamlStrategy);
 
+  passport.serializeUser((user, done) => {
+    done(null, user);
+  });
 
-// Database
+  passport.deserializeUser((user, done) => {
+    done(null, {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+    });
+  });
+
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  siteRoot = express.Router();
+  app.use(SITE_ROOT, siteRoot);
+  app.set("trust proxy", true);
+
+  siteRoot.get("/login", passport.authenticate("saml"));
+
+  siteRoot.post(
+    "/acs",
+    bodyParser.urlencoded({ extended: false }),
+    // might need route for unauthorized user
+    passport.authenticate("saml", { failureRedirect: "/login" }),
+    (req, res) => {
+      res.redirect("/");
+    }
+  );
+
+  siteRoot.get("/metadata", (req, res) => {
+    res.set("Content-Type", "text/xml");
+    res
+      .status(200)
+      .send(
+        defaultSamlStrategy.generateServiceProviderMetadata(SP_CERT, SP_CERT)
+      );
+  });
+
+  app.get("*", (req, res) => {
+    console.log("redirecting from where? ", req.originalUrl);
+    console.log("Redirecting...");
+    res.redirect("/");
+  });
+}
+// DatabaseF
 const ensureDatabaseExists = async () => {
   const dbName = "membertracker";
 
@@ -142,4 +207,3 @@ ensureDatabaseExists()
   .catch((err) => {
     console.error("Unable to start the application:", err);
   });
-

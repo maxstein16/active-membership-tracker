@@ -5,11 +5,17 @@ const { getMembershipByAttributes } = require("../../data-layer/membership");
 
 async function checkRole(username, orgId, allowEboard) {
   try {
+
+    console.log('username: ', username, ', org id: ', orgId, ", allowEboard: ", allowEboard);
     const memberResult = await getMemberByUsername(username);
+    console.log('member result', memberResult)
     if (!memberResult) return false;
 
+    console.log('member id', memberResult.member_id)
     const memberId = memberResult.member_id;
     const currentSemester = await getCurrentSemester();
+    console.log('current semester, ', currentSemester)
+    console.log('current semester id ', currentSemester.semester_id)
     if (!currentSemester) return false;
 
     const membership = await getMembershipByAttributes({
@@ -17,6 +23,8 @@ async function checkRole(username, orgId, allowEboard) {
       organization_id: orgId,
       semester_id: currentSemester.semester_id,
     });
+
+    console.log("mem", membership);
 
     if (!membership || membership.membership_role === ROLE_MEMBER) return false;
     if (!allowEboard && membership.membership_role === ROLE_EBOARD)
