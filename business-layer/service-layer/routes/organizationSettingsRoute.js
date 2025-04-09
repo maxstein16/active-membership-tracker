@@ -18,20 +18,27 @@ const hasCredentials = require("../../business-logic-layer/public/hasCredentials
 
 //GET /v1/organization/:orgId/settings
 router.get("/", isAdminOrEboardForOrg, async function (req, res) {
+  console.log('here 2')
   let orgId = req.params.orgId;
 
   orgId = sanitizer.sanitize(orgId);
 
+  console.log('here 3')
   if (isNaN(orgId)) {
+    console.log('here 4')
     return res.status(400).json({ error: error.organizationIdMustBeInteger });
   }
 
+  console.log('here 5')
   const response = await business.getOrganizationSettings(parseInt(orgId));
 
+  console.log('here 6')
   if (response.error !== error.noError) {
+    console.log('here 7')
     return res.status(404).json({ error: response.error });
   }
 
+  console.log('here 8')
   return res.status(200).json({ status: "success", data: response.data });
 });
 
