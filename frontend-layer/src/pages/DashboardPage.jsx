@@ -22,12 +22,12 @@ export default function DashboardPage() {
     getAPIData(`/session`, API_METHODS.get, {}).then((sessionData) => {
       if (!sessionData || sessionData.hasOwnProperty("error")) {
         // No session, so login
-        console.log("No session, logging in...");
+        // console.log("No session, logging in...");
         getAPIData(`/session/login`, API_METHODS.get, {}).then((loginResult) => {
-          console.log("Login result:", loginResult);
+          // console.log("Login result:", loginResult);
         });
       } else {
-        console.log("Session data:", sessionData);
+        // console.log("Session data:", sessionData);
       }
     });
   }, []);
